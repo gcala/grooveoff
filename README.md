@@ -4,6 +4,7 @@ README
 GrooveOff
 ------------
 Offline Grooveshark.com music
+
 GrooveOff can access the huge Grooveshark database through its public api:
 
 http://developers.grooveshark.com/docs/public_api/v3/
