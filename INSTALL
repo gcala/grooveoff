@@ -1,0 +1,12 @@
+INSTALL
+=======
+
+extract downloaded archive and enter the application folder, then:
+
+mkdir build
+cd build
+cmake .. -DCMAKE_INSTALL_PREFIX=/usr
+make
+make install (as root)
+
+
