@@ -120,7 +120,7 @@ void DownloadItem::setupUi()
     ui_->multiFuncButton->setIconSize(QSize(16,16));
     ui_->playButton->setIconSize(QSize(16,16));
     ui_->openFolderButton->setIconSize(QSize(16,16));
-    ui_->openFolderButton->setIcon(QIcon::fromTheme(QLatin1String("document-open-folder"), QIcon(QLatin1String(":/resources/document-open-folder.png"))));
+    ui_->openFolderButton->setIcon(QIcon::fromTheme(QLatin1String("folder-open")));
     ui_->openFolderButton->setToolTip(trUtf8("Open folder"));
     ui_->openFolderButton->setFixedSize(QSize(Utility::buttonSize,Utility::buttonSize));
 }
