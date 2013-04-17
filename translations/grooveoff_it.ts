@@ -231,14 +231,14 @@
         <translation>Riscarica</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/downloaditem.cpp" line="229"/>
-        <source>Network error</source>
-        <translation>Errore di rete</translation>
-    </message>
-    <message>
         <location filename="../src/grooveoff/downloaditem.cpp" line="207"/>
         <source>Aborted</source>
         <translation>Annullato</translation>
+    </message>
+    <message>
+        <location filename="../src/grooveoff/downloaditem.cpp" line="229"/>
+        <source>Network or Server error</source>
+        <translation>Errore di rete o del server</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/downloaditem.cpp" line="323"/>

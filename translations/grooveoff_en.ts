@@ -231,13 +231,13 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/downloaditem.cpp" line="229"/>
-        <source>Network error</source>
+        <location filename="../src/grooveoff/downloaditem.cpp" line="207"/>
+        <source>Aborted</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/downloaditem.cpp" line="207"/>
-        <source>Aborted</source>
+        <location filename="../src/grooveoff/downloaditem.cpp" line="229"/>
+        <source>Network or Server error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

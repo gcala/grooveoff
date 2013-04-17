@@ -226,7 +226,7 @@ void DownloadItem::stateChanged()
             ui_->infoIcon->setPixmap(QIcon::fromTheme(QLatin1String("dialog-warning"), QIcon(QLatin1String(":/resources/dialog-warning.png"))).pixmap(16,16));
             ui_->infoIconWidget->setVisible(true);
             ui_->infoMessageWidget->setVisible(false);
-            ui_->infoMessage->setText(trUtf8("Network error"));
+            ui_->infoMessage->setText(trUtf8("Network or Server error"));
             ui_->multiFuncWidget->setVisible(false);
             ui_->multiFuncButton->setIcon(QIcon::fromTheme(QLatin1String("view-refresh"), QIcon(QLatin1String(":/resources/view-refresh.png"))));
             ui_->multiFuncButton->setToolTip(trUtf8("Redownload selected"));
