@@ -606,6 +606,9 @@ void MainWindow::replyFinished(QNetworkReply *reply)
 
     if (!ok) {
         qDebug() << "GrooveOff ::" << "An error occurred during parsing";
+        ui_->busyLabel->setVisible(false);
+        ui_->searchButton->setVisible(true);
+        busyAnimation_->stop();
         return;
     }
 
