@@ -105,14 +105,14 @@ QVariantMap Utility::header()
 QStringList Utility::htmlclient()
 {
     QStringList list;
-    list << QLatin1String("htmlshark") << QLatin1String("20120312") << QLatin1String("reallyHotSauce");
+    list << QLatin1String("htmlshark") << QLatin1String("20130520") << QLatin1String("nuggetsOfBaller");
     return list;
 }
 
 QStringList Utility::jsqueue()
 {
     QStringList list;
-    list << QLatin1String("jsqueue") << QLatin1String("20120312.08") << QLatin1String("circlesAndSquares");
+    list << QLatin1String("jsqueue") << QLatin1String("20130520") << QLatin1String("nuggetsOfBaller");
     return list;
 }
 
