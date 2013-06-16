@@ -63,6 +63,8 @@ AudioPlayer::AudioPlayer(QWidget *parent) :
 
     connect(mediaObject_, SIGNAL(aboutToFinish()), this, SLOT(aboutToFinish()));
 
+    connect(ui_->timeLabel, SIGNAL(clicked()), this, SLOT(toggleTimeLabel()));
+
     updateState_ = true;
 }
 
@@ -105,7 +107,7 @@ void AudioPlayer::setupUi()
     ui_->timeLabel->setText("00:00");
     ui_->timeLabel->setMinimumSize(QSize(50,0));
     ui_->timeLabel->setFont(Utility::monoFont());
-    
+
     ui_->elapsedTimeLabel->setText("00:00");
     ui_->elapsedTimeLabel->setMinimumSize(QSize(50,0));
     ui_->elapsedTimeLabel->setFont(Utility::monoFont());
@@ -240,14 +242,21 @@ void AudioPlayer::tick(qint64 elapsedTime)
 {
     if(mediaObject_->state() == Phonon::StoppedState)
         return;
-    
+
     quint64 remainingTime = mediaObject_->remainingTime();
 
     if(ui_->elapsedTimeLabel->isVisible()) {
         ui_->elapsedTimeLabel->setText(QTime(0, (elapsedTime / 60000) % 60, (elapsedTime / 1000) % 60).toString("mm:ss"));
         ui_->timeLabel->setText("-" + QTime(0, (remainingTime / 60000) % 60, (remainingTime / 1000) % 60).toString("mm:ss"));
     } else {
-        ui_->timeLabel->setText(QTime(0, (elapsedTime / 60000) % 60, (elapsedTime / 1000) % 60).toString("mm:ss"));
+        switch(timerState) {
+            case GrooveOff::ElapsedState:
+                ui_->timeLabel->setText(QTime(0, (elapsedTime / 60000) % 60, (elapsedTime / 1000) % 60).toString("mm:ss"));
+                break;
+            case GrooveOff::RemainingState:
+                ui_->timeLabel->setText("-" + QTime(0, (remainingTime / 60000) % 60, (remainingTime / 1000) % 60).toString("mm:ss"));
+                break;
+        }
     }
 }
 
@@ -289,5 +298,11 @@ void AudioPlayer::pauseResumePlaying()
         ui_->playPauseButton->setToolTip(trUtf8("Pause"));
     }
 }
+
+void AudioPlayer::toggleTimeLabel()
+{
+    timerState = (GrooveOff::TimerState)!timerState;
+}
+
 
 #include "audioplayer.moc"

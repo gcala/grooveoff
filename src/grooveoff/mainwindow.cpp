@@ -831,6 +831,8 @@ void MainWindow::loadSettings()
     if(!_sizes.isEmpty()) {
         ui_->splitter->setSizes(_sizes);
     }
+
+    ui_->playerWidget->setTimerState((GrooveOff::TimerState)settings.value(QLatin1String("timerState"), GrooveOff::ElapsedState).toInt());
 }
 
 /*!
@@ -853,6 +855,8 @@ void MainWindow::saveSettings()
         settings.setValue(QLatin1String("destination"), ui_->pathLine->text());
     else
         settings.setValue(QLatin1String("destination"), QString());
+
+    settings.setValue(QLatin1String("timerState"), ui_->playerWidget->getTimerState());
 }
 
 /*!

@@ -74,6 +74,20 @@ namespace GrooveOff {
          */
         SongJob
     };
+
+    /**
+     * The player timer state
+     */
+    enum TimerState {
+        /**
+         * Elapsed time
+         */
+        ElapsedState,
+        /**
+         * Remaining time
+         */
+        RemainingState
+    };
 }
 
 QT_END_NAMESPACE

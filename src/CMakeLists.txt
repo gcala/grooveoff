@@ -11,6 +11,7 @@ set(grooveoff_SRCS grooveoff/utility.cpp
                    grooveoff/settingsitem.cpp
                    grooveoff/configdialog.cpp
                    grooveoff/timerbutton.cpp
+                   grooveoff/timerlabel.cpp
                    grooveoff/songdownloader.cpp
                    grooveoff/song.cpp
                    grooveoff/qled.cpp

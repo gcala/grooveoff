@@ -21,6 +21,7 @@
 #define AUDIOPLAYER_H
 
 #include "grooveoff/downloaditem.h"
+#include "grooveoff/grooveoffnamespace.h"
 
 #include <QWidget>
 #include <phonon/MediaObject>
@@ -40,10 +41,13 @@ class AudioPlayer : public QWidget
 public:
     explicit AudioPlayer(QWidget *parent = 0);
     virtual ~AudioPlayer();
-    
+
     void showElapsedTimerLabel(bool);
 
     GrooveOff::DownloadState currentItemDownloadState() { return item->downloadState(); }
+
+    GrooveOff::TimerState getTimerState() { return timerState; }
+    void setTimerState(GrooveOff::TimerState state) { timerState = state; }
 
 public slots:
     void playItem(DownloadItem *i);
@@ -55,6 +59,7 @@ private slots:
     void stopPlaying();
     void removeItem(DownloadItem *i);
     void stateChanged(Phonon::State newState, Phonon::State oldState);
+    void toggleTimeLabel();
 
 private:
     Ui::AudioPlayer *ui_;
@@ -65,6 +70,7 @@ private:
     QList<Phonon::MediaSource> audioSources_;
     QString currentSongFileName_;
     bool updateState_;
+    GrooveOff::TimerState timerState;
 
     //Methods
     void setupUi();

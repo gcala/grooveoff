@@ -95,7 +95,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="timeLabel">
+      <widget class="TimerLabel" name="timeLabel">
        <property name="text">
         <string/>
        </property>
@@ -118,6 +118,11 @@
    <class>ElidedLabel</class>
    <extends>QLabel</extends>
    <header location="global">grooveoff/elidedlabel.h</header>
+  </customwidget>
+  <customwidget>
+   <class>TimerLabel</class>
+   <extends>QLabel</extends>
+   <header location="global">grooveoff/timerlabel.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
