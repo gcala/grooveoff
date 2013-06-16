@@ -83,9 +83,11 @@ MainWindow::MainWindow(QWidget *parent) :
 
     if(ui_->splitter->orientation() == Qt::Vertical) {
         actionCompact_->setChecked(true);
+        ui_->playerWidget->showElapsedTimerLabel(false);
     }
     else {
         actionWide_->setChecked(true);
+        ui_->playerWidget->showElapsedTimerLabel(true);
     }
 
     listModel_ = new MatchesListModel(this);
@@ -728,6 +730,7 @@ void MainWindow::addDownloadItem(const QModelIndex &index)
 void MainWindow::setCompactLayout()
 {
     ui_->splitter->setOrientation(Qt::Vertical);
+    ui_->playerWidget->showElapsedTimerLabel(false);
 
     // save choice
     QSettings settings;
@@ -742,6 +745,7 @@ void MainWindow::setCompactLayout()
 void MainWindow::setWideLayout()
 {
     ui_->splitter->setOrientation(Qt::Horizontal);
+    ui_->playerWidget->showElapsedTimerLabel(true);
 
     // save choice
     QSettings settings;
@@ -820,6 +824,7 @@ void MainWindow::loadSettings()
     }
 
     ui_->splitter->setOrientation((Qt::Orientation)settings.value(QLatin1String("splitterOrientation"), Qt::Vertical).toInt());
+    ui_->playerWidget->showElapsedTimerLabel(ui_->splitter->orientation() == Qt::Vertical ? false : true);
 
     QList<int> _sizes = settings.value(QLatin1String("splitterSizes")).value< QList<int> >();
 

@@ -40,6 +40,8 @@ class AudioPlayer : public QWidget
 public:
     explicit AudioPlayer(QWidget *parent = 0);
     virtual ~AudioPlayer();
+    
+    void showElapsedTimerLabel(bool);
 
     GrooveOff::DownloadState currentItemDownloadState() { return item->downloadState(); }
 
@@ -48,7 +50,7 @@ public slots:
     void pauseResumePlaying();
 
 private slots:
-    void tick(qint64 time);
+    void tick(qint64 elapsedTime);
     void aboutToFinish();
     void stopPlaying();
     void removeItem(DownloadItem *i);

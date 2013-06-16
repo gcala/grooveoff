@@ -105,10 +105,24 @@ void AudioPlayer::setupUi()
     ui_->timeLabel->setText("00:00");
     ui_->timeLabel->setMinimumSize(QSize(50,0));
     ui_->timeLabel->setFont(Utility::monoFont());
+    
+    ui_->elapsedTimeLabel->setText("00:00");
+    ui_->elapsedTimeLabel->setMinimumSize(QSize(50,0));
+    ui_->elapsedTimeLabel->setFont(Utility::monoFont());
 }
 
 /*!
-  \brief play: play a file
+  \brief showElapsedTimerLabel: show/hide elapsedTimeLabel
+  \param ok: bool
+  \return void
+*/
+void AudioPlayer::showElapsedTimerLabel(bool ok)
+{
+    ui_->elapsedTimeLabel->setVisible(ok);
+}
+
+/*!
+  \brief playItem: play a file
   \param i: item
   \return void
 */
@@ -194,15 +208,16 @@ void AudioPlayer::stateChanged(Phonon::State newState, Phonon::State oldState)
     case Phonon::PlayingState:
         ui_->labelsContainerWidget->setVisible(true);
         ui_->playPauseButton->setIcon(QIcon::fromTheme(QLatin1String("media-playback-pause"), QIcon(QLatin1String(":/resources/media-playback-pause.png"))));
-            if(item)
-                item->setPlayerState(Phonon::PlayingState);
+        if(item)
+            item->setPlayerState(Phonon::PlayingState);
         break;
     case Phonon::StoppedState:
         ui_->labelsContainerWidget->setVisible(false);
         ui_->playPauseButton->setIcon(QIcon::fromTheme(QLatin1String("media-playback-start"), QIcon(QLatin1String(":/resources/media-playback-start.png"))));
         ui_->timeLabel->setText("00:00");
-            if(item)
-                item->setPlayerState(Phonon::StoppedState);
+        ui_->elapsedTimeLabel->setText("00:00");
+        if(item)
+            item->setPlayerState(Phonon::StoppedState);
         break;
     case Phonon::PausedState:
         ui_->labelsContainerWidget->setVisible(true);
@@ -221,10 +236,19 @@ void AudioPlayer::stateChanged(Phonon::State newState, Phonon::State oldState)
   \param time: current play time
   \return void
 */
-void AudioPlayer::tick(qint64 time)
+void AudioPlayer::tick(qint64 elapsedTime)
 {
-    QTime displayTime(0, (time / 60000) % 60, (time / 1000) % 60);
-    ui_->timeLabel->setText(displayTime.toString("mm:ss"));
+    if(mediaObject_->state() == Phonon::StoppedState)
+        return;
+    
+    quint64 remainingTime = mediaObject_->remainingTime();
+
+    if(ui_->elapsedTimeLabel->isVisible()) {
+        ui_->elapsedTimeLabel->setText(QTime(0, (elapsedTime / 60000) % 60, (elapsedTime / 1000) % 60).toString("mm:ss"));
+        ui_->timeLabel->setText("-" + QTime(0, (remainingTime / 60000) % 60, (remainingTime / 1000) % 60).toString("mm:ss"));
+    } else {
+        ui_->timeLabel->setText(QTime(0, (elapsedTime / 60000) % 60, (elapsedTime / 1000) % 60).toString("mm:ss"));
+    }
 }
 
 /*!

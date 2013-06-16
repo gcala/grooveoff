@@ -78,7 +78,21 @@
       </widget>
      </item>
      <item>
-      <widget class="Phonon::SeekSlider" name="seekSlider"/>
+      <widget class="QLabel" name="elapsedTimeLabel">
+       <property name="text">
+        <string/>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="Phonon::SeekSlider" name="seekSlider">
+       <property name="iconVisible">
+        <bool>false</bool>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QLabel" name="timeLabel">
