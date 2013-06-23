@@ -69,8 +69,8 @@ void PlayAnimationWidget::paintEvent(QPaintEvent *event)
     QPainter painter(this);
 //    painter.setRenderHint(QPainter::Antialiasing);
     QPalette systemPalette;
-    painter.setPen(QPen(systemPalette.color(QPalette::Highlight), 1, Qt::SolidLine));
-    painter.setBrush(systemPalette.color(QPalette::Highlight));
+    painter.setPen(QPen(systemPalette.color(QPalette::Foreground), 1, Qt::SolidLine));
+    painter.setBrush(systemPalette.color(QPalette::Foreground));
 
     // calculating spacer
     int emptySpace = rect().width() - BAR_WIDTH * NUM_BARS;
@@ -78,7 +78,7 @@ void PlayAnimationWidget::paintEvent(QPaintEvent *event)
 
     if(!animating_) {
         for(int i = 0; i < NUM_BARS; i++) {
-            painter.drawRect(spacer*(i+1) + BAR_WIDTH*i, this->rect().height() - currentHeights_.at(i), BAR_WIDTH, this->rect().height());
+            painter.drawRect(spacer * ( i + 1 ) + BAR_WIDTH * i, this->rect().height() - currentHeights_.at(i), BAR_WIDTH, this->rect().height());
         }
         return;
     }
