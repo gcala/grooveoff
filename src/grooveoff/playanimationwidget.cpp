@@ -22,10 +22,10 @@
 #include <QPainter>
 #include <QTime>
 
-#define NUM_BARS 3
+#define NUM_BARS 4
 #define BAR_WIDTH 3
 #define TICK 1
-#define MIN_HEIGHT 5
+#define MIN_HEIGHT 3
 #define SPEED 15
 
 PlayAnimationWidget::PlayAnimationWidget(QWidget *parent) :
@@ -67,9 +67,10 @@ void PlayAnimationWidget::paintEvent(QPaintEvent *event)
     Q_UNUSED(event)
 
     QPainter painter(this);
-    painter.setRenderHint(QPainter::Antialiasing);
-    painter.drawRect(0,0,rect().width(),rect().height());
-    painter.setBrush(QBrush(QColor(Qt::black)));
+//    painter.setRenderHint(QPainter::Antialiasing);
+    QPalette systemPalette;
+    painter.setPen(QPen(systemPalette.color(QPalette::Highlight), 1, Qt::SolidLine));
+    painter.setBrush(systemPalette.color(QPalette::Highlight));
 
     // calculating spacer
     int emptySpace = rect().width() - BAR_WIDTH * NUM_BARS;

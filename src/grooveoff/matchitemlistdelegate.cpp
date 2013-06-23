@@ -139,7 +139,7 @@ void MatchItemListDelegate::paint ( QPainter* painter, const QStyleOptionViewIte
 
     QStyleOptionButton button;
 
-    if(QFile::exists(path_ + QDir::separator() + index.data(SongRoles::Artist).toString() + " - " + index.data(Qt::DisplayRole).toString() + ".mp3")) {
+    if(QFile::exists(path_ + QDir::separator() + title + " - " + artist + ".mp3")) {
         button.icon = QIcon::fromTheme(QLatin1String("view-refresh"), QIcon(QLatin1String(":/resources/view-refresh.png")));
     } else {
         if(QIcon::hasThemeIcon(QLatin1String("download")))

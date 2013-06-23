@@ -276,15 +276,29 @@
      </layout>
     </widget>
    </item>
+   <item>
+    <widget class="PlayAnimationWidget" name="playingAnimation" native="true">
+     <property name="minimumSize">
+      <size>
+       <width>30</width>
+       <height>30</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>30</width>
+       <height>30</height>
+      </size>
+     </property>
+     <property name="sizeIncrement">
+      <size>
+       <width>30</width>
+       <height>30</height>
+      </size>
+     </property>
+    </widget>
+   </item>
   </layout>
-  <zorder>songWidget</zorder>
-  <zorder>progressWidget</zorder>
-  <zorder>infoIconWidget</zorder>
-  <zorder>infoMessageWidget</zorder>
-  <zorder>openFolderWidget</zorder>
-  <zorder>multiFuncWidget</zorder>
-  <zorder>playWidget</zorder>
-  <zorder>progressBar</zorder>
  </widget>
  <customwidgets>
   <customwidget>
@@ -296,6 +310,12 @@
    <class>ElidedLabel</class>
    <extends>QLabel</extends>
    <header location="global">grooveoff/elidedlabel.h</header>
+  </customwidget>
+  <customwidget>
+   <class>PlayAnimationWidget</class>
+   <extends>QWidget</extends>
+   <header location="global">grooveoff/playanimationwidget.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>
