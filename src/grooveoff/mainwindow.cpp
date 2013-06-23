@@ -71,10 +71,13 @@ MainWindow::MainWindow(QWidget *parent) :
     ui_(new Ui::MainWindow)
 {
     ui_->setupUi(this);
+    playerWidget = new AudioPlayer(this);
     setupUi();
     setupActions();
     setupMenus();
     loadSettings();
+    statusBar()->addPermanentWidget( playerWidget, 1 );
+    statusBar()->setSizeGripEnabled(false);
 
     //fake
     searchInProgress_ = true;
@@ -83,11 +86,11 @@ MainWindow::MainWindow(QWidget *parent) :
 
     if(ui_->splitter->orientation() == Qt::Vertical) {
         actionCompact_->setChecked(true);
-        ui_->playerWidget->showElapsedTimerLabel(false);
+        playerWidget->showElapsedTimerLabel(false);
     }
     else {
         actionWide_->setChecked(true);
-        ui_->playerWidget->showElapsedTimerLabel(true);
+        playerWidget->showElapsedTimerLabel(true);
     }
 
     listModel_ = new MatchesListModel(this);
@@ -221,7 +224,7 @@ void MainWindow::setupUi()
 
     ui_->splitter->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
 
-    ui_->playerWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+    playerWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
 }
 
 /*!
@@ -409,7 +412,7 @@ void MainWindow::getToken()
 
     // some ui setups
     ui_->qled->setValue(false);
-    statusBar()->showMessage(trUtf8("Connecting..."), 0);
+    //statusBar()->showMessage(trUtf8("Connecting..."), 0);
 
     // set current operation
     currentJob_ = GrooveOff::TokenJob;
@@ -584,7 +587,7 @@ void MainWindow::replyFinished(QNetworkReply *reply)
 
         // the error occurred during token request...
         if(currentJob_ == GrooveOff::TokenJob) {
-            statusBar()->showMessage(reply->errorString(), 3000);
+            //statusBar()->showMessage(reply->errorString(), 3000);
             ui_->qled->setToolTip(trUtf8("Check your connection and try again"));
             ui_->searchButton->setEnabled(false);
         } else if(currentJob_ == GrooveOff::SearchJob) { // the error occurred during search request...
@@ -625,12 +628,12 @@ void MainWindow::replyFinished(QNetworkReply *reply)
                 ((DownloadItem *)ui_->downloadList->itemWidget(ui_->downloadList->item(i)))->setToken(token_);
             }
 
-            statusBar()->showMessage(trUtf8("Connected"), 3000);
+            //statusBar()->showMessage(trUtf8("Connected"), 3000);
             ui_->qled->setValue(true);
             ui_->qled->setToolTip(trUtf8("You're connected to grooveshark!"));
             ui_->listView->setEnabled(true);
         } else {
-            statusBar()->showMessage(trUtf8("Token not received!!"), 3000);
+            //statusBar()->showMessage(trUtf8("Token not received!!"), 3000);
             qDebug() << "GrooveOff ::" << "Token not received!!";
             qDebug() << "GrooveOff ::" << result;
         }
@@ -695,8 +698,10 @@ void MainWindow::addDownloadItem(const QModelIndex &index)
 
     // build a DownloadItem with all required data
     DownloadItem *item = new DownloadItem(ui_->pathLine->text(), // save folder
-                                          fileName,
-                                          index.data(SongRoles::Id).toString(), // song id
+                                          index.data(Qt::DisplayRole).toString(),   // title
+                                          index.data(SongRoles::Album).toString(),
+                                          index.data(SongRoles::Artist).toString(),
+                                          index.data(SongRoles::Id).toString(),     // song id
                                           token_,
                                           index.data(SongRoles::Cover).toString(),
                                           this);
@@ -709,10 +714,10 @@ void MainWindow::addDownloadItem(const QModelIndex &index)
         queue_.append(item);
     }
 
-    connect(item, SIGNAL(play(DownloadItem*)), ui_->playerWidget, SLOT(playItem(DownloadItem*)));
-    connect(item, SIGNAL(remove(DownloadItem*)), ui_->playerWidget, SLOT(removeItem(DownloadItem*)));
+    connect(item, SIGNAL(play(DownloadItem*)), playerWidget, SLOT(playItem(DownloadItem*)));
+    connect(item, SIGNAL(remove(DownloadItem*)), playerWidget, SLOT(removeItem(DownloadItem*)));
     connect(item, SIGNAL(downloadFinished()), this, SLOT(freeDownloadSlot()));
-    connect(item, SIGNAL(pauseResumePlaying()), ui_->playerWidget, SLOT(pauseResumePlaying()));
+    connect(item, SIGNAL(pauseResumePlaying()), playerWidget, SLOT(pauseResumePlaying()));
     connect(item, SIGNAL(addToQueue(DownloadItem*)), this, SLOT(addItemToQueue(DownloadItem*)));
     connect(item, SIGNAL(stateChangedSignal()), listModel_, SLOT(forceRepaint()));
 
@@ -720,7 +725,7 @@ void MainWindow::addDownloadItem(const QModelIndex &index)
     ui_->downloadList->addItem(i);
     ui_->downloadList->setItemWidget(i, item);
     ui_->downloadList->setCurrentItem(i);
-    i->setSizeHint(QSize(50,50));
+    i->setSizeHint(QSize(Utility::coverSize + Utility::marginSize * 2,Utility::coverSize + Utility::marginSize * 2));
 }
 
 /*!
@@ -730,7 +735,7 @@ void MainWindow::addDownloadItem(const QModelIndex &index)
 void MainWindow::setCompactLayout()
 {
     ui_->splitter->setOrientation(Qt::Vertical);
-    ui_->playerWidget->showElapsedTimerLabel(false);
+    playerWidget->showElapsedTimerLabel(false);
 
     // save choice
     QSettings settings;
@@ -745,7 +750,7 @@ void MainWindow::setCompactLayout()
 void MainWindow::setWideLayout()
 {
     ui_->splitter->setOrientation(Qt::Horizontal);
-    ui_->playerWidget->showElapsedTimerLabel(true);
+    playerWidget->showElapsedTimerLabel(true);
 
     // save choice
     QSettings settings;
@@ -784,7 +789,7 @@ void MainWindow::onlineStateChanged(bool isOnline) {
     if(isOnline) { // when returning online get a new token
         newToken();
     } else {
-        statusBar()->showMessage(trUtf8("Offline"),0);
+        //statusBar()->showMessage(trUtf8("Offline"),0);
         ui_->searchButton->setEnabled(false);
         ui_->qled->setValue(false);
         ui_->listView->setEnabled(false);
@@ -824,7 +829,7 @@ void MainWindow::loadSettings()
     }
 
     ui_->splitter->setOrientation((Qt::Orientation)settings.value(QLatin1String("splitterOrientation"), Qt::Vertical).toInt());
-    ui_->playerWidget->showElapsedTimerLabel(ui_->splitter->orientation() == Qt::Vertical ? false : true);
+    playerWidget->showElapsedTimerLabel(ui_->splitter->orientation() == Qt::Vertical ? false : true);
 
     QList<int> _sizes = settings.value(QLatin1String("splitterSizes")).value< QList<int> >();
 
@@ -832,7 +837,7 @@ void MainWindow::loadSettings()
         ui_->splitter->setSizes(_sizes);
     }
 
-    ui_->playerWidget->setTimerState((GrooveOff::TimerState)settings.value(QLatin1String("timerState"), GrooveOff::ElapsedState).toInt());
+    playerWidget->setTimerState((GrooveOff::TimerState)settings.value(QLatin1String("timerState"), GrooveOff::ElapsedState).toInt());
 }
 
 /*!
@@ -856,7 +861,7 @@ void MainWindow::saveSettings()
     else
         settings.setValue(QLatin1String("destination"), QString());
 
-    settings.setValue(QLatin1String("timerState"), ui_->playerWidget->getTimerState());
+    settings.setValue(QLatin1String("timerState"), playerWidget->getTimerState());
 }
 
 /*!

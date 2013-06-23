@@ -103,7 +103,6 @@ void MatchItemListDelegate::paint ( QPainter* painter, const QStyleOptionViewIte
     QRect coverRect;
     coverRect.setX(option.rect.x() + Utility::marginSize);
     coverRect.setY(option.rect.y() + (option.rect.height() / 2 - Utility::coverSize / 2));
-    //coverRect.setY(option.rect.y() + (fmTitle.height()*2 > Utility::coverSize ? (fmTitle.height() - Utility::coverSize / 2) : (option.rect.height() / 2 - Utility::coverSize / 2)));
     coverRect.setWidth(Utility::coverSize);
     coverRect.setHeight(Utility::coverSize);
     painter->drawPixmap(coverRect, pix);
@@ -121,7 +120,7 @@ void MatchItemListDelegate::paint ( QPainter* painter, const QStyleOptionViewIte
 
     QString title = index.data(Qt::DisplayRole).toString();
 
-    painter->drawText(titleRect, Qt::AlignLeft | Qt::AlignTop, fmTitle.elidedText(title, Qt::ElideRight, titleRect.width()));
+    painter->drawText(titleRect, Qt::AlignLeft | Qt::AlignVCenter, fmTitle.elidedText(title, Qt::ElideRight, titleRect.width()));
     painter->restore();
 
     QRect albumRect = titleRect;
@@ -130,7 +129,7 @@ void MatchItemListDelegate::paint ( QPainter* painter, const QStyleOptionViewIte
 
     QString artist = index.data(SongRoles::Artist).toString();
     QString album = index.data(SongRoles::Album).toString();
-    painter->drawText(albumRect, Qt::AlignLeft | Qt::AlignBottom, option.fontMetrics.elidedText(artist + " - " + album, Qt::ElideRight, albumRect.width()));
+    painter->drawText(albumRect, Qt::AlignLeft | Qt::AlignVCenter, option.fontMetrics.elidedText(artist + " - " + album, Qt::ElideRight, albumRect.width()));
 
     QRect buttonRect;
     buttonRect.setX(option.rect.width() - Utility::buttonSize - Utility::marginSize -2 /* hack */);

@@ -40,14 +40,18 @@ class DownloadItem : public QWidget
     Q_OBJECT
 
 public:
-    DownloadItem(const QString &path, const QString &fileName, const QString &id,
+    DownloadItem(const QString &path, const QString &title, const QString &album, const QString &artist, const QString &id,
                  const QString &token, const QString &coverName, QWidget *parent = 0);
     virtual ~DownloadItem();
     QString songFile();
 
     const QString & id() { return id_; }
     const QString & fileName() { return fileName_; }
+    const QString & title() { return title_; }
+    const QString & album() { return album_; }
+    const QString & artist() { return artist_; }
     const QString & path() { return path_; }
+    QPixmap coverPixmap() {return coverPixmap_;}
     GrooveOff::DownloadState downloadState() { return downloadState_; }
 
     void startDownload();
@@ -81,6 +85,9 @@ private:
     Ui::DownloadItem *ui_;
     QString path_;
     QString fileName_;
+    QString title_;
+    QString album_;
+    QString artist_;
     QString id_;
     QString token_;
     QPixmap coverPixmap_;

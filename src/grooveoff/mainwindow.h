@@ -116,6 +116,7 @@ private:
     int parallelDownloadsCount_;
     QList<DownloadItem *> queue_;
     MatchItemListDelegate *matchItemListDelegate_;
+    AudioPlayer *playerWidget;
 
     //Menus
     QMenu *fileMenu_;

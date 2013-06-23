@@ -23,7 +23,7 @@
 #include <QUuid>
 #include <QCryptographicHash>
 
-const int Utility::coverSize  = 40;
+const int Utility::coverSize  = 40; // possible values are 40,50,70,80,90,120
 const int Utility::buttonSize = 24;
 const int Utility::marginSize = 5;
 const QByteArray Utility::userAgent("Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.56 Safari/536.5");

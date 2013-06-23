@@ -82,26 +82,28 @@ AudioPlayer::~AudioPlayer()
 */
 void AudioPlayer::setupUi()
 {
-    ui_->labelsContainerWidget->setVisible(false);
-
-    // Now playing %title by %artist from album %album
-    ui_->label->setText(trUtf8("Now playing:"));
-    ui_->label->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
-
     ui_->titleLabel->setFont(Utility::font(QFont::Bold));
-    ui_->titleLabel->setWordWrap(true);
+    //ui_->titleLabel->setWordWrap(true);
+
+    ui_->album_authorLabel->setFont(Utility::font(QFont::Bold));
+    //ui_->album_authorLabel->setWordWrap(true);
+
+    ui_->widget->setBackgroundRole(QPalette::Base);
 
     ui_->playPauseButton->setIcon(QIcon::fromTheme(QLatin1String("media-playback-start"), QIcon(QLatin1String(":/resources/media-playback-start.png"))));
     ui_->playPauseButton->setFlat(true);
     ui_->playPauseButton->setToolTip(trUtf8("Play"));
-    ui_->playPauseButton->setMaximumSize(QSize(24,24));
+    ui_->playPauseButton->setFixedSize(QSize(32,32));
+    ui_->playPauseButton->setIconSize(QSize(32,32));
     ui_->playPauseButton->setEnabled(false);
     connect(ui_->playPauseButton, SIGNAL(clicked(bool)), this, SLOT(pauseResumePlaying()));
 
     ui_->stopButton->setIcon(QIcon::fromTheme(QLatin1String("media-playback-stop"), QIcon(QLatin1String(":/resources/media-playback-stop.png"))));
     ui_->stopButton->setToolTip(trUtf8("Stop "));
     ui_->stopButton->setFlat(true);
-    ui_->stopButton->setMaximumSize(QSize(24,24));
+    ui_->stopButton->setFixedSize(QSize(24,24));
+    ui_->stopButton->setIconSize(QSize(24,24));
+    ui_->stopButton->setContentsMargins( 0, 0, 0, 0 );
     connect(ui_->stopButton, SIGNAL(clicked(bool)), this, SLOT(stopPlaying()));
 
     ui_->timeLabel->setText("00:00");
@@ -141,8 +143,15 @@ void AudioPlayer::playItem(DownloadItem *i)
 
     QFileInfo fi(song);
 
-    ui_->titleLabel->setText(fi.fileName());
-    ui_->titleLabel->setToolTip(fi.fileName());
+    ui_->titleLabel->setText(item->title());
+    ui_->titleLabel->setToolTip(item->title());
+
+    ui_->album_authorLabel->setText(item->artist() + " - " + item->album());
+
+    QPixmap pix = item->coverPixmap();
+    pix = pix.scaledToWidth(ui_->coverLabel->size().width(), Qt::SmoothTransformation);
+
+    ui_->coverLabel->setPixmap(pix);
 
     // very minimal playlist: only one song
     // first stop current media
@@ -208,13 +217,13 @@ void AudioPlayer::stateChanged(Phonon::State newState, Phonon::State oldState)
         }
         break;
     case Phonon::PlayingState:
-        ui_->labelsContainerWidget->setVisible(true);
+        //ui_->labelsContainerWidget->setVisible(true);
         ui_->playPauseButton->setIcon(QIcon::fromTheme(QLatin1String("media-playback-pause"), QIcon(QLatin1String(":/resources/media-playback-pause.png"))));
         if(item)
             item->setPlayerState(Phonon::PlayingState);
         break;
     case Phonon::StoppedState:
-        ui_->labelsContainerWidget->setVisible(false);
+        //ui_->labelsContainerWidget->setVisible(false);
         ui_->playPauseButton->setIcon(QIcon::fromTheme(QLatin1String("media-playback-start"), QIcon(QLatin1String(":/resources/media-playback-start.png"))));
         ui_->timeLabel->setText("00:00");
         ui_->elapsedTimeLabel->setText("00:00");
@@ -222,7 +231,7 @@ void AudioPlayer::stateChanged(Phonon::State newState, Phonon::State oldState)
             item->setPlayerState(Phonon::StoppedState);
         break;
     case Phonon::PausedState:
-        ui_->labelsContainerWidget->setVisible(true);
+        //ui_->labelsContainerWidget->setVisible(true);
         ui_->playPauseButton->setIcon(QIcon::fromTheme(QLatin1String("media-playback-start"), QIcon(QLatin1String(":/resources/media-playback-start.png"))));
             if(item)
                 item->setPlayerState(Phonon::PausedState);
@@ -293,7 +302,7 @@ void AudioPlayer::pauseResumePlaying()
         ui_->playPauseButton->setToolTip(trUtf8("Play"));
     } else{
         mediaObject_->play();
-        ui_->labelsContainerWidget->setVisible(true);
+        //ui_->labelsContainerWidget->setVisible(true);
         ui_->playPauseButton->setIcon(QIcon::fromTheme(QLatin1String("media-playback-pause"), QIcon(QLatin1String(":/resources/media-playback-pause.png"))));
         ui_->playPauseButton->setToolTip(trUtf8("Pause"));
     }

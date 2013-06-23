@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>581</width>
-    <height>40</height>
+    <width>572</width>
+    <height>52</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -35,7 +35,7 @@
       <property name="horizontalSpacing">
        <number>5</number>
       </property>
-      <item row="0" column="0">
+      <item row="0" column="0" rowspan="2">
        <widget class="QLabel" name="coverLabel">
         <property name="text">
          <string/>
@@ -44,6 +44,13 @@
       </item>
       <item row="0" column="1">
        <widget class="ElidedLabel" name="titleLabel">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="ElidedLabel" name="artist_albumLabel">
         <property name="text">
          <string/>
         </property>
@@ -270,6 +277,14 @@
     </widget>
    </item>
   </layout>
+  <zorder>songWidget</zorder>
+  <zorder>progressWidget</zorder>
+  <zorder>infoIconWidget</zorder>
+  <zorder>infoMessageWidget</zorder>
+  <zorder>openFolderWidget</zorder>
+  <zorder>multiFuncWidget</zorder>
+  <zorder>playWidget</zorder>
+  <zorder>progressBar</zorder>
  </widget>
  <customwidgets>
   <customwidget>

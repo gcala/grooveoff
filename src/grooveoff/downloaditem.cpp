@@ -41,17 +41,21 @@
   \param pix: cover pixmap
   \param parent: The Parent Widget
 */
-DownloadItem::DownloadItem(const QString &path, const QString &fileName, const QString &id,
+DownloadItem::DownloadItem(const QString &path, const QString &title, const QString &album, const QString &artist, const QString &id,
                            const QString &token, const QString &coverName, QWidget *parent) :
     QWidget(parent),
     ui_(new Ui::DownloadItem),
     path_(path),
-    fileName_(fileName),
+    title_(title),
+    album_(album),
+    artist_(artist),
     id_(id),
     token_(token),
     coverName_(coverName)
 {
     ui_->setupUi(this);
+
+    fileName_ = title_ + " - " + artist_;
 
     standardCover_ = true;
 
@@ -62,7 +66,7 @@ DownloadItem::DownloadItem(const QString &path, const QString &fileName, const Q
     downloadState_ = GrooveOff::QueuedState;
     playerState_ = Phonon::StoppedState;
     stateChanged();
-    qDebug() << "GrooveOff ::" << "Queued download of" << fileName_;
+    qDebug() << "GrooveOff ::" << "Queued download of" << title_;
 }
 
 /*!
@@ -92,11 +96,16 @@ void DownloadItem::setupUi()
 
     ui_->coverLabel->setScaledContents(true);
     ui_->coverLabel->setFixedSize(QSize(Utility::coverSize,Utility::coverSize));
+    ui_->coverLabel->setToolTip(fileName_);
 
     ui_->titleLabel->setFont(Utility::font(QFont::Bold));
-    ui_->titleLabel->setText(fileName_);
-    ui_->titleLabel->setToolTip(fileName_);
-    ui_->coverLabel->setToolTip(fileName_);
+    ui_->titleLabel->setText(title_);
+    ui_->titleLabel->setToolTip(title_);
+    ui_->titleLabel->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred); // fix hidden label
+
+    ui_->artist_albumLabel->setText(artist_ + " - " + album_);
+    ui_->artist_albumLabel->setToolTip(title_);
+    ui_->artist_albumLabel->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred); // fix hidden label
 
     ui_->multiFuncButton->setFixedSize(QSize(Utility::buttonSize,Utility::buttonSize));
     ui_->playButton->setFixedSize(QSize(Utility::buttonSize,Utility::buttonSize));

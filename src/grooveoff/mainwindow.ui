@@ -15,6 +15,9 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <property name="leftMargin">
@@ -192,9 +195,6 @@
       <widget class="QListWidget" name="downloadList"/>
      </widget>
     </item>
-    <item>
-     <widget class="AudioPlayer" name="playerWidget"/>
-    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -214,12 +214,6 @@
    <class>QLed</class>
    <extends>QWidget</extends>
    <header location="global">grooveoff/qled.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>AudioPlayer</class>
-   <extends>QFrame</extends>
-   <header location="global">grooveoff/audioplayer.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

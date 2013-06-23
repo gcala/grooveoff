@@ -71,6 +71,7 @@ private:
     QString currentSongFileName_;
     bool updateState_;
     GrooveOff::TimerState timerState;
+    QPixmap coverPixmap_;
 
     //Methods
     void setupUi();

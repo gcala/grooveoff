@@ -26,28 +26,28 @@ ElidedLabel::ElidedLabel(QWidget* parent, Qt::WindowFlags f):
     QLabel(parent, f),
     elideMode_(Qt::ElideRight)
 {
-    setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
+    setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
 }
 
 ElidedLabel::ElidedLabel(const QString& text, QWidget* parent, Qt::WindowFlags f):
     QLabel(text, parent, f),
     elideMode_(Qt::ElideRight)
 {
-    setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
+    setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
 }
 
 ElidedLabel::ElidedLabel(const QString& text, Qt::TextElideMode elideMode, QWidget* parent, Qt::WindowFlags f) :
     QLabel(text, parent, f),
     elideMode_(elideMode)
 {
-    setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
+    setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
 }
 
 void ElidedLabel::setText(const QString& text)
 {
     QLabel::setText(text);
     cacheElidedText(geometry().width());
-    setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
+    setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
 }
 
 void ElidedLabel::cacheElidedText(int w)

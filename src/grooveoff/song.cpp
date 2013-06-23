@@ -18,6 +18,7 @@
 
 
 #include "grooveoff/song.h"
+#include "grooveoff/utility.h"
 
 #include <QPixmapCache>
 #include <QNetworkAccessManager>
@@ -57,8 +58,8 @@ void Song::setCoverName(const QString &cover)
     // 'NoCoverArt' is a custom name used to tell to use a default pixmap
     if(coverName_ == QLatin1String("NoCoverArt")) {
         if (!QPixmapCache::find(coverName_, &coverPixmap_)) {
-            coverPixmap_ = QIcon::fromTheme(QLatin1String("media-optical"), QIcon(QLatin1String(":/resources/media-optical.png"))).pixmap(40);
-            coverPixmap_ = coverPixmap_.scaledToWidth(40, Qt::SmoothTransformation);
+            coverPixmap_ = QIcon::fromTheme(QLatin1String("media-optical"), QIcon(QLatin1String(":/resources/media-optical.png"))).pixmap(Utility::coverSize);
+            coverPixmap_ = coverPixmap_.scaledToWidth(Utility::coverSize, Qt::SmoothTransformation);
             QPixmapCache::insert(QLatin1String("NoCoverArt"), coverPixmap_);
         }
 
@@ -69,7 +70,7 @@ void Song::setCoverName(const QString &cover)
     if (!QPixmapCache::find(coverName_, &coverPixmap_)) {
         //...not found; download it!
         QNetworkRequest request;
-        request.setUrl(QUrl(QString("http://images.gs-cdn.net/static/albums/40_%1").arg(coverName_)));
+        request.setUrl(QUrl(QString("http://images.gs-cdn.net/static/albums/" + QString::number(Utility::coverSize) + "_%1").arg(coverName_)));
         request.setHeader(QNetworkRequest::ContentTypeHeader, QLatin1String("application/x-www-form-urlencoded"));
         qnam_->get(request);
     }
@@ -96,7 +97,7 @@ void Song::onFinished(QNetworkReply *reply)
         // id reply returned error...
         qDebug() << "GrooveOff ::" << "Error downloading cover" << coverName_ << ":: " << reply->errorString();
         // use standard cover
-        coverPixmap_ = QIcon::fromTheme(QLatin1String("media-optical"), QIcon(QLatin1String(":/resources/media-optical.png"))).pixmap(40);
+        coverPixmap_ = QIcon::fromTheme(QLatin1String("media-optical"), QIcon(QLatin1String(":/resources/media-optical.png"))).pixmap(Utility::coverSize);
     }
 
     emit trigRepaint();
