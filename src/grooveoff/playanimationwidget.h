@@ -17,25 +17,36 @@
 */
 
 
-#include "grooveoff/timerlabel.h"
+#ifndef PLAYANIMATIONWIDGET_H
+#define PLAYANIMATIONWIDGET_H
 
-#include <QPainter>
+#include <QWidget>
+#include <QTimer>
 
-TimerLabel::TimerLabel(QWidget *parent) :
-    QLabel(parent)
+class PlayAnimationWidget : public QWidget
 {
+    Q_OBJECT
+public:
+    explicit PlayAnimationWidget(QWidget *parent = 0);
 
-}
+    void startAnimation();
+    void stopAnimation();
+    
+signals:
+    
+public slots:
 
-TimerLabel::~TimerLabel()
-{
+protected:
+    void paintEvent(QPaintEvent *event);
 
-}
+private:
+    QTimer timer_;
+    QVector<int> maxHeights_;
+    QVector<int> currentHeights_;
+    QVector<int> ticks_;
+    bool animating_;
 
-void TimerLabel::mousePressEvent( QMouseEvent * event )
-{
-    Q_UNUSED(event)
-    emit clicked();
-}
+    int randomHeight();
+};
 
-#include "timerlabel.moc"
+#endif // PLAYANIMATIONWIDGET_H

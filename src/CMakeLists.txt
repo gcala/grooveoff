@@ -10,6 +10,7 @@ set(grooveoff_SRCS grooveoff/utility.cpp
                    grooveoff/aboutdialog.cpp
                    grooveoff/settingsitem.cpp
                    grooveoff/configdialog.cpp
+                   grooveoff/playanimationwidget.cpp
                    grooveoff/timerbutton.cpp
                    grooveoff/timerlabel.cpp
                    grooveoff/songdownloader.cpp
