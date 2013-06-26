@@ -23,15 +23,18 @@
 #include <QObject>
 #include <QPainter>
 
-class QNetworkAccessManager;
-class QNetworkReply;
-
 class Song : public QObject
 {
     Q_OBJECT
 
 public:
     explicit Song ( QObject* parent = 0 );
+    explicit Song ( const QString &title = QString(),
+                    const QString &album = QString(),
+                    const QString &artist = QString(),
+                    const QString &year = QString(),
+                    const QString &id = QString(),
+                    QObject* parent = 0 );
     ~Song();
 
     void setTitle(const QString &title) {title_ = title;}
@@ -39,7 +42,7 @@ public:
     void setArtist(const QString &artist) {artist_ = artist;}
     void setYear(const QString &year) {year_ = year;}
     void setId(const QString &id) {id_ = id;}
-    void setCoverName(const QString &cover);
+    void setCoverName(const QString &cover) {coverName_ = cover;}
 
     QString title()       const { return title_; }
     QString album()       const { return album_; }
@@ -53,7 +56,6 @@ signals:
     void trigRepaint();
 
 public slots:
-    void onFinished(QNetworkReply*);
 
 private:
     QString title_;
@@ -63,8 +65,6 @@ private:
     QString id_;
     QString coverName_;
     QPixmap coverPixmap_;
-    QNetworkAccessManager *qnam_;
-    QNetworkReply *reply_;
 };
 
 #endif // SONG_H

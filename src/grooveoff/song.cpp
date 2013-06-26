@@ -34,8 +34,22 @@
 Song::Song ( QObject* parent ) :
     QObject(parent)
 {
-    qnam_ = new QNetworkAccessManager(this);
-    connect(qnam_, SIGNAL(finished(QNetworkReply*)), this, SLOT(onFinished(QNetworkReply*)));
+}
+
+Song::Song ( const QString &title,
+             const QString &album,
+             const QString &artist,
+             const QString &year,
+             const QString &id,
+             QObject* parent) :
+    QObject(parent),
+    title_(title),
+    album_(album),
+    artist_(artist),
+    year_(year),
+    id_(id)
+{
+
 }
 
 /*!
@@ -43,64 +57,6 @@ Song::Song ( QObject* parent ) :
 */
 Song::~Song()
 {
-    qnam_->deleteLater();
-}
-
-/*!
-  \brief setCoverArtFilename: setup cover name
-  \param cover: name of album cover
-  \return void
-*/
-void Song::setCoverName(const QString &cover)
-{
-    coverName_ = cover;
-
-    // 'NoCoverArt' is a custom name used to tell to use a default pixmap
-    if(coverName_ == QLatin1String("NoCoverArt")) {
-        if (!QPixmapCache::find(coverName_, &coverPixmap_)) {
-            coverPixmap_ = QIcon::fromTheme(QLatin1String("media-optical"), QIcon(QLatin1String(":/resources/media-optical.png"))).pixmap(Utility::coverSize);
-            coverPixmap_ = coverPixmap_.scaledToWidth(Utility::coverSize, Qt::SmoothTransformation);
-            QPixmapCache::insert(QLatin1String("NoCoverArt"), coverPixmap_);
-        }
-
-        return;
-    }
-
-    // first of all search PixmapCache for current cover name and use it if found
-    if (!QPixmapCache::find(coverName_, &coverPixmap_)) {
-        //...not found; download it!
-        QNetworkRequest request;
-        request.setUrl(QUrl(QString("http://images.gs-cdn.net/static/albums/" + QString::number(Utility::coverSize) + "_%1").arg(coverName_)));
-        request.setHeader(QNetworkRequest::ContentTypeHeader, QLatin1String("application/x-www-form-urlencoded"));
-        qnam_->get(request);
-    }
-}
-
-/*!
-  \brief onFinished: reply finished
-  \param reply: current reply object
-  \return void
-*/
-void Song::onFinished(QNetworkReply *reply)
-{
-    switch(reply->error()) {
-
-    case QNetworkReply::NoError:
-        // if no error
-        if (!QPixmapCache::find(coverName_, &coverPixmap_)) {
-            coverPixmap_.loadFromData(reply->readAll());
-            QPixmapCache::insert(coverName_, coverPixmap_);
-        }
-        break;
-
-    default:
-        // id reply returned error...
-        qDebug() << "GrooveOff ::" << "Error downloading cover" << coverName_ << ":: " << reply->errorString();
-        // use standard cover
-        coverPixmap_ = QIcon::fromTheme(QLatin1String("media-optical"), QIcon(QLatin1String(":/resources/media-optical.png"))).pixmap(Utility::coverSize);
-    }
-
-    emit trigRepaint();
 }
 
 #include "song.moc"
