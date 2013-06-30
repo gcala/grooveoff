@@ -70,7 +70,7 @@ public:
 private slots:
     void selectFolder();
     void replyFinished(QNetworkReply*);
-    void addDownloadItem(const QModelIndex &index);
+    void addDownloadItem(const QString id);
     void beginSearch();
     void newToken();
     void setCompactLayout();
@@ -157,6 +157,7 @@ private:
     void populateResultsTable();
     void applyFilter();
     bool isDownloadingQueued(const QString &);
+    Song * getSongById(const QString &);
 };
 
 #endif // MAINWINDOW_H

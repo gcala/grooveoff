@@ -198,7 +198,7 @@ bool MatchItemListDelegate::editorEvent(QEvent *event, QAbstractItemModel *model
     // mouse pointer is in rect/button area; evaluating button press/release
     if( event->type() == QEvent::MouseButtonRelease) {
         // when MouseButtonRelease emit a signal like clicked()
-        emit downloadRequest(index);
+        emit downloadRequest(index.data(SongRoles::Id).toString());
     }
 
     return true;

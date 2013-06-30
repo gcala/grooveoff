@@ -51,4 +51,36 @@ Song::~Song()
 {
 }
 
+// Song& Song::operator=(const Song* song)
+// {
+//     title_ = song->title();
+//     album_ = song->album();
+//     artist_ = song->artist();
+//     year_ = song->year();
+//     id_ = song->id();
+//     coverName_ = song->coverName();
+//     return &this;
+//
+// //     Song mysong;
+// //     mysong.setTitle(song->title());
+// //     mysong.setAlbum(song->album());
+// //     mysong.setArtist(song->artist());
+// //     mysong.setYear(song->year());
+// //     mysong.setId(song->id());
+// //     mysong.setCoverName(song->coverName());
+// //     return mysong;
+// }
+
+Song::Song(const Song* song)
+    : QObject()
+{
+    title_ = song->title();
+    album_ = song->album();
+    artist_ = song->artist();
+    year_ = song->year();
+    id_ = song->id();
+    coverName_ = song->coverName();
+}
+
+
 #include "song.moc"

@@ -104,8 +104,8 @@ MainWindow::MainWindow(QWidget *parent) :
     matchItemListDelegate_ = new MatchItemListDelegate(ui_->listView);
     ui_->listView->setItemDelegate(matchItemListDelegate_);
     //connecting delegate's signal to this class's slot
-    connect(matchItemListDelegate_, SIGNAL(downloadRequest(QModelIndex)),
-            this, SLOT(addDownloadItem(QModelIndex)));
+    connect(matchItemListDelegate_, SIGNAL(downloadRequest(QString)),
+            this, SLOT(addDownloadItem(QString)));
 
     QTime time = QTime::currentTime();
     qsrand((uint)time.msec());
@@ -661,7 +661,7 @@ void MainWindow::replyFinished(QNetworkReply *reply)
   \param index : index of item in results list (to download)
   \return void
 */
-void MainWindow::addDownloadItem(const QModelIndex &index)
+void MainWindow::addDownloadItem(const QString id)
 {
     // check if destination folder exists
     if(!QFile::exists(ui_->pathLine->text())) {
@@ -682,10 +682,12 @@ void MainWindow::addDownloadItem(const QModelIndex &index)
         return;
     }
 
-    if(isDownloadingQueued(index.data(SongRoles::Id).toString()))
+    if(isDownloadingQueued(id))
         return;
 
-    QString fileName = index.data(SongRoles::Artist).toString() + " - " + index.data(Qt::DisplayRole).toString();
+    Song *song(getSongById(id));
+
+    QString fileName = song->artist() + " - " + song->title();
 
     // check file existence
     if(QFile::exists(ui_->pathLine->text() + QDir::separator() + fileName + ".mp3")) {
@@ -703,12 +705,8 @@ void MainWindow::addDownloadItem(const QModelIndex &index)
 
     // build a DownloadItem with all required data
     DownloadItem *item = new DownloadItem(ui_->pathLine->text(), // save folder
-                                          index.data(SongRoles::Title).toString(),   // title
-                                          index.data(SongRoles::Album).toString(),
-                                          index.data(SongRoles::Artist).toString(),
-                                          index.data(SongRoles::Id).toString(),     // song id
                                           token_,
-                                          index.data(SongRoles::CoverName).toString(),
+                                          song,
                                           this);
 
     // check if download queue_ is full
@@ -1045,6 +1043,15 @@ void MainWindow::reloadItemsCover()
 //         qobject_cast<DownloadItem *>(ui_->downloadList->itemWidget(ui_->downloadList->item(i)))->pickCover();
 //     }
 }
+
+Song * MainWindow::getSongById(const QString& id)
+{
+    foreach(Song *song, songs_) {
+        if(song->id() == id)
+            return song;
+    }
+}
+
 
 
 #include "mainwindow.moc"

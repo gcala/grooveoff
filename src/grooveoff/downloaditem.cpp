@@ -40,21 +40,16 @@
   \param pix: cover pixmap
   \param parent: The Parent Widget
 */
-DownloadItem::DownloadItem(const QString &path, const QString &title, const QString &album, const QString &artist, const QString &id,
-                           const QString &token, const QString &name, QWidget *parent) :
+DownloadItem::DownloadItem(const QString &path, const QString &token, const Song *song, QWidget *parent) :
     QWidget(parent),
     ui_(new Ui::DownloadItem),
     path_(path),
-    title_(title),
-    album_(album),
-    artist_(artist),
-    id_(id),
     token_(token),
-    coverName_(name)
+    song_(song)
 {
     ui_->setupUi(this);
 
-    fileName_ = title_ + " - " + artist_;
+    fileName_ = song_.title() + " - " + song_.artist();
 
     standardCover_ = true;
 
@@ -65,7 +60,7 @@ DownloadItem::DownloadItem(const QString &path, const QString &title, const QStr
     downloadState_ = GrooveOff::QueuedState;
     playerState_ = Phonon::StoppedState;
     stateChanged();
-    qDebug() << "GrooveOff ::" << "Queued download of" << title_;
+    qDebug() << "GrooveOff ::" << "Queued download of" << song_.title();
 }
 
 /*!
@@ -81,7 +76,7 @@ DownloadItem::~DownloadItem()
     }
 
     if(downloadState_ == GrooveOff::DownloadingState) {
-        song_->stopDownload();
+        songDownloader_->stopDownload();
     }
 }
 
@@ -94,20 +89,20 @@ void DownloadItem::setupUi()
     ui_->coverLabel->setScaledContents(true);
     ui_->coverLabel->setFixedSize(QSize(Utility::coverSize,Utility::coverSize));
 
-    if(!coverName_.isEmpty() && QFile::exists("/tmp/grooveoff_cache/" + coverName_))
-        ui_->coverLabel->setPixmap(QPixmap("/tmp/grooveoff_cache/" + coverName_));
+    if(!song_.coverName().isEmpty() && QFile::exists("/tmp/grooveoff_cache/" + song_.coverName()))
+        ui_->coverLabel->setPixmap(QPixmap("/tmp/grooveoff_cache/" + song_.coverName()));
     else
         ui_->coverLabel->setPixmap(QIcon::fromTheme(QLatin1String("media-optical"), QIcon(QLatin1String(":/resources/media-optical.png"))).pixmap(Utility::coverSize));
 
     ui_->coverLabel->setToolTip(fileName_);
 
     ui_->titleLabel->setFont(Utility::font(QFont::Bold));
-    ui_->titleLabel->setText(title_);
-    ui_->titleLabel->setToolTip(title_);
+    ui_->titleLabel->setText(song_.title());
+    ui_->titleLabel->setToolTip(song_.title());
     ui_->titleLabel->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred); // fix hidden label
 
-    ui_->artist_albumLabel->setText(artist_ + " - " + album_);
-    ui_->artist_albumLabel->setToolTip(title_);
+    ui_->artist_albumLabel->setText(song_.artist() + " - " + song_.album());
+    ui_->artist_albumLabel->setToolTip(song_.title());
     ui_->artist_albumLabel->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred); // fix hidden label
 
     ui_->multiFuncButton->setFixedSize(QSize(Utility::buttonSize,Utility::buttonSize));
@@ -275,9 +270,9 @@ void DownloadItem::startDownload()
 {
     downloadState_ = GrooveOff::DownloadingState;
     stateChanged();
-    song_ = new SongDownloader(path_, fileName_, id_, token_, this);
-    connect(song_, SIGNAL(progress(qint64,qint64)), this, SLOT(setProgress(qint64,qint64)));
-    connect(song_, SIGNAL(downloadCompleted(bool)), this, SLOT(downloadFinished(bool)));
+    songDownloader_ = new SongDownloader(path_, fileName_, song_.id(), token_, this);
+    connect(songDownloader_, SIGNAL(progress(qint64,qint64)), this, SLOT(setProgress(qint64,qint64)));
+    connect(songDownloader_, SIGNAL(downloadCompleted(bool)), this, SLOT(downloadFinished(bool)));
 }
 
 
@@ -368,7 +363,7 @@ void DownloadItem::multiFuncBtnClicked()
             break;
         case GrooveOff::DownloadingState:
             emit remove(this);
-            song_->stopDownload();
+            songDownloader_->stopDownload();
             ui_->progressBar->setValue(0);
             downloadState_ = GrooveOff::AbortedState;
             stateChanged();
@@ -385,7 +380,7 @@ void DownloadItem::multiFuncBtnClicked()
 
 bool DownloadItem::operator==(DownloadItem& right) const
 {
-    if(id_ == right.id())
+    if(song_.id() == right.id())
         return true;
     return false;
 }
@@ -427,7 +422,7 @@ QString DownloadItem::songFile()
 */
 void DownloadItem::setToken(const QString& token)
 {
-    song_->setToken(token);
+    songDownloader_->setToken(token);
 }
 
 /*!
@@ -509,8 +504,8 @@ void DownloadItem::openFolder()
 
 void DownloadItem::reloadCover()
 {
-    if(!QFile::exists("/tmp/grooveoff_cache/" + coverName_)) {
-        ui_->coverLabel->setPixmap("/tmp/grooveoff_cache/" + coverName_);
+    if(!QFile::exists("/tmp/grooveoff_cache/" + song_.coverName())) {
+        ui_->coverLabel->setPixmap("/tmp/grooveoff_cache/" + song_.coverName());
     }
 }
 
