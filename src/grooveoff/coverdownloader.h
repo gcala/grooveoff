@@ -16,39 +16,34 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#ifndef COVERDOWNLOADER_H
+#define COVERDOWNLOADER_H
 
-#include "grooveoff/song.h"
+#include <QNetworkAccessManager>
+#include <QPixmap>
 
-/*!
-  \brief Song: this is the Song constructor.
-  \param parent: The Parent Widget
-*/
-Song::Song ( QObject* parent ) :
-    QObject(parent)
+class CoverDownloader : public QObject
 {
-}
+    Q_OBJECT
+public:
+    explicit CoverDownloader(QString name, QObject *parent = 0);
 
-Song::Song ( const QString &title,
-             const QString &album,
-             const QString &artist,
-             const QString &year,
-             const QString &id,
-             QObject* parent) :
-    QObject(parent),
-    title_(title),
-    album_(album),
-    artist_(artist),
-    year_(year),
-    id_(id)
-{
+    QPixmap pix() { return coverPixmap_; }
+    bool isSuccess() { return success_; }
+    QString getCoverName() { return coverName_; }
 
-}
+signals:
+    void done();
 
-/*!
-  \brief ~Song: this is the Song destructor.
-*/
-Song::~Song()
-{
-}
+public slots:
+    void downloadFinished();
 
-#include "song.moc"
+private:
+    QString coverName_;
+    bool success_;
+    QPixmap coverPixmap_;
+    QNetworkAccessManager qnam_;
+    QNetworkReply *reply_;
+};
+
+#endif // COVERDOWNLOADER_H

@@ -28,7 +28,6 @@
 #include <QPushButton>
 #include <QHBoxLayout>
 #include <QDir>
-#include <QPixmapCache>
 #include <QDebug>
 #include <QDesktopServices>
 
@@ -42,7 +41,7 @@
   \param parent: The Parent Widget
 */
 DownloadItem::DownloadItem(const QString &path, const QString &title, const QString &album, const QString &artist, const QString &id,
-                           const QString &token, const QString &coverName, QWidget *parent) :
+                           const QString &token, const QString &name, QWidget *parent) :
     QWidget(parent),
     ui_(new Ui::DownloadItem),
     path_(path),
@@ -51,7 +50,7 @@ DownloadItem::DownloadItem(const QString &path, const QString &title, const QStr
     artist_(artist),
     id_(id),
     token_(token),
-    coverName_(coverName)
+    coverName_(name)
 {
     ui_->setupUi(this);
 
@@ -92,10 +91,14 @@ DownloadItem::~DownloadItem()
 */
 void DownloadItem::setupUi()
 {
-    pickCover();
-
     ui_->coverLabel->setScaledContents(true);
     ui_->coverLabel->setFixedSize(QSize(Utility::coverSize,Utility::coverSize));
+
+    if(!coverName_.isEmpty() && QFile::exists("/tmp/grooveoff_cache/" + coverName_))
+        ui_->coverLabel->setPixmap(QPixmap("/tmp/grooveoff_cache/" + coverName_));
+    else
+        ui_->coverLabel->setPixmap(QIcon::fromTheme(QLatin1String("media-optical"), QIcon(QLatin1String(":/resources/media-optical.png"))).pixmap(Utility::coverSize));
+
     ui_->coverLabel->setToolTip(fileName_);
 
     ui_->titleLabel->setFont(Utility::font(QFont::Bold));
@@ -496,25 +499,6 @@ void DownloadItem::setPlayerState(Phonon::State state)
 }
 
 /*!
-  \brief pickCover: pick a custom cover if downloaded on cache
-  \return void
-*/
-void DownloadItem::pickCover()
-{
-    if(!standardCover_)
-        return;
-
-    if (!QPixmapCache::find(coverName_, &coverPixmap_)) {
-        coverPixmap_ = QIcon::fromTheme(QLatin1String("media-optical"), QIcon(QLatin1String(":/resources/media-optical.png"))).pixmap(Utility::coverSize);
-        coverPixmap_ = coverPixmap_.scaledToWidth(Utility::coverSize, Qt::SmoothTransformation);
-    } else {
-        standardCover_ = false;
-    }
-
-    ui_->coverLabel->setPixmap(coverPixmap_);
-}
-
-/*!
   \brief openFolder: open folder containing downloaded song
   \return void
 */
@@ -522,6 +506,14 @@ void DownloadItem::openFolder()
 {
     QDesktopServices::openUrl(QUrl("file://" + path_, QUrl::TolerantMode));
 }
+
+void DownloadItem::reloadCover()
+{
+    if(!QFile::exists("/tmp/grooveoff_cache/" + coverName_)) {
+        ui_->coverLabel->setPixmap("/tmp/grooveoff_cache/" + coverName_);
+    }
+}
+
 
 
 #include "downloaditem.moc"

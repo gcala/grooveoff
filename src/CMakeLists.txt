@@ -3,7 +3,9 @@ include_directories(${QT_INCLUDES}
                     ${QJSON_INCLUDE_DIR}
                     ${CMAKE_CURRENT_BINARY_DIR})
 
-set(grooveoff_SRCS grooveoff/utility.cpp
+set(grooveoff_SRCS grooveoff/coverdownloader.cpp
+                   grooveoff/covermanager.cpp
+                   grooveoff/utility.cpp
                    grooveoff/combobox.cpp
                    grooveoff/filterproxymodel.cpp
                    grooveoff/elidedlabel.cpp

@@ -16,39 +16,30 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#ifndef COVERMANAGER_H
+#define COVERMANAGER_H
 
-#include "grooveoff/song.h"
+#include <QObject>
+#include <QHash>
 
-/*!
-  \brief Song: this is the Song constructor.
-  \param parent: The Parent Widget
-*/
-Song::Song ( QObject* parent ) :
-    QObject(parent)
+class Song;
+
+class CoverManager :  public QObject
 {
-}
+    Q_OBJECT
+public:
+    explicit CoverManager(QObject *parent = 0);
+    void addItem(Song *song);
+    void clear();
 
-Song::Song ( const QString &title,
-             const QString &album,
-             const QString &artist,
-             const QString &year,
-             const QString &id,
-             QObject* parent) :
-    QObject(parent),
-    title_(title),
-    album_(album),
-    artist_(artist),
-    year_(year),
-    id_(id)
-{
+signals:
+    void coverDownloaded();
 
-}
+public slots:
+    void setCover();
 
-/*!
-  \brief ~Song: this is the Song destructor.
-*/
-Song::~Song()
-{
-}
+private:
+    QHash<QString, QList<Song*> > coverItems_;
+};
 
-#include "song.moc"
+#endif // COVERMANAGER_H

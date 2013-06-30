@@ -41,7 +41,7 @@ class DownloadItem : public QWidget
 
 public:
     DownloadItem(const QString &path, const QString &title, const QString &album, const QString &artist, const QString &id,
-                 const QString &token, const QString &coverName, QWidget *parent = 0);
+                 const QString &token, const QString &name, QWidget *parent = 0);
     virtual ~DownloadItem();
     QString songFile();
 
@@ -51,13 +51,12 @@ public:
     const QString & album() { return album_; }
     const QString & artist() { return artist_; }
     const QString & path() { return path_; }
-    QPixmap coverPixmap() {return coverPixmap_;}
+    const QString & coverName() { return coverName_; }
     GrooveOff::DownloadState downloadState() { return downloadState_; }
 
     void startDownload();
     void setToken(const QString &token);
     void setPlayerState(Phonon::State);
-    void pickCover();
 
     bool operator==(DownloadItem &) const;
 
@@ -80,6 +79,7 @@ private slots:
     void multiFuncBtnClicked();
     void removeSong();
     void openFolder();
+    void reloadCover();
 
 private:
     Ui::DownloadItem *ui_;
@@ -90,7 +90,6 @@ private:
     QString artist_;
     QString id_;
     QString token_;
-    QPixmap coverPixmap_;
     QString coverName_;
     QString ip_;
     SongDownloader *song_;

@@ -50,7 +50,6 @@ public:
     QString year()        const { return year_; }
     QString id()          const { return id_; }
     QString coverName()   const { return coverName_; }
-    QPixmap coverPixmap() const { return coverPixmap_; }
 
 signals:
     void trigRepaint();
@@ -64,7 +63,6 @@ private:
     QString year_;
     QString id_;
     QString coverName_;
-    QPixmap coverPixmap_;
 };
 
 #endif // SONG_H

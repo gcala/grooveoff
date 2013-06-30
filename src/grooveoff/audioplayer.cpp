@@ -82,11 +82,11 @@ AudioPlayer::~AudioPlayer()
 */
 void AudioPlayer::setupUi()
 {
+    ui_->coverLabel->setScaledContents(true);
+
     ui_->titleLabel->setFont(Utility::font(QFont::Bold));
-    //ui_->titleLabel->setWordWrap(true);
 
     ui_->album_authorLabel->setFont(Utility::font(QFont::Bold));
-    //ui_->album_authorLabel->setWordWrap(true);
 
     ui_->widget->setBackgroundRole(QPalette::Base);
 
@@ -148,10 +148,10 @@ void AudioPlayer::playItem(DownloadItem *i)
 
     ui_->album_authorLabel->setText(item->artist() + " - " + item->album());
 
-    QPixmap pix = item->coverPixmap();
-    pix = pix.scaledToWidth(ui_->coverLabel->size().width(), Qt::SmoothTransformation);
-
-    ui_->coverLabel->setPixmap(pix);
+    if(!item->coverName().isEmpty() && QFile::exists("/tmp/grooveoff_cache/" + item->coverName()))
+        ui_->coverLabel->setPixmap(QPixmap("/tmp/grooveoff_cache/" + item->coverName()));
+    else
+        ui_->coverLabel->setPixmap(QIcon::fromTheme(QLatin1String("media-optical"), QIcon(QLatin1String(":/resources/media-optical.png"))).pixmap(ui_->coverLabel->size()));
 
     // very minimal playlist: only one song
     // first stop current media

@@ -46,6 +46,7 @@ class QBoxLayout;
 class FilterProxyModel;
 class DownloadItem;
 class MatchItemListDelegate;
+class CoverManager;
 
 namespace Ui {
 class MainWindow;
@@ -117,6 +118,7 @@ private:
     QList<DownloadItem *> queue_;
     MatchItemListDelegate *matchItemListDelegate_;
     AudioPlayer *playerWidget;
+    CoverManager *cvrMngr_;
 
     //Menus
     QMenu *fileMenu_;

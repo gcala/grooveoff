@@ -25,7 +25,6 @@
 #include <QApplication>
 #include <QPainter>
 #include <QMouseEvent>
-#include <QPixmapCache>
 #include <QDir>
 
 /*!
@@ -92,12 +91,12 @@ void MatchItemListDelegate::paint ( QPainter* painter, const QStyleOptionViewIte
 
     // album cover pixmap
     QPixmap pix;
-    if(index.data(SongRoles::CoverPix).value<QPixmap>().isNull()) {
-        pix = QIcon::fromTheme(QLatin1String("media-optical"), QIcon(QLatin1String(":/resources/media-optical.png"))).pixmap(Utility::coverSize);
-        pix = pix.scaledToWidth(Utility::coverSize, Qt::SmoothTransformation);
-    }
+    if(!index.data(SongRoles::CoverName).toString().isEmpty() && QFile::exists("/tmp/grooveoff_cache/" + index.data(SongRoles::CoverName).toString()))
+        pix.load("/tmp/grooveoff_cache/" + index.data(SongRoles::CoverName).toString());
     else
-        pix = index.data(SongRoles::CoverPix).value<QPixmap>();
+        pix = QIcon::fromTheme(QLatin1String("media-optical"), QIcon(QLatin1String(":/resources/media-optical.png"))).pixmap(Utility::coverSize);
+
+    pix = pix.scaledToWidth(Utility::coverSize, Qt::SmoothTransformation);
 
     // rect hosting cover pixmap
     QRect coverRect;
@@ -118,7 +117,7 @@ void MatchItemListDelegate::paint ( QPainter* painter, const QStyleOptionViewIte
     painter->save();
     painter->setFont(Utility::font(QFont::Bold));
 
-    QString title = index.data(Qt::DisplayRole).toString();
+    QString title = index.data(SongRoles::Title).toString();
 
     painter->drawText(titleRect, Qt::AlignLeft | Qt::AlignVCenter, fmTitle.elidedText(title, Qt::ElideRight, titleRect.width()));
     painter->restore();

@@ -28,6 +28,7 @@
 #include "grooveoff/filterproxymodel.h"
 #include "grooveoff/utility.h"
 #include "grooveoff/grooveoffnamespace.h"
+#include "grooveoff/covermanager.h"
 #include "ui_mainwindow.h"
 
 #include <QtGui/QLabel>
@@ -78,6 +79,9 @@ MainWindow::MainWindow(QWidget *parent) :
     loadSettings();
     statusBar()->addPermanentWidget( playerWidget, 1 );
     statusBar()->setSizeGripEnabled(false);
+
+    cvrMngr_ = new CoverManager(this);
+    connect(cvrMngr_, SIGNAL(coverDownloaded()), this, SLOT(reloadItemsCover()));
 
     //fake
     searchInProgress_ = true;
@@ -449,6 +453,9 @@ void MainWindow::getResultsFromSearch(const QString &query, const QString &what)
     // clear list of previous results
     results_.clear();
 
+    // clear cover manager
+    cvrMngr_->clear();
+
     // clear the model
     listModel_->clear();
     proxyModel_->setSourceModel(listModel_);
@@ -507,14 +514,12 @@ void MainWindow::populateResultsTable()
         song->setArtist(m[QLatin1String("ArtistName")].toString());
         song->setYear(m[QLatin1String("Year")].toString());
         song->setId(m[QLatin1String("SongID")].toString());
+        song->setCoverName(m[QLatin1String("CoverArtFilename")].toString());
 
         // Decide if show cover arts
-        if(loadCovers_ && !m[QLatin1String("CoverArtFilename")].toString().isEmpty())
-            song->setCoverName(m[QLatin1String("CoverArtFilename")].toString());
-        else
-            song->setCoverName(QLatin1String("NoCoverArt"));
-
-        connect(song, SIGNAL(trigRepaint()), this, SLOT(reloadItemsCover()));
+        if(loadCovers_ && !QFile::exists("/tmp/grooveoff_cache/" + m[QLatin1String("CoverArtFilename")].toString())) {
+            cvrMngr_->addItem(song);
+        }
 
         songs_.append(song);
 
@@ -698,12 +703,12 @@ void MainWindow::addDownloadItem(const QModelIndex &index)
 
     // build a DownloadItem with all required data
     DownloadItem *item = new DownloadItem(ui_->pathLine->text(), // save folder
-                                          index.data(Qt::DisplayRole).toString(),   // title
+                                          index.data(SongRoles::Title).toString(),   // title
                                           index.data(SongRoles::Album).toString(),
                                           index.data(SongRoles::Artist).toString(),
                                           index.data(SongRoles::Id).toString(),     // song id
                                           token_,
-                                          index.data(SongRoles::Cover).toString(),
+                                          index.data(SongRoles::CoverName).toString(),
                                           this);
 
     // check if download queue_ is full
@@ -1027,7 +1032,7 @@ bool MainWindow::isDownloadingQueued(const QString &id)
 }
 
 /*!
-  \brief reloadItemsCover : when a new cover was downloaded on cache
+  \brief reloadItemsCover : when a new cover was downloaded
   refresh both listviews
   \return void
 */
@@ -1036,9 +1041,9 @@ void MainWindow::reloadItemsCover()
     //FIXME : this is quite brutal but it avoids a lot of code (and bugs) and seems working without issues :P
     listModel_->forceRepaint();
 
-    for(int i = 0; i < ui_->downloadList->count(); i++) {
-        qobject_cast<DownloadItem *>(ui_->downloadList->itemWidget(ui_->downloadList->item(i)))->pickCover();
-    }
+//     for(int i = 0; i < ui_->downloadList->count(); i++) {
+//         qobject_cast<DownloadItem *>(ui_->downloadList->itemWidget(ui_->downloadList->item(i)))->pickCover();
+//     }
 }
 
 
