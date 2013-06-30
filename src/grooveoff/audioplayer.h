@@ -49,6 +49,8 @@ public:
     GrooveOff::TimerState getTimerState() { return timerState; }
     void setTimerState(GrooveOff::TimerState state) { timerState = state; }
 
+    void showMessage(const QString &message);
+
 public slots:
     void playItem(DownloadItem *i);
     void pauseResumePlaying();

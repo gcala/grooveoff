@@ -170,7 +170,8 @@ void MainWindow::setupUi()
     ui_->label1->setFont(Utility::font(QFont::Bold, 2));
     ui_->label2->setText(trUtf8("Offline Grooveshark.com music"));
 
-    statusBar()->showMessage(trUtf8("Connecting...", 0));
+//    statusBar()->showMessage(trUtf8("Connecting...", 0));
+    playerWidget->showMessage(trUtf8("Connecting..."));
 
     // Led
     ui_->qled->setFixedSize(QSize(24,24));
@@ -417,6 +418,7 @@ void MainWindow::getToken()
     // some ui setups
     ui_->qled->setValue(false);
     //statusBar()->showMessage(trUtf8("Connecting..."), 0);
+    playerWidget->showMessage(trUtf8("Connecting..."));
 
     // set current operation
     currentJob_ = GrooveOff::TokenJob;
@@ -593,6 +595,7 @@ void MainWindow::replyFinished(QNetworkReply *reply)
         // the error occurred during token request...
         if(currentJob_ == GrooveOff::TokenJob) {
             //statusBar()->showMessage(reply->errorString(), 3000);
+            playerWidget->showMessage(reply->errorString());
             ui_->qled->setToolTip(trUtf8("Check your connection and try again"));
             ui_->searchButton->setEnabled(false);
         } else if(currentJob_ == GrooveOff::SearchJob) { // the error occurred during search request...
@@ -634,11 +637,13 @@ void MainWindow::replyFinished(QNetworkReply *reply)
             }
 
             //statusBar()->showMessage(trUtf8("Connected"), 3000);
+            playerWidget->showMessage(trUtf8("Connected"));
             ui_->qled->setValue(true);
             ui_->qled->setToolTip(trUtf8("You're connected to grooveshark!"));
             ui_->listView->setEnabled(true);
         } else {
             //statusBar()->showMessage(trUtf8("Token not received!!"), 3000);
+            playerWidget->showMessage(trUtf8("Token not received!!"));
             qDebug() << "GrooveOff ::" << "Token not received!!";
             qDebug() << "GrooveOff ::" << result;
         }
@@ -793,6 +798,7 @@ void MainWindow::onlineStateChanged(bool isOnline) {
         newToken();
     } else {
         //statusBar()->showMessage(trUtf8("Offline"),0);
+        playerWidget->showMessage(trUtf8("Offline"));
         ui_->searchButton->setEnabled(false);
         ui_->qled->setValue(false);
         ui_->listView->setEnabled(false);

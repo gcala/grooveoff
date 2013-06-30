@@ -83,12 +83,10 @@ AudioPlayer::~AudioPlayer()
 void AudioPlayer::setupUi()
 {
     ui_->coverLabel->setScaledContents(true);
-
     ui_->titleLabel->setFont(Utility::font(QFont::Bold));
-
     ui_->album_authorLabel->setFont(Utility::font(QFont::Bold));
-
-    ui_->widget->setBackgroundRole(QPalette::Base);
+    ui_->stackedWidget->setBackgroundRole(QPalette::Base);
+    ui_->messageLabel->setFont(Utility::font(QFont::Bold,1));
 
     ui_->playPauseButton->setIcon(QIcon::fromTheme(QLatin1String("media-playback-start"), QIcon(QLatin1String(":/resources/media-playback-start.png"))));
     ui_->playPauseButton->setFlat(true);
@@ -171,6 +169,8 @@ void AudioPlayer::playItem(DownloadItem *i)
     mediaObject_->setCurrentSource(audioSources_.at(0));
     mediaObject_->play();
 
+    ui_->stackedWidget->setCurrentIndex(1);
+
     // ui setup
     ui_->stopButton->setIcon(QIcon::fromTheme(QLatin1String("media-playback-stop"), QIcon(QLatin1String(":/resources/media-playback-stop.png"))));
     ui_->playPauseButton->setEnabled(true);
@@ -195,6 +195,9 @@ void AudioPlayer::removeItem(DownloadItem *i)
         ui_->playPauseButton->setIcon(QIcon::fromTheme(QLatin1String("media-playback-start"), QIcon(QLatin1String(":/resources/media-playback-start.png"))));
         audioSources_.clear();
         item = NULL;
+
+        ui_->stackedWidget->setCurrentIndex(0);
+        ui_->messageLabel->setText(trUtf8("Nothing to Play"));
     }
 }
 
@@ -312,6 +315,13 @@ void AudioPlayer::toggleTimeLabel()
 {
     timerState = (GrooveOff::TimerState)!timerState;
 }
+
+void AudioPlayer::showMessage(const QString& message)
+{
+    ui_->stackedWidget->setCurrentIndex(0);
+    ui_->messageLabel->setText(message);
+}
+
 
 
 #include "audioplayer.moc"
