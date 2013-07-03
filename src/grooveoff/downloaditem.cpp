@@ -89,8 +89,8 @@ void DownloadItem::setupUi()
     ui_->coverLabel->setScaledContents(true);
     ui_->coverLabel->setFixedSize(QSize(Utility::coverSize,Utility::coverSize));
 
-    if(!song_.coverName().isEmpty() && QFile::exists("/tmp/grooveoff_cache/" + song_.coverName()))
-        ui_->coverLabel->setPixmap(QPixmap("/tmp/grooveoff_cache/" + song_.coverName()));
+    if(!song_.coverName().isEmpty() && QFile::exists(Utility::coversCachePath + song_.coverName()))
+        ui_->coverLabel->setPixmap(QPixmap(Utility::coversCachePath + song_.coverName()));
     else
         ui_->coverLabel->setPixmap(QIcon::fromTheme(QLatin1String("media-optical"), QIcon(QLatin1String(":/resources/media-optical.png"))).pixmap(Utility::coverSize));
 
@@ -504,8 +504,8 @@ void DownloadItem::openFolder()
 
 void DownloadItem::reloadCover()
 {
-    if(!QFile::exists("/tmp/grooveoff_cache/" + song_.coverName())) {
-        ui_->coverLabel->setPixmap("/tmp/grooveoff_cache/" + song_.coverName());
+    if(!QFile::exists(Utility::coversCachePath + song_.coverName())) {
+        ui_->coverLabel->setPixmap(Utility::coversCachePath + song_.coverName());
     }
 }
 

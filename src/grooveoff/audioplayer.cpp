@@ -148,8 +148,8 @@ void AudioPlayer::playItem(DownloadItem *i)
 
     ui_->album_authorLabel->setText(item->artist() + " - " + item->album());
 
-    if(!item->coverName().isEmpty() && QFile::exists("/tmp/grooveoff_cache/" + item->coverName()))
-        ui_->coverLabel->setPixmap(QPixmap("/tmp/grooveoff_cache/" + item->coverName()));
+    if(!item->coverName().isEmpty() && QFile::exists(Utility::coversCachePath + item->coverName()))
+        ui_->coverLabel->setPixmap(QPixmap(Utility::coversCachePath + item->coverName()));
     else
         ui_->coverLabel->setPixmap(QIcon::fromTheme(QLatin1String("media-optical"), QIcon(QLatin1String(":/resources/media-optical.png"))).pixmap(ui_->coverLabel->size()));
 

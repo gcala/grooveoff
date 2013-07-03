@@ -17,6 +17,7 @@
 */
 
 #include "coverdownloader.h"
+#include "utility.h"
 
 #include <QNetworkRequest>
 #include <QNetworkReply>
@@ -44,11 +45,11 @@ void CoverDownloader::downloadFinished()
         QByteArray data = reply_->readAll();
         coverPixmap_.loadFromData(data);
         success_ = true;
-        if(!QFile::exists("/tmp/grooveoff_cache/")) {
+        if(!QFile::exists(Utility::coversCachePath)) {
             QDir dir;
-            dir.mkdir("/tmp/grooveoff_cache/");
+            dir.mkdir(Utility::coversCachePath);
         }
-        QFile file("/tmp/grooveoff_cache/" + coverName_);
+        QFile file(Utility::coversCachePath + coverName_);
         file.open(QIODevice::WriteOnly);
         file.write(data);
         file.close();

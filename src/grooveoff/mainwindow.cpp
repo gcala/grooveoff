@@ -519,7 +519,7 @@ void MainWindow::populateResultsTable()
         song->setCoverName(m[QLatin1String("CoverArtFilename")].toString());
 
         // Decide if show cover arts
-        if(loadCovers_ && !QFile::exists("/tmp/grooveoff_cache/" + m[QLatin1String("CoverArtFilename")].toString())) {
+        if(loadCovers_ && !QFile::exists(Utility::coversCachePath + m[QLatin1String("CoverArtFilename")].toString())) {
             cvrMngr_->addItem(song);
         }
 

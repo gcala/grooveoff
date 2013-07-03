@@ -38,6 +38,7 @@ public:
     static const QLatin1String host;
     static const QByteArray secret;
     static const QByteArray uuid;
+    static const QString coversCachePath;
 
     static QString elidedText(const QString &text, const Qt::TextElideMode &elideMode, const int &width, const QFont::Weight &weight);
 

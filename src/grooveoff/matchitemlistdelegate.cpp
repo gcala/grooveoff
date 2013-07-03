@@ -91,8 +91,8 @@ void MatchItemListDelegate::paint ( QPainter* painter, const QStyleOptionViewIte
 
     // album cover pixmap
     QPixmap pix;
-    if(!index.data(SongRoles::CoverName).toString().isEmpty() && QFile::exists("/tmp/grooveoff_cache/" + index.data(SongRoles::CoverName).toString()))
-        pix.load("/tmp/grooveoff_cache/" + index.data(SongRoles::CoverName).toString());
+    if(!index.data(SongRoles::CoverName).toString().isEmpty() && QFile::exists(Utility::coversCachePath + index.data(SongRoles::CoverName).toString()))
+        pix.load(Utility::coversCachePath + index.data(SongRoles::CoverName).toString());
     else
         pix = QIcon::fromTheme(QLatin1String("media-optical"), QIcon(QLatin1String(":/resources/media-optical.png"))).pixmap(Utility::coverSize);
 

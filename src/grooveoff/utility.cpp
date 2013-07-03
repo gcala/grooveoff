@@ -22,6 +22,7 @@
 #include <QFontMetrics>
 #include <QUuid>
 #include <QCryptographicHash>
+#include <QDir>
 
 const int Utility::coverSize  = 40; // possible values are 40,50,70,80,90,120
 const int Utility::buttonSize = 24;
@@ -30,6 +31,8 @@ const QByteArray Utility::userAgent("Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWe
 const QLatin1String Utility::host("grooveshark.com");
 const QByteArray Utility::secret = Utility::randomHex(32).toAscii();
 const QByteArray Utility::uuid = QUuid::createUuid().toString().remove('{').remove('}').toAscii();
+const QString Utility::coversCachePath = QDir::tempPath() + QDir::separator() +
+                                         QLatin1String("grooveoff_cache") + QDir::separator();
 
 QString Utility::elidedText(const QString& text,
                             const Qt::TextElideMode& elideMode,
