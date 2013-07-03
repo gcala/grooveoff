@@ -90,6 +90,7 @@ void AudioPlayer::setupUi()
 
     ui_->playPauseButton->setIcon(QIcon::fromTheme(QLatin1String("media-playback-start"), QIcon(QLatin1String(":/resources/media-playback-start.png"))));
     ui_->playPauseButton->setFlat(true);
+    ui_->playPauseButton->setStyleSheet("border: none; outline: none;");
     ui_->playPauseButton->setToolTip(trUtf8("Play"));
     ui_->playPauseButton->setFixedSize(QSize(32,32));
     ui_->playPauseButton->setIconSize(QSize(32,32));
@@ -99,6 +100,7 @@ void AudioPlayer::setupUi()
     ui_->stopButton->setIcon(QIcon::fromTheme(QLatin1String("media-playback-stop"), QIcon(QLatin1String(":/resources/media-playback-stop.png"))));
     ui_->stopButton->setToolTip(trUtf8("Stop "));
     ui_->stopButton->setFlat(true);
+    ui_->stopButton->setStyleSheet("border: none; outline: none;");
     ui_->stopButton->setFixedSize(QSize(24,24));
     ui_->stopButton->setIconSize(QSize(24,24));
     ui_->stopButton->setContentsMargins( 0, 0, 0, 0 );
