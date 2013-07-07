@@ -683,7 +683,7 @@ void MainWindow::addDownloadItem(Song song)
     if(isDownloadingQueued(song.id()))
         return;
 
-    QString fileName = song.artist() + " - " + song.title();
+    QString fileName = song.title() + " - " + song.artist();
 
     // check file existence
     if(QFile::exists(ui_->pathLine->text() + QDir::separator() + fileName + ".mp3")) {
