@@ -277,7 +277,7 @@
     </widget>
    </item>
    <item>
-    <widget class="PlayAnimationWidget" name="playingAnimation" native="true">
+    <widget class="QWidget" name="animationWidget" native="true">
      <property name="minimumSize">
       <size>
        <width>30</width>
@@ -296,6 +296,17 @@
        <height>30</height>
       </size>
      </property>
+     <layout class="QGridLayout" name="gridLayout">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <item row="0" column="0">
+       <widget class="PlayAnimationWidget" name="barsWidget" native="true"/>
+      </item>
+     </layout>
     </widget>
    </item>
   </layout>
