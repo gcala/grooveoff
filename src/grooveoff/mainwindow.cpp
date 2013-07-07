@@ -128,6 +128,8 @@ MainWindow::MainWindow(QWidget *parent) :
         ui_->pathLine->setText(QDesktopServices::storageLocation(QDesktopServices::MusicLocation));
     }
 
+    Utility::downloadPath = ui_->pathLine->text();
+
     setGeometry(settings.value(QLatin1String("windowGeometry"), QRect(100,100,350,600)).toRect());
 }
 

@@ -33,6 +33,7 @@ const QByteArray Utility::secret = Utility::randomHex(32).toAscii();
 const QByteArray Utility::uuid = QUuid::createUuid().toString().remove('{').remove('}').toAscii();
 const QString Utility::coversCachePath = QDir::tempPath() + QDir::separator() +
                                          QLatin1String("grooveoff_cache") + QDir::separator();
+QString Utility::downloadPath = "";
 
 QString Utility::elidedText(const QString& text,
                             const Qt::TextElideMode& elideMode,

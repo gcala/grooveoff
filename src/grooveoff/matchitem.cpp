@@ -22,6 +22,7 @@
 #include "ui_matchitem.h"
 #include <QGraphicsDropShadowEffect>
 #include <QFile>
+#include <QDir>
 
 MatchItem::MatchItem(const Song &song, QWidget *parent) :
     QWidget(parent),
@@ -65,7 +66,14 @@ void MatchItem::setupUi()
     ui_->artist_albumLabel->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred); // fix hidden label
 
     ui_->downloadButton->setFixedSize(QSize(Utility::buttonSize,Utility::buttonSize));
-    ui_->downloadButton->setIcon(QIcon::fromTheme(QLatin1String("download")));
+    if(QFile::exists(Utility::downloadPath + QDir::separator() + song_.title() + " - " + song_.artist() + ".mp3")) {
+        ui_->downloadButton->setIcon(QIcon::fromTheme(QLatin1String("view-refresh"), QIcon(QLatin1String(":/resources/view-refresh.png"))));
+    } else {
+        if(QIcon::hasThemeIcon(QLatin1String("download")))
+            ui_->downloadButton->setIcon(QIcon::fromTheme(QLatin1String("download")));
+        else
+            ui_->downloadButton->setIcon(QIcon::fromTheme(QLatin1String("document-save"), QIcon(QLatin1String(":/resources/download.png"))));
+    }
 }
 
 void MatchItem::loadCover()
