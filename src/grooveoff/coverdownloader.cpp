@@ -35,6 +35,11 @@ CoverDownloader::CoverDownloader(QString name, QObject *parent) :
     connect(reply_, SIGNAL(finished()), this, SLOT(downloadFinished()));
 }
 
+CoverDownloader::~CoverDownloader()
+{
+    reply_->deleteLater();
+}
+
 
 void CoverDownloader::downloadFinished()
 {
@@ -43,7 +48,7 @@ void CoverDownloader::downloadFinished()
     case QNetworkReply::NoError: {
         // if no error
         QByteArray data = reply_->readAll();
-        coverPixmap_.loadFromData(data);
+//        coverPixmap_.loadFromData(data);
         success_ = true;
         if(!QFile::exists(Utility::coversCachePath)) {
             QDir dir;
@@ -60,9 +65,6 @@ void CoverDownloader::downloadFinished()
     }
 
     emit done();
-
-    reply_->deleteLater();
-    reply_ = NULL;
 }
 
 #include "coverdownloader.moc"

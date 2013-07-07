@@ -36,9 +36,10 @@ public:
                     const QString &id = QString(),
                     QObject* parent = 0 );
     Song(const Song *);
+    Song(const Song &);
     ~Song();
 
-//    Song & operator=(const Song *song);
+//    Song & operator=(const Song song);
 
     void setTitle(const QString &title) {title_ = title;}
     void setAlbum(const QString &album) {album_ = album;}

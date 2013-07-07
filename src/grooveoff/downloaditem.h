@@ -41,7 +41,7 @@ class DownloadItem : public QWidget
     Q_OBJECT
 
 public:
-    DownloadItem(const QString &path, const QString &token, const Song *song, QWidget *parent = 0);
+    DownloadItem(const QString &path, const QString &token, const Song &song, QWidget *parent = 0);
     virtual ~DownloadItem();
     QString songFile();
 
@@ -79,7 +79,7 @@ private slots:
     void multiFuncBtnClicked();
     void removeSong();
     void openFolder();
-    void reloadCover();
+//    void reloadCover();
 
 private:
     Ui::DownloadItem *ui_;

@@ -18,8 +18,6 @@
 
 #include "grooveoff/mainwindow.h"
 #include "grooveoff/audioplayer.h"
-#include "grooveoff/matcheslistmodel.h"
-#include "grooveoff/matchitemlistdelegate.h"
 #include "grooveoff/qled.h"
 #include "grooveoff/downloaditem.h"
 #include "grooveoff/roles.h"
@@ -30,6 +28,7 @@
 #include "grooveoff/grooveoffnamespace.h"
 #include "grooveoff/covermanager.h"
 #include "ui_mainwindow.h"
+#include "grooveoff/matchitem.h"
 
 #include <QtGui/QLabel>
 #include <QtGui/QMenu>
@@ -97,16 +96,6 @@ MainWindow::MainWindow(QWidget *parent) :
         playerWidget->showElapsedTimerLabel(true);
     }
 
-    listModel_ = new MatchesListModel(this);
-    proxyModel_ = new FilterProxyModel(this);
-    ui_->listView->setModel(proxyModel_);
-
-    matchItemListDelegate_ = new MatchItemListDelegate(ui_->listView);
-    ui_->listView->setItemDelegate(matchItemListDelegate_);
-    //connecting delegate's signal to this class's slot
-    connect(matchItemListDelegate_, SIGNAL(downloadRequest(QString)),
-            this, SLOT(addDownloadItem(QString)));
-
     QTime time = QTime::currentTime();
     qsrand((uint)time.msec());
 
@@ -138,8 +127,6 @@ MainWindow::MainWindow(QWidget *parent) :
     } else {
         ui_->pathLine->setText(QDesktopServices::storageLocation(QDesktopServices::MusicLocation));
     }
-
-    matchItemListDelegate_->setPath(ui_->pathLine->text());
 
     setGeometry(settings.value(QLatin1String("windowGeometry"), QRect(100,100,350,600)).toRect());
 }
@@ -333,8 +320,6 @@ void MainWindow::selectFolder()
         ui_->pathLine->setText(dir_);
     else
         dir_ = ui_->pathLine->text();
-
-    matchItemListDelegate_->setPath(ui_->pathLine->text());
 }
 
 /*!
@@ -458,9 +443,12 @@ void MainWindow::getResultsFromSearch(const QString &query, const QString &what)
     // clear cover manager
     cvrMngr_->clear();
 
-    // clear the model
-    listModel_->clear();
-    proxyModel_->setSourceModel(listModel_);
+    // clear listWidget
+    for(int i = ui_->listWidget->count() - 1; i >= 0; i--) {
+        QListWidgetItem *item = ui_->listWidget->takeItem(i);
+        ui_->downloadList->removeItemWidget(item);
+        delete item;
+    }
 
     // clear artists, albums containers
     ui_->artistsCB->clear();
@@ -510,21 +498,28 @@ void MainWindow::populateResultsTable()
         QVariantMap m = results_.at(i).toMap();
 
         // quite obvious...
-        Song *song = new Song(this);
-        song->setTitle(m[QLatin1String("SongName")].toString());
-        song->setAlbum(m[QLatin1String("AlbumName")].toString());
-        song->setArtist(m[QLatin1String("ArtistName")].toString());
-        song->setYear(m[QLatin1String("Year")].toString());
-        song->setId(m[QLatin1String("SongID")].toString());
-        song->setCoverName(m[QLatin1String("CoverArtFilename")].toString());
+        Song song(this);
+        song.setTitle(m[QLatin1String("SongName")].toString());
+        song.setAlbum(m[QLatin1String("AlbumName")].toString());
+        song.setArtist(m[QLatin1String("ArtistName")].toString());
+        song.setYear(m[QLatin1String("Year")].toString());
+        song.setId(m[QLatin1String("SongID")].toString());
+        song.setCoverName(m[QLatin1String("CoverArtFilename")].toString());
 
         // Decide if show cover arts
         if(loadCovers_ && !QFile::exists(Utility::coversCachePath + m[QLatin1String("CoverArtFilename")].toString())) {
-            cvrMngr_->addItem(song);
+            cvrMngr_->addItem(song.coverName());
         }
 
-        songs_.append(song);
+        // build a DownloadItem with all required data
+        MatchItem *matchItem = new MatchItem(song, this);
+        QListWidgetItem *wItem = new QListWidgetItem;
+        ui_->listWidget->addItem(wItem);
+        ui_->listWidget->setItemWidget(wItem, matchItem);
+        wItem->setSizeHint(QSize(Utility::coverSize + Utility::marginSize * 2,Utility::coverSize + Utility::marginSize * 2));
+        connect(matchItem, SIGNAL(download(Song)), this, SLOT(addDownloadItem(Song)));
 
+        // populate filter widgets
         bool found = false;
         int j = 0;
         for(; j < artistsAlbumsContainer_.count(); j++) {
@@ -554,10 +549,6 @@ void MainWindow::populateResultsTable()
 
         albums << m[QLatin1String("AlbumName")].toString();
     }
-
-    // use 'songs' in our model
-    listModel_->setElements(songs_);
-    proxyModel_->setSourceModel(listModel_);
 
     // removing duplicates
     artists.removeDuplicates();
@@ -640,7 +631,7 @@ void MainWindow::replyFinished(QNetworkReply *reply)
             playerWidget->showMessage(trUtf8("Connected"));
             ui_->qled->setValue(true);
             ui_->qled->setToolTip(trUtf8("You're connected to grooveshark!"));
-            ui_->listView->setEnabled(true);
+            ui_->listWidget->setEnabled(true);
         } else {
             //statusBar()->showMessage(trUtf8("Token not received!!"), 3000);
             playerWidget->showMessage(trUtf8("Token not received!!"));
@@ -666,7 +657,7 @@ void MainWindow::replyFinished(QNetworkReply *reply)
   \param index : index of item in results list (to download)
   \return void
 */
-void MainWindow::addDownloadItem(const QString id)
+void MainWindow::addDownloadItem(Song song)
 {
     // check if destination folder exists
     if(!QFile::exists(ui_->pathLine->text())) {
@@ -687,12 +678,10 @@ void MainWindow::addDownloadItem(const QString id)
         return;
     }
 
-    if(isDownloadingQueued(id))
+    if(isDownloadingQueued(song.id()))
         return;
 
-    Song *song(getSongById(id));
-
-    QString fileName = song->artist() + " - " + song->title();
+    QString fileName = song.artist() + " - " + song.title();
 
     // check file existence
     if(QFile::exists(ui_->pathLine->text() + QDir::separator() + fileName + ".mp3")) {
@@ -727,7 +716,6 @@ void MainWindow::addDownloadItem(const QString id)
     connect(item, SIGNAL(downloadFinished()), this, SLOT(freeDownloadSlot()));
     connect(item, SIGNAL(pauseResumePlaying()), playerWidget, SLOT(pauseResumePlaying()));
     connect(item, SIGNAL(addToQueue(DownloadItem*)), this, SLOT(addItemToQueue(DownloadItem*)));
-    connect(item, SIGNAL(stateChangedSignal()), listModel_, SLOT(forceRepaint()));
 
     QListWidgetItem *i = new QListWidgetItem;
     ui_->downloadList->addItem(i);
@@ -801,7 +789,7 @@ void MainWindow::onlineStateChanged(bool isOnline) {
         playerWidget->showMessage(trUtf8("Offline"));
         ui_->searchButton->setEnabled(false);
         ui_->qled->setValue(false);
-        ui_->listView->setEnabled(false);
+        ui_->listWidget->setEnabled(false);
     }
 }
 
@@ -888,23 +876,34 @@ void MainWindow::donate()
 */
 void MainWindow::applyFilter()
 {
-    QString artist;
-    QString album;
+    QString artist = ui_->artistsCB->currentText();
+    QString album = ui_->albumsCB->currentText();
 
-    if(ui_->artistsCB->currentIndex() == 0)
-        artist = "All Artists";
-    else
-        artist = ui_->artistsCB->currentText();
+    for(int i = 0; i < ui_->listWidget->count(); i++) {
+        QString itemArtist = ((MatchItem *)ui_->listWidget->itemWidget(ui_->listWidget->item(i)))->artist();
+        QString itemAlbum  = ((MatchItem *)ui_->listWidget->itemWidget(ui_->listWidget->item(i)))->album();
 
-    if(ui_->albumsCB->currentIndex() == 0)
-        album = "All Albums";
-    else
-        album = ui_->albumsCB->currentText();
+        if( ui_->artistsCB->currentIndex() == 0  && ui_->albumsCB->currentIndex() == 0) {
+            ui_->listWidget->setRowHidden(i, false);
+        } else if( ui_->artistsCB->currentIndex() == 0 ) {
+            if( itemAlbum == album )
+                ui_->listWidget->setRowHidden(i, false);
+            else
+                ui_->listWidget->setRowHidden(i, true);
+        } else if( ui_->albumsCB->currentIndex() == 0 ) {
+            if( itemArtist == artist )
+                ui_->listWidget->setRowHidden(i, false);
+            else
+                ui_->listWidget->setRowHidden(i, true);
+        } else {
+            if( itemArtist == artist && itemAlbum == album   )
+                ui_->listWidget->setRowHidden(i, false);
+            else
+                ui_->listWidget->setRowHidden(i, true);
+        }
+    }
 
-    proxyModel_->setMatchTerms(artist, album);
-    proxyModel_->setFilterRegExp(QRegExp());
-    //ui_->matchesMessage->setText(trUtf8("%1 songs found").arg(proxyModel_->rowCount()));
-    ui_->matchesMessage->setText(trUtf8("%n song(s) found", "", proxyModel_->rowCount()));
+    ui_->matchesMessage->setText(trUtf8("%n song(s) found", "", visibleItemsCount()));
 }
 
 /*!
@@ -1042,22 +1041,21 @@ bool MainWindow::isDownloadingQueued(const QString &id)
 */
 void MainWindow::reloadItemsCover()
 {
-    //FIXME : this is quite brutal but it avoids a lot of code (and bugs) and seems working without issues :P
-    listModel_->forceRepaint();
-
-//     for(int i = 0; i < ui_->downloadList->count(); i++) {
-//         qobject_cast<DownloadItem *>(ui_->downloadList->itemWidget(ui_->downloadList->item(i)))->pickCover();
-//     }
-}
-
-Song * MainWindow::getSongById(const QString& id)
-{
-    foreach(Song *song, songs_) {
-        if(song->id() == id)
-            return song;
+    for(int i = 0; i < ui_->listWidget->count(); i++) {
+        if(!qobject_cast<MatchItem *>(ui_->listWidget->itemWidget(ui_->listWidget->item(i)))->coverFound())
+            qobject_cast<MatchItem *>(ui_->listWidget->itemWidget(ui_->listWidget->item(i)))->loadCover();
     }
 }
 
+int MainWindow::visibleItemsCount()
+{
+    int count = 0;
+    for(int i = 0; i < ui_->listWidget->count(); i++) {
+        if(!ui_->listWidget->isRowHidden(i))
+            count++;
+    }
 
+    return count;
+}
 
 #include "mainwindow.moc"

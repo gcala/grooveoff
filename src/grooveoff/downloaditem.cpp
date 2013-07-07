@@ -30,6 +30,7 @@
 #include <QDir>
 #include <QDebug>
 #include <QDesktopServices>
+#include <QGraphicsDropShadowEffect>
 
 /*!
   \brief DownloadItem: this is the DownloadItem constructor.
@@ -40,7 +41,7 @@
   \param pix: cover pixmap
   \param parent: The Parent Widget
 */
-DownloadItem::DownloadItem(const QString &path, const QString &token, const Song *song, QWidget *parent) :
+DownloadItem::DownloadItem(const QString &path, const QString &token, const Song &song, QWidget *parent) :
     QWidget(parent),
     ui_(new Ui::DownloadItem),
     path_(path),
@@ -95,6 +96,13 @@ void DownloadItem::setupUi()
         ui_->coverLabel->setPixmap(QIcon::fromTheme(QLatin1String("media-optical"), QIcon(QLatin1String(":/resources/media-optical.png"))).pixmap(Utility::coverSize));
 
     ui_->coverLabel->setToolTip(fileName_);
+
+    QGraphicsDropShadowEffect *coverShadow = new QGraphicsDropShadowEffect(this);
+    coverShadow->setBlurRadius(10.0);
+    coverShadow->setColor(palette().color(QPalette::Shadow));
+    coverShadow->setOffset(0.0);
+
+    ui_->coverLabel->setGraphicsEffect(coverShadow);
 
     ui_->titleLabel->setFont(Utility::font(QFont::Bold));
     ui_->titleLabel->setText(song_.title());
@@ -152,11 +160,34 @@ void DownloadItem::stateChanged()
 {
     emit stateChangedSignal();
 
+    /*
+     * multiFuncButton has 4 actions:
+     * (A) abort current download
+     * (B) remove song from queue
+     * (C) delete a downloaded song
+     * (D) re-download aborted
+     *
+     *
+     * STATES and widgets' visibility
+     *
+     * item's widgets | multiFuncButton | progressBar | playButton | openFolderButton | info icon/message |
+     * ---------------+-----------------+-------------+------------+------------------+-------------------+
+     * Queue          |       (B)       |             |            |                  |                   |
+     * Download       |       (A)       |      x      |      x     |                  |                   |
+     * Finished       |       (C)       |             |      x     |         x        |                   |
+     * Aborted        |       (D)       |             |            |                  |          x        |
+     * Canceled       |                 |             |            |                  |          x        |
+     *
+     */
+
+
     switch(downloadState_) {
         case GrooveOff::QueuedState:
             ui_->multiFuncWidget->setVisible(false);
             ui_->multiFuncButton->setIcon(QIcon::fromTheme(QLatin1String("dialog-cancel"), QIcon(QLatin1String(":/resources/dialog-cancel.png"))));
             ui_->multiFuncButton->setToolTip(trUtf8("Remove from queue"));
+            ui_->playingAnimation->setVisible(false);
+            ui_->playingAnimation->stopAnimation();
             ui_->playWidget->setVisible(false);
             ui_->progressWidget->setVisible(false);
             ui_->openFolderWidget->setVisible(false);
@@ -502,12 +533,12 @@ void DownloadItem::openFolder()
     QDesktopServices::openUrl(QUrl("file://" + path_, QUrl::TolerantMode));
 }
 
-void DownloadItem::reloadCover()
-{
-    if(!QFile::exists(Utility::coversCachePath + song_.coverName())) {
-        ui_->coverLabel->setPixmap(Utility::coversCachePath + song_.coverName());
-    }
-}
+//void DownloadItem::reloadCover()
+//{
+//    if(!QFile::exists(Utility::coversCachePath + song_.coverName())) {
+//        ui_->coverLabel->setPixmap(Utility::coversCachePath + song_.coverName());
+//    }
+//}
 
 
 

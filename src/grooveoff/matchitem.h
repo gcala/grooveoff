@@ -16,30 +16,47 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef COVERMANAGER_H
-#define COVERMANAGER_H
 
-#include <QObject>
-#include <QStringList>
+#ifndef MATCHITEM_H
+#define MATCHITEM_H
 
-class Song;
+#include "song.h"
+#include <QWidget>
 
-class CoverManager :  public QObject
+
+namespace Ui {
+class MatchItem;
+}
+
+class QLabel;
+class QPushButton;
+
+class MatchItem : public QWidget
 {
     Q_OBJECT
+
 public:
-    explicit CoverManager(QObject *parent = 0);
-    void addItem(QString);
-    void clear();
+    MatchItem(const Song &song, QWidget *parent = 0);
+    virtual ~MatchItem();
+
+    bool coverFound() { return coverFound_; }
+    void loadCover();
+    const QString & artist() { return song_.artist(); }
+    const QString & album() { return song_.album(); }
 
 signals:
-    void coverDownloaded();
+    void download(Song);
 
-public slots:
-    void setCover();
+private slots:
+    void downloadSlot();
 
 private:
-    QStringList coverItems_;
+    Ui::MatchItem *ui_;
+    Song song_;
+    QString fileName_;
+    bool coverFound_;
+
+    void setupUi();
 };
 
-#endif // COVERMANAGER_H
+#endif // MATCHITEM_H

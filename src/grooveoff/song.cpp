@@ -82,5 +82,15 @@ Song::Song(const Song* song)
     coverName_ = song->coverName();
 }
 
+Song::Song(const Song &song)
+{
+    title_ = song.title();
+    album_ = song.album();
+    artist_ = song.artist();
+    year_ = song.year();
+    id_ = song.id();
+    coverName_ = song.coverName();
+}
+
 
 #include "song.moc"

@@ -27,8 +27,8 @@ class CoverDownloader : public QObject
     Q_OBJECT
 public:
     explicit CoverDownloader(QString name, QObject *parent = 0);
+    ~CoverDownloader();
 
-    QPixmap pix() { return coverPixmap_; }
     bool isSuccess() { return success_; }
     QString getCoverName() { return coverName_; }
 
@@ -41,7 +41,7 @@ public slots:
 private:
     QString coverName_;
     bool success_;
-    QPixmap coverPixmap_;
+//    QPixmap coverPixmap_;
     QNetworkAccessManager qnam_;
     QNetworkReply *reply_;
 };

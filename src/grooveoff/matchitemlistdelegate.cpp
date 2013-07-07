@@ -104,6 +104,7 @@ void MatchItemListDelegate::paint ( QPainter* painter, const QStyleOptionViewIte
     coverRect.setY(option.rect.y() + (option.rect.height() / 2 - Utility::coverSize / 2));
     coverRect.setWidth(Utility::coverSize);
     coverRect.setHeight(Utility::coverSize);
+
     painter->drawPixmap(coverRect, pix);
 
     // rect hosting song title

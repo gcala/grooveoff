@@ -23,6 +23,7 @@
 
 #include <QDir>
 #include <QTime>
+#include <QGraphicsDropShadowEffect>
 
 /*!
   \brief AudioPlayer: this is the AudioPlayer constructor.
@@ -82,6 +83,15 @@ AudioPlayer::~AudioPlayer()
 */
 void AudioPlayer::setupUi()
 {
+    QGraphicsDropShadowEffect *coverShadow = new QGraphicsDropShadowEffect(this);
+    coverShadow->setBlurRadius(10.0);
+    coverShadow->setColor(palette().color(QPalette::Shadow));
+    coverShadow->setOffset(0.0);
+
+    ui_->coverLabel->setWindowFlags(Qt::FramelessWindowHint);
+    ui_->coverLabel->setAttribute(Qt::WA_TranslucentBackground);
+    ui_->coverLabel->setGraphicsEffect(coverShadow);
+
     ui_->coverLabel->setScaledContents(true);
     ui_->titleLabel->setFont(Utility::font(QFont::Bold));
     ui_->album_authorLabel->setFont(Utility::font(QFont::Bold));

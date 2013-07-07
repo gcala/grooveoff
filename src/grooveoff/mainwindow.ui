@@ -15,9 +15,6 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
-    <property name="bottomMargin">
-     <number>0</number>
-    </property>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <property name="leftMargin">
@@ -191,7 +188,7 @@
       <property name="orientation">
        <enum>Qt::Vertical</enum>
       </property>
-      <widget class="QListView" name="listView"/>
+      <widget class="QListWidget" name="listWidget"/>
       <widget class="QListWidget" name="downloadList"/>
      </widget>
     </item>

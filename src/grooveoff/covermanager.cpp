@@ -25,15 +25,10 @@ CoverManager::CoverManager(QObject *parent) :
 {
 }
 
-void CoverManager::addItem(Song *song)
+void CoverManager::addItem(QString coverName)
 {
-    QString coverName = song->coverName();
-    if(coverItems_.contains(coverName)) {
-        coverItems_[coverName].append(song);
-    } else {
-        QList<Song *> listOfSongsWithSameCover;
-        listOfSongsWithSameCover.append(song);
-        coverItems_.insert(coverName, listOfSongsWithSameCover);
+    if(!coverItems_.contains(coverName)) {
+        coverItems_.append(coverName);
         CoverDownloader *downloader = new CoverDownloader(coverName, this);
         connect(downloader, SIGNAL(done()), this, SLOT(setCover()));
     }
@@ -49,6 +44,9 @@ void CoverManager::setCover()
     CoverDownloader *downloader = (CoverDownloader *)QObject::sender();
     if(downloader->isSuccess())
         emit coverDownloaded();
+//    disconnect(downloader, SIGNAL(done()), this, SLOT(setCover()));
+//    delete downloader;
+//    downloader = 0;
 }
 
 #include "covermanager.moc"

@@ -27,7 +27,7 @@
 #include <QNetworkConfigurationManager>
 
 class QNetworkReply;
-class QModelIndex;
+//class QModelIndex;
 class QLabel;
 class QPushButton;
 class QLed;
@@ -37,13 +37,12 @@ class QListWidget;
 class QSplitter;
 class AudioPlayer;
 class QActionGroup;
-class MatchesTableModel;
-class MatchesListModel;
+//class MatchesTableModel;
+//class MatchesListModel;
 class QNetworkAccessManager;
 class QTableWidgetItem;
 class Song;
 class QBoxLayout;
-class FilterProxyModel;
 class DownloadItem;
 class MatchItemListDelegate;
 class CoverManager;
@@ -70,7 +69,7 @@ public:
 private slots:
     void selectFolder();
     void replyFinished(QNetworkReply*);
-    void addDownloadItem(const QString id);
+    void addDownloadItem(Song song);
     void beginSearch();
     void newToken();
     void setCompactLayout();
@@ -92,8 +91,6 @@ private:
     QMovie *busyAnimation_;
     QNetworkConfigurationManager *qncm_;
     QList<QPair<QString, QStringList> > artistsAlbumsContainer_;
-    FilterProxyModel *proxyModel_;
-    MatchesListModel *listModel_;
     MyJar *jar_;
     QNetworkAccessManager *qnam_;
     int currentJob_;
@@ -116,7 +113,6 @@ private:
     bool searchInProgress_;
     int parallelDownloadsCount_;
     QList<DownloadItem *> queue_;
-    MatchItemListDelegate *matchItemListDelegate_;
     AudioPlayer *playerWidget;
     CoverManager *cvrMngr_;
 
@@ -157,7 +153,7 @@ private:
     void populateResultsTable();
     void applyFilter();
     bool isDownloadingQueued(const QString &);
-    Song * getSongById(const QString &);
+    int visibleItemsCount();
 };
 
 #endif // MAINWINDOW_H

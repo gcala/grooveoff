@@ -7,7 +7,6 @@ set(grooveoff_SRCS grooveoff/coverdownloader.cpp
                    grooveoff/covermanager.cpp
                    grooveoff/utility.cpp
                    grooveoff/combobox.cpp
-                   grooveoff/filterproxymodel.cpp
                    grooveoff/elidedlabel.cpp
                    grooveoff/aboutdialog.cpp
                    grooveoff/settingsitem.cpp
@@ -18,11 +17,10 @@ set(grooveoff_SRCS grooveoff/coverdownloader.cpp
                    grooveoff/songdownloader.cpp
                    grooveoff/song.cpp
                    grooveoff/qled.cpp
-                   grooveoff/matchitemlistdelegate.cpp
-                   grooveoff/matcheslistmodel.cpp
                    grooveoff/downloaditem.cpp
                    grooveoff/audioplayer.cpp
-                   grooveoff/mainwindow.cpp)
+                   grooveoff/mainwindow.cpp
+                   grooveoff/matchitem.cpp)
 
 set(grooveoff_RCS ../grooveoff.qrc)
 qt4_add_resources(grooveoff_RC_SRCS ${grooveoff_RCS} )
@@ -33,7 +31,8 @@ set(grooveoff_UI grooveoff/downloaditem.ui
                  grooveoff/mainwindow.ui
                  grooveoff/configdialog.ui
                  grooveoff/settingsitem.ui
-                 grooveoff/aboutdialog.ui)
+                 grooveoff/aboutdialog.ui
+                 grooveoff/matchitem.ui)
 qt4_wrap_ui(grooveoff_UI_HEADERS ${grooveoff_UI})
 
 qt4_automoc(${grooveoff_SRCS})
