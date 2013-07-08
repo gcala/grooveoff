@@ -20,7 +20,8 @@
 #define COVERMANAGER_H
 
 #include <QObject>
-#include <QStringList>
+#include <QHash>
+#include <QSharedPointer>
 
 class Song;
 
@@ -29,7 +30,7 @@ class CoverManager :  public QObject
     Q_OBJECT
 public:
     explicit CoverManager(QObject *parent = 0);
-    void addItem(QString);
+    void addItem(const QSharedPointer<Song> &);
     void clear();
 
 signals:
@@ -39,7 +40,7 @@ public slots:
     void setCover();
 
 private:
-    QStringList coverItems_;
+    QHash< QString, QList< QSharedPointer<Song> > > coverItems_;
 };
 
 #endif // COVERMANAGER_H

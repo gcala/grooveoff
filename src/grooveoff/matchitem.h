@@ -36,25 +36,25 @@ class MatchItem : public QWidget
     Q_OBJECT
 
 public:
-    MatchItem(const Song &song, QWidget *parent = 0);
+    MatchItem(const QSharedPointer<Song> &song, QWidget *parent = 0);
     virtual ~MatchItem();
 
-    bool coverFound() { return coverFound_; }
-    void loadCover();
-    const QString & artist() { return song_.artist(); }
-    const QString & album() { return song_.album(); }
+    const QString & artist() { return song_.data()->artist(); }
+    const QString & album() { return song_.data()->album(); }
 
 signals:
-    void download(Song);
+    void download(QSharedPointer<Song>);
+
+public slots:
+    void setDownloadIcon();
 
 private slots:
+    void loadCover();
     void downloadSlot();
 
 private:
     Ui::MatchItem *ui_;
-    Song song_;
-    QString fileName_;
-    bool coverFound_;
+    QSharedPointer<Song> song_;
 
     void setupUi();
 };

@@ -30,7 +30,7 @@ public:
     ~CoverDownloader();
 
     bool isSuccess() { return success_; }
-    QString getCoverName() { return coverName_; }
+    QString coverName() { return coverName_; }
 
 signals:
     void done();
@@ -41,7 +41,6 @@ public slots:
 private:
     QString coverName_;
     bool success_;
-//    QPixmap coverPixmap_;
     QNetworkAccessManager qnam_;
     QNetworkReply *reply_;
 };

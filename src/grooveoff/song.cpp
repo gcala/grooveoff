@@ -19,29 +19,19 @@
 
 #include "grooveoff/song.h"
 
-/*!
-  \brief Song: this is the Song constructor.
-  \param parent: The Parent Widget
-*/
-Song::Song ( QObject* parent ) :
-    QObject(parent)
-{
-}
-
 Song::Song ( const QString &title,
              const QString &album,
              const QString &artist,
              const QString &year,
              const QString &id,
-             QObject* parent) :
-    QObject(parent),
+             const QString &coverName) :
     title_(title),
     album_(album),
     artist_(artist),
     year_(year),
-    id_(id)
+    id_(id),
+    coverName_(coverName)
 {
-
 }
 
 /*!
@@ -51,45 +41,14 @@ Song::~Song()
 {
 }
 
-// Song& Song::operator=(const Song* song)
-// {
-//     title_ = song->title();
-//     album_ = song->album();
-//     artist_ = song->artist();
-//     year_ = song->year();
-//     id_ = song->id();
-//     coverName_ = song->coverName();
-//     return &this;
-//
-// //     Song mysong;
-// //     mysong.setTitle(song->title());
-// //     mysong.setAlbum(song->album());
-// //     mysong.setArtist(song->artist());
-// //     mysong.setYear(song->year());
-// //     mysong.setId(song->id());
-// //     mysong.setCoverName(song->coverName());
-// //     return mysong;
-// }
-
-Song::Song(const Song* song)
-    : QObject()
+void Song::requireCoverReload()
 {
-    title_ = song->title();
-    album_ = song->album();
-    artist_ = song->artist();
-    year_ = song->year();
-    id_ = song->id();
-    coverName_ = song->coverName();
+    emit reloadCover();
 }
 
-Song::Song(const Song &song)
+void Song::requireDownloadIconReload()
 {
-    title_ = song.title();
-    album_ = song.album();
-    artist_ = song.artist();
-    year_ = song.year();
-    id_ = song.id();
-    coverName_ = song.coverName();
+    emit reloadIcon();
 }
 
 

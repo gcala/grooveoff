@@ -21,42 +21,40 @@
 #define SONG_H
 
 #include <QObject>
-#include <QPainter>
 
 class Song : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit Song ( QObject* parent = 0 );
     explicit Song ( const QString &title = QString(),
                     const QString &album = QString(),
                     const QString &artist = QString(),
                     const QString &year = QString(),
                     const QString &id = QString(),
-                    QObject* parent = 0 );
-    Song(const Song *);
-    Song(const Song &);
+                    const QString &coverName = QString());
     ~Song();
 
-//    Song & operator=(const Song song);
-
-    void setTitle(const QString &title) {title_ = title;}
-    void setAlbum(const QString &album) {album_ = album;}
-    void setArtist(const QString &artist) {artist_ = artist;}
-    void setYear(const QString &year) {year_ = year;}
-    void setId(const QString &id) {id_ = id;}
+    void setTitle(const QString &title)     {title_ = title;}
+    void setAlbum(const QString &album)     {album_ = album;}
+    void setArtist(const QString &artist)   {artist_ = artist;}
+    void setYear(const QString &year)       {year_ = year;}
+    void setId(const QString &id)           {id_ = id;}
     void setCoverName(const QString &cover) {coverName_ = cover;}
 
-    QString title()       const { return title_; }
-    QString album()       const { return album_; }
-    QString artist()      const { return artist_; }
-    QString year()        const { return year_; }
-    QString id()          const { return id_; }
-    QString coverName()   const { return coverName_; }
+    QString title()     const { return title_; }
+    QString album()     const { return album_; }
+    QString artist()    const { return artist_; }
+    QString year()      const { return year_; }
+    QString id()        const { return id_; }
+    QString coverName() const { return coverName_; }
+
+    void requireCoverReload();
+    void requireDownloadIconReload();
 
 signals:
-    void trigRepaint();
+    void reloadCover();
+    void reloadIcon();
 
 public slots:
 

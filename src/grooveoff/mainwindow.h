@@ -69,7 +69,7 @@ public:
 private slots:
     void selectFolder();
     void replyFinished(QNetworkReply*);
-    void addDownloadItem(Song song);
+    void addDownloadItem(QSharedPointer<Song> song);
     void beginSearch();
     void newToken();
     void setCompactLayout();
@@ -84,7 +84,6 @@ private slots:
     void removeFailedDeletedAborted();
     void removeDownloaded();
     void addItemToQueue(DownloadItem *);
-    void reloadItemsCover();
 
 private:
     Ui::MainWindow *ui_;
@@ -94,7 +93,6 @@ private:
     MyJar *jar_;
     QNetworkAccessManager *qnam_;
     int currentJob_;
-    QString dir_;
     QString token_;
     QNetworkRequest tokenRequest_;
     QNetworkRequest mainRequest_;
@@ -150,10 +148,11 @@ private:
     QString randomHex(const int &length);
     void setTokenRequest();
     void setMainRequest();
-    void populateResultsTable();
+    void populateResultsList();
     void applyFilter();
     bool isDownloadingQueued(const QString &);
     int visibleItemsCount();
+    void reloadItemsDownloadButtons();
 };
 
 #endif // MAINWINDOW_H

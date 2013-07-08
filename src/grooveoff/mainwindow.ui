@@ -188,7 +188,7 @@
       <property name="orientation">
        <enum>Qt::Vertical</enum>
       </property>
-      <widget class="QListWidget" name="listWidget"/>
+      <widget class="QListWidget" name="matchList"/>
       <widget class="QListWidget" name="downloadList"/>
      </widget>
     </item>

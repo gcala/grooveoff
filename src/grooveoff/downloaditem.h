@@ -41,16 +41,16 @@ class DownloadItem : public QWidget
     Q_OBJECT
 
 public:
-    DownloadItem(const QString &path, const QString &token, const Song &song, QWidget *parent = 0);
+    DownloadItem(const QString &path, const QString &token, const QSharedPointer<Song> &song, QWidget *parent = 0);
     virtual ~DownloadItem();
     QString songFile();
 
-    const QString id() { return song_.id(); }
+    const QString id() { return song_.data()->id(); }
     const QString fileName() { return fileName_; }
-    const QString title() { return song_.title(); }
-    const QString album() { return song_.album(); }
-    const QString artist() { return song_.artist(); }
-    const QString coverName() { return song_.coverName(); }
+    const QString title() { return song_.data()->title(); }
+    const QString album() { return song_.data()->album(); }
+    const QString artist() { return song_.data()->artist(); }
+    const QString coverName() { return song_.data()->coverName(); }
     const QString & path() { return path_; }
     GrooveOff::DownloadState downloadState() { return downloadState_; }
 
@@ -79,14 +79,14 @@ private slots:
     void multiFuncBtnClicked();
     void removeSong();
     void openFolder();
-//    void reloadCover();
+    void loadCover();
 
 private:
     Ui::DownloadItem *ui_;
     QString path_;
     QString token_;
     QString fileName_;
-    Song song_;
+    QSharedPointer<Song> song_;
     QString ip_;
     SongDownloader *songDownloader_;
     GrooveOff::DownloadState downloadState_;

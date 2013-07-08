@@ -23,17 +23,19 @@
 #include <QGraphicsDropShadowEffect>
 #include <QFile>
 #include <QDir>
+#include <QDebug>
 
-MatchItem::MatchItem(const Song &song, QWidget *parent) :
+MatchItem::MatchItem(const QSharedPointer<Song> &song, QWidget *parent) :
     QWidget(parent),
     ui_(new Ui::MatchItem),
     song_(song)
-{
+{    
     ui_->setupUi(this);
-    fileName_ = song_.title() + " - " + song_.artist();
-    coverFound_ = false;
     setupUi();
+
     connect(ui_->downloadButton, SIGNAL(clicked()), SLOT(downloadSlot()));
+    connect(song_.data(), SIGNAL(reloadCover()), this, SLOT(loadCover()));
+    connect(song_.data(), SIGNAL(reloadIcon()), this, SLOT(setDownloadIcon()));
 }
 
 MatchItem::~MatchItem()
@@ -47,7 +49,7 @@ void MatchItem::setupUi()
 
     loadCover();
 
-    ui_->coverLabel->setToolTip(fileName_);
+    ui_->coverLabel->setToolTip(song_.data()->title() + " - " + song_.data()->artist());
 
     QGraphicsDropShadowEffect *coverShadow = new QGraphicsDropShadowEffect(this);
     coverShadow->setBlurRadius(10.0);
@@ -57,40 +59,46 @@ void MatchItem::setupUi()
     ui_->coverLabel->setGraphicsEffect(coverShadow);
 
     ui_->titleLabel->setFont(Utility::font(QFont::Bold));
-    ui_->titleLabel->setText(song_.title());
-    ui_->titleLabel->setToolTip(song_.title());
+    ui_->titleLabel->setText(song_.data()->title());
+    ui_->titleLabel->setToolTip(song_.data()->title());
     ui_->titleLabel->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred); // fix hidden label
 
-    ui_->artist_albumLabel->setText(song_.artist() + " - " + song_.album());
-    ui_->artist_albumLabel->setToolTip(song_.title());
+    ui_->artist_albumLabel->setText(song_.data()->artist() + " - " + song_.data()->album());
+    ui_->artist_albumLabel->setToolTip(song_.data()->title());
     ui_->artist_albumLabel->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred); // fix hidden label
 
     ui_->downloadButton->setFixedSize(QSize(Utility::buttonSize,Utility::buttonSize));
-    if(QFile::exists(Utility::downloadPath + QDir::separator() + song_.title() + " - " + song_.artist() + ".mp3")) {
-        ui_->downloadButton->setIcon(QIcon::fromTheme(QLatin1String("view-refresh"), QIcon(QLatin1String(":/resources/view-refresh.png"))));
-    } else {
-        if(QIcon::hasThemeIcon(QLatin1String("download")))
-            ui_->downloadButton->setIcon(QIcon::fromTheme(QLatin1String("download")));
-        else
-            ui_->downloadButton->setIcon(QIcon::fromTheme(QLatin1String("document-save"), QIcon(QLatin1String(":/resources/download.png"))));
-    }
+    ui_->downloadButton->setIconSize(QSize(16,16));
+
+    setDownloadIcon();
 }
 
 void MatchItem::loadCover()
 {
-    if(!coverFound_) {
-        if(!song_.coverName().isEmpty() && QFile::exists(Utility::coversCachePath + song_.coverName())) {
-            ui_->coverLabel->setPixmap(QPixmap(Utility::coversCachePath + song_.coverName()));
-            coverFound_ = true;
-        }
-        else
-            ui_->coverLabel->setPixmap(QIcon::fromTheme(QLatin1String("media-optical"), QIcon(QLatin1String(":/resources/media-optical.png"))).pixmap(Utility::coverSize));
-    }
+    if(!song_.data()->coverName().isEmpty() && QFile::exists(Utility::coversCachePath + song_.data()->coverName()))
+        ui_->coverLabel->setPixmap(QPixmap(Utility::coversCachePath + song_.data()->coverName()));
+    else
+        ui_->coverLabel->setPixmap(QIcon::fromTheme(QLatin1String("media-optical"),
+                                   QIcon(QLatin1String(":/resources/media-optical.png"))).pixmap(Utility::coverSize));
 }
 
 void MatchItem::downloadSlot()
 {
     emit download(song_);
+}
+
+void MatchItem::setDownloadIcon()
+{
+    if(QFile::exists(Utility::downloadPath + QDir::separator() + song_.data()->title() + " - " + song_.data()->artist() + ".mp3")) {
+        ui_->downloadButton->setIcon(QIcon::fromTheme(QLatin1String("view-refresh"),
+                                     QIcon(QLatin1String(":/resources/view-refresh.png"))));
+    } else {
+        if(QIcon::hasThemeIcon(QLatin1String("download")))
+            ui_->downloadButton->setIcon(QIcon::fromTheme(QLatin1String("download")));
+        else
+            ui_->downloadButton->setIcon(QIcon::fromTheme(QLatin1String("document-save"),
+                                         QIcon(QLatin1String(":/resources/download.png"))));
+    }
 }
 
 #include "matchitem.moc"

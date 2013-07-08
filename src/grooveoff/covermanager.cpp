@@ -25,10 +25,15 @@ CoverManager::CoverManager(QObject *parent) :
 {
 }
 
-void CoverManager::addItem(QString coverName)
+void CoverManager::addItem(const QSharedPointer<Song> &song)
 {
-    if(!coverItems_.contains(coverName)) {
-        coverItems_.append(coverName);
+    QString coverName = song.data()->coverName();
+    if(coverItems_.contains(coverName)) {
+        coverItems_[coverName].append(song);
+    } else {
+        QList< QSharedPointer<Song> > listOfSongsWithSameCover;
+        listOfSongsWithSameCover.append(song);
+        coverItems_.insert(coverName, listOfSongsWithSameCover);
         CoverDownloader *downloader = new CoverDownloader(coverName, this);
         connect(downloader, SIGNAL(done()), this, SLOT(setCover()));
     }
@@ -42,8 +47,13 @@ void CoverManager::clear()
 void CoverManager::setCover()
 {
     CoverDownloader *downloader = (CoverDownloader *)QObject::sender();
-    if(downloader->isSuccess())
-        emit coverDownloaded();
+    if(downloader->isSuccess()) {
+        QString coverName = downloader->coverName();
+        foreach (QSharedPointer<Song> song, coverItems_.value(coverName)) {
+            song.data()->requireCoverReload();
+        }
+    }
+//        emit coverDownloaded();
 //    disconnect(downloader, SIGNAL(done()), this, SLOT(setCover()));
 //    delete downloader;
 //    downloader = 0;
