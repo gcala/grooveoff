@@ -39,8 +39,8 @@ public:
     MatchItem(const QSharedPointer<Song> &song, QWidget *parent = 0);
     virtual ~MatchItem();
 
-    const QString & artist() { return song_.data()->artist(); }
-    const QString & album() { return song_.data()->album(); }
+    const QString artist() { return song_.data()->artist(); }
+    const QString album() { return song_.data()->album(); }
 
 signals:
     void download(QSharedPointer<Song>);
