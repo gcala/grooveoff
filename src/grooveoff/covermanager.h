@@ -23,14 +23,14 @@
 #include <QHash>
 #include <QSharedPointer>
 
-class Song;
+class SongObject;
 
 class CoverManager :  public QObject
 {
     Q_OBJECT
 public:
     explicit CoverManager(QObject *parent = 0);
-    void addItem(const QSharedPointer<Song> &);
+    void addItem(const QSharedPointer<SongObject> &);
     void clear();
 
 signals:
@@ -40,7 +40,7 @@ public slots:
     void setCover();
 
 private:
-    QHash< QString, QList< QSharedPointer<Song> > > coverItems_;
+    QHash< QString, QList< QSharedPointer<SongObject> > > coverItems_;
 };
 
 #endif // COVERMANAGER_H

@@ -20,7 +20,7 @@
 #ifndef MATCHITEM_H
 #define MATCHITEM_H
 
-#include "song.h"
+#include "songobject.h"
 #include <QWidget>
 
 
@@ -36,14 +36,14 @@ class MatchItem : public QWidget
     Q_OBJECT
 
 public:
-    MatchItem(const QSharedPointer<Song> &song, QWidget *parent = 0);
+    MatchItem(const QSharedPointer<SongObject> &song, QWidget *parent = 0);
     virtual ~MatchItem();
 
     const QString artist() { return song_.data()->artist(); }
     const QString album() { return song_.data()->album(); }
 
 signals:
-    void download(QSharedPointer<Song>);
+    void download(QSharedPointer<SongObject>);
 
 public slots:
     void setDownloadIcon();
@@ -54,7 +54,7 @@ private slots:
 
 private:
     Ui::MatchItem *ui_;
-    QSharedPointer<Song> song_;
+    QSharedPointer<SongObject> song_;
 
     void setupUi();
 };

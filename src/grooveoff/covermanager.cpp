@@ -17,7 +17,7 @@
 */
 
 #include "covermanager.h"
-#include "song.h"
+#include "songobject.h"
 #include "coverdownloader.h"
 
 CoverManager::CoverManager(QObject *parent) :
@@ -25,13 +25,13 @@ CoverManager::CoverManager(QObject *parent) :
 {
 }
 
-void CoverManager::addItem(const QSharedPointer<Song> &song)
+void CoverManager::addItem(const QSharedPointer<SongObject> &song)
 {
     QString coverName = song.data()->coverName();
     if(coverItems_.contains(coverName)) {
         coverItems_[coverName].append(song);
     } else {
-        QList< QSharedPointer<Song> > listOfSongsWithSameCover;
+        QList< QSharedPointer<SongObject> > listOfSongsWithSameCover;
         listOfSongsWithSameCover.append(song);
         coverItems_.insert(coverName, listOfSongsWithSameCover);
         CoverDownloader *downloader = new CoverDownloader(coverName, this);
@@ -49,7 +49,7 @@ void CoverManager::setCover()
     CoverDownloader *downloader = (CoverDownloader *)QObject::sender();
     if(downloader->isSuccess()) {
         QString coverName = downloader->coverName();
-        foreach (QSharedPointer<Song> song, coverItems_.value(coverName)) {
+        foreach (QSharedPointer<SongObject> song, coverItems_.value(coverName)) {
             song.data()->requireCoverReload();
         }
     }

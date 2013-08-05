@@ -21,13 +21,10 @@
 
 #include <QMainWindow>
 #include <QNetworkCookieJar>
-#include <QNetworkRequest>
-#include <QVariantMap>
-#include <QVariantList>
 #include <QNetworkConfigurationManager>
+#include <phononnamespace.h>
+#include <libgrooveshark/apirequest.h>
 
-class QNetworkReply;
-//class QModelIndex;
 class QLabel;
 class QPushButton;
 class QLed;
@@ -37,11 +34,8 @@ class QListWidget;
 class QSplitter;
 class AudioPlayer;
 class QActionGroup;
-//class MatchesTableModel;
-//class MatchesListModel;
 class QNetworkAccessManager;
-class QTableWidgetItem;
-class Song;
+class SongObject;
 class QBoxLayout;
 class DownloadItem;
 class MatchItemListDelegate;
@@ -68,10 +62,9 @@ public:
 
 private slots:
     void selectFolder();
-    void replyFinished(QNetworkReply*);
-    void addDownloadItem(QSharedPointer<Song> song);
+    void addDownloadItem(QSharedPointer<SongObject> song);
     void beginSearch();
-    void newToken();
+    void getToken();
     void setCompactLayout();
     void setWideLayout();
     void about();
@@ -81,9 +74,12 @@ private slots:
     void artistChanged();
     void albumChanged();
     void freeDownloadSlot();
-    void removeFailedDeletedAborted();
-    void removeDownloaded();
     void addItemToQueue(DownloadItem *);
+    void tokenReturned();
+    void populateResultsList();
+
+    void streamKeyRicevuto();
+    void errorDuringToken();
 
 private:
     Ui::MainWindow *ui_;
@@ -91,16 +87,9 @@ private:
     QNetworkConfigurationManager *qncm_;
     QList<QPair<QString, QStringList> > artistsAlbumsContainer_;
     MyJar *jar_;
-    QNetworkAccessManager *qnam_;
     int currentJob_;
-    QString token_;
-    QNetworkRequest tokenRequest_;
-    QNetworkRequest mainRequest_;
-    QVariantMap header_;
-    QVariantList results_;
     int row_;
     QString currentSongID_;
-    QList<Song *> songs_;
     QStringList searchList_;
     int searchSize_;
     int maxResults_;
@@ -113,6 +102,12 @@ private:
     QList<DownloadItem *> queue_;
     AudioPlayer *playerWidget;
     CoverManager *cvrMngr_;
+
+    QNetworkAccessManager *nam_;
+    GrooveShark::ApiRequest *api_;
+    GrooveShark::TokenPtr token_;
+    GrooveShark::SongListPtr songList_;
+    GrooveShark::StreamKeyPtr streamKey_;
 
     //Menus
     QMenu *fileMenu_;
@@ -143,14 +138,8 @@ private:
     void loadSettings();
     void saveSettings();
     void unqueue();
-    void getToken();
-    void getResultsFromSearch(const QString &query, const QString &what="Songs");
-    QString randomHex(const int &length);
-    void setTokenRequest();
-    void setMainRequest();
-    void populateResultsList();
     void applyFilter();
-    bool isDownloadingQueued(const QString &);
+    bool isDownloadingQueued(const uint &);
     int visibleItemsCount();
     void reloadItemsDownloadButtons();
 };

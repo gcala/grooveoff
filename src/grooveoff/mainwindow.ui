@@ -189,7 +189,11 @@
        <enum>Qt::Vertical</enum>
       </property>
       <widget class="QListWidget" name="matchList"/>
-      <widget class="QListWidget" name="downloadList"/>
+      <widget class="Playlist" name="downloadList">
+       <property name="dragDropMode">
+        <enum>QAbstractItemView::InternalMove</enum>
+       </property>
+      </widget>
      </widget>
     </item>
    </layout>
@@ -217,6 +221,11 @@
    <class>ComboBox</class>
    <extends>QComboBox</extends>
    <header location="global">grooveoff/combobox.h</header>
+  </customwidget>
+  <customwidget>
+   <class>Playlist</class>
+   <extends>QListWidget</extends>
+   <header location="global">grooveoff/playlist.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

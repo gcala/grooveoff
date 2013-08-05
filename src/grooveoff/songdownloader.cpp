@@ -36,47 +36,31 @@
   \param token: token of connection
   \param parent: The Parent Widget
 */
-SongDownloader::SongDownloader(const QString &path, const QString &fileName, const QString &id,
-                               const QString &token, QObject *parent) :
+SongDownloader::SongDownloader(const QString &path,
+                               const QString &fileName,
+                               const uint &id,
+                               const QString &token,
+                               const QString &streamKey,
+                               const QString &ip,
+                               QObject *parent) :
     QNetworkAccessManager(parent),
     path_(path),
     fileName_(fileName),
     id_(id),
-    token_(token)
+    token_(token),
+    streamKey_(streamKey),
+    ip_(ip)
 {
     aborted_ = false;
 
-    // common headers
-    mainRequest_.setRawHeader(QByteArray("User-Agent"), Utility::userAgent);
-    mainRequest_.setRawHeader(QByteArray("Referer"), QString("http://%1/JSQueue.swf?%2").arg(Utility::host).arg(Utility::jsqueue().at(1)).toAscii());
-
     connect(this, SIGNAL(finished(QNetworkReply*)), this, SLOT(onFinished(QNetworkReply*)));
 
-    startDownload();
+    download();
 }
 
 SongDownloader::~SongDownloader()
 {
     deleteLater();
-}
-
-/*!
-  \brief startDownload: start song download: first we need to get a key from the server
-  \return void
-*/
-void SongDownloader::startDownload()
-{
-    aborted_ = false;
-    currentJob_ = GrooveOff::KeyJob;
-
-    QVariantMap map = Utility::downloadMap(id_, token_);
-    QJson::Serializer serializer;
-    QByteArray json = serializer.serialize(map);
-
-    mainRequest_.setUrl(QUrl("http://" + Utility::host + "/more.php?" + map.value("method").toByteArray()));
-    mainRequest_.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
-    reply_ = post(mainRequest_, json);
-    qDebug() << "GrooveOff ::" << "Started download of" << fileName_;
 }
 
 /*!
@@ -94,6 +78,9 @@ void SongDownloader::download()
     QUrl postData;
     postData.addQueryItem(QLatin1String("streamKey"), streamKey_);
 
+    // common headers
+    mainRequest_.setRawHeader(QByteArray("User-Agent"), Utility::userAgent);
+    mainRequest_.setRawHeader(QByteArray("Referer"), QString("http://%1/JSQueue.swf?%2").arg(Utility::host).arg(Utility::jsqueue().at(1)).toAscii());
     mainRequest_.setUrl(QUrl(QString("http://%1/stream.php").arg(ip_)));
     mainRequest_.setHeader(QNetworkRequest::ContentTypeHeader, QLatin1String("application/x-www-form-urlencoded"));
     reply_ = post(mainRequest_, postData.encodedQuery());
@@ -121,57 +108,23 @@ void SongDownloader::onFinished(QNetworkReply *)
         qDebug() << "GrooveOff ::" << "Reply Error ::" << reply_->errorString() << "for" << fileName_;
 
         emit downloadCompleted(false);
-        // close and remove download file
         if(currentJob_ == GrooveOff::SongJob) {
             if(file_->isOpen()) {
                 file_->close();
                 file_->remove();
                 file_->deleteLater();
             }
-        }
         return;
+        }
     }
 
-    switch(currentJob_) {
-    case GrooveOff::KeyJob:
-    {
-        QJson::Parser parser;
-        bool ok;
-
-        QByteArray data = reply_->readAll();
-
-        // json is a QString containing the data to convert
-        QVariantMap result = parser.parse (data, &ok).toMap();
-
-        if (!ok) {
-            qFatal("An error occurred during parsing");
-            emit downloadCompleted(false);
-            return;
-        }
-
-        ip_  = result[QLatin1String("result")].toMap()[id_].toMap()[QLatin1String("ip")].toString();
-        streamKey_ = result[QLatin1String("result")].toMap()[id_].toMap()[QLatin1String("streamKey")].toString();
-
-        if(!streamKey_.isEmpty() && !aborted_)
-            download();
-        else {
-            emit downloadCompleted(false);
-            qDebug() << "GrooveOff ::" << "streamKey not found";
-        }
-
-        break;
+    if(file_->isOpen()) {
+        file_->close();
+        file_->deleteLater();
     }
-    case GrooveOff::SongJob:
-        if(file_->isOpen()) {
-            file_->close();
-            file_->deleteLater();
-        }
 
-        emit downloadCompleted(true);
-
-        qDebug() << "GrooveOff ::" << "Finished download of" << fileName_;
-        break;
-    }
+    emit downloadCompleted(true);
+    qDebug() << "GrooveOff ::" << "Finished download of" << fileName_;
 }
 
 /*!

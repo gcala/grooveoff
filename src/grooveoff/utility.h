@@ -22,8 +22,9 @@
 
 #include <QString>
 #include <QFont>
-#include <QVariantMap>
 #include <QStringList>
+#include <phonon/MediaSource>
+#include <grooveoff/songobject.h>
 
 class Utility
 {
@@ -36,10 +37,10 @@ public:
     static const int marginSize;
     static const QByteArray userAgent;
     static const QLatin1String host;
-    static const QByteArray secret;
-    static const QByteArray uuid;
     static const QString coversCachePath;
     static QString downloadPath;
+    static QList<Phonon::MediaSource> audioSources;
+    static QList< QSharedPointer<SongObject> > playlist;
 
     static QString elidedText(const QString &text, const Qt::TextElideMode &elideMode, const int &width, const QFont::Weight &weight);
 
@@ -47,13 +48,7 @@ public:
 
     static QFont monoFont(const QFont::Weight &weight = QFont::Normal, const int &delta = 0);
 
-    static QString randomHex(const int &length);
-    static QVariantMap header();
-    static QStringList htmlclient();
     static QStringList jsqueue();
-    static QVariantMap getTokenMap();
-    static QVariantMap searchMap(const QString &query, const QString &what, const QString &token);
-    static QVariantMap downloadMap(const QString &id, const QString &token);
 };
 
 #endif // UTILITY_H

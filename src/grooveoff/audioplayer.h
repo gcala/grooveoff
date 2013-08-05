@@ -44,40 +44,42 @@ public:
 
     void showElapsedTimerLabel(bool);
 
-    GrooveOff::DownloadState currentItemDownloadState() { return item->downloadState(); }
-
     GrooveOff::TimerState getTimerState() { return timerState; }
     void setTimerState(GrooveOff::TimerState state) { timerState = state; }
 
     void showMessage(const QString &message);
 
 public slots:
-    void playItem(DownloadItem *i);
     void pauseResumePlaying();
+    void play(QString);
+
+signals:
+    void cambioStato(Phonon::State newState, QString source);
 
 private slots:
     void tick(qint64 elapsedTime);
     void aboutToFinish();
     void stopPlaying();
-    void removeItem(DownloadItem *i);
     void stateChanged(Phonon::State newState, Phonon::State oldState);
     void toggleTimeLabel();
+    void removeFromPlaylist();
+    void sourceChanged(Phonon::MediaSource);
 
 private:
     Ui::AudioPlayer *ui_;
     Phonon::MediaObject *mediaObject_;
     Phonon::MediaObject *metaInformationResolver_;
     Phonon::AudioOutput *audioOutput_;
-    DownloadItem *item;
-    QList<Phonon::MediaSource> audioSources_;
-    QString currentSongFileName_;
     bool updateState_;
     GrooveOff::TimerState timerState;
-    QPixmap coverPixmap_;
+    int oldIndex_;
+    Phonon::MediaSource oldSource_;
 
     //Methods
     void setupUi();
+    void setupLabels(int);
     void setupActions();
+    int currentIndex(const QString & file);
 };
 
 #endif // AUDIOPLAYER_H

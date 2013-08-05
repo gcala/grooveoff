@@ -34,26 +34,25 @@
 
 /*!
   \brief DownloadItem: this is the DownloadItem constructor.
-  \param path: save folder
   \param fileName: song file name
   \param id: song id
   \param token: a token used in request
   \param pix: cover pixmap
   \param parent: The Parent Widget
 */
-DownloadItem::DownloadItem(const QString &path, const QString &token, const QSharedPointer<Song> &song, QWidget *parent) :
+DownloadItem::DownloadItem(const QSharedPointer<SongObject> &song, const QString &token, QWidget *parent) :
     QWidget(parent),
     ui_(new Ui::DownloadItem),
-    path_(path),
-    token_(token),
-    song_(song)
+    song_(song),
+    token_(token)
 {
     ui_->setupUi(this);
     connect(song_.data(), SIGNAL(reloadCover()), this, SLOT(loadCover()));
+    connect(song_.data(), SIGNAL(stateChanged(Phonon::State)), this, SLOT(setPlayerState(Phonon::State)));
 
     fileName_ = song_.data()->title() + " - " + song_.data()->artist();
 
-    standardCover_ = true;
+//    standardCover_ = true;
 
     setupUi();
 
@@ -145,6 +144,7 @@ void DownloadItem::setupUi()
 void DownloadItem::setupConnections()
 {
     connect(ui_->playButton, SIGNAL(clicked()), this, SLOT(playSong()));
+//    connect(ui_->playButton, SIGNAL(clicked()), song_.data(), SIGNAL(playMe()));
     connect(ui_->multiFuncButton, SIGNAL(clicked()), this, SLOT(multiFuncBtnClicked()));
     connect(ui_->multiFuncButton, SIGNAL(countdownFinished()), this, SLOT(removeSong()));
     connect(ui_->openFolderButton, SIGNAL(clicked()), this, SLOT(openFolder()));
@@ -249,6 +249,7 @@ void DownloadItem::stateChanged()
             ui_->infoIconWidget->setVisible(false);
             ui_->infoMessageWidget->setVisible(false);
             ui_->openFolderWidget->setVisible(false);
+            emit reloadPlaylist();
             break;
         case GrooveOff::AbortedState:
             ui_->playWidget->setVisible(false);
@@ -281,6 +282,7 @@ void DownloadItem::stateChanged()
             ui_->infoMessageWidget->setVisible(false);
             ui_->infoMessage->setText(trUtf8("Deleted"));
             ui_->openFolderWidget->setVisible(false);
+            emit reloadPlaylist();
             break;
         default:
             ui_->playWidget->setVisible(false);
@@ -309,11 +311,10 @@ void DownloadItem::startDownload()
 {
     downloadState_ = GrooveOff::DownloadingState;
     stateChanged();
-    songDownloader_ = new SongDownloader(path_, fileName_, song_.data()->id(), token_, this);
+    songDownloader_ = new SongDownloader(song_.data()->path(), fileName_, song_.data()->id(), token_, streamKey_, ip_, this);
     connect(songDownloader_, SIGNAL(progress(qint64,qint64)), this, SLOT(setProgress(qint64,qint64)));
     connect(songDownloader_, SIGNAL(downloadCompleted(bool)), this, SLOT(downloadFinished(bool)));
 }
-
 
 /*!
   \brief downloadFinished: slot called once cover download finished
@@ -358,16 +359,7 @@ void DownloadItem::setProgress(const qint64 &bytesReceived, const qint64 &bytesT
 */
 void DownloadItem::playSong()
 {
-//    if(playerState_ == Phonon::StoppedState) {
-        if(!QFile::exists(songFile())) {
-            qDebug() << "GrooveOff ::" << "File" << songFile() << "not found";
-            ui_->multiFuncWidget->setVisible(false);
-            return;
-        }
-        emit play(this);
-//    } else {
-//        emit pauseResumePlaying();
-//    }
+    emit play(song_.data()->source().url().toString());
 }
 
 /*!
@@ -446,6 +438,7 @@ void DownloadItem::removeSong()
     qDebug() << "GrooveOff ::" << songFile() << "removed";
     stateChanged();
     emit song_.data()->requireDownloadIconReload();
+    emit song_.data()->requireRemotion();
 }
 
 /*!
@@ -454,7 +447,7 @@ void DownloadItem::removeSong()
 */
 QString DownloadItem::songFile()
 {
-    QString fileName = path_ + QDir::separator() + fileName_.replace('/','-') + ".mp3";
+    QString fileName = song_.data()->path() + QDir::separator() + fileName_.replace('/','-') + ".mp3";
     return fileName;
 }
 
@@ -541,7 +534,7 @@ void DownloadItem::setPlayerState(Phonon::State state)
 */
 void DownloadItem::openFolder()
 {
-    QDesktopServices::openUrl(QUrl("file://" + path_, QUrl::TolerantMode));
+    QDesktopServices::openUrl(QUrl("file://" + song_.data()->path(), QUrl::TolerantMode));
 }
 
 void DownloadItem::loadCover()

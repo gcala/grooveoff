@@ -15,41 +15,53 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+#include <QDebug>
 
+#include "grooveoff/songobject.h"
 
-#include "grooveoff/song.h"
+#include <QDir>
 
-Song::Song ( const QString &title,
-             const QString &album,
-             const QString &artist,
-             const QString &year,
-             const QString &id,
-             const QString &coverName) :
-    title_(title),
-    album_(album),
-    artist_(artist),
-    year_(year),
-    id_(id),
-    coverName_(coverName)
+SongObject::SongObject (  const GrooveShark::SongPtr &song ) :
+    song_(song)
 {
+//     qDebug() << "CREO" << id_;
 }
 
 /*!
   \brief ~Song: this is the Song destructor.
 */
-Song::~Song()
+SongObject::~SongObject()
 {
+//     qDebug() << "DISTRUGGO" << id_;
 }
 
-void Song::requireCoverReload()
+void SongObject::requireCoverReload()
 {
     emit reloadCover();
 }
 
-void Song::requireDownloadIconReload()
+void SongObject::requireDownloadIconReload()
 {
     emit reloadIcon();
 }
 
+void SongObject::requireRemotion()
+{
+    emit removeMe();
+}
 
-#include "song.moc"
+void SongObject::setPath(const QString& path)
+{
+    path_ = path;
+    QString fileName = song_->songName() + " - " + song_->artistName();
+    QString completeName = path_ + QDir::separator() + fileName.replace('/','-');
+    source_ =  Phonon::MediaSource(completeName + ".mp3");
+}
+
+void SongObject::setPlayerState(Phonon::State state)
+{
+    emit stateChanged(state);
+}
+
+
+#include "songobject.moc"

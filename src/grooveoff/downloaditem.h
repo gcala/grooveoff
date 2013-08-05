@@ -24,7 +24,7 @@
 #include <QVariantMap>
 #include <phonon/MediaObject>
 #include "grooveoff/grooveoffnamespace.h"
-#include "grooveoff/song.h"
+#include "grooveoff/songobject.h"
 
 namespace Ui {
 class DownloadItem;
@@ -41,32 +41,42 @@ class DownloadItem : public QWidget
     Q_OBJECT
 
 public:
-    DownloadItem(const QString &path, const QString &token, const QSharedPointer<Song> &song, QWidget *parent = 0);
+    DownloadItem(const QSharedPointer<SongObject> &song, const QString &token, QWidget *parent = 0);
     virtual ~DownloadItem();
     QString songFile();
 
-    const QString id() { return song_.data()->id(); }
+    const QSharedPointer<SongObject> song() { return song_; }
+    uint id() { return song_.data()->id(); }
+    //------->
     const QString fileName() { return fileName_; }
     const QString title() { return song_.data()->title(); }
     const QString album() { return song_.data()->album(); }
     const QString artist() { return song_.data()->artist(); }
     const QString coverName() { return song_.data()->coverName(); }
-    const QString & path() { return path_; }
+    const QString path() { return song_.data()->path(); }
+    //<-------
     GrooveOff::DownloadState downloadState() { return downloadState_; }
 
     void startDownload();
     void setToken(const QString &token);
-    void setPlayerState(Phonon::State);
+
+    void setStreamKey(const QString &streamKey) { streamKey_ = streamKey; }
+    void setIp(const QString &ip) { ip_ = ip; }
 
     bool operator==(DownloadItem &) const;
 
+public slots:
+    void setPlayerState(Phonon::State);
+
 signals:
-    void play(DownloadItem *i);
     void remove(DownloadItem *i);
     void downloadFinished();
     void addToQueue(DownloadItem *);
     void pauseResumePlaying();
     void stateChangedSignal();
+    void play(QString);
+
+    void reloadPlaylist();
 
 protected:
     virtual void leaveEvent ( QEvent * event );
@@ -83,15 +93,15 @@ private slots:
 
 private:
     Ui::DownloadItem *ui_;
-    QString path_;
+    QSharedPointer<SongObject> song_;
     QString token_;
     QString fileName_;
-    QSharedPointer<Song> song_;
-    QString ip_;
     SongDownloader *songDownloader_;
     GrooveOff::DownloadState downloadState_;
     Phonon::State playerState_;
-    bool standardCover_;
+
+    QString ip_;
+    QString streamKey_;
 
     void setupUi();
     void setupConnections();

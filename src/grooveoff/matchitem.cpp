@@ -25,11 +25,11 @@
 #include <QDir>
 #include <QDebug>
 
-MatchItem::MatchItem(const QSharedPointer<Song> &song, QWidget *parent) :
+MatchItem::MatchItem(const QSharedPointer<SongObject> &song, QWidget *parent) :
     QWidget(parent),
     ui_(new Ui::MatchItem),
     song_(song)
-{    
+{
     ui_->setupUi(this);
     setupUi();
 
