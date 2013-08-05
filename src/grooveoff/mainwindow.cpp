@@ -18,6 +18,8 @@
 
 #include "grooveoff/mainwindow.h"
 #include "grooveoff/audioplayer.h"
+#include "grooveoff/matcheslistmodel.h"
+#include "grooveoff/matchitemlistdelegate.h"
 #include "grooveoff/qled.h"
 #include "grooveoff/downloaditem.h"
 #include "grooveoff/roles.h"
@@ -26,9 +28,7 @@
 #include "grooveoff/filterproxymodel.h"
 #include "grooveoff/utility.h"
 #include "grooveoff/grooveoffnamespace.h"
-#include "grooveoff/covermanager.h"
 #include "ui_mainwindow.h"
-#include "grooveoff/matchitem.h"
 
 #include <QtGui/QLabel>
 #include <QtGui/QMenu>
@@ -71,20 +71,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui_(new Ui::MainWindow)
 {
     ui_->setupUi(this);
-    playerWidget = new AudioPlayer(this);
     setupUi();
     setupActions();
     setupMenus();
     loadSettings();
-    statusBar()->addPermanentWidget( playerWidget, 1 );
-    statusBar()->setSizeGripEnabled(false);
-
-    nam_ = new QNetworkAccessManager(this);
-    api_ = new GrooveShark::ApiRequest(nam_);
-    jar_ = new MyJar;
-    nam_->setCookieJar(jar_);
-
-    cvrMngr_ = new CoverManager(this);
 
     //fake
     searchInProgress_ = true;
@@ -93,20 +83,39 @@ MainWindow::MainWindow(QWidget *parent) :
 
     if(ui_->splitter->orientation() == Qt::Vertical) {
         actionCompact_->setChecked(true);
-        playerWidget->showElapsedTimerLabel(false);
     }
     else {
         actionWide_->setChecked(true);
-        playerWidget->showElapsedTimerLabel(true);
     }
+
+    listModel_ = new MatchesListModel(this);
+    proxyModel_ = new FilterProxyModel(this);
+    ui_->listView->setModel(proxyModel_);
+
+    matchItemListDelegate_ = new MatchItemListDelegate(ui_->listView);
+    ui_->listView->setItemDelegate(matchItemListDelegate_);
+    //connecting delegate's signal to this class's slot
+    connect(matchItemListDelegate_, SIGNAL(downloadRequest(QModelIndex)),
+            this, SLOT(addDownloadItem(QModelIndex)));
 
     QTime time = QTime::currentTime();
     qsrand((uint)time.msec());
 
+    setTokenRequest();
+    setMainRequest();
+
+    token_ = "None";
+
+    qnam_ = new QNetworkAccessManager;
+    connect(qnam_, SIGNAL(finished(QNetworkReply*)), this, SLOT(replyFinished(QNetworkReply*)));
+
+    jar_ = new MyJar;
+    qnam_->setCookieJar(jar_);
+
     qncm_ = new QNetworkConfigurationManager(this);
     connect(qncm_, SIGNAL(onlineStateChanged(bool)), this, SLOT(onlineStateChanged(bool)));
     if(qncm_->isOnline())
-        getToken();
+        newToken();
 
     parallelDownloadsCount_ = 0;
 
@@ -114,15 +123,14 @@ MainWindow::MainWindow(QWidget *parent) :
     settings.setIniCodec( "UTF-8" );
 
     if(saveDestination_) {
-        ui_->pathLine->setText(settings.value(QLatin1String("destination"),
-                                              QDesktopServices::storageLocation(QDesktopServices::MusicLocation)).toString());
+        ui_->pathLine->setText(settings.value(QLatin1String("destination"), QDesktopServices::storageLocation(QDesktopServices::MusicLocation)).toString());
         if(ui_->pathLine->text().isEmpty())
             ui_->pathLine->setText(QDesktopServices::storageLocation(QDesktopServices::MusicLocation));
     } else {
         ui_->pathLine->setText(QDesktopServices::storageLocation(QDesktopServices::MusicLocation));
     }
 
-    Utility::downloadPath = ui_->pathLine->text();
+    matchItemListDelegate_->setPath(ui_->pathLine->text());
 
     setGeometry(settings.value(QLatin1String("windowGeometry"), QRect(100,100,350,600)).toRect());
 }
@@ -132,7 +140,7 @@ MainWindow::MainWindow(QWidget *parent) :
 */
 MainWindow::~MainWindow()
 {
-    delete api_;
+    delete qnam_;
 
     saveSettings();
 }
@@ -153,8 +161,7 @@ void MainWindow::setupUi()
     ui_->label1->setFont(Utility::font(QFont::Bold, 2));
     ui_->label2->setText(trUtf8("Offline Grooveshark.com music"));
 
-//    statusBar()->showMessage(trUtf8("Connecting...", 0));
-    playerWidget->showMessage(trUtf8("Connecting..."));
+    statusBar()->showMessage(trUtf8("Connecting...", 0));
 
     // Led
     ui_->qled->setFixedSize(QSize(24,24));
@@ -193,8 +200,7 @@ void MainWindow::setupUi()
     ui_->browseButton->setFixedHeight(fontHeight > 25 ? fontHeight : 25);
 
     // label with spinning image: requires QMovie
-    ui_->busyLabel->setMaximumSize(QSize(fontHeight > 25 ? fontHeight : 25,
-                                         fontHeight > 25 ? fontHeight : 25));
+    ui_->busyLabel->setMaximumSize(QSize(fontHeight > 25 ? fontHeight : 25, fontHeight > 25 ? fontHeight : 25));
     ui_->busyLabel->setScaledContents(true);
     busyAnimation_ = new QMovie(QLatin1String(":/resources/busywidget.gif"));
     ui_->busyLabel->setMovie(busyAnimation_);
@@ -208,14 +214,12 @@ void MainWindow::setupUi()
     connect(ui_->searchLine, SIGNAL(returnPressed()), this, SLOT(beginSearch()));
     connect(ui_->artistsCB, SIGNAL(activated(int)), this, SLOT(artistChanged()));
     connect(ui_->albumsCB, SIGNAL(activated(int)), this, SLOT(albumChanged()));
-    connect(playerWidget, SIGNAL(cambioStato(Phonon::State,QString)),
-            ui_->downloadList, SLOT(cambioStato(Phonon::State,QString)));
 
     ui_->matchesMessage->setFont(Utility::font(QFont::Bold));
 
     ui_->splitter->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
 
-    playerWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+    ui_->playerWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
 }
 
 /*!
@@ -224,78 +228,49 @@ void MainWindow::setupUi()
 */
 void MainWindow::setupActions()
 {
-    actionClose_ = new QAction(QIcon::fromTheme(QLatin1String("application-exit"),
-                               QIcon(QLatin1String(":/resources/application-exit.png"))),
-                               trUtf8("&Exit"), this);
+    actionClose_ = new QAction(QIcon::fromTheme(QLatin1String("application-exit"), QIcon(QLatin1String(":/resources/application-exit.png"))), trUtf8("&Exit"), this);
     actionClose_->setToolTip(trUtf8("Close GrooveOff"));
     actionClose_->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Q));
-    connect(actionClose_, SIGNAL(triggered()),
-            this, SLOT(close()));
+    connect(actionClose_, SIGNAL(triggered()), this, SLOT(close()));
 
-    actionDonate_ = new QAction(QIcon::fromTheme(QLatin1String("help-donate"),
-                                QIcon(QLatin1String(":/resources/help-donate.png"))),
-                                trUtf8("&Donate"), this);
+    actionDonate_ = new QAction(QIcon::fromTheme(QLatin1String("help-donate"), QIcon(QLatin1String(":/resources/help-donate.png"))), trUtf8("&Donate"), this);
     actionDonate_->setToolTip(trUtf8("Donate with PayPal"));
-    connect(actionDonate_, SIGNAL(triggered()),
-            this, SLOT(donate()));
+    connect(actionDonate_, SIGNAL(triggered()), this, SLOT(donate()));
 
     actionConfigure_ = new QAction(trUtf8("&Configure GrooveOff..."), this);
     if(QIcon::hasThemeIcon(QLatin1String("configure")))
         actionConfigure_->setIcon(QIcon::fromTheme(QLatin1String("configure")));
     else
-        actionConfigure_->setIcon(QIcon::fromTheme(QLatin1String("gconf-editor"),
-                                  QIcon(QLatin1String(":/resources/configure.png"))));
+        actionConfigure_->setIcon(QIcon::fromTheme(QLatin1String("gconf-editor"), QIcon(QLatin1String(":/resources/configure.png"))));
 
-    connect(actionConfigure_, SIGNAL(triggered()),
-            this, SLOT(configure()));
+    connect(actionConfigure_, SIGNAL(triggered()), this, SLOT(configure()));
 
-    actionCompact_ = new QAction(QIcon::fromTheme(QLatin1String("view-split-top-bottom"),
-                                 QIcon(QLatin1String(":/resources/view-split-top-bottom.png"))),
-                                 trUtf8("&Compact"), this);
+    actionCompact_ = new QAction(QIcon::fromTheme(QLatin1String("view-split-top-bottom"), QIcon(QLatin1String(":/resources/view-split-top-bottom.png"))), trUtf8("&Compact"), this);
     actionCompact_->setCheckable(true);
-    connect(actionCompact_, SIGNAL(triggered()),
-            this, SLOT(setCompactLayout()));
+    connect(actionCompact_, SIGNAL(triggered()), this, SLOT(setCompactLayout()));
 
-    actionWide_ = new QAction(QIcon::fromTheme(QLatin1String("view-split-left-right"),
-                              QIcon(QLatin1String(":/resources/view-split-left-right"))),
-                              trUtf8("&Wide"), this);
+    actionWide_ = new QAction(QIcon::fromTheme(QLatin1String("view-split-left-right"), QIcon(QLatin1String(":/resources/view-split-left-right"))), trUtf8("&Wide"), this);
     actionWide_->setCheckable(true);
-    connect(actionWide_, SIGNAL(triggered()),
-            this, SLOT(setWideLayout()));
+    connect(actionWide_, SIGNAL(triggered()), this, SLOT(setWideLayout()));
 
-    actionNewToken_ = new QAction(QIcon::fromTheme(QLatin1String("emblem-new"),
-                                  QIcon(QLatin1String(":/resources/emblem-new.png"))),
-                                  trUtf8("&Get new token..."), this);
-    connect(actionNewToken_, SIGNAL(triggered()),
-            this, SLOT(getToken()));
+    actionNewToken_ = new QAction(QIcon::fromTheme(QLatin1String("emblem-new"), QIcon(QLatin1String(":/resources/emblem-new.png"))), trUtf8("&Get new token..."), this);
+    connect(actionNewToken_, SIGNAL(triggered()), this, SLOT(newToken()));
 
     layoutGroup_ = new QActionGroup(this);
     layoutGroup_->addAction(actionCompact_);
     layoutGroup_->addAction(actionWide_);
 
-    actionRemoveFailed_ = new QAction(QIcon::fromTheme(QLatin1String("edit-delete"),
-                                      QIcon(QLatin1String(":/resources/edit-delete.png"))),
-                                      trUtf8("&Remove deleted/failed songs"), this);
-    connect(actionRemoveFailed_, SIGNAL(triggered(bool)),
-            ui_->downloadList, SLOT(removeFailedDeletedAborted()));
+    actionRemoveFailed_ = new QAction(QIcon::fromTheme(QLatin1String("edit-delete"),QIcon(QLatin1String(":/resources/edit-delete.png"))), trUtf8("&Remove deleted/failed songs"), this);
+    connect(actionRemoveFailed_, SIGNAL(triggered(bool)), this, SLOT(removeFailedDeletedAborted()));
 
-    actionClearDownloadList_ = new QAction(QIcon::fromTheme(QLatin1String("edit-clear"),
-                                           QIcon(QLatin1String(":/resources/edit-clear"))),
-                                           trUtf8("Remove &downloaded songs"), this);
-    connect(actionClearDownloadList_, SIGNAL(triggered(bool)),
-            ui_->downloadList, SLOT(removeDownloaded()));
+    actionClearDownloadList_ = new QAction(QIcon::fromTheme(QLatin1String("edit-clear"),QIcon(QLatin1String(":/resources/edit-clear"))), trUtf8("Remove &downloaded songs"), this);
+    connect(actionClearDownloadList_, SIGNAL(triggered(bool)), this, SLOT(removeDownloaded()));
 
-    actionAbout_ = new QAction(QIcon::fromTheme(QLatin1String("help-about"),
-                               QIcon(QLatin1String(":/resources/help-about.png"))),
-                               trUtf8("&About GrooveOff"), this);
-    connect(actionAbout_, SIGNAL(triggered()),
-            this, SLOT(about()));
+    actionAbout_ = new QAction(QIcon::fromTheme(QLatin1String("help-about"), QIcon(QLatin1String(":/resources/help-about.png"))), trUtf8("&About GrooveOff"), this);
+    connect(actionAbout_, SIGNAL(triggered()), this, SLOT(about()));
 
-    actionQtAbout_ = new QAction(QIcon::fromTheme(QLatin1String("qtlogo"),
-                                 QIcon(QLatin1String(":/resources/qtlogo.png"))),
-                                 trUtf8("About &Qt"), this);
-    connect(actionQtAbout_, SIGNAL(triggered()),
-            qApp, SLOT(aboutQt()));
+    actionQtAbout_ = new QAction(QIcon::fromTheme(QLatin1String("qtlogo"), QIcon(QLatin1String(":/resources/qtlogo.png"))), trUtf8("About &Qt"), this);
+    connect(actionQtAbout_, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
 }
 
 /*!
@@ -317,8 +292,7 @@ void MainWindow::setupMenus()
     settingsMenu_ = new QMenu(trUtf8("&Settings"));
     settingsMenu_->addAction(actionConfigure_);
     layoutMenu_ = new QMenu(trUtf8("&Layout"));
-    layoutMenu_->setIcon(QIcon::fromTheme(QLatin1String("view-multiple-objects"),
-                         QIcon(QLatin1String(":/resources/view-multiple-objects.png"))));
+    layoutMenu_->setIcon(QIcon::fromTheme(QLatin1String("view-multiple-objects"), QIcon(QLatin1String(":/resources/view-multiple-objects.png"))));
     viewMenu_->addMenu(layoutMenu_);
     layoutMenu_->addAction(actionCompact_);
     layoutMenu_->addAction(actionWide_);
@@ -339,17 +313,18 @@ void MainWindow::setupMenus()
 */
 void MainWindow::selectFolder()
 {
-    QString dir = QFileDialog::getExistingDirectory(this, trUtf8("Select Directory"),
+    dir_ = QFileDialog::getExistingDirectory(this, trUtf8("Select Directory"),
                                               ui_->pathLine->text().isEmpty() ? QDir::homePath() : ui_->pathLine->text(),
                                               QFileDialog::ShowDirsOnly
                                               | QFileDialog::DontResolveSymlinks);
 
     // be sure that a valid path was selected
-    if(QFile::exists(dir))
-        ui_->pathLine->setText(dir);
+    if(QFile::exists(dir_))
+        ui_->pathLine->setText(dir_);
+    else
+        dir_ = ui_->pathLine->text();
 
-    Utility::downloadPath = ui_->pathLine->text();
-    reloadItemsDownloadButtons();
+    matchItemListDelegate_->setPath(ui_->pathLine->text());
 }
 
 /*!
@@ -377,35 +352,46 @@ void MainWindow::beginSearch()
         setupCompleter();
     }
 
-    qDebug() << "GrooveOff ::" << "Searching for" << ui_->searchLine->text();
+    // the real network routine for searching songs
+    getResultsFromSearch(ui_->searchLine->text());
+}
 
-    // flag that prevents multiple searches
-    searchInProgress_ = true;
+/*!
+  \brief randomHex: generate a session unique random hex
+  \param length : length of the random string
+  \return random hex as string
+*/
+QString MainWindow::randomHex(const int &length)
+{
+    QString randomHex;
 
-    // some ui setups
-    ui_->busyLabel->setVisible(true);
-    ui_->searchButton->setVisible(false);
-    busyAnimation_->start();
-
-    // clear cover manager
-    cvrMngr_->clear();
-
-    // clear listWidget
-    for(int i = ui_->matchList->count() - 1; i >= 0; i--) {
-        QListWidgetItem *item = ui_->matchList->takeItem(i);
-        ui_->downloadList->removeItemWidget(item);
-        delete item;
+    for(int i = 0; i < length; i++) {
+        int n = qrand() % 16;
+        randomHex.append(QString::number(n,16));
     }
 
-    // clear artists, albums containers
-    ui_->artistsCB->clear();
-    ui_->artistsCB->addItem(trUtf8("All Artists"));
-    ui_->albumsCB->clear();
-    ui_->albumsCB->addItem(trUtf8("All Albums"));
-    artistsAlbumsContainer_.clear();
+    return randomHex;
+}
 
-    songList_ = api_->songs(ui_->searchLine->text(), token_->result());
-    connect(songList_.data(), SIGNAL(finished()), this, SLOT(populateResultsList()));
+/*!
+  \brief setTokenRequest: setup a request used for token retrieval
+  \return void
+*/
+void MainWindow::setTokenRequest()
+{
+    tokenRequest_.setRawHeader(QByteArray("User-Agent"), Utility::userAgent);
+    tokenRequest_.setHeader(QNetworkRequest::ContentTypeHeader, QLatin1String("application/json"));
+}
+
+/*!
+  \brief setMainRequest: setup a request used for search
+  \return void
+*/
+void MainWindow::setMainRequest()
+{
+    mainRequest_.setRawHeader(QByteArray("User-Agent"), Utility::userAgent);
+    mainRequest_.setRawHeader(QByteArray("Referer"), QString("http://%1/JSQueue.swf?%2").arg(Utility::host).arg(Utility::jsqueue().at(1)).toAscii());
+    mainRequest_.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 }
 
 /*!
@@ -421,61 +407,73 @@ void MainWindow::getToken()
 
     // some ui setups
     ui_->qled->setValue(false);
-    //statusBar()->showMessage(trUtf8("Connecting..."), 0);
-    playerWidget->showMessage(trUtf8("Connecting..."));
+    statusBar()->showMessage(trUtf8("Connecting..."), 0);
 
-    token_ = api_->token();
-    connect( token_.data(), SIGNAL(finished()), this, SLOT(tokenReturned()));
-    connect(token_.data(), SIGNAL(parseError()), this, SLOT(errorDuringToken()));
+    // set current operation
+    currentJob_ = GrooveOff::TokenJob;
+
+    QJson::Serializer serializer;
+    QByteArray json = serializer.serialize(Utility::getTokenMap());
+
+    tokenRequest_.setUrl(QUrl(QLatin1String("https://") + Utility::host + QLatin1String("/more.php")));
+
+    qnam_->post(tokenRequest_,json);
 }
 
-void MainWindow::tokenReturned()
+/*!
+  \brief getResultsFromSearch : return match results
+  \param query : text to search
+  \param what : type of search
+  \return void
+*/
+void MainWindow::getResultsFromSearch(const QString &query, const QString &what)
 {
-    //token_->result()
-    //TODO: gestire errore
+    qDebug() << "GrooveOff ::" << "Searching for" << query;
 
-    // the application is now free to perform a search
-    searchInProgress_ = false;
-    ui_->searchButton->setEnabled(true);
+    // flag that prevents multiple searches
+    searchInProgress_ = true;
 
-    if(!token_->result().isEmpty()) {
-        ui_->searchLine->setStyleSheet("");
+    // some ui setups
+    ui_->busyLabel->setVisible(true);
+    ui_->searchButton->setVisible(false);
+    busyAnimation_->start();
 
-        // give token to existing download items
-        for(int i = 0; i < ui_->downloadList->count(); i++) {
-            ((DownloadItem *)ui_->downloadList->itemWidget(ui_->downloadList->item(i)))->setToken(token_->result());
-        }
+    // clear songs list
+    songs_.clear();
 
-        //statusBar()->showMessage(trUtf8("Connected"), 3000);
-        playerWidget->showMessage(trUtf8("Connected"));
-        ui_->qled->setValue(true);
-        ui_->qled->setToolTip(trUtf8("You're connected to grooveshark!"));
-        ui_->matchList->setEnabled(true);
-    } else {
-        //statusBar()->showMessage(trUtf8("Token not received!!"), 3000);
-        playerWidget->showMessage(trUtf8("Token not received!!"));
-        qDebug() << "GrooveOff ::" << "Token not received!!";
-//        qDebug() << "GrooveOff ::" << result;
-    }
+    // clear list of previous results
+    results_.clear();
+
+    // clear the model
+    listModel_->clear();
+    proxyModel_->setSourceModel(listModel_);
+
+    // clear artists, albums containers
+    ui_->artistsCB->clear();
+    ui_->artistsCB->addItem(trUtf8("All Artists"));
+    ui_->albumsCB->clear();
+    ui_->albumsCB->addItem(trUtf8("All Albums"));
+    artistsAlbumsContainer_.clear();
+
+    QVariantMap map = Utility::searchMap(query, what, token_);
+    QJson::Serializer serializer;
+    QByteArray json = serializer.serialize(map);
+
+    tokenRequest_.setUrl(QUrl(QLatin1String("http://") + Utility::host + QLatin1String("/more.php?") + map.value(QLatin1String("method")).toByteArray()));
+    currentJob_ = GrooveOff::SearchJob;
+    qnam_->post(tokenRequest_,json);
 }
-
 
 /*!
   \brief populateResultsTable : fills results list
   \return void
 */
-void MainWindow::populateResultsList()
+void MainWindow::populateResultsTable()
 {
-    //TODO: controllo erori
-    searchInProgress_ = false;
-
-    ui_->busyLabel->setVisible(false);
-    ui_->searchButton->setVisible(true);
-    busyAnimation_->stop();
-
     // check if last search returned results
-    if(songList_->list().count() == 0)
+    if(results_.count() == 0) {
         return;
+    }
 
     // row index (start from 0)
     row_ = 0;
@@ -484,36 +482,41 @@ void MainWindow::populateResultsList()
     int count;
 
     if(maxResults_ == 0) // no results limit
-        count = songList_->list().count();
+        count = results_.count();
     else // limit results for performance
-        count = qMin(maxResults_, songList_->list().count());
+        count = qMin(maxResults_, results_.count());
 
     ui_->combosContainer->setVisible(true);
 
     QStringList artists;
     QStringList albums;
 
+    // start building a qlist of Song objects
     for(int i = 0; i < count; i++) {
-        QSharedPointer<SongObject> shSong(new SongObject(songList_->list().at(i)));
+        QVariantMap m = results_.at(i).toMap();
+
+        // quite obvious...
+        Song *song = new Song(this);
+        song->setTitle(m[QLatin1String("SongName")].toString());
+        song->setAlbum(m[QLatin1String("AlbumName")].toString());
+        song->setArtist(m[QLatin1String("ArtistName")].toString());
+        song->setYear(m[QLatin1String("Year")].toString());
+        song->setId(m[QLatin1String("SongID")].toString());
 
         // Decide if show cover arts
-        if(loadCovers_ && !QFile::exists(Utility::coversCachePath + songList_->list().at(i)->coverArtFilename())) {
-            cvrMngr_->addItem(shSong);
-        }
+        if(loadCovers_ && !m[QLatin1String("CoverArtFilename")].toString().isEmpty())
+            song->setCoverName(m[QLatin1String("CoverArtFilename")].toString());
+        else
+            song->setCoverName(QLatin1String("NoCoverArt"));
 
-        // build a DownloadItem with all required data
-        MatchItem *matchItem = new MatchItem(shSong, this);
-        QListWidgetItem *wItem = new QListWidgetItem;
-        ui_->matchList->addItem(wItem);
-        ui_->matchList->setItemWidget(wItem, matchItem);
-        wItem->setSizeHint(QSize(Utility::coverSize + Utility::marginSize * 2,Utility::coverSize + Utility::marginSize * 2));
-        connect(matchItem, SIGNAL(download(QSharedPointer<SongObject>)), this, SLOT(addDownloadItem(QSharedPointer<SongObject>)));
+        connect(song, SIGNAL(trigRepaint()), this, SLOT(reloadItemsCover()));
 
-        // populate filter widgets
+        songs_.append(song);
+
         bool found = false;
         int j = 0;
         for(; j < artistsAlbumsContainer_.count(); j++) {
-            if(artistsAlbumsContainer_.at(j).first == songList_->list().at(i)->artistName()) {
+            if(artistsAlbumsContainer_.at(j).first == m[QLatin1String("ArtistName")].toString()) {
                 found = true;
                 break;
             }
@@ -522,23 +525,27 @@ void MainWindow::populateResultsList()
         if(found) {
             bool albumExists = false;
             for(int k = 0; k < artistsAlbumsContainer_[j].second.count(); k++) {
-                if(artistsAlbumsContainer_[j].second.at(k) == songList_->list().at(i)->albumName())
+                if(artistsAlbumsContainer_[j].second.at(k) == m[QLatin1String("AlbumName")].toString())
                     albumExists = true;
             }
             if(!albumExists) {
-                artistsAlbumsContainer_[j].second << songList_->list().at(i)->albumName();
+                artistsAlbumsContainer_[j].second << m[QLatin1String("AlbumName")].toString();
                 artistsAlbumsContainer_[j].second.sort();
             }
         } else {
             QPair<QString, QStringList> e;
-            e.first = songList_->list().at(i)->artistName();
-            e.second << songList_->list().at(i)->albumName();
+            e.first = m[QLatin1String("ArtistName")].toString();
+            e.second << m[QLatin1String("AlbumName")].toString();
             artistsAlbumsContainer_.append(e);
-            artists << songList_->list().at(i)->artistName();
+            artists << m[QLatin1String("ArtistName")].toString();
         }
 
-        albums << songList_->list().at(i)->albumName();
+        albums << m[QLatin1String("AlbumName")].toString();
     }
+
+    // use 'songs' in our model
+    listModel_->setElements(songs_);
+    proxyModel_->setSourceModel(listModel_);
 
     // removing duplicates
     artists.removeDuplicates();
@@ -554,11 +561,97 @@ void MainWindow::populateResultsList()
 }
 
 /*!
+  \brief newToken : get a new token (if previous is outdated or not working)
+  \return void
+*/
+void MainWindow::newToken()
+{
+    getToken();
+}
+
+/*!
+  \brief replyFinished : evaluate network reply once finished
+  \param reply : network reply
+  \return void
+*/
+void MainWindow::replyFinished(QNetworkReply *reply)
+{
+    // check if reply was wrong
+    if(!reply->error() == QNetworkReply::NoError) {
+        qDebug() << "GrooveOff ::" << reply->errorString();
+
+        // the error occurred during token request...
+        if(currentJob_ == GrooveOff::TokenJob) {
+            statusBar()->showMessage(reply->errorString(), 3000);
+            ui_->qled->setToolTip(trUtf8("Check your connection and try again"));
+            ui_->searchButton->setEnabled(false);
+        } else if(currentJob_ == GrooveOff::SearchJob) { // the error occurred during search request...
+            populateResultsTable();
+        }
+        return;
+    }
+
+    // the application is now free to perform a search
+    searchInProgress_ = false;
+    ui_->searchButton->setEnabled(true);
+
+    QJson::Parser parser;
+    bool ok;
+
+    // get the reply data
+    QByteArray data = reply->readAll();
+
+    // json is a QString containing the data to convert
+    QVariantMap result = parser.parse (data, &ok).toMap();
+
+    if (!ok) {
+        qDebug() << "GrooveOff ::" << "An error occurred during parsing";
+        ui_->busyLabel->setVisible(false);
+        ui_->searchButton->setVisible(true);
+        busyAnimation_->stop();
+        return;
+    }
+
+    switch(currentJob_) {
+    case GrooveOff::TokenJob:
+        token_ = result[QLatin1String("result")].toString();
+        if(!token_.isEmpty()) {
+            ui_->searchLine->setStyleSheet("");
+
+            // give token to existing download items
+            for(int i = 0; i < ui_->downloadList->count(); i++) {
+                ((DownloadItem *)ui_->downloadList->itemWidget(ui_->downloadList->item(i)))->setToken(token_);
+            }
+
+            statusBar()->showMessage(trUtf8("Connected"), 3000);
+            ui_->qled->setValue(true);
+            ui_->qled->setToolTip(trUtf8("You're connected to grooveshark!"));
+            ui_->listView->setEnabled(true);
+        } else {
+            statusBar()->showMessage(trUtf8("Token not received!!"), 3000);
+            qDebug() << "GrooveOff ::" << "Token not received!!";
+            qDebug() << "GrooveOff ::" << result;
+        }
+
+        break;
+    case GrooveOff::SearchJob:
+        ui_->busyLabel->setVisible(false);
+        ui_->searchButton->setVisible(true);
+        busyAnimation_->stop();
+        results_ = result[QLatin1String("result")].toMap()[QLatin1String("result")].toList();
+
+        populateResultsTable();
+
+        break;
+    }
+}
+
+/*!
   \brief addDownloadItem : add a new download to the list
   \param index : index of item in results list (to download)
   \return void
 */
-void MainWindow::addDownloadItem(QSharedPointer<SongObject> song)
+void MainWindow::addDownloadItem(const QModelIndex &index)
 {
     // check if destination folder exists
     if(!QFile::exists(ui_->pathLine->text())) {
@@ -579,10 +672,10 @@ void MainWindow::addDownloadItem(QSharedPointer<SongObject> song)
         return;
     }
 
-    if(isDownloadingQueued(song.data()->id()))
+    if(isDownloadingQueued(index.data(SongRoles::Id).toString()))
         return;
 
-    QString fileName = song.data()->title() + " - " + song.data()->artist();
+    QString fileName = index.data(SongRoles::Artist).toString() + " - " + index.data(Qt::DisplayRole).toString();
 
     // check file existence
     if(QFile::exists(ui_->pathLine->text() + QDir::separator() + fileName + ".mp3")) {
@@ -598,35 +691,34 @@ void MainWindow::addDownloadItem(QSharedPointer<SongObject> song)
         }
     }
 
-    song.data()->setPath(ui_->pathLine->text());
-
     // build a DownloadItem with all required data
-    DownloadItem *item = new DownloadItem(song,
-                                          token_->result(),
+    DownloadItem *item = new DownloadItem(ui_->pathLine->text(), // save folder
+                                          fileName,
+                                          index.data(SongRoles::Id).toString(), // song id
+                                          token_,
+                                          index.data(SongRoles::Cover).toString(),
                                           this);
-    connect(item, SIGNAL(play(QString)), playerWidget, SLOT(play(QString)));
-    connect(item, SIGNAL(reloadPlaylist()), ui_->downloadList, SLOT(reloadPlaylist()));
 
     // check if download queue_ is full
-//     if(parallelDownloadsCount_ < maxDownloads_) {
-//         parallelDownloadsCount_++;
-//         item->startDownload();
-//     } else {
-//         queue_.append(item);
-//     }
-    queue_.append(item);
-    streamKey_ = api_->streamKey(song.data()->id(), token_->result());
-    connect( streamKey_.data(), SIGNAL(finished()), this, SLOT(streamKeyRicevuto()));
+    if(parallelDownloadsCount_ < maxDownloads_) {
+        parallelDownloadsCount_++;
+        item->startDownload();
+    } else {
+        queue_.append(item);
+    }
 
+    connect(item, SIGNAL(play(DownloadItem*)), ui_->playerWidget, SLOT(playItem(DownloadItem*)));
+    connect(item, SIGNAL(remove(DownloadItem*)), ui_->playerWidget, SLOT(removeItem(DownloadItem*)));
     connect(item, SIGNAL(downloadFinished()), this, SLOT(freeDownloadSlot()));
+    connect(item, SIGNAL(pauseResumePlaying()), ui_->playerWidget, SLOT(pauseResumePlaying()));
     connect(item, SIGNAL(addToQueue(DownloadItem*)), this, SLOT(addItemToQueue(DownloadItem*)));
+    connect(item, SIGNAL(stateChangedSignal()), listModel_, SLOT(forceRepaint()));
 
     QListWidgetItem *i = new QListWidgetItem;
     ui_->downloadList->addItem(i);
     ui_->downloadList->setItemWidget(i, item);
     ui_->downloadList->setCurrentItem(i);
-    i->setSizeHint(QSize(Utility::coverSize + Utility::marginSize * 2,
-                         Utility::coverSize + Utility::marginSize * 2));
+    i->setSizeHint(QSize(50,50));
 }
 
 /*!
@@ -636,7 +728,6 @@ void MainWindow::addDownloadItem(QSharedPointer<SongObject> song)
 void MainWindow::setCompactLayout()
 {
     ui_->splitter->setOrientation(Qt::Vertical);
-    playerWidget->showElapsedTimerLabel(false);
 
     // save choice
     QSettings settings;
@@ -651,7 +742,6 @@ void MainWindow::setCompactLayout()
 void MainWindow::setWideLayout()
 {
     ui_->splitter->setOrientation(Qt::Horizontal);
-    playerWidget->showElapsedTimerLabel(true);
 
     // save choice
     QSettings settings;
@@ -688,13 +778,12 @@ void MainWindow::configure()
 */
 void MainWindow::onlineStateChanged(bool isOnline) {
     if(isOnline) { // when returning online get a new token
-        getToken();
+        newToken();
     } else {
-        //statusBar()->showMessage(trUtf8("Offline"),0);
-        playerWidget->showMessage(trUtf8("Offline"));
+        statusBar()->showMessage(trUtf8("Offline"),0);
         ui_->searchButton->setEnabled(false);
         ui_->qled->setValue(false);
-        ui_->matchList->setEnabled(false);
+        ui_->listView->setEnabled(false);
     }
 }
 
@@ -731,15 +820,12 @@ void MainWindow::loadSettings()
     }
 
     ui_->splitter->setOrientation((Qt::Orientation)settings.value(QLatin1String("splitterOrientation"), Qt::Vertical).toInt());
-    playerWidget->showElapsedTimerLabel(ui_->splitter->orientation() == Qt::Vertical ? false : true);
 
     QList<int> _sizes = settings.value(QLatin1String("splitterSizes")).value< QList<int> >();
 
     if(!_sizes.isEmpty()) {
         ui_->splitter->setSizes(_sizes);
     }
-
-    playerWidget->setTimerState((GrooveOff::TimerState)settings.value(QLatin1String("timerState"), GrooveOff::ElapsedState).toInt());
 }
 
 /*!
@@ -762,8 +848,6 @@ void MainWindow::saveSettings()
         settings.setValue(QLatin1String("destination"), ui_->pathLine->text());
     else
         settings.setValue(QLatin1String("destination"), QString());
-
-    settings.setValue(QLatin1String("timerState"), playerWidget->getTimerState());
 }
 
 /*!
@@ -781,34 +865,23 @@ void MainWindow::donate()
 */
 void MainWindow::applyFilter()
 {
-    QString artist = ui_->artistsCB->currentText();
-    QString album = ui_->albumsCB->currentText();
+    QString artist;
+    QString album;
 
-    for(int i = 0; i < ui_->matchList->count(); i++) {
-        QString itemArtist = ((MatchItem *)ui_->matchList->itemWidget(ui_->matchList->item(i)))->artist();
-        QString itemAlbum  = ((MatchItem *)ui_->matchList->itemWidget(ui_->matchList->item(i)))->album();
+    if(ui_->artistsCB->currentIndex() == 0)
+        artist = "All Artists";
+    else
+        artist = ui_->artistsCB->currentText();
 
-        if( ui_->artistsCB->currentIndex() == 0  && ui_->albumsCB->currentIndex() == 0) {
-            ui_->matchList->setRowHidden(i, false);
-        } else if( ui_->artistsCB->currentIndex() == 0 ) {
-            if( itemAlbum == album )
-                ui_->matchList->setRowHidden(i, false);
-            else
-                ui_->matchList->setRowHidden(i, true);
-        } else if( ui_->albumsCB->currentIndex() == 0 ) {
-            if( itemArtist == artist )
-                ui_->matchList->setRowHidden(i, false);
-            else
-                ui_->matchList->setRowHidden(i, true);
-        } else {
-            if( itemArtist == artist && itemAlbum == album   )
-                ui_->matchList->setRowHidden(i, false);
-            else
-                ui_->matchList->setRowHidden(i, true);
-        }
-    }
+    if(ui_->albumsCB->currentIndex() == 0)
+        album = "All Albums";
+    else
+        album = ui_->albumsCB->currentText();
 
-    ui_->matchesMessage->setText(trUtf8("%n song(s) found", "", visibleItemsCount()));
+    proxyModel_->setMatchTerms(artist, album);
+    proxyModel_->setFilterRegExp(QRegExp());
+    //ui_->matchesMessage->setText(trUtf8("%1 songs found").arg(proxyModel_->rowCount()));
+    ui_->matchesMessage->setText(trUtf8("%n song(s) found", "", proxyModel_->rowCount()));
 }
 
 /*!
@@ -862,6 +935,40 @@ void MainWindow::unqueue()
 }
 
 /*!
+  \brief removeFailedDeletedAborted : remove failed/deleted/aborted items from download list
+  \return void
+*/
+void MainWindow::removeFailedDeletedAborted()
+{
+    for(int i = ui_->downloadList->count() - 1; i >= 0; i--) {
+        GrooveOff::DownloadState state = ((DownloadItem *)ui_->downloadList->itemWidget(ui_->downloadList->item(i)))->downloadState();
+        if(state == GrooveOff::AbortedState ||
+           state == GrooveOff::DeletedState ||
+           state == GrooveOff::ErrorState ) {
+            QListWidgetItem *item = ui_->downloadList->takeItem(i);
+            ui_->downloadList->removeItemWidget(item);
+            delete item;
+        }
+    }
+}
+
+/*!
+  \brief removeDownloaded : remove successfully downloaded items from download list
+  \return void
+*/
+void MainWindow::removeDownloaded()
+{
+    for(int i = ui_->downloadList->count() - 1; i >= 0; i--) {
+        GrooveOff::DownloadState state = ((DownloadItem *)ui_->downloadList->itemWidget(ui_->downloadList->item(i)))->downloadState();
+        if(state == GrooveOff::FinishedState) {
+            QListWidgetItem *item = ui_->downloadList->takeItem(i);
+            ui_->downloadList->removeItemWidget(item);
+            delete item;
+        }
+    }
+}
+
+/*!
   \brief addItemToQueue : add an item to the queue_ list
   \param item: item to add
   \return void
@@ -887,7 +994,7 @@ void MainWindow::freeDownloadSlot()
   \param id: song id
   \return bool
 */
-bool MainWindow::isDownloadingQueued(const uint &id)
+bool MainWindow::isDownloadingQueued(const QString &id)
 {
     // check if file is currently downloading
     for(int i = 0; i < ui_->downloadList->count(); i++) {
@@ -905,42 +1012,19 @@ bool MainWindow::isDownloadingQueued(const uint &id)
     return false;
 }
 
-int MainWindow::visibleItemsCount()
+/*!
+  \brief reloadItemsCover : when a new cover was downloaded on cache
+  refresh both listviews
+  \return void
+*/
+void MainWindow::reloadItemsCover()
 {
-    int count = 0;
-    for(int i = 0; i < ui_->matchList->count(); i++) {
-        if(!ui_->matchList->isRowHidden(i))
-            count++;
+    //FIXME : this is quite brutal but it avoids a lot of code (and bugs) and seems working without issues :P
+    listModel_->forceRepaint();
+
+    for(int i = 0; i < ui_->downloadList->count(); i++) {
+        qobject_cast<DownloadItem *>(ui_->downloadList->itemWidget(ui_->downloadList->item(i)))->pickCover();
     }
-
-    return count;
-}
-
-void MainWindow::reloadItemsDownloadButtons()
-{
-    for(int i = 0; i < ui_->matchList->count(); i++) {
-        qobject_cast<MatchItem *>(ui_->matchList->itemWidget(ui_->matchList->item(i)))->setDownloadIcon();
-    }
-}
-
-void MainWindow::streamKeyRicevuto()
-{
-    DownloadItem *item = ui_->downloadList->elemento(streamKey_->id());
-    item->setStreamKey(streamKey_->streamKey());
-    item->setIp(streamKey_->ip());
-
-    // check if download queue_ is full
-     if(parallelDownloadsCount_ < maxDownloads_) {
-         parallelDownloadsCount_++;
-         item->startDownload();
-     }
-}
-
-void MainWindow::errorDuringToken()
-{
-    //statusBar()->showMessage(trUtf8("Token not received!!"), 3000);
-    playerWidget->showMessage(trUtf8("Token not received:") + "\n" + token_->errorString());
-    qDebug() << "GrooveOff ::" << "Token not received: " << token_->errorString();
 }
 
 

@@ -21,7 +21,6 @@
 #define AUDIOPLAYER_H
 
 #include "grooveoff/downloaditem.h"
-#include "grooveoff/grooveoffnamespace.h"
 
 #include <QWidget>
 #include <phonon/MediaObject>
@@ -42,44 +41,32 @@ public:
     explicit AudioPlayer(QWidget *parent = 0);
     virtual ~AudioPlayer();
 
-    void showElapsedTimerLabel(bool);
-
-    GrooveOff::TimerState getTimerState() { return timerState; }
-    void setTimerState(GrooveOff::TimerState state) { timerState = state; }
-
-    void showMessage(const QString &message);
+    GrooveOff::DownloadState currentItemDownloadState() { return item->downloadState(); }
 
 public slots:
+    void playItem(DownloadItem *i);
     void pauseResumePlaying();
-    void play(QString);
-
-signals:
-    void cambioStato(Phonon::State newState, QString source);
 
 private slots:
-    void tick(qint64 elapsedTime);
+    void tick(qint64 time);
     void aboutToFinish();
     void stopPlaying();
+    void removeItem(DownloadItem *i);
     void stateChanged(Phonon::State newState, Phonon::State oldState);
-    void toggleTimeLabel();
-    void removeFromPlaylist();
-    void sourceChanged(Phonon::MediaSource);
 
 private:
     Ui::AudioPlayer *ui_;
     Phonon::MediaObject *mediaObject_;
     Phonon::MediaObject *metaInformationResolver_;
     Phonon::AudioOutput *audioOutput_;
+    DownloadItem *item;
+    QList<Phonon::MediaSource> audioSources_;
+    QString currentSongFileName_;
     bool updateState_;
-    GrooveOff::TimerState timerState;
-    int oldIndex_;
-    Phonon::MediaSource oldSource_;
 
     //Methods
     void setupUi();
-    void setupLabels(int);
     void setupActions();
-    int currentIndex(const QString & file);
 };
 
 #endif // AUDIOPLAYER_H

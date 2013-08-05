@@ -188,13 +188,12 @@
       <property name="orientation">
        <enum>Qt::Vertical</enum>
       </property>
-      <widget class="QListWidget" name="matchList"/>
-      <widget class="Playlist" name="downloadList">
-       <property name="dragDropMode">
-        <enum>QAbstractItemView::InternalMove</enum>
-       </property>
-      </widget>
+      <widget class="QListView" name="listView"/>
+      <widget class="QListWidget" name="downloadList"/>
      </widget>
+    </item>
+    <item>
+     <widget class="AudioPlayer" name="playerWidget"/>
     </item>
    </layout>
   </widget>
@@ -218,14 +217,15 @@
    <container>1</container>
   </customwidget>
   <customwidget>
+   <class>AudioPlayer</class>
+   <extends>QFrame</extends>
+   <header location="global">grooveoff/audioplayer.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
    <class>ComboBox</class>
    <extends>QComboBox</extends>
    <header location="global">grooveoff/combobox.h</header>
-  </customwidget>
-  <customwidget>
-   <class>Playlist</class>
-   <extends>QListWidget</extends>
-   <header location="global">grooveoff/playlist.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

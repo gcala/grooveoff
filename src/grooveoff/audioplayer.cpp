@@ -23,7 +23,6 @@
 
 #include <QDir>
 #include <QTime>
-#include <QGraphicsDropShadowEffect>
 
 /*!
   \brief AudioPlayer: this is the AudioPlayer constructor.
@@ -36,7 +35,7 @@ AudioPlayer::AudioPlayer(QWidget *parent) :
     ui_->setupUi(this);
     setupUi();
 
-    oldIndex_ = -1;
+    item = NULL;
 
     // The AudioOutput class is used to send data to audio output devices
     audioOutput_ = new Phonon::AudioOutput(Phonon::MusicCategory, this);
@@ -64,10 +63,6 @@ AudioPlayer::AudioPlayer(QWidget *parent) :
 
     connect(mediaObject_, SIGNAL(aboutToFinish()), this, SLOT(aboutToFinish()));
 
-    connect(mediaObject_,SIGNAL(currentSourceChanged(Phonon::MediaSource)), this, SLOT(sourceChanged(Phonon::MediaSource)));
-
-    connect(ui_->timeLabel, SIGNAL(clicked()), this, SLOT(toggleTimeLabel()));
-
     updateState_ = true;
 }
 
@@ -85,56 +80,97 @@ AudioPlayer::~AudioPlayer()
 */
 void AudioPlayer::setupUi()
 {
-    QGraphicsDropShadowEffect *coverShadow = new QGraphicsDropShadowEffect(this);
-    coverShadow->setBlurRadius(10.0);
-    coverShadow->setColor(palette().color(QPalette::Shadow));
-    coverShadow->setOffset(0.0);
+    ui_->labelsContainerWidget->setVisible(false);
 
-    ui_->coverLabel->setWindowFlags(Qt::FramelessWindowHint);
-    ui_->coverLabel->setAttribute(Qt::WA_TranslucentBackground);
-    ui_->coverLabel->setGraphicsEffect(coverShadow);
+    // Now playing %title by %artist from album %album
+    ui_->label->setText(trUtf8("Now playing:"));
+    ui_->label->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
 
-    ui_->coverLabel->setScaledContents(true);
     ui_->titleLabel->setFont(Utility::font(QFont::Bold));
-    ui_->album_authorLabel->setFont(Utility::font(QFont::Bold));
-    ui_->stackedWidget->setBackgroundRole(QPalette::Base);
-    ui_->messageLabel->setFont(Utility::font(QFont::Bold,1));
+    ui_->titleLabel->setWordWrap(true);
 
     ui_->playPauseButton->setIcon(QIcon::fromTheme(QLatin1String("media-playback-start"), QIcon(QLatin1String(":/resources/media-playback-start.png"))));
     ui_->playPauseButton->setFlat(true);
-    ui_->playPauseButton->setStyleSheet("border: none; outline: none;");
     ui_->playPauseButton->setToolTip(trUtf8("Play"));
-    ui_->playPauseButton->setFixedSize(QSize(32,32));
-    ui_->playPauseButton->setIconSize(QSize(32,32));
+    ui_->playPauseButton->setMaximumSize(QSize(24,24));
     ui_->playPauseButton->setEnabled(false);
     connect(ui_->playPauseButton, SIGNAL(clicked(bool)), this, SLOT(pauseResumePlaying()));
 
     ui_->stopButton->setIcon(QIcon::fromTheme(QLatin1String("media-playback-stop"), QIcon(QLatin1String(":/resources/media-playback-stop.png"))));
     ui_->stopButton->setToolTip(trUtf8("Stop "));
     ui_->stopButton->setFlat(true);
-    ui_->stopButton->setStyleSheet("border: none; outline: none;");
-    ui_->stopButton->setFixedSize(QSize(24,24));
-    ui_->stopButton->setIconSize(QSize(24,24));
-    ui_->stopButton->setContentsMargins( 0, 0, 0, 0 );
+    ui_->stopButton->setMaximumSize(QSize(24,24));
     connect(ui_->stopButton, SIGNAL(clicked(bool)), this, SLOT(stopPlaying()));
 
     ui_->timeLabel->setText("00:00");
     ui_->timeLabel->setMinimumSize(QSize(50,0));
     ui_->timeLabel->setFont(Utility::monoFont());
-
-    ui_->elapsedTimeLabel->setText("00:00");
-    ui_->elapsedTimeLabel->setMinimumSize(QSize(50,0));
-    ui_->elapsedTimeLabel->setFont(Utility::monoFont());
 }
 
 /*!
-  \brief showElapsedTimerLabel: show/hide elapsedTimeLabel
-  \param ok: bool
+  \brief play: play a file
+  \param i: item
   \return void
 */
-void AudioPlayer::showElapsedTimerLabel(bool ok)
+void AudioPlayer::playItem(DownloadItem *i)
 {
-    ui_->elapsedTimeLabel->setVisible(ok);
+    updateState_ = true;
+
+    if(item)
+        item->setPlayerState(Phonon::StoppedState);
+
+    item = i;
+
+    QString song = item->path() + QDir::separator() + QString(item->fileName()).replace('/','-');
+
+    QFileInfo fi(song);
+
+    ui_->titleLabel->setText(fi.fileName());
+    ui_->titleLabel->setToolTip(fi.fileName());
+
+    // very minimal playlist: only one song
+    // first stop current media
+    mediaObject_->stop();
+
+    // clear media sources list
+    audioSources_.clear();
+
+    currentSongFileName_ = song;
+
+    // define a new media source and append
+    Phonon::MediaSource source(currentSongFileName_ + ".mp3");
+    audioSources_.append(source);
+
+    // set metaInformer, mediaobject and play
+    metaInformationResolver_->setCurrentSource(audioSources_.at(0));
+    mediaObject_->setCurrentSource(audioSources_.at(0));
+    mediaObject_->play();
+
+    // ui setup
+    ui_->stopButton->setIcon(QIcon::fromTheme(QLatin1String("media-playback-stop"), QIcon(QLatin1String(":/resources/media-playback-stop.png"))));
+    ui_->playPauseButton->setEnabled(true);
+    ui_->playPauseButton->setIcon(QIcon::fromTheme(QLatin1String("media-playback-pause"), QIcon(QLatin1String(":/resources/media-playback-pause.png"))));
+    ui_->playPauseButton->setToolTip(trUtf8("Pause"));
+}
+
+/*!
+  \brief remove: remove a song
+  \param song: file name
+  \return void
+*/
+void AudioPlayer::removeItem(DownloadItem *i)
+{
+    // this slot is activated from a signal in downloadlist widget
+    // when there you want to remove a song you have to alert the media player
+    // who stops playing if removed song is current playing song
+    if(item == i) {
+        item->setPlayerState(Phonon::StoppedState);
+        mediaObject_->stop();
+        ui_->playPauseButton->setEnabled(false);
+        ui_->playPauseButton->setIcon(QIcon::fromTheme(QLatin1String("media-playback-start"), QIcon(QLatin1String(":/resources/media-playback-start.png"))));
+        audioSources_.clear();
+        item = NULL;
+    }
 }
 
 /*!
@@ -147,8 +183,6 @@ void AudioPlayer::stateChanged(Phonon::State newState, Phonon::State oldState)
 {
     Q_UNUSED(oldState)
 
-    int index = Utility::audioSources.indexOf(mediaObject_->currentSource());
-
     switch (newState) {
     case Phonon::ErrorState:
         if (mediaObject_->errorType() == Phonon::FatalError) {
@@ -158,24 +192,23 @@ void AudioPlayer::stateChanged(Phonon::State newState, Phonon::State oldState)
         }
         break;
     case Phonon::PlayingState:
-        //ui_->labelsContainerWidget->setVisible(true);
-        ui_->playPauseButton->setIcon(QIcon::fromTheme(QLatin1String("media-playback-pause"),
-                                      QIcon(QLatin1String(":/resources/media-playback-pause.png"))));
-        Utility::playlist.at(index).data()->setPlayerState(Phonon::PlayingState);
+        ui_->labelsContainerWidget->setVisible(true);
+        ui_->playPauseButton->setIcon(QIcon::fromTheme(QLatin1String("media-playback-pause"), QIcon(QLatin1String(":/resources/media-playback-pause.png"))));
+            if(item)
+                item->setPlayerState(Phonon::PlayingState);
         break;
     case Phonon::StoppedState:
-        //ui_->labelsContainerWidget->setVisible(false);
-        ui_->playPauseButton->setIcon(QIcon::fromTheme(QLatin1String("media-playback-start"),
-                                      QIcon(QLatin1String(":/resources/media-playback-start.png"))));
+        ui_->labelsContainerWidget->setVisible(false);
+        ui_->playPauseButton->setIcon(QIcon::fromTheme(QLatin1String("media-playback-start"), QIcon(QLatin1String(":/resources/media-playback-start.png"))));
         ui_->timeLabel->setText("00:00");
-        ui_->elapsedTimeLabel->setText("00:00");
-        Utility::playlist.at(index).data()->setPlayerState(Phonon::StoppedState);
+            if(item)
+                item->setPlayerState(Phonon::StoppedState);
         break;
     case Phonon::PausedState:
-        //ui_->labelsContainerWidget->setVisible(true);
-        ui_->playPauseButton->setIcon(QIcon::fromTheme(QLatin1String("media-playback-start"),
-                                      QIcon(QLatin1String(":/resources/media-playback-start.png"))));
-        Utility::playlist.at(index).data()->setPlayerState(Phonon::PausedState);
+        ui_->labelsContainerWidget->setVisible(true);
+        ui_->playPauseButton->setIcon(QIcon::fromTheme(QLatin1String("media-playback-start"), QIcon(QLatin1String(":/resources/media-playback-start.png"))));
+            if(item)
+                item->setPlayerState(Phonon::PausedState);
         break;
     default:
         /* do nothing */
@@ -188,26 +221,10 @@ void AudioPlayer::stateChanged(Phonon::State newState, Phonon::State oldState)
   \param time: current play time
   \return void
 */
-void AudioPlayer::tick(qint64 elapsedTime)
+void AudioPlayer::tick(qint64 time)
 {
-    if(mediaObject_->state() == Phonon::StoppedState)
-        return;
-
-    quint64 remainingTime = mediaObject_->remainingTime();
-
-    if(ui_->elapsedTimeLabel->isVisible()) {
-        ui_->elapsedTimeLabel->setText(QTime(0, (elapsedTime / 60000) % 60, (elapsedTime / 1000) % 60).toString("mm:ss"));
-        ui_->timeLabel->setText("-" + QTime(0, (remainingTime / 60000) % 60, (remainingTime / 1000) % 60).toString("mm:ss"));
-    } else {
-        switch(timerState) {
-            case GrooveOff::ElapsedState:
-                ui_->timeLabel->setText(QTime(0, (elapsedTime / 60000) % 60, (elapsedTime / 1000) % 60).toString("mm:ss"));
-                break;
-            case GrooveOff::RemainingState:
-                ui_->timeLabel->setText("-" + QTime(0, (remainingTime / 60000) % 60, (remainingTime / 1000) % 60).toString("mm:ss"));
-                break;
-        }
-    }
+    QTime displayTime(0, (time / 60000) % 60, (time / 1000) % 60);
+    ui_->timeLabel->setText(displayTime.toString("mm:ss"));
 }
 
 /*!
@@ -216,9 +233,9 @@ void AudioPlayer::tick(qint64 elapsedTime)
 */
 void AudioPlayer::aboutToFinish()
 {
-    int index = Utility::audioSources.indexOf(mediaObject_->currentSource()) + 1;
-    if (Utility::audioSources.size() > index) {
-        mediaObject_->enqueue(Utility::audioSources.at(index));
+    int index = audioSources_.indexOf(mediaObject_->currentSource()) + 1;
+    if (audioSources_.size() > index) {
+        mediaObject_->enqueue(audioSources_.at(index));
     }
 }
 
@@ -243,121 +260,10 @@ void AudioPlayer::pauseResumePlaying()
         ui_->playPauseButton->setToolTip(trUtf8("Play"));
     } else{
         mediaObject_->play();
-        //ui_->labelsContainerWidget->setVisible(true);
+        ui_->labelsContainerWidget->setVisible(true);
         ui_->playPauseButton->setIcon(QIcon::fromTheme(QLatin1String("media-playback-pause"), QIcon(QLatin1String(":/resources/media-playback-pause.png"))));
         ui_->playPauseButton->setToolTip(trUtf8("Pause"));
     }
 }
-
-void AudioPlayer::toggleTimeLabel()
-{
-    timerState = (GrooveOff::TimerState)!timerState;
-}
-
-void AudioPlayer::showMessage(const QString& message)
-{
-    ui_->stackedWidget->setCurrentIndex(0);
-    ui_->messageLabel->setText(message);
-}
-
-void AudioPlayer::removeFromPlaylist()
-{
-    for(int i = 0; i < Utility::playlist.count(); i++) {
-        if(Utility::playlist.at(i).data()->id() == ((SongObject *)QObject::sender())->id()) {
-            bool isPlaying = false;
-            qDebug() << "indice canzone rimuovere" << i;
-            qDebug() << "oldIndex_" << oldIndex_;
-            if(i == oldIndex_) {
-                qDebug() << "sto per fermare";
-                mediaObject_->stop();
-                isPlaying = true;
-            }
-            qDebug() << "fermato";
-            Utility::playlist.removeAt(i);
-            qDebug() << "rimosso da playlist";
-            Utility::audioSources.removeAt(i);
-            qDebug() << "rimosso da audio sources";
-            oldIndex_--;
-            qDebug() << "oldIndex_" << oldIndex_;
-            if(isPlaying) {
-                oldIndex_++;
-                qDebug() << "oldIndex_" << oldIndex_;
-                //play(oldIndex_);
-            }
-            break;
-        }
-    }
-}
-
-void AudioPlayer::sourceChanged(Phonon::MediaSource newSource)
-{
-    // fermare la riproduzione precedente
-    emit cambioStato(Phonon::StoppedState, oldSource_.url().toString());
-
-    // recuperiamo l'indice della sorgente attuale per compilare i label
-    int index = currentIndex(newSource.url().toString());
-    setupLabels(index);
-
-    // la nuiva sorgente viene flaggata
-    oldSource_ = newSource;
-
-    // comunichiamo il cambio di stato
-    emit cambioStato(mediaObject_->state(), newSource.url().toString());
-}
-
-void AudioPlayer::setupLabels(int index)
-{
-    QString title = Utility::playlist.at(index).data()->title();
-    QString artist = Utility::playlist.at(index).data()->artist();
-    QString album = Utility::playlist.at(index).data()->album();
-    QString path = Utility::playlist.at(index).data()->path();
-    QString coverName = Utility::playlist.at(index).data()->coverName();
-
-    ui_->titleLabel->setText(title);
-    ui_->titleLabel->setToolTip(title);
-
-    ui_->album_authorLabel->setText(artist + " - " + album);
-
-    if(!coverName.isEmpty() && QFile::exists(Utility::coversCachePath + coverName))
-        ui_->coverLabel->setPixmap(QPixmap(Utility::coversCachePath + coverName));
-    else
-        ui_->coverLabel->setPixmap(QIcon::fromTheme(QLatin1String("media-optical"),
-                                   QIcon(QLatin1String(":/resources/media-optical.png"))).pixmap(ui_->coverLabel->size()));
-}
-
-void AudioPlayer::play(QString source)
-{
-    int index = currentIndex(source);
-
-    if(index < 0)
-        return;
-
-//    metaInformationResolver_->setCurrentSource(Utility::audioSources.at(index));
-    mediaObject_->setCurrentSource(Utility::audioSources.at(index));
-    mediaObject_->play();
-    setupLabels(index);
-    ui_->stackedWidget->setCurrentIndex(1);
-
-    // ui setup
-    ui_->stopButton->setIcon(QIcon::fromTheme(QLatin1String("media-playback-stop"), QIcon(QLatin1String(":/resources/media-playback-stop.png"))));
-    ui_->playPauseButton->setEnabled(true);
-    ui_->playPauseButton->setIcon(QIcon::fromTheme(QLatin1String("media-playback-pause"), QIcon(QLatin1String(":/resources/media-playback-pause.png"))));
-    ui_->playPauseButton->setToolTip(trUtf8("Pause"));
-
-}
-
-int AudioPlayer::currentIndex(const QString &file)
-{
-    int index = -1;
-    for(int i = 0; i < Utility::audioSources.count(); i++) {
-        if(Utility::audioSources.at(i).url().toString() == file) {
-            index = i;
-            break;
-        }
-    }
-    return index;
-}
-
-
 
 #include "audioplayer.moc"

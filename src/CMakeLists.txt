@@ -3,33 +3,22 @@ include_directories(${QT_INCLUDES}
                     ${QJSON_INCLUDE_DIR}
                     ${CMAKE_CURRENT_BINARY_DIR})
 
-set(grooveoff_SRCS grooveoff/coverdownloader.cpp
-                   grooveoff/covermanager.cpp
-                   grooveoff/utility.cpp
+set(grooveoff_SRCS grooveoff/utility.cpp
                    grooveoff/combobox.cpp
+                   grooveoff/filterproxymodel.cpp
                    grooveoff/elidedlabel.cpp
                    grooveoff/aboutdialog.cpp
                    grooveoff/settingsitem.cpp
                    grooveoff/configdialog.cpp
-                   grooveoff/playanimationwidget.cpp
                    grooveoff/timerbutton.cpp
-                   grooveoff/timerlabel.cpp
                    grooveoff/songdownloader.cpp
-                   grooveoff/songobject.cpp
+                   grooveoff/song.cpp
                    grooveoff/qled.cpp
+                   grooveoff/matchitemlistdelegate.cpp
+                   grooveoff/matcheslistmodel.cpp
                    grooveoff/downloaditem.cpp
                    grooveoff/audioplayer.cpp
-                   grooveoff/mainwindow.cpp
-                   grooveoff/matchitem.cpp
-                   grooveoff/playlist.cpp
-                   libgrooveshark/apirequest.cpp
-                   libgrooveshark/config.cpp
-                   libgrooveshark/requesthandler.cpp
-                   libgrooveshark/song.cpp
-                   libgrooveshark/songlist.cpp
-                   libgrooveshark/token.cpp
-                   libgrooveshark/urlbuilder.cpp
-                   libgrooveshark/streamkey.cpp)
+                   grooveoff/mainwindow.cpp)
 
 set(grooveoff_RCS ../grooveoff.qrc)
 qt4_add_resources(grooveoff_RC_SRCS ${grooveoff_RCS} )
@@ -40,8 +29,7 @@ set(grooveoff_UI grooveoff/downloaditem.ui
                  grooveoff/mainwindow.ui
                  grooveoff/configdialog.ui
                  grooveoff/settingsitem.ui
-                 grooveoff/aboutdialog.ui
-                 grooveoff/matchitem.ui)
+                 grooveoff/aboutdialog.ui)
 qt4_wrap_ui(grooveoff_UI_HEADERS ${grooveoff_UI})
 
 qt4_automoc(${grooveoff_SRCS})
