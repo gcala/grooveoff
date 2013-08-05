@@ -1,0 +1,34 @@
+#ifndef CONFIG_P_H
+#define CONFIG_P_H
+
+#include "config.h"
+
+namespace GrooveShark
+{
+
+class ConfigPrivate
+{
+
+public:
+     ConfigPrivate( Config* qq );
+    ~ConfigPrivate();
+
+    QUrl gsBaseUrl() const;
+    void setGsBaseUrl( const QUrl& gsBaseUrl );
+
+    QString userAgent() const;
+
+    QString userAgentPrefix() const;
+    void setUserAgentPrefix( const QString& prefix );
+
+    QString contentType() const;
+private:
+    Config* q;
+    QUrl m_gsBaseUrl;
+    QString m_userAgentPrefix;
+
+};
+
+}
+
+#endif // CONFIG_P_H
