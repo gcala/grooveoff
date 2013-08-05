@@ -32,13 +32,8 @@ class SongDownloader : public QNetworkAccessManager
     Q_OBJECT
 
 public:
-    explicit SongDownloader(const QString &path,
-                            const QString &fileName,
-                            const uint &id,
-                            const QString &token,
-                            const QString &streamKey,
-                            const QString &ip,
-                            QObject *parent = 0);
+    explicit SongDownloader(const QString &path, const QString &fileName, const QString &id,
+                            const QString &token, QObject *parent = 0);
     virtual ~SongDownloader();
 
     void download();
@@ -61,7 +56,7 @@ private:
     QFile *file_;
     QString path_;
     QString fileName_;
-    uint id_;
+    QString id_;
     QString token_;
     QString ip_;
     QString streamKey_;

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>572</width>
-    <height>52</height>
+    <width>581</width>
+    <height>40</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -35,7 +35,7 @@
       <property name="horizontalSpacing">
        <number>5</number>
       </property>
-      <item row="0" column="0" rowspan="2">
+      <item row="0" column="0">
        <widget class="QLabel" name="coverLabel">
         <property name="text">
          <string/>
@@ -44,13 +44,6 @@
       </item>
       <item row="0" column="1">
        <widget class="ElidedLabel" name="titleLabel">
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="ElidedLabel" name="artist_albumLabel">
         <property name="text">
          <string/>
         </property>
@@ -276,39 +269,6 @@
      </layout>
     </widget>
    </item>
-   <item>
-    <widget class="QWidget" name="animationWidget" native="true">
-     <property name="minimumSize">
-      <size>
-       <width>30</width>
-       <height>30</height>
-      </size>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>30</width>
-       <height>30</height>
-      </size>
-     </property>
-     <property name="sizeIncrement">
-      <size>
-       <width>30</width>
-       <height>30</height>
-      </size>
-     </property>
-     <layout class="QGridLayout" name="gridLayout">
-      <property name="leftMargin">
-       <number>0</number>
-      </property>
-      <property name="rightMargin">
-       <number>0</number>
-      </property>
-      <item row="0" column="0">
-       <widget class="PlayAnimationWidget" name="barsWidget" native="true"/>
-      </item>
-     </layout>
-    </widget>
-   </item>
   </layout>
  </widget>
  <customwidgets>
@@ -321,12 +281,6 @@
    <class>ElidedLabel</class>
    <extends>QLabel</extends>
    <header location="global">grooveoff/elidedlabel.h</header>
-  </customwidget>
-  <customwidget>
-   <class>PlayAnimationWidget</class>
-   <extends>QWidget</extends>
-   <header location="global">grooveoff/playanimationwidget.h</header>
-   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>

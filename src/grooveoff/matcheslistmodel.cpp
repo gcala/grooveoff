@@ -29,12 +29,11 @@ MatchesListModel::MatchesListModel(QObject *parent) :
 {
     // Adding new roles
     QHash<int, QByteArray> roles;
-    roles.insert(SongRoles::Title, QByteArray("title"));
     roles.insert(SongRoles::Album, QByteArray("album"));
     roles.insert(SongRoles::Artist, QByteArray("artist"));
     roles.insert(SongRoles::Year, QByteArray("year"));
-    roles.insert(SongRoles::CoverName, QByteArray("coverName"));
-    roles.insert(SongRoles::Id, QByteArray("id"));
+    roles.insert(SongRoles::Cover, QByteArray("cover"));
+    roles.insert(SongRoles::CoverPix, QByteArray("coverPix"));
     setRoleNames(roles);
 }
 
@@ -53,7 +52,7 @@ QVariant MatchesListModel::data ( const QModelIndex& index, int role ) const
         return QVariant();
 
     switch (role) {
-        case SongRoles::Title:
+        case Qt::DisplayRole:
             return QVariant(songs_.at(index.row())->title());
         case SongRoles::Artist:
             return QVariant(songs_.at(index.row())->artist());
@@ -61,8 +60,10 @@ QVariant MatchesListModel::data ( const QModelIndex& index, int role ) const
             return QVariant(songs_.at(index.row())->album());
         case SongRoles::Id:
             return QVariant(songs_.at(index.row())->id());
-        case SongRoles::CoverName:
+        case SongRoles::Cover:
              return QVariant(songs_.at(index.row())->coverName());
+        case SongRoles::CoverPix:
+             return QVariant(songs_.at(index.row())->coverPixmap());
         default:
             return QVariant();
     }

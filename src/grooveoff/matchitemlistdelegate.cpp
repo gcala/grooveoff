@@ -25,6 +25,7 @@
 #include <QApplication>
 #include <QPainter>
 #include <QMouseEvent>
+#include <QPixmapCache>
 #include <QDir>
 
 /*!
@@ -91,20 +92,20 @@ void MatchItemListDelegate::paint ( QPainter* painter, const QStyleOptionViewIte
 
     // album cover pixmap
     QPixmap pix;
-    if(!index.data(SongRoles::CoverName).toString().isEmpty() && QFile::exists(Utility::coversCachePath + index.data(SongRoles::CoverName).toString()))
-        pix.load(Utility::coversCachePath + index.data(SongRoles::CoverName).toString());
-    else
+    if(index.data(SongRoles::CoverPix).value<QPixmap>().isNull()) {
         pix = QIcon::fromTheme(QLatin1String("media-optical"), QIcon(QLatin1String(":/resources/media-optical.png"))).pixmap(Utility::coverSize);
-
-    pix = pix.scaledToWidth(Utility::coverSize, Qt::SmoothTransformation);
+        pix = pix.scaledToWidth(Utility::coverSize, Qt::SmoothTransformation);
+    }
+    else
+        pix = index.data(SongRoles::CoverPix).value<QPixmap>();
 
     // rect hosting cover pixmap
     QRect coverRect;
     coverRect.setX(option.rect.x() + Utility::marginSize);
     coverRect.setY(option.rect.y() + (option.rect.height() / 2 - Utility::coverSize / 2));
+    //coverRect.setY(option.rect.y() + (fmTitle.height()*2 > Utility::coverSize ? (fmTitle.height() - Utility::coverSize / 2) : (option.rect.height() / 2 - Utility::coverSize / 2)));
     coverRect.setWidth(Utility::coverSize);
     coverRect.setHeight(Utility::coverSize);
-
     painter->drawPixmap(coverRect, pix);
 
     // rect hosting song title
@@ -118,9 +119,9 @@ void MatchItemListDelegate::paint ( QPainter* painter, const QStyleOptionViewIte
     painter->save();
     painter->setFont(Utility::font(QFont::Bold));
 
-    QString title = index.data(SongRoles::Title).toString();
+    QString title = index.data(Qt::DisplayRole).toString();
 
-    painter->drawText(titleRect, Qt::AlignLeft | Qt::AlignVCenter, fmTitle.elidedText(title, Qt::ElideRight, titleRect.width()));
+    painter->drawText(titleRect, Qt::AlignLeft | Qt::AlignTop, fmTitle.elidedText(title, Qt::ElideRight, titleRect.width()));
     painter->restore();
 
     QRect albumRect = titleRect;
@@ -129,7 +130,7 @@ void MatchItemListDelegate::paint ( QPainter* painter, const QStyleOptionViewIte
 
     QString artist = index.data(SongRoles::Artist).toString();
     QString album = index.data(SongRoles::Album).toString();
-    painter->drawText(albumRect, Qt::AlignLeft | Qt::AlignVCenter, option.fontMetrics.elidedText(artist + " - " + album, Qt::ElideRight, albumRect.width()));
+    painter->drawText(albumRect, Qt::AlignLeft | Qt::AlignBottom, option.fontMetrics.elidedText(artist + " - " + album, Qt::ElideRight, albumRect.width()));
 
     QRect buttonRect;
     buttonRect.setX(option.rect.width() - Utility::buttonSize - Utility::marginSize -2 /* hack */);
@@ -139,7 +140,7 @@ void MatchItemListDelegate::paint ( QPainter* painter, const QStyleOptionViewIte
 
     QStyleOptionButton button;
 
-    if(QFile::exists(path_ + QDir::separator() + title + " - " + artist + ".mp3")) {
+    if(QFile::exists(path_ + QDir::separator() + index.data(SongRoles::Artist).toString() + " - " + index.data(Qt::DisplayRole).toString() + ".mp3")) {
         button.icon = QIcon::fromTheme(QLatin1String("view-refresh"), QIcon(QLatin1String(":/resources/view-refresh.png")));
     } else {
         if(QIcon::hasThemeIcon(QLatin1String("download")))
@@ -199,7 +200,7 @@ bool MatchItemListDelegate::editorEvent(QEvent *event, QAbstractItemModel *model
     // mouse pointer is in rect/button area; evaluating button press/release
     if( event->type() == QEvent::MouseButtonRelease) {
         // when MouseButtonRelease emit a signal like clicked()
-        emit downloadRequest(index.data(SongRoles::Id).toString());
+        emit downloadRequest(index);
     }
 
     return true;

@@ -28,31 +28,32 @@
 #include <QPushButton>
 #include <QHBoxLayout>
 #include <QDir>
+#include <QPixmapCache>
 #include <QDebug>
 #include <QDesktopServices>
-#include <QGraphicsDropShadowEffect>
 
 /*!
   \brief DownloadItem: this is the DownloadItem constructor.
+  \param path: save folder
   \param fileName: song file name
   \param id: song id
   \param token: a token used in request
   \param pix: cover pixmap
   \param parent: The Parent Widget
 */
-DownloadItem::DownloadItem(const QSharedPointer<SongObject> &song, const QString &token, QWidget *parent) :
+DownloadItem::DownloadItem(const QString &path, const QString &fileName, const QString &id,
+                           const QString &token, const QString &coverName, QWidget *parent) :
     QWidget(parent),
     ui_(new Ui::DownloadItem),
-    song_(song),
-    token_(token)
+    path_(path),
+    fileName_(fileName),
+    id_(id),
+    token_(token),
+    coverName_(coverName)
 {
     ui_->setupUi(this);
-    connect(song_.data(), SIGNAL(reloadCover()), this, SLOT(loadCover()));
-    connect(song_.data(), SIGNAL(stateChanged(Phonon::State)), this, SLOT(setPlayerState(Phonon::State)));
 
-    fileName_ = song_.data()->title() + " - " + song_.data()->artist();
-
-//    standardCover_ = true;
+    standardCover_ = true;
 
     setupUi();
 
@@ -61,7 +62,7 @@ DownloadItem::DownloadItem(const QSharedPointer<SongObject> &song, const QString
     downloadState_ = GrooveOff::QueuedState;
     playerState_ = Phonon::StoppedState;
     stateChanged();
-    qDebug() << "GrooveOff ::" << "Queued download of" << song_.data()->title();
+    qDebug() << "GrooveOff ::" << "Queued download of" << fileName_;
 }
 
 /*!
@@ -77,7 +78,7 @@ DownloadItem::~DownloadItem()
     }
 
     if(downloadState_ == GrooveOff::DownloadingState) {
-        songDownloader_->stopDownload();
+        song_->stopDownload();
     }
 }
 
@@ -87,28 +88,15 @@ DownloadItem::~DownloadItem()
 */
 void DownloadItem::setupUi()
 {
+    pickCover();
+
     ui_->coverLabel->setScaledContents(true);
     ui_->coverLabel->setFixedSize(QSize(Utility::coverSize,Utility::coverSize));
 
-    loadCover();
-
-    ui_->coverLabel->setToolTip(fileName_);
-
-    QGraphicsDropShadowEffect *coverShadow = new QGraphicsDropShadowEffect(this);
-    coverShadow->setBlurRadius(10.0);
-    coverShadow->setColor(palette().color(QPalette::Shadow));
-    coverShadow->setOffset(0.0);
-
-    ui_->coverLabel->setGraphicsEffect(coverShadow);
-
     ui_->titleLabel->setFont(Utility::font(QFont::Bold));
-    ui_->titleLabel->setText(song_.data()->title());
-    ui_->titleLabel->setToolTip(song_.data()->title());
-    ui_->titleLabel->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred); // fix hidden label
-
-    ui_->artist_albumLabel->setText(song_.data()->artist() + " - " + song_.data()->album());
-    ui_->artist_albumLabel->setToolTip(song_.data()->title());
-    ui_->artist_albumLabel->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred); // fix hidden label
+    ui_->titleLabel->setText(fileName_);
+    ui_->titleLabel->setToolTip(fileName_);
+    ui_->coverLabel->setToolTip(fileName_);
 
     ui_->multiFuncButton->setFixedSize(QSize(Utility::buttonSize,Utility::buttonSize));
     ui_->playButton->setFixedSize(QSize(Utility::buttonSize,Utility::buttonSize));
@@ -144,7 +132,6 @@ void DownloadItem::setupUi()
 void DownloadItem::setupConnections()
 {
     connect(ui_->playButton, SIGNAL(clicked()), this, SLOT(playSong()));
-//    connect(ui_->playButton, SIGNAL(clicked()), song_.data(), SIGNAL(playMe()));
     connect(ui_->multiFuncButton, SIGNAL(clicked()), this, SLOT(multiFuncBtnClicked()));
     connect(ui_->multiFuncButton, SIGNAL(countdownFinished()), this, SLOT(removeSong()));
     connect(ui_->openFolderButton, SIGNAL(clicked()), this, SLOT(openFolder()));
@@ -158,66 +145,33 @@ void DownloadItem::stateChanged()
 {
     emit stateChangedSignal();
 
-    /*
-     * multiFuncButton has 4 actions:
-     * (A) abort current download
-     * (B) remove song from queue
-     * (C) delete a downloaded song
-     * (D) re-download aborted
-     *
-     *
-     * STATES and widgets' visibility
-     *
-     * item's widgets | multiFuncButton | progressBar | playButton | openFolderButton | info icon/message |
-     * ---------------+-----------------+-------------+------------+------------------+-------------------+
-     * Queue          |       (B)       |             |            |                  |                   |
-     * Download       |       (A)       |      x      |      x     |                  |                   |
-     * Finished       |       (C)       |             |      x     |         x        |                   |
-     * Aborted        |       (D)       |             |            |                  |          x        |
-     * Canceled       |                 |             |            |                  |          x        |
-     *
-     */
-
-
     switch(downloadState_) {
         case GrooveOff::QueuedState:
             ui_->multiFuncWidget->setVisible(false);
             ui_->multiFuncButton->setIcon(QIcon::fromTheme(QLatin1String("dialog-cancel"), QIcon(QLatin1String(":/resources/dialog-cancel.png"))));
             ui_->multiFuncButton->setToolTip(trUtf8("Remove from queue"));
-            ui_->animationWidget->setVisible(false);
-            ui_->barsWidget->stopAnimation();
             ui_->playWidget->setVisible(false);
             ui_->progressWidget->setVisible(false);
             ui_->openFolderWidget->setVisible(false);
             if(QIcon::hasThemeIcon(QLatin1String("download-later")))
                 ui_->infoIcon->setPixmap(QIcon::fromTheme(QLatin1String("download-later")).pixmap(16,16));
             else
-                ui_->infoIcon->setPixmap(QIcon::fromTheme(QLatin1String("appointment-soon"),
-                                         QIcon(QLatin1String(":/resources/download-later.png"))).pixmap(16,16));
+                ui_->infoIcon->setPixmap(QIcon::fromTheme(QLatin1String("appointment-soon"), QIcon(QLatin1String(":/resources/download-later.png"))).pixmap(16,16));
             ui_->infoIconWidget->setVisible(true);
             ui_->infoMessageWidget->setVisible(false);
             ui_->infoMessage->setText(trUtf8("Queued"));
             break;
         case GrooveOff::DownloadingState:
             ui_->multiFuncWidget->setVisible(true);
-            ui_->multiFuncButton->setIcon(QIcon::fromTheme(QLatin1String("process-stop"),
-                                          QIcon(QLatin1String(":/resources/process-stop.png"))));
+            ui_->multiFuncButton->setIcon(QIcon::fromTheme(QLatin1String("process-stop"), QIcon(QLatin1String(":/resources/process-stop.png"))));
             ui_->multiFuncButton->setToolTip(trUtf8("Stop download"));
-            if(playerState_ == Phonon::StoppedState) {
-                ui_->animationWidget->setVisible(false);
-                ui_->barsWidget->stopAnimation();
-                ui_->playWidget->setVisible(true);
-                ui_->playButton->setIcon(QIcon::fromTheme(QLatin1String("media-playback-start"),
-                                         QIcon(QLatin1String(":/resources/media-playback-start.png"))));
-                ui_->playButton->setToolTip(trUtf8("Play"));
-            } else if(playerState_ == Phonon::PlayingState) {
-                ui_->playWidget->setVisible(false);
-                ui_->animationWidget->setVisible(true);
-                ui_->barsWidget->startAnimation();
+            ui_->playWidget->setVisible(true);
+            if(playerState_ == Phonon::PlayingState) {
+                ui_->playButton->setIcon(QIcon::fromTheme(QLatin1String("media-playback-pause"), QIcon(QLatin1String(":/resources/media-playback-pause.png"))));
+                ui_->playButton->setToolTip(trUtf8("Pause"));
             } else {
-                ui_->playWidget->setVisible(false);
-                ui_->animationWidget->setVisible(true);
-                ui_->barsWidget->stopAnimation();
+                ui_->playButton->setIcon(QIcon::fromTheme(QLatin1String("media-playback-start"), QIcon(QLatin1String(":/resources/media-playback-start.png"))));
+                ui_->playButton->setToolTip(trUtf8("Play"));
             }
             ui_->progressWidget->setVisible(true);
             ui_->infoIconWidget->setVisible(false);
@@ -226,77 +180,55 @@ void DownloadItem::stateChanged()
             break;
         case GrooveOff::FinishedState:
             ui_->multiFuncWidget->setVisible(false);
-            ui_->multiFuncButton->setIcon(QIcon::fromTheme(QLatin1String("user-trash"),
-                                          QIcon(QLatin1String(":/resources/user-trash.png"))));
+            ui_->multiFuncButton->setIcon(QIcon::fromTheme(QLatin1String("user-trash"), QIcon(QLatin1String(":/resources/user-trash.png"))));
             ui_->multiFuncButton->setToolTip(trUtf8("Delete this song"));
-            if(playerState_ == Phonon::StoppedState) {
-                ui_->playWidget->setVisible(true);
-                ui_->animationWidget->setVisible(false);
-                ui_->barsWidget->stopAnimation();
-                ui_->playButton->setIcon(QIcon::fromTheme(QLatin1String("media-playback-start"),
-                                         QIcon(QLatin1String(":/resources/media-playback-start.png"))));
-                ui_->playButton->setToolTip(trUtf8("Play"));
-            } else if(playerState_ == Phonon::PlayingState) {
-                ui_->playWidget->setVisible(false);
-                ui_->animationWidget->setVisible(true);
-                ui_->barsWidget->startAnimation();
+            ui_->playWidget->setVisible(true);
+            if(playerState_ == Phonon::PlayingState) {
+                ui_->playButton->setIcon(QIcon::fromTheme(QLatin1String("media-playback-pause"), QIcon(QLatin1String(":/resources/media-playback-pause.png"))));
+                ui_->playButton->setToolTip(trUtf8("Pause"));
             } else {
-                ui_->playWidget->setVisible(false);
-                ui_->animationWidget->setVisible(true);
-                ui_->barsWidget->stopAnimation();
+                ui_->playButton->setIcon(QIcon::fromTheme(QLatin1String("media-playback-start"), QIcon(QLatin1String(":/resources/media-playback-start.png"))));
+                ui_->playButton->setToolTip(trUtf8("Play"));
             }
             ui_->progressWidget->setVisible(false);
             ui_->infoIconWidget->setVisible(false);
             ui_->infoMessageWidget->setVisible(false);
             ui_->openFolderWidget->setVisible(false);
-            emit reloadPlaylist();
             break;
         case GrooveOff::AbortedState:
             ui_->playWidget->setVisible(false);
-            ui_->animationWidget->setVisible(false);
-            ui_->barsWidget->stopAnimation();
             ui_->progressWidget->setVisible(false);
             if(QIcon::hasThemeIcon(QLatin1String("task-reject")))
                 ui_->infoIcon->setPixmap(QIcon::fromTheme(QLatin1String("task-reject")).pixmap(16,16));
             else
-                ui_->infoIcon->setPixmap(QIcon::fromTheme(QLatin1String("emblem-unreadable"),
-                                         QIcon(QLatin1String(":/resources/task-reject.png"))).pixmap(16,16));
+                ui_->infoIcon->setPixmap(QIcon::fromTheme(QLatin1String("emblem-unreadable"), QIcon(QLatin1String(":/resources/task-reject.png"))).pixmap(16,16));
             ui_->infoIconWidget->setVisible(true);
             ui_->infoMessageWidget->setVisible(false);
             ui_->infoMessage->setText(trUtf8("Aborted"));
             ui_->multiFuncWidget->setVisible(false);
-            ui_->multiFuncButton->setIcon(QIcon::fromTheme(QLatin1String("view-refresh"),
-                                          QIcon(QLatin1String(":/resources/view-refresh.png"))));
+            ui_->multiFuncButton->setIcon(QIcon::fromTheme(QLatin1String("view-refresh"), QIcon(QLatin1String(":/resources/view-refresh.png"))));
             ui_->multiFuncButton->setToolTip(trUtf8("Redownload selected"));
             ui_->openFolderWidget->setVisible(false);
             break;
         case GrooveOff::DeletedState:
             ui_->multiFuncWidget->setVisible(false);
             ui_->playWidget->setVisible(false);
-            ui_->animationWidget->setVisible(false);
-            ui_->barsWidget->stopAnimation();
             ui_->progressWidget->setVisible(false);
-            ui_->infoIcon->setPixmap(QIcon::fromTheme(QLatin1String("user-trash-full"),
-                                     QIcon(QLatin1String(":/resources/user-trash-full.png"))).pixmap(16,16));
+            ui_->infoIcon->setPixmap(QIcon::fromTheme(QLatin1String("user-trash-full"), QIcon(QLatin1String(":/resources/user-trash-full.png"))).pixmap(16,16));
             ui_->infoIconWidget->setVisible(true);
             ui_->infoMessageWidget->setVisible(false);
             ui_->infoMessage->setText(trUtf8("Deleted"));
             ui_->openFolderWidget->setVisible(false);
-            emit reloadPlaylist();
             break;
         default:
             ui_->playWidget->setVisible(false);
-            ui_->animationWidget->setVisible(false);
-            ui_->barsWidget->stopAnimation();
             ui_->progressWidget->setVisible(false);
-            ui_->infoIcon->setPixmap(QIcon::fromTheme(QLatin1String("dialog-warning"),
-                                     QIcon(QLatin1String(":/resources/dialog-warning.png"))).pixmap(16,16));
+            ui_->infoIcon->setPixmap(QIcon::fromTheme(QLatin1String("dialog-warning"), QIcon(QLatin1String(":/resources/dialog-warning.png"))).pixmap(16,16));
             ui_->infoIconWidget->setVisible(true);
             ui_->infoMessageWidget->setVisible(false);
             ui_->infoMessage->setText(trUtf8("Network or Server error"));
             ui_->multiFuncWidget->setVisible(false);
-            ui_->multiFuncButton->setIcon(QIcon::fromTheme(QLatin1String("view-refresh"),
-                                          QIcon(QLatin1String(":/resources/view-refresh.png"))));
+            ui_->multiFuncButton->setIcon(QIcon::fromTheme(QLatin1String("view-refresh"), QIcon(QLatin1String(":/resources/view-refresh.png"))));
             ui_->multiFuncButton->setToolTip(trUtf8("Redownload selected"));
             ui_->openFolderWidget->setVisible(false);
             break;
@@ -311,10 +243,11 @@ void DownloadItem::startDownload()
 {
     downloadState_ = GrooveOff::DownloadingState;
     stateChanged();
-    songDownloader_ = new SongDownloader(song_.data()->path(), fileName_, song_.data()->id(), token_, streamKey_, ip_, this);
-    connect(songDownloader_, SIGNAL(progress(qint64,qint64)), this, SLOT(setProgress(qint64,qint64)));
-    connect(songDownloader_, SIGNAL(downloadCompleted(bool)), this, SLOT(downloadFinished(bool)));
+    song_ = new SongDownloader(path_, fileName_, id_, token_, this);
+    connect(song_, SIGNAL(progress(qint64,qint64)), this, SLOT(setProgress(qint64,qint64)));
+    connect(song_, SIGNAL(downloadCompleted(bool)), this, SLOT(downloadFinished(bool)));
 }
+
 
 /*!
   \brief downloadFinished: slot called once cover download finished
@@ -334,7 +267,6 @@ void DownloadItem::downloadFinished(bool ok)
     }
 
     emit downloadFinished();
-    emit song_.data()->requireDownloadIconReload();
 }
 
 /*!
@@ -345,7 +277,7 @@ void DownloadItem::downloadFinished(bool ok)
 */
 void DownloadItem::setProgress(const qint64 &bytesReceived, const qint64 &bytesTotal)
 {
-    // enable play button if downloaded at least 1MiB
+    // make play button visible if downloaded at least 1MiB
     if(bytesReceived > 1024*1024)
         ui_->playButton->setEnabled(true);
 
@@ -359,7 +291,16 @@ void DownloadItem::setProgress(const qint64 &bytesReceived, const qint64 &bytesT
 */
 void DownloadItem::playSong()
 {
-    emit play(song_.data()->source().url().toString());
+    if(playerState_ == Phonon::StoppedState) {
+        if(!QFile::exists(songFile())) {
+            qDebug() << "GrooveOff ::" << "File" << songFile() << "not found";
+            ui_->multiFuncWidget->setVisible(false);
+            return;
+        }
+        emit play(this);
+    } else {
+        emit pauseResumePlaying();
+    }
 }
 
 /*!
@@ -384,8 +325,7 @@ void DownloadItem::multiFuncBtnClicked()
             } else {
                 ui_->multiFuncButton->setToolTip(trUtf8("Delete this song"));
                 ui_->multiFuncButton->stopCountdown();
-                ui_->multiFuncButton->setIcon(QIcon::fromTheme(QLatin1String("user-trash"),
-                                              QIcon(QLatin1String(":/resources/user-trash.png"))));
+                ui_->multiFuncButton->setIcon(QIcon::fromTheme(QLatin1String("user-trash"), QIcon(QLatin1String(":/resources/user-trash.png"))));
             }
             break;
         case GrooveOff::AbortedState:
@@ -396,7 +336,7 @@ void DownloadItem::multiFuncBtnClicked()
             break;
         case GrooveOff::DownloadingState:
             emit remove(this);
-            songDownloader_->stopDownload();
+            song_->stopDownload();
             ui_->progressBar->setValue(0);
             downloadState_ = GrooveOff::AbortedState;
             stateChanged();
@@ -413,7 +353,7 @@ void DownloadItem::multiFuncBtnClicked()
 
 bool DownloadItem::operator==(DownloadItem& right) const
 {
-    if(song_.data()->id() == right.id())
+    if(id_ == right.id())
         return true;
     return false;
 }
@@ -437,8 +377,6 @@ void DownloadItem::removeSong()
     downloadState_ = GrooveOff::DeletedState;
     qDebug() << "GrooveOff ::" << songFile() << "removed";
     stateChanged();
-    emit song_.data()->requireDownloadIconReload();
-    emit song_.data()->requireRemotion();
 }
 
 /*!
@@ -447,7 +385,7 @@ void DownloadItem::removeSong()
 */
 QString DownloadItem::songFile()
 {
-    QString fileName = song_.data()->path() + QDir::separator() + fileName_.replace('/','-') + ".mp3";
+    QString fileName = path_ + QDir::separator() + fileName_.replace('/','-') + ".mp3";
     return fileName;
 }
 
@@ -457,7 +395,7 @@ QString DownloadItem::songFile()
 */
 void DownloadItem::setToken(const QString& token)
 {
-    songDownloader_->setToken(token);
+    song_->setToken(token);
 }
 
 /*!
@@ -529,21 +467,31 @@ void DownloadItem::setPlayerState(Phonon::State state)
 }
 
 /*!
+  \brief pickCover: pick a custom cover if downloaded on cache
+  \return void
+*/
+void DownloadItem::pickCover()
+{
+    if(!standardCover_)
+        return;
+
+    if (!QPixmapCache::find(coverName_, &coverPixmap_)) {
+        coverPixmap_ = QIcon::fromTheme(QLatin1String("media-optical"), QIcon(QLatin1String(":/resources/media-optical.png"))).pixmap(Utility::coverSize);
+        coverPixmap_ = coverPixmap_.scaledToWidth(Utility::coverSize, Qt::SmoothTransformation);
+    } else {
+        standardCover_ = false;
+    }
+
+    ui_->coverLabel->setPixmap(coverPixmap_);
+}
+
+/*!
   \brief openFolder: open folder containing downloaded song
   \return void
 */
 void DownloadItem::openFolder()
 {
-    QDesktopServices::openUrl(QUrl("file://" + song_.data()->path(), QUrl::TolerantMode));
-}
-
-void DownloadItem::loadCover()
-{
-    if(!song_.data()->coverName().isEmpty() && QFile::exists(Utility::coversCachePath + song_.data()->coverName()))
-        ui_->coverLabel->setPixmap(QPixmap(Utility::coversCachePath + song_.data()->coverName()));
-    else
-        ui_->coverLabel->setPixmap(QIcon::fromTheme(QLatin1String("media-optical"),
-                                   QIcon(QLatin1String(":/resources/media-optical.png"))).pixmap(Utility::coverSize));
+    QDesktopServices::openUrl(QUrl("file://" + path_, QUrl::TolerantMode));
 }
 
 

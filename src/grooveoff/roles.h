@@ -27,8 +27,9 @@ namespace SongRoles
         Album,
         Artist,
         Year,
-        CoverName,
-        Id
+        Cover,
+        Id,
+        CoverPix
     };
 }
 

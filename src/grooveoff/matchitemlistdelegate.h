@@ -35,7 +35,7 @@ public:
     void setPath(const QString &path) { path_ = path; }
 
 signals:
-    void downloadRequest(const QString &id);
+    void downloadRequest(const QModelIndex &index);
 
 private:
     int currentRow_;
