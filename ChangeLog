@@ -1,14 +1,17 @@
 ChangeLog
 =========
 
-version 0.1.6 (release 2013-07-05 )
-  * added basque translation by alexgabilondo
+version 0.1.7 (release 2013-08-05 )
+  * added Czech translation by fri
+  
+version 0.1.6 (release 2013-08-05 )
+  * added Basque translation by alexgabilondo
 
 version 0.1.5 (release 2013-07-08 )
-  * added french (by maxlath) and slovak (by dagsoftware) translations
+  * added French (by maxlath) and Slovak (by dagsoftware) translations
 
 version 0.1.4 (release 2013-05-30 )
-  * added greek translation by dglent
+  * added Greek translation by dglent
 
 version 0.1.3 (release 2013-05-30 )
   * match api changes
