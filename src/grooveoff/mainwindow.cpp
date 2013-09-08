@@ -472,8 +472,13 @@ void MainWindow::populateResultsTable()
 {
     // check if last search returned results
     if(results_.count() == 0) {
+        qDebug() << "GrooveOff :: " << "Empty result list";
         return;
     }
+
+    // check if it's a playlist
+    bool isPlaylist;
+    ui_->searchLine->text().toInt(&isPlaylist, 10);
 
     // row index (start from 0)
     row_ = 0;
@@ -481,7 +486,7 @@ void MainWindow::populateResultsTable()
     // 'count' contains number of elements to display
     int count;
 
-    if(maxResults_ == 0) // no results limit
+    if(maxResults_ == 0 || isPlaylist) // no results limit and do not limit playlists
         count = results_.count();
     else // limit results for performance
         count = qMin(maxResults_, results_.count());
@@ -491,13 +496,14 @@ void MainWindow::populateResultsTable()
     QStringList artists;
     QStringList albums;
 
+    qDebug() << "GrooveOff :: " << "Parsing " << count << " items";
     // start building a qlist of Song objects
     for(int i = 0; i < count; i++) {
         QVariantMap m = results_.at(i).toMap();
 
         // quite obvious...
         Song *song = new Song(this);
-        song->setTitle(m[QLatin1String("SongName")].toString());
+        song->setTitle(m[QLatin1String(isPlaylist ? "Name" : "SongName")].toString());
         song->setAlbum(m[QLatin1String("AlbumName")].toString());
         song->setArtist(m[QLatin1String("ArtistName")].toString());
         song->setYear(m[QLatin1String("Year")].toString());
@@ -600,7 +606,6 @@ void MainWindow::replyFinished(QNetworkReply *reply)
 
     // get the reply data
     QByteArray data = reply->readAll();
-
     // json is a QString containing the data to convert
     QVariantMap result = parser.parse (data, &ok).toMap();
 
@@ -635,12 +640,19 @@ void MainWindow::replyFinished(QNetworkReply *reply)
 
         break;
     case GrooveOff::SearchJob:
+        bool isPlaylist;
+        ui_->searchLine->text().toInt(&isPlaylist, 10);
+
+        if(isPlaylist)
+            results_ = result[QLatin1String("result")].toMap()[QLatin1String("Songs")].toList();
+        else
+            results_ = result[QLatin1String("result")].toMap()[QLatin1String("result")].toList();
+
+        populateResultsTable();
+
         ui_->busyLabel->setVisible(false);
         ui_->searchButton->setVisible(true);
         busyAnimation_->stop();
-        results_ = result[QLatin1String("result")].toMap()[QLatin1String("result")].toList();
-
-        populateResultsTable();
 
         break;
     }
