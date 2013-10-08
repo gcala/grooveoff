@@ -147,9 +147,16 @@ QString prepToken(const QString &method, const QString &secret, const QString &t
 
 QVariantMap Utility::searchMap(const QString &query, const QString &what, const QString &token)
 {
+    bool isPlaylist;
+    int playlistId = query.toInt(&isPlaylist, 10);
+
     QVariantMap parameters;
-    parameters.insert(QLatin1String("type"), what);
-    parameters.insert(QLatin1String("query"), query);
+    if (isPlaylist) {
+        parameters.insert(QLatin1String("playlistID"), playlistId);
+    } else {
+        parameters.insert(QLatin1String("type"), what);
+        parameters.insert(QLatin1String("query"), query);
+    }
 
     QVariantMap h = Utility::header();
     h.insert(QLatin1String("clientRevision"), Utility::htmlclient().at(1));
@@ -158,7 +165,10 @@ QVariantMap Utility::searchMap(const QString &query, const QString &what, const 
 
     QVariantMap p;
     p.insert(QLatin1String("parameters"), parameters);
-    p.insert(QLatin1String("method"), QLatin1String("getResultsFromSearch"));
+    if(isPlaylist)
+        p.insert(QLatin1String("method"), QLatin1String("playlistGetSongs"));
+    else
+        p.insert(QLatin1String("method"), QLatin1String("getResultsFromSearch"));
     p.insert(QLatin1String("header"), h);
 
     return p;
