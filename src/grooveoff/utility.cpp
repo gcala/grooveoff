@@ -18,6 +18,7 @@
 
 
 #include "utility.h"
+#include "songitem.h"
 
 #include <QFontMetrics>
 #include <QDir>
@@ -25,13 +26,12 @@
 const int Utility::coverSize  = 40; // possible values are 40,50,70,80,90,120
 const int Utility::buttonSize = 24;
 const int Utility::marginSize = 5;
-const QByteArray Utility::userAgent("Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.56 Safari/536.5");
-const QLatin1String Utility::host("grooveshark.com");
 const QString Utility::coversCachePath = QDir::tempPath() + QDir::separator() +
                                          QLatin1String("grooveoff_cache") + QDir::separator();
 QString Utility::downloadPath = "";
+QString Utility::token = "";
 QList<Phonon::MediaSource> Utility::audioSources;
-QList< QSharedPointer<SongObject> > Utility::playlist;
+QList< SongItemPtr > Utility::playlist;
 
 QString Utility::elidedText(const QString& text,
                             const Qt::TextElideMode& elideMode,
@@ -64,11 +64,7 @@ QFont Utility::monoFont(const QFont::Weight& weight, const int &delta)
     return systemFont;
 }
 
-QStringList Utility::jsqueue()
+QString Utility::fileName(const GrooveShark::SongPtr &song)
 {
-    QStringList list;
-    list << QLatin1String("jsqueue") << QLatin1String("20130520") << QLatin1String("nuggetsOfBaller");
-    return list;
+    return song->songName().replace('/','-') + " - " + song->artistName().replace('/','-');
 }
-
-

@@ -18,10 +18,10 @@
 
 
 #include "grooveoff/downloaditem.h"
-#include "grooveoff/songdownloader.h"
 #include "grooveoff/timerbutton.h"
 #include "grooveoff/utility.h"
 #include "ui_downloaditem.h"
+#include <libgrooveshark/apirequest.h>
 
 #include <QLabel>
 #include <QProgressBar>
@@ -32,27 +32,20 @@
 #include <QDesktopServices>
 #include <QGraphicsDropShadowEffect>
 
+using namespace GrooveShark;
+
 /*!
   \brief DownloadItem: this is the DownloadItem constructor.
-  \param fileName: song file name
-  \param id: song id
-  \param token: a token used in request
-  \param pix: cover pixmap
   \param parent: The Parent Widget
 */
-DownloadItem::DownloadItem(const QSharedPointer<SongObject> &song, const QString &token, QWidget *parent) :
+DownloadItem::DownloadItem(const SongItemPtr &song, QWidget *parent) :
     QWidget(parent),
     ui_(new Ui::DownloadItem),
-    song_(song),
-    token_(token)
+    song_(song)
 {
     ui_->setupUi(this);
     connect(song_.data(), SIGNAL(reloadCover()), this, SLOT(loadCover()));
     connect(song_.data(), SIGNAL(stateChanged(Phonon::State)), this, SLOT(setPlayerState(Phonon::State)));
-
-    fileName_ = song_.data()->title() + " - " + song_.data()->artist();
-
-//    standardCover_ = true;
 
     setupUi();
 
@@ -61,7 +54,7 @@ DownloadItem::DownloadItem(const QSharedPointer<SongObject> &song, const QString
     downloadState_ = GrooveOff::QueuedState;
     playerState_ = Phonon::StoppedState;
     stateChanged();
-    qDebug() << "GrooveOff ::" << "Queued download of" << song_.data()->title();
+    qDebug() << "GrooveOff ::" << "Queued download of" << song_->info()->songName();
 }
 
 /*!
@@ -77,7 +70,7 @@ DownloadItem::~DownloadItem()
     }
 
     if(downloadState_ == GrooveOff::DownloadingState) {
-        songDownloader_->stopDownload();
+        downloader_->stopDownload();
     }
 }
 
@@ -92,7 +85,7 @@ void DownloadItem::setupUi()
 
     loadCover();
 
-    ui_->coverLabel->setToolTip(fileName_);
+    ui_->coverLabel->setToolTip(Utility::fileName(song_->info()));
 
     QGraphicsDropShadowEffect *coverShadow = new QGraphicsDropShadowEffect(this);
     coverShadow->setBlurRadius(10.0);
@@ -102,12 +95,12 @@ void DownloadItem::setupUi()
     ui_->coverLabel->setGraphicsEffect(coverShadow);
 
     ui_->titleLabel->setFont(Utility::font(QFont::Bold));
-    ui_->titleLabel->setText(song_.data()->title());
-    ui_->titleLabel->setToolTip(song_.data()->title());
+    ui_->titleLabel->setText(song_->info()->songName());
+    ui_->titleLabel->setToolTip(song_->info()->songName());
     ui_->titleLabel->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred); // fix hidden label
 
-    ui_->artist_albumLabel->setText(song_.data()->artist() + " - " + song_.data()->album());
-    ui_->artist_albumLabel->setToolTip(song_.data()->title());
+    ui_->artist_albumLabel->setText(song_->info()->artistName() + " - " + song_->info()->albumName());
+    ui_->artist_albumLabel->setToolTip(song_->info()->songName());
     ui_->artist_albumLabel->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred); // fix hidden label
 
     ui_->multiFuncButton->setFixedSize(QSize(Utility::buttonSize,Utility::buttonSize));
@@ -144,7 +137,6 @@ void DownloadItem::setupUi()
 void DownloadItem::setupConnections()
 {
     connect(ui_->playButton, SIGNAL(clicked()), this, SLOT(playSong()));
-//    connect(ui_->playButton, SIGNAL(clicked()), song_.data(), SIGNAL(playMe()));
     connect(ui_->multiFuncButton, SIGNAL(clicked()), this, SLOT(multiFuncBtnClicked()));
     connect(ui_->multiFuncButton, SIGNAL(countdownFinished()), this, SLOT(removeSong()));
     connect(ui_->openFolderButton, SIGNAL(clicked()), this, SLOT(openFolder()));
@@ -311,9 +303,9 @@ void DownloadItem::startDownload()
 {
     downloadState_ = GrooveOff::DownloadingState;
     stateChanged();
-    songDownloader_ = new SongDownloader(song_.data()->path(), fileName_, song_.data()->id(), token_, streamKey_, ip_, this);
-    connect(songDownloader_, SIGNAL(progress(qint64,qint64)), this, SLOT(setProgress(qint64,qint64)));
-    connect(songDownloader_, SIGNAL(downloadCompleted(bool)), this, SLOT(downloadFinished(bool)));
+    downloader_ = ApiRequest::instance()->downloadSong(song_->path(), Utility::fileName(song_->info()), song_->info()->songID(), Utility::token);
+    connect(downloader_.data(), SIGNAL(progress(qint64,qint64)), this, SLOT(setProgress(qint64,qint64)));
+    connect(downloader_.data(), SIGNAL(downloadCompleted(bool)), this, SLOT(downloadFinished(bool)));
 }
 
 /*!
@@ -396,7 +388,7 @@ void DownloadItem::multiFuncBtnClicked()
             break;
         case GrooveOff::DownloadingState:
             emit remove(this);
-            songDownloader_->stopDownload();
+            downloader_->stopDownload();
             ui_->progressBar->setValue(0);
             downloadState_ = GrooveOff::AbortedState;
             stateChanged();
@@ -413,7 +405,7 @@ void DownloadItem::multiFuncBtnClicked()
 
 bool DownloadItem::operator==(DownloadItem& right) const
 {
-    if(song_.data()->id() == right.id())
+    if(song_->info()->songID() == right.song()->info()->songID())
         return true;
     return false;
 }
@@ -447,17 +439,8 @@ void DownloadItem::removeSong()
 */
 QString DownloadItem::songFile()
 {
-    QString fileName = song_.data()->path() + QDir::separator() + fileName_.replace('/','-') + ".mp3";
+    QString fileName = song_->path() + QDir::separator() + Utility::fileName(song_->info()) + ".mp3";
     return fileName;
-}
-
-/*!
-  \brief setToken: passes new token to all download items
-  \return void
-*/
-void DownloadItem::setToken(const QString& token)
-{
-    songDownloader_->setToken(token);
 }
 
 /*!
@@ -534,13 +517,13 @@ void DownloadItem::setPlayerState(Phonon::State state)
 */
 void DownloadItem::openFolder()
 {
-    QDesktopServices::openUrl(QUrl("file://" + song_.data()->path(), QUrl::TolerantMode));
+    QDesktopServices::openUrl(QUrl("file://" + song_->path(), QUrl::TolerantMode));
 }
 
 void DownloadItem::loadCover()
 {
-    if(!song_.data()->coverName().isEmpty() && QFile::exists(Utility::coversCachePath + song_.data()->coverName()))
-        ui_->coverLabel->setPixmap(QPixmap(Utility::coversCachePath + song_.data()->coverName()));
+    if(!song_->info()->coverArtFilename().isEmpty() && QFile::exists(Utility::coversCachePath + song_->info()->coverArtFilename()))
+        ui_->coverLabel->setPixmap(QPixmap(Utility::coversCachePath + song_->info()->coverArtFilename()));
     else
         ui_->coverLabel->setPixmap(QIcon::fromTheme(QLatin1String("media-optical"),
                                    QIcon(QLatin1String(":/resources/media-optical.png"))).pixmap(Utility::coverSize));

@@ -28,13 +28,18 @@ void ConfigPrivate::setGsBaseUrl( const QUrl& gsBaseUrl )
     this->m_gsBaseUrl = gsBaseUrl;
 }
 
-QString ConfigPrivate::userAgent() const
+QByteArray ConfigPrivate::userAgent() const
 {
     QString userAgent;
     if ( !m_userAgentPrefix.isEmpty() )
         userAgent = m_userAgentPrefix % QLatin1String( " " );
     userAgent = userAgent % QLatin1String( "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.56 Safari/536.5 " );
-    return userAgent;
+    return userAgent.toAscii();
+}
+
+QLatin1String ConfigPrivate::host() const
+{
+    return QLatin1String("grooveshark.com");
 }
 
 QString ConfigPrivate::userAgentPrefix() const
@@ -74,9 +79,14 @@ void Config::setGsBaseUrl(const QUrl& gsBaseUrl)
     d->setGsBaseUrl( gsBaseUrl );
 }
 
-QString Config::userAgent() const
+QByteArray Config::userAgent() const
 {
     return d->userAgent();
+}
+
+QLatin1String Config::host() const
+{
+    return d->host();
 }
 
 QString Config::userAgentPrefix() const

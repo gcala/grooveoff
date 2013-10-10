@@ -25,7 +25,9 @@
 #include <QDir>
 #include <QDebug>
 
-MatchItem::MatchItem(const QSharedPointer<SongObject> &song, QWidget *parent) :
+using namespace GrooveShark;
+
+MatchItem::MatchItem(const SongItemPtr &song, QWidget *parent) :
     QWidget(parent),
     ui_(new Ui::MatchItem),
     song_(song)
@@ -49,7 +51,7 @@ void MatchItem::setupUi()
 
     loadCover();
 
-    ui_->coverLabel->setToolTip(song_.data()->title() + " - " + song_.data()->artist());
+    ui_->coverLabel->setToolTip(song_->info()->songName() + " - " + song_->info()->artistName());
 
     QGraphicsDropShadowEffect *coverShadow = new QGraphicsDropShadowEffect(this);
     coverShadow->setBlurRadius(10.0);
@@ -59,12 +61,12 @@ void MatchItem::setupUi()
     ui_->coverLabel->setGraphicsEffect(coverShadow);
 
     ui_->titleLabel->setFont(Utility::font(QFont::Bold));
-    ui_->titleLabel->setText(song_.data()->title());
-    ui_->titleLabel->setToolTip(song_.data()->title());
+    ui_->titleLabel->setText(song_->info()->songName());
+    ui_->titleLabel->setToolTip(song_->info()->songName());
     ui_->titleLabel->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred); // fix hidden label
 
-    ui_->artist_albumLabel->setText(song_.data()->artist() + " - " + song_.data()->album());
-    ui_->artist_albumLabel->setToolTip(song_.data()->title());
+    ui_->artist_albumLabel->setText(song_->info()->artistName() + " - " + song_->info()->albumName());
+    ui_->artist_albumLabel->setToolTip(song_->info()->songName());
     ui_->artist_albumLabel->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred); // fix hidden label
 
     ui_->downloadButton->setFixedSize(QSize(Utility::buttonSize,Utility::buttonSize));
@@ -75,8 +77,8 @@ void MatchItem::setupUi()
 
 void MatchItem::loadCover()
 {
-    if(!song_.data()->coverName().isEmpty() && QFile::exists(Utility::coversCachePath + song_.data()->coverName()))
-        ui_->coverLabel->setPixmap(QPixmap(Utility::coversCachePath + song_.data()->coverName()));
+    if(!song_->info()->coverArtFilename().isEmpty() && QFile::exists(Utility::coversCachePath + song_->info()->coverArtFilename()))
+        ui_->coverLabel->setPixmap(QPixmap(Utility::coversCachePath + song_->info()->coverArtFilename()));
     else
         ui_->coverLabel->setPixmap(QIcon::fromTheme(QLatin1String("media-optical"),
                                    QIcon(QLatin1String(":/resources/media-optical.png"))).pixmap(Utility::coverSize));
@@ -89,7 +91,7 @@ void MatchItem::downloadSlot()
 
 void MatchItem::setDownloadIcon()
 {
-    if(QFile::exists(Utility::downloadPath + QDir::separator() + song_.data()->title() + " - " + song_.data()->artist() + ".mp3")) {
+    if(QFile::exists(Utility::downloadPath + QDir::separator() + song_->info()->songName() + " - " + song_->info()->artistName() + ".mp3")) {
         ui_->downloadButton->setIcon(QIcon::fromTheme(QLatin1String("view-refresh"),
                                      QIcon(QLatin1String(":/resources/view-refresh.png"))));
     } else {

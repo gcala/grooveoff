@@ -29,6 +29,7 @@
 #include "grooveoff/covermanager.h"
 #include "ui_mainwindow.h"
 #include "grooveoff/matchitem.h"
+#include "songitem.h"
 
 #include <QtGui/QLabel>
 #include <QtGui/QMenu>
@@ -57,6 +58,8 @@
 #include <QCompleter>
 #include <QDirModel>
 
+using namespace GrooveShark;
+
 // version include
 #include <config-version.h>
 
@@ -80,7 +83,7 @@ MainWindow::MainWindow(QWidget *parent) :
     statusBar()->setSizeGripEnabled(false);
 
     nam_ = new QNetworkAccessManager(this);
-    api_ = new GrooveShark::ApiRequest(nam_);
+    api_ = ApiRequest::instance();
     jar_ = new MyJar;
     nam_->setCookieJar(jar_);
 
@@ -132,9 +135,8 @@ MainWindow::MainWindow(QWidget *parent) :
 */
 MainWindow::~MainWindow()
 {
-    delete api_;
-
     saveSettings();
+    delete api_;
 }
 
 /*!
@@ -404,7 +406,7 @@ void MainWindow::beginSearch()
     ui_->albumsCB->addItem(trUtf8("All Albums"));
     artistsAlbumsContainer_.clear();
 
-    songList_ = api_->songs(ui_->searchLine->text(), token_->result());
+    songList_ = api_->songs(ui_->searchLine->text(), Utility::token);
     connect(songList_.data(), SIGNAL(finished()), this, SLOT(populateResultsList()));
 }
 
@@ -432,7 +434,7 @@ void MainWindow::getToken()
 void MainWindow::tokenReturned()
 {
     //token_->result()
-    //TODO: gestire errore
+    //TODO: handle token error
 
     // the application is now free to perform a search
     searchInProgress_ = false;
@@ -441,10 +443,7 @@ void MainWindow::tokenReturned()
     if(!token_->result().isEmpty()) {
         ui_->searchLine->setStyleSheet("");
 
-        // give token to existing download items
-        for(int i = 0; i < ui_->downloadList->count(); i++) {
-            ((DownloadItem *)ui_->downloadList->itemWidget(ui_->downloadList->item(i)))->setToken(token_->result());
-        }
+        Utility::token = token_->result();
 
         //statusBar()->showMessage(trUtf8("Connected"), 3000);
         playerWidget->showMessage(trUtf8("Connected"));
@@ -466,7 +465,7 @@ void MainWindow::tokenReturned()
 */
 void MainWindow::populateResultsList()
 {
-    //TODO: controllo erori
+    //TODO: handle errors
     searchInProgress_ = false;
 
     ui_->busyLabel->setVisible(false);
@@ -494,20 +493,20 @@ void MainWindow::populateResultsList()
     QStringList albums;
 
     for(int i = 0; i < count; i++) {
-        QSharedPointer<SongObject> shSong(new SongObject(songList_->list().at(i)));
-
+        SongItemPtr songItem(new SongItem(songList_->list().at(i)));
+        
         // Decide if show cover arts
         if(loadCovers_ && !QFile::exists(Utility::coversCachePath + songList_->list().at(i)->coverArtFilename())) {
-            cvrMngr_->addItem(shSong);
+            cvrMngr_->addItem(songItem);
         }
 
         // build a DownloadItem with all required data
-        MatchItem *matchItem = new MatchItem(shSong, this);
+        MatchItem *matchItem = new MatchItem(songItem, this);
         QListWidgetItem *wItem = new QListWidgetItem;
         ui_->matchList->addItem(wItem);
         ui_->matchList->setItemWidget(wItem, matchItem);
         wItem->setSizeHint(QSize(Utility::coverSize + Utility::marginSize * 2,Utility::coverSize + Utility::marginSize * 2));
-        connect(matchItem, SIGNAL(download(QSharedPointer<SongObject>)), this, SLOT(addDownloadItem(QSharedPointer<SongObject>)));
+        connect(matchItem, SIGNAL(download(SongItemPtr)), this, SLOT(addDownloadItem(SongItemPtr)));
 
         // populate filter widgets
         bool found = false;
@@ -558,7 +557,7 @@ void MainWindow::populateResultsList()
   \param index : index of item in results list (to download)
   \return void
 */
-void MainWindow::addDownloadItem(QSharedPointer<SongObject> song)
+void MainWindow::addDownloadItem(SongItemPtr song)
 {
     // check if destination folder exists
     if(!QFile::exists(ui_->pathLine->text())) {
@@ -579,44 +578,38 @@ void MainWindow::addDownloadItem(QSharedPointer<SongObject> song)
         return;
     }
 
-    if(isDownloadingQueued(song.data()->id()))
+    if(isDownloadingQueued(song->info()->songID()))
         return;
 
-    QString fileName = song.data()->title() + " - " + song.data()->artist();
-
     // check file existence
-    if(QFile::exists(ui_->pathLine->text() + QDir::separator() + fileName + ".mp3")) {
+    if(QFile::exists(ui_->pathLine->text() + QDir::separator() + Utility::fileName(song->info()) + ".mp3")) {
         int ret = QMessageBox::question(this,
                                         trUtf8("Overwrite File?"),
-                                        trUtf8("A file named \"%1\" already exists. Are you sure you want to overwrite it?").arg(fileName),
+                                        trUtf8("A file named \"%1\" already exists. Are you sure you want to overwrite it?").arg(Utility::fileName(song->info())),
                                         QMessageBox::Yes | QMessageBox::Cancel,
                                         QMessageBox::Cancel);
         if(ret == QMessageBox::Yes) {
-            QFile::remove(ui_->pathLine->text() + QDir::separator() + fileName + ".mp3");
+            QFile::remove(ui_->pathLine->text() + QDir::separator() + Utility::fileName(song->info()) + ".mp3");
         } else {
             return;
         }
     }
 
-    song.data()->setPath(ui_->pathLine->text());
+    song->setPath(ui_->pathLine->text());
 
     // build a DownloadItem with all required data
     DownloadItem *item = new DownloadItem(song,
-                                          token_->result(),
                                           this);
     connect(item, SIGNAL(play(QString)), playerWidget, SLOT(play(QString)));
     connect(item, SIGNAL(reloadPlaylist()), ui_->downloadList, SLOT(reloadPlaylist()));
 
     // check if download queue_ is full
-//     if(parallelDownloadsCount_ < maxDownloads_) {
-//         parallelDownloadsCount_++;
-//         item->startDownload();
-//     } else {
-//         queue_.append(item);
-//     }
-    queue_.append(item);
-    streamKey_ = api_->streamKey(song.data()->id(), token_->result());
-    connect( streamKey_.data(), SIGNAL(finished()), this, SLOT(streamKeyRicevuto()));
+    if(parallelDownloadsCount_ < maxDownloads_) {
+        parallelDownloadsCount_++;
+        item->startDownload();
+    } else {
+        queue_.append(item);
+    }
 
     connect(item, SIGNAL(downloadFinished()), this, SLOT(freeDownloadSlot()));
     connect(item, SIGNAL(addToQueue(DownloadItem*)), this, SLOT(addItemToQueue(DownloadItem*)));
@@ -785,8 +778,8 @@ void MainWindow::applyFilter()
     QString album = ui_->albumsCB->currentText();
 
     for(int i = 0; i < ui_->matchList->count(); i++) {
-        QString itemArtist = ((MatchItem *)ui_->matchList->itemWidget(ui_->matchList->item(i)))->artist();
-        QString itemAlbum  = ((MatchItem *)ui_->matchList->itemWidget(ui_->matchList->item(i)))->album();
+        QString itemArtist = ((MatchItem *)ui_->matchList->itemWidget(ui_->matchList->item(i)))->song()->info()->artistName();
+        QString itemAlbum  = ((MatchItem *)ui_->matchList->itemWidget(ui_->matchList->item(i)))->song()->info()->albumName();
 
         if( ui_->artistsCB->currentIndex() == 0  && ui_->albumsCB->currentIndex() == 0) {
             ui_->matchList->setRowHidden(i, false);
@@ -893,7 +886,7 @@ bool MainWindow::isDownloadingQueued(const uint &id)
     for(int i = 0; i < ui_->downloadList->count(); i++) {
         GrooveOff::DownloadState state = qobject_cast<DownloadItem *>(ui_->downloadList->itemWidget(ui_->downloadList->item(i)))->downloadState();
         if(state != GrooveOff::DeletedState) {
-            if(id == qobject_cast<DownloadItem *>(ui_->downloadList->itemWidget(ui_->downloadList->item(i)))->id()) {
+            if(id == qobject_cast<DownloadItem *>(ui_->downloadList->itemWidget(ui_->downloadList->item(i)))->song()->info()->songID()) {
                 QMessageBox::information(this,
                                         trUtf8("Download in progress"),
                                         trUtf8("A file with the same name is already in your download list."),
@@ -921,19 +914,6 @@ void MainWindow::reloadItemsDownloadButtons()
     for(int i = 0; i < ui_->matchList->count(); i++) {
         qobject_cast<MatchItem *>(ui_->matchList->itemWidget(ui_->matchList->item(i)))->setDownloadIcon();
     }
-}
-
-void MainWindow::streamKeyRicevuto()
-{
-    DownloadItem *item = ui_->downloadList->elemento(streamKey_->id());
-    item->setStreamKey(streamKey_->streamKey());
-    item->setIp(streamKey_->ip());
-
-    // check if download queue_ is full
-     if(parallelDownloadsCount_ < maxDownloads_) {
-         parallelDownloadsCount_++;
-         item->startDownload();
-     }
 }
 
 void MainWindow::errorDuringToken()

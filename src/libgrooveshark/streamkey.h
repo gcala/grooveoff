@@ -18,8 +18,7 @@ class StreamKey : public QObject
     Q_PROPERTY( uint id READ id CONSTANT )
 
 public:
-    StreamKey( QNetworkReply* reply, QObject* parent = 0 );
-    StreamKey( const QVariant& variant, QObject* parent = 0 );
+    StreamKey( uint id, QString token, QObject* parent = 0 );
     virtual ~StreamKey();
 
     QString streamKey() const;

@@ -17,24 +17,31 @@
 */
 
 #include "covermanager.h"
-#include "songobject.h"
 #include "coverdownloader.h"
+#include "utility.h"
+
+#include <QFile>
+#include <QDir>
 
 CoverManager::CoverManager(QObject *parent) :
     QObject(parent)
 {
+    if(!QFile::exists(Utility::coversCachePath)) {
+            QDir dir;
+            dir.mkdir(Utility::coversCachePath);
+    }
 }
 
-void CoverManager::addItem(const QSharedPointer<SongObject> &song)
+void CoverManager::addItem(const SongItemPtr &song)
 {
-    QString coverName = song.data()->coverName();
-    if(coverItems_.contains(coverName)) {
-        coverItems_[coverName].append(song);
+    QString coverArtFilename = song->info()->coverArtFilename();
+    if(coverItems_.contains(coverArtFilename)) {
+        coverItems_[coverArtFilename].append(song);
     } else {
-        QList< QSharedPointer<SongObject> > listOfSongsWithSameCover;
+        QList< SongItemPtr > listOfSongsWithSameCover;
         listOfSongsWithSameCover.append(song);
-        coverItems_.insert(coverName, listOfSongsWithSameCover);
-        CoverDownloader *downloader = new CoverDownloader(coverName, this);
+        coverItems_.insert(coverArtFilename, listOfSongsWithSameCover);
+        CoverDownloader *downloader = new CoverDownloader(coverArtFilename, this);
         connect(downloader, SIGNAL(done()), this, SLOT(setCover()));
     }
 }
@@ -46,17 +53,13 @@ void CoverManager::clear()
 
 void CoverManager::setCover()
 {
-    CoverDownloader *downloader = (CoverDownloader *)QObject::sender();
-    if(downloader->isSuccess()) {
-        QString coverName = downloader->coverName();
-        foreach (QSharedPointer<SongObject> song, coverItems_.value(coverName)) {
+    CoverDownloader *coverDownloader = (CoverDownloader *)QObject::sender();
+    if(coverDownloader->isSuccess()) {
+        QString coverArtFilename = coverDownloader->coverName();
+        foreach (SongItemPtr song, coverItems_.value(coverArtFilename)) {
             song.data()->requireCoverReload();
         }
     }
-//        emit coverDownloaded();
-//    disconnect(downloader, SIGNAL(done()), this, SLOT(setCover()));
-//    delete downloader;
-//    downloader = 0;
 }
 
 #include "covermanager.moc"

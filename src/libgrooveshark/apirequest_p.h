@@ -12,17 +12,21 @@ class ApiRequestPrivate
 {
 public:
     //Constructors
-    ApiRequestPrivate( QNetworkAccessManager* nam );
+    ApiRequestPrivate();
+    ~ApiRequestPrivate();
+
     //Member Functions
     SongListPtr songs(QString match, QString token );
     SongPtr song( uint id );
     TokenPtr token();
     StreamKeyPtr streamKey(uint id, QString token);
+    DownloaderPtr downloadSong(QString path, QString fileName, uint id, QString token);
 
 private:
-    RequestHandler m_requestHandler;
-    QByteArray m_secret;
-    QByteArray m_uuid;
+    RequestHandler * m_requestHandler;
+//     QByteArray m_secret;
+//     QByteArray m_uuid;
+    QNetworkAccessManager * m_nam;
 
     QString randomHex(const int &length);
     QVariantMap header();

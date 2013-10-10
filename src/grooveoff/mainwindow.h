@@ -24,6 +24,7 @@
 #include <QNetworkConfigurationManager>
 #include <phononnamespace.h>
 #include <libgrooveshark/apirequest.h>
+#include "songitem.h"
 
 class QLabel;
 class QPushButton;
@@ -62,7 +63,7 @@ public:
 
 private slots:
     void selectFolder();
-    void addDownloadItem(QSharedPointer<SongObject> song);
+    void addDownloadItem(SongItemPtr song);
     void beginSearch();
     void getToken();
     void setCompactLayout();
@@ -78,7 +79,6 @@ private slots:
     void tokenReturned();
     void populateResultsList();
 
-    void streamKeyRicevuto();
     void errorDuringToken();
 
 private:
@@ -107,7 +107,6 @@ private:
     GrooveShark::ApiRequest *api_;
     GrooveShark::TokenPtr token_;
     GrooveShark::SongListPtr songList_;
-    GrooveShark::StreamKeyPtr streamKey_;
 
     //Menus
     QMenu *fileMenu_;

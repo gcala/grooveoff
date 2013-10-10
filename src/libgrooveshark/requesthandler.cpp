@@ -12,6 +12,7 @@ RequestHandler::RequestHandler( QNetworkAccessManager* nam ) : m_nam( nam )
 
 RequestHandler::~RequestHandler()
 {
+    m_nam->deleteLater();
 }
 
 QNetworkReply* RequestHandler::getRequest( const QString& url )
@@ -45,7 +46,7 @@ QNetworkReply* RequestHandler::postFileRequest( const QString& url, const QStrin
 
 void RequestHandler::addUserAgent( QNetworkRequest &request )
 {
-    request.setRawHeader("User-Agent", Config::instance()->userAgent().toAscii() );
+    request.setRawHeader("User-Agent", Config::instance()->userAgent() );
 }
 
 void RequestHandler::addContentType( QNetworkRequest &request )

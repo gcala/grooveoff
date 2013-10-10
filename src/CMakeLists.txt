@@ -14,14 +14,13 @@ set(grooveoff_SRCS grooveoff/coverdownloader.cpp
                    grooveoff/playanimationwidget.cpp
                    grooveoff/timerbutton.cpp
                    grooveoff/timerlabel.cpp
-                   grooveoff/songdownloader.cpp
-                   grooveoff/songobject.cpp
                    grooveoff/qled.cpp
                    grooveoff/downloaditem.cpp
                    grooveoff/audioplayer.cpp
                    grooveoff/mainwindow.cpp
                    grooveoff/matchitem.cpp
                    grooveoff/playlist.cpp
+                   grooveoff/songitem.cpp
                    libgrooveshark/apirequest.cpp
                    libgrooveshark/config.cpp
                    libgrooveshark/requesthandler.cpp
@@ -29,7 +28,9 @@ set(grooveoff_SRCS grooveoff/coverdownloader.cpp
                    libgrooveshark/songlist.cpp
                    libgrooveshark/token.cpp
                    libgrooveshark/urlbuilder.cpp
-                   libgrooveshark/streamkey.cpp)
+                   libgrooveshark/streamkey.cpp
+                   libgrooveshark/downloader.cpp
+                   libgrooveshark/mapbuilder.cpp)
 
 set(grooveoff_RCS ../grooveoff.qrc)
 qt4_add_resources(grooveoff_RC_SRCS ${grooveoff_RCS} )

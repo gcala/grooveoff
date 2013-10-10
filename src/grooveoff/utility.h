@@ -24,7 +24,8 @@
 #include <QFont>
 #include <QStringList>
 #include <phonon/MediaSource>
-#include <grooveoff/songobject.h>
+#include "songitem.h"
+#include "libgrooveshark/song.h"
 
 class Utility
 {
@@ -39,8 +40,9 @@ public:
     static const QLatin1String host;
     static const QString coversCachePath;
     static QString downloadPath;
+    static QString token;
     static QList<Phonon::MediaSource> audioSources;
-    static QList< QSharedPointer<SongObject> > playlist;
+    static QList< SongItemPtr > playlist;
 
     static QString elidedText(const QString &text, const Qt::TextElideMode &elideMode, const int &width, const QFont::Weight &weight);
 
@@ -48,7 +50,7 @@ public:
 
     static QFont monoFont(const QFont::Weight &weight = QFont::Normal, const int &delta = 0);
 
-    static QStringList jsqueue();
+    static QString fileName(const GrooveShark::SongPtr &song);
 };
 
 #endif // UTILITY_H

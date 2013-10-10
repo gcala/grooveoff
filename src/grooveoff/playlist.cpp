@@ -46,7 +46,7 @@ void Playlist::reloadPlaylist()
 void Playlist::cambioStato(Phonon::State newState, QString source)
 {
     for(int i = 0; i < count(); i++) {
-        if(source == ITEM(i)->path() + QDir::separator() + ITEM(i)->fileName() + ".mp3") {
+        if(source == ITEM(i)->song()->path() + QDir::separator() + Utility::fileName(ITEM(i)->song()->info()) + ".mp3") {
             ITEM(i)->setPlayerState(newState);
             break;
         }
@@ -85,18 +85,6 @@ void Playlist::removeDownloaded()
             delete item;
         }
     }
-}
-
-DownloadItem * Playlist::elemento(uint id)
-{
-    int i;
-    for(i = 0; i < count(); i++) {
-        if(id == ITEM(i)->id()) {
-            break;
-        }
-    }
-
-    return ITEM(i);
 }
 
 

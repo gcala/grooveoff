@@ -19,7 +19,6 @@ SongPrivate::SongPrivate ( Song* qq, const QVariant& variant, QObject* parent ) 
     parse ( variant );
 }
 
-
 uint SongPrivate::albumID() const
 {
     return m_albumID;
@@ -198,10 +197,10 @@ bool SongPrivate::parse( const QVariant& data )
         qDebug() << "'Flags' field is invalid";
     m_flags = v.toULongLong();
 
-    v = songMap.value( QLatin1String( "GenreID" ) );
-    if( !v.canConvert( QVariant::UInt ) )
-        qDebug() << "'GenreID' field is invalid";
-    m_genreID = v.toUInt();
+//     v = songMap.value( QLatin1String( "GenreID" ) );
+//     if( !v.canConvert( QVariant::UInt ) )
+//         qDebug() << "'GenreID' field is invalid";
+//     m_genreID = v.toUInt();
 
     v = songMap.value( QLatin1String( "IsLowBitrateAvailable" ) );
     if( !v.canConvert( QVariant::Bool ) )

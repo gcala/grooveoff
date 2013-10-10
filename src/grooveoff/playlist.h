@@ -31,8 +31,6 @@ class Playlist : public QListWidget
 public:
     explicit Playlist(QWidget *parent = 0);
 
-    DownloadItem * elemento(uint id);
-
 public slots:
     void reloadPlaylist();
     void cambioStato(Phonon::State newState, QString source);

@@ -4,6 +4,7 @@
 #include "songlist.h"
 #include "token.h"
 #include "streamkey.h"
+#include "downloader.h"
 
 class QByteArray;
 class QString;
@@ -23,8 +24,7 @@ class ApiRequestPrivate;
 class ApiRequest
 {
 public:
-
-    ApiRequest( QNetworkAccessManager* nam );
+    static ApiRequest * instance();
     ~ApiRequest( );
 
     //SIMPLE API
@@ -41,8 +41,15 @@ public:
 
     StreamKeyPtr streamKey(uint id, QString token);
 
+    DownloaderPtr downloadSong(QString path, QString fileName, uint id, QString token);
+
 private:
+    ApiRequest();
+
+
     ApiRequestPrivate* const d;
+
+    static ApiRequest * s_instance;
 };
 
 }

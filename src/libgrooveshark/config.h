@@ -17,7 +17,8 @@ public:
     QUrl gsBaseUrl() const;
     void setGsBaseUrl( const QUrl& gsBaseUrl );
 
-    QString userAgent() const;
+    QByteArray userAgent() const;
+    QLatin1String host() const;
 
     QString userAgentPrefix() const;
     void setUserAgentPrefix( const QString& prefix );

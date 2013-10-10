@@ -24,7 +24,8 @@
 #include <QVariantMap>
 #include <phonon/MediaObject>
 #include "grooveoff/grooveoffnamespace.h"
-#include "grooveoff/songobject.h"
+#include "grooveoff/songitem.h"
+#include <libgrooveshark/downloader.h>
 
 namespace Ui {
 class DownloadItem;
@@ -33,7 +34,6 @@ class DownloadItem;
 class QLabel;
 class QPushButton;
 class QProgressBar;
-class SongDownloader;
 class TimerButton;
 
 class DownloadItem : public QWidget
@@ -41,27 +41,14 @@ class DownloadItem : public QWidget
     Q_OBJECT
 
 public:
-    DownloadItem(const QSharedPointer<SongObject> &song, const QString &token, QWidget *parent = 0);
+    DownloadItem(const SongItemPtr &song, QWidget *parent = 0);
     virtual ~DownloadItem();
     QString songFile();
 
-    const QSharedPointer<SongObject> song() { return song_; }
-    uint id() { return song_.data()->id(); }
-    //------->
-    const QString fileName() { return fileName_; }
-    const QString title() { return song_.data()->title(); }
-    const QString album() { return song_.data()->album(); }
-    const QString artist() { return song_.data()->artist(); }
-    const QString coverName() { return song_.data()->coverName(); }
-    const QString path() { return song_.data()->path(); }
-    //<-------
+    const SongItemPtr song() { return song_; }
     GrooveOff::DownloadState downloadState() { return downloadState_; }
 
     void startDownload();
-    void setToken(const QString &token);
-
-    void setStreamKey(const QString &streamKey) { streamKey_ = streamKey; }
-    void setIp(const QString &ip) { ip_ = ip; }
 
     bool operator==(DownloadItem &) const;
 
@@ -93,15 +80,10 @@ private slots:
 
 private:
     Ui::DownloadItem *ui_;
-    QSharedPointer<SongObject> song_;
-    QString token_;
-    QString fileName_;
-    SongDownloader *songDownloader_;
+    SongItemPtr song_;
     GrooveOff::DownloadState downloadState_;
     Phonon::State playerState_;
-
-    QString ip_;
-    QString streamKey_;
+    GrooveShark::DownloaderPtr downloader_;
 
     void setupUi();
     void setupConnections();

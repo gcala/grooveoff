@@ -50,10 +50,6 @@ void CoverDownloader::downloadFinished()
         QByteArray data = reply_->readAll();
 //        coverPixmap_.loadFromData(data);
         success_ = true;
-        if(!QFile::exists(Utility::coversCachePath)) {
-            QDir dir;
-            dir.mkdir(Utility::coversCachePath);
-        }
         QFile file(Utility::coversCachePath + coverName_);
         file.open(QIODevice::WriteOnly);
         file.write(data);

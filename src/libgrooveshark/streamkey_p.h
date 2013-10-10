@@ -11,14 +11,14 @@ class StreamKeyPrivate : public QObject
     Q_OBJECT
 
 public:
-    StreamKeyPrivate ( StreamKey* qq, QNetworkReply* reply, QObject* parent = 0 );
-    StreamKeyPrivate ( StreamKey* qq, const QVariant& variant, QObject* parent = 0 );
+    StreamKeyPrivate ( StreamKey* qq, uint id, QString token, QObject* parent = 0 );
 
     QString streamKey() const;
     QString ip() const;
     uint id() const;
 
 private:
+    QNetworkAccessManager* m_nam;
     QNetworkReply* m_reply;
     StreamKey* const q;
 

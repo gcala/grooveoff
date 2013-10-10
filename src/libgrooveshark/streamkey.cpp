@@ -1,22 +1,40 @@
 #include "streamkey_p.h"
+#include "mapbuilder.h"
+#include "urlbuilder.h"
+#include "config.h"
+
 #include <qjson/parser.h>
+#include <qjson/serializer.h>
+#include <QStringList>
 #include <QDebug>
 
 using namespace GrooveShark;
 
-StreamKeyPrivate::StreamKeyPrivate ( StreamKey* qq, QNetworkReply* reply, QObject* parent ) :
+StreamKeyPrivate::StreamKeyPrivate ( StreamKey* qq, uint id, QString token, QObject* parent ) :
     QObject ( parent ),
-    m_reply ( reply ),
+    m_id(id),
     q ( qq ),
     m_error ( QNetworkReply::NoError )
 {
+    QVariantMap map = MapBuilder::getDownloadMap(QString::number(id), token);
+    QJson::Serializer serializer;
+    QByteArray json = serializer.serialize(map);
+
+    QString requestUrl = UrlBuilder::getSongStreamKeyUrl() + map.value("method").toByteArray();
+    QString refererUrl = UrlBuilder::getRefererUrl() + MapBuilder::jsqueue().at(1);
+
+    m_nam = new QNetworkAccessManager(this);
+
+    //FIXME:duplicated code from requesthandler.cpp
+    QNetworkRequest request( requestUrl );
+    request.setRawHeader("User-Agent", Config::instance()->userAgent() );
+    request.setRawHeader("Referer", refererUrl.toAscii() );
+    request.setHeader(QNetworkRequest::ContentTypeHeader, Config::instance()->contentType().toAscii() );
+
+    m_reply = m_nam->post( request, json );
+
     QObject::connect ( m_reply, SIGNAL ( finished() ), this, SLOT ( parseData() ) );
     QObject::connect ( m_reply, SIGNAL ( error ( QNetworkReply::NetworkError ) ), this, SLOT ( error ( QNetworkReply::NetworkError ) ) );
-}
-
-StreamKeyPrivate::StreamKeyPrivate ( StreamKey* qq, const QVariant& variant, QObject* parent ) : QObject ( parent ), m_reply ( 0 ), q ( qq )
-{
-    parse ( variant );
 }
 
 QString StreamKeyPrivate::streamKey() const
@@ -93,6 +111,7 @@ void StreamKeyPrivate::parseData()
         }
     }
     m_reply->deleteLater();
+    m_nam->deleteLater();
 }
 
 void StreamKeyPrivate::error ( QNetworkReply::NetworkError error )
@@ -101,12 +120,7 @@ void StreamKeyPrivate::error ( QNetworkReply::NetworkError error )
     emit q->requestError ( error );
 }
 
-StreamKey::StreamKey ( QNetworkReply* reply, QObject* parent ) : QObject ( parent ), d ( new StreamKeyPrivate ( this, reply ) )
-{
-
-}
-
-StreamKey::StreamKey ( const QVariant& variant, QObject* parent ) : QObject ( parent ), d ( new StreamKeyPrivate ( this, variant ) )
+StreamKey::StreamKey ( uint id, QString token, QObject* parent ) : QObject ( parent ), d ( new StreamKeyPrivate ( this, id, token ) )
 {
 
 }

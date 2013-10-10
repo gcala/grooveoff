@@ -263,7 +263,7 @@ void AudioPlayer::showMessage(const QString& message)
 void AudioPlayer::removeFromPlaylist()
 {
     for(int i = 0; i < Utility::playlist.count(); i++) {
-        if(Utility::playlist.at(i).data()->id() == ((SongObject *)QObject::sender())->id()) {
+        if(Utility::playlist.at(i)->info()->songID() == ((SongItem *)QObject::sender())->info()->songID()) {
             bool isPlaying = false;
             qDebug() << "indice canzone rimuovere" << i;
             qDebug() << "oldIndex_" << oldIndex_;
@@ -307,11 +307,11 @@ void AudioPlayer::sourceChanged(Phonon::MediaSource newSource)
 
 void AudioPlayer::setupLabels(int index)
 {
-    QString title = Utility::playlist.at(index).data()->title();
-    QString artist = Utility::playlist.at(index).data()->artist();
-    QString album = Utility::playlist.at(index).data()->album();
-    QString path = Utility::playlist.at(index).data()->path();
-    QString coverName = Utility::playlist.at(index).data()->coverName();
+    QString title = Utility::playlist.at(index)->info()->songName();
+    QString artist = Utility::playlist.at(index)->info()->artistName();
+    QString album = Utility::playlist.at(index)->info()->albumName();
+    QString path = Utility::playlist.at(index)->path();
+    QString coverName = Utility::playlist.at(index)->info()->coverArtFilename();
 
     ui_->titleLabel->setText(title);
     ui_->titleLabel->setToolTip(title);
