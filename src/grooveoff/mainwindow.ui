@@ -156,6 +156,12 @@
        </item>
        <item>
         <widget class="ComboBox" name="artistsCB">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="minimumSize">
           <size>
            <width>180</width>
@@ -169,6 +175,12 @@
        </item>
        <item>
         <widget class="ComboBox" name="albumsCB">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="minimumSize">
           <size>
            <width>180</width>
@@ -177,6 +189,13 @@
          </property>
          <property name="frame">
           <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="batchDownloadButton">
+         <property name="text">
+          <string/>
          </property>
         </widget>
        </item>

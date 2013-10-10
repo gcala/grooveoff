@@ -168,8 +168,8 @@ void MainWindow::setupUi()
     ui_->label3->setBuddy(ui_->searchLine);
     ui_->searchLine->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     ui_->searchLine->setFixedHeight(fontHeight > 24 ? fontHeight : 24);
-    ui_->searchLine->setToolTip(trUtf8("Search for songs, artists, genres"));
-    ui_->searchLine->setPlaceholderText(trUtf8("Search for songs, artists, genres"));
+    ui_->searchLine->setToolTip(trUtf8("Search for songs, artists, genres, playlists"));
+    ui_->searchLine->setPlaceholderText(trUtf8("Search for songs, artists, genres, playlists"));
 
     ui_->searchButton->setIcon(QIcon::fromTheme(QLatin1String("system-search")));
     ui_->searchButton->setIconSize(QSize(16,16));
@@ -204,6 +204,11 @@ void MainWindow::setupUi()
 
     ui_->combosContainer->setVisible(false);
 
+    ui_->batchDownloadButton->setToolTip(trUtf8("Download all files"));
+    ui_->batchDownloadButton->setIcon(QIcon::fromTheme(QLatin1String("kget")));
+    ui_->batchDownloadButton->setIconSize(QSize(16,16));
+    ui_->batchDownloadButton->setFixedHeight(fontHeight > 25 ? fontHeight : 25);
+
     // Connections
     connect(ui_->searchButton, SIGNAL(clicked(bool)), this, SLOT(beginSearch()));
     connect(ui_->browseButton, SIGNAL(clicked(bool)), this, SLOT(selectFolder()));
@@ -212,6 +217,7 @@ void MainWindow::setupUi()
     connect(ui_->albumsCB, SIGNAL(activated(int)), this, SLOT(albumChanged()));
     connect(playerWidget, SIGNAL(cambioStato(Phonon::State,QString)),
             ui_->downloadList, SLOT(cambioStato(Phonon::State,QString)));
+    connect(ui_->batchDownloadButton, SIGNAL(clicked()), this, SLOT(batchDownload()));
 
     ui_->matchesMessage->setFont(Utility::font(QFont::Bold));
 
@@ -494,7 +500,7 @@ void MainWindow::populateResultsList()
 
     for(int i = 0; i < count; i++) {
         SongItemPtr songItem(new SongItem(songList_->list().at(i)));
-        
+
         // Decide if show cover arts
         if(loadCovers_ && !QFile::exists(Utility::coversCachePath + songList_->list().at(i)->coverArtFilename())) {
             cvrMngr_->addItem(songItem);
@@ -921,6 +927,15 @@ void MainWindow::errorDuringToken()
     //statusBar()->showMessage(trUtf8("Token not received!!"), 3000);
     playerWidget->showMessage(trUtf8("Token not received:") + "\n" + token_->errorString());
     qDebug() << "GrooveOff ::" << "Token not received: " << token_->errorString();
+}
+
+void MainWindow::batchDownload()
+{
+    for(int i = 0; i < ui_->matchList->count(); i++) {
+        if(!ui_->matchList->item(i)->isHidden())
+            addDownloadItem(((MatchItem *)ui_->matchList->itemWidget(ui_->matchList->item(i)))->song());
+    }
+//    ((MatchItem *)ui_->matchList->itemWidget(ui_->matchList->item(i)))->song()->info()->artistName()
 }
 
 
