@@ -100,6 +100,15 @@ void AudioPlayer::setupUi()
     ui_->stackedWidget->setBackgroundRole(QPalette::Base);
     ui_->messageLabel->setFont(Utility::font(QFont::Bold,1));
 
+    ui_->previousButton->setIcon(QIcon::fromTheme(QLatin1String("media-seek-backward"), QIcon(QLatin1String(":/resources/media-seek-backward.png"))));
+    ui_->previousButton->setFlat(true);
+    ui_->previousButton->setStyleSheet("border: none; outline: none;");
+    ui_->previousButton->setToolTip(trUtf8("Play Previous"));
+    ui_->previousButton->setFixedSize(QSize(16,16));
+    ui_->previousButton->setIconSize(QSize(16,16));
+    ui_->previousButton->setEnabled(false);
+    connect(ui_->previousButton, SIGNAL(clicked(bool)), this, SLOT(playPrevious()));
+
     ui_->playPauseButton->setIcon(QIcon::fromTheme(QLatin1String("media-playback-start"), QIcon(QLatin1String(":/resources/media-playback-start.png"))));
     ui_->playPauseButton->setFlat(true);
     ui_->playPauseButton->setStyleSheet("border: none; outline: none;");
@@ -117,6 +126,15 @@ void AudioPlayer::setupUi()
     ui_->stopButton->setIconSize(QSize(24,24));
     ui_->stopButton->setContentsMargins( 0, 0, 0, 0 );
     connect(ui_->stopButton, SIGNAL(clicked(bool)), this, SLOT(stopPlaying()));
+
+    ui_->nextButton->setIcon(QIcon::fromTheme(QLatin1String("media-seek-forward"), QIcon(QLatin1String(":/resources/media-seek-forward.png"))));
+    ui_->nextButton->setFlat(true);
+    ui_->nextButton->setStyleSheet("border: none; outline: none;");
+    ui_->nextButton->setToolTip(trUtf8("Play Next"));
+    ui_->nextButton->setFixedSize(QSize(16,16));
+    ui_->nextButton->setIconSize(QSize(16,16));
+    ui_->nextButton->setEnabled(false);
+    connect(ui_->nextButton, SIGNAL(clicked(bool)), this, SLOT(playNext()));
 
     ui_->timeLabel->setText("00:00");
     ui_->timeLabel->setMinimumSize(QSize(50,0));
@@ -356,6 +374,16 @@ int AudioPlayer::currentIndex(const QString &file)
         }
     }
     return index;
+}
+
+void AudioPlayer::playNext()
+{
+
+}
+
+void AudioPlayer::playPrevious()
+{
+
 }
 
 

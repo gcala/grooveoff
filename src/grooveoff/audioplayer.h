@@ -64,6 +64,8 @@ private slots:
     void toggleTimeLabel();
     void removeFromPlaylist();
     void sourceChanged(Phonon::MediaSource);
+    void playPrevious();
+    void playNext();
 
 private:
     Ui::AudioPlayer *ui_;
