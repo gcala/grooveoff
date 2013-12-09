@@ -17,9 +17,10 @@
 */
 
 
-#include "grooveoff/matchitem.h"
-#include "grooveoff/utility.h"
+#include "matchitem.h"
+#include "utility.h"
 #include "ui_matchitem.h"
+
 #include <QGraphicsDropShadowEffect>
 #include <QFile>
 #include <QDir>
@@ -27,7 +28,7 @@
 
 using namespace GrooveShark;
 
-MatchItem::MatchItem(const SongItemPtr &song, QWidget *parent) :
+MatchItem::MatchItem(const PlaylistItemPtr &song, QWidget *parent) :
     QWidget(parent),
     ui_(new Ui::MatchItem),
     song_(song)
@@ -77,7 +78,9 @@ void MatchItem::setupUi()
 
 void MatchItem::loadCover()
 {
-    if(!song_->info()->coverArtFilename().isEmpty() && QFile::exists(Utility::coversCachePath + song_->info()->coverArtFilename()))
+    if(!song_->info()->coverArtFilename().isEmpty()
+        && QFile::exists(Utility::coversCachePath + song_->info()->coverArtFilename())
+        && song_->info()->coverArtFilename() != "0")
         ui_->coverLabel->setPixmap(QPixmap(Utility::coversCachePath + song_->info()->coverArtFilename()));
     else
         ui_->coverLabel->setPixmap(QIcon::fromTheme(QLatin1String("media-optical"),

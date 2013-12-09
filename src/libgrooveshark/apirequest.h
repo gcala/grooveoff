@@ -46,7 +46,6 @@ public:
 private:
     ApiRequest();
 
-
     ApiRequestPrivate* const d;
 
     static ApiRequest * s_instance;

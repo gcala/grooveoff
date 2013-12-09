@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>AudioPlayer</class>
- <widget class="QWidget" name="AudioPlayer">
+ <class>PlayerWidget</class>
+ <widget class="QWidget" name="PlayerWidget">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
     <width>660</width>
-    <height>87</height>
+    <height>93</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -34,13 +34,6 @@
      </item>
      <item>
       <widget class="QPushButton" name="playPauseButton">
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="stopButton">
        <property name="text">
         <string/>
        </property>
@@ -213,12 +206,12 @@
   <customwidget>
    <class>ElidedLabel</class>
    <extends>QLabel</extends>
-   <header location="global">grooveoff/elidedlabel.h</header>
+   <header location="global">elidedlabel.h</header>
   </customwidget>
   <customwidget>
    <class>TimerLabel</class>
    <extends>QLabel</extends>
-   <header location="global">grooveoff/timerlabel.h</header>
+   <header location="global">timerlabel.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

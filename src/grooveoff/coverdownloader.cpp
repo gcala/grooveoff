@@ -44,11 +44,9 @@ CoverDownloader::~CoverDownloader()
 void CoverDownloader::downloadFinished()
 {
     switch(reply_->error()) {
-
     case QNetworkReply::NoError: {
         // if no error
         QByteArray data = reply_->readAll();
-//        coverPixmap_.loadFromData(data);
         success_ = true;
         QFile file(Utility::coversCachePath + coverName_);
         file.open(QIODevice::WriteOnly);
@@ -57,6 +55,7 @@ void CoverDownloader::downloadFinished()
         break;
     }
     default:
+        qDebug() << "GrooveOff ::" << "Error downloading cover of" << coverName_;
         success_ = false;
     }
 

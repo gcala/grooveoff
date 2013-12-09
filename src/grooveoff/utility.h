@@ -24,8 +24,8 @@
 #include <QFont>
 #include <QStringList>
 #include <phonon/MediaSource>
-#include "songitem.h"
-#include "libgrooveshark/song.h"
+#include "playlistitem.h"
+#include "../libgrooveshark/song.h"
 
 class Utility
 {
@@ -42,7 +42,7 @@ public:
     static QString downloadPath;
     static QString token;
     static QList<Phonon::MediaSource> audioSources;
-    static QList< SongItemPtr > playlist;
+    static QList< PlaylistItemPtr > playlist;
 
     static QString elidedText(const QString &text, const Qt::TextElideMode &elideMode, const int &width, const QFont::Weight &weight);
 

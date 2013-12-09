@@ -17,7 +17,7 @@
 */
 
 
-#include "grooveoff/timerlabel.h"
+#include "timerlabel.h"
 
 #include <QPainter>
 

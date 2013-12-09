@@ -17,11 +17,12 @@
 */
 
 
-#include "grooveoff/downloaditem.h"
-#include "grooveoff/timerbutton.h"
-#include "grooveoff/utility.h"
+#include "downloaditem.h"
+#include "timerbutton.h"
+#include "utility.h"
 #include "ui_downloaditem.h"
-#include <libgrooveshark/apirequest.h>
+#include <../libgrooveshark/apirequest.h>
+#include "audioengine.h"
 
 #include <QLabel>
 #include <QProgressBar>
@@ -38,7 +39,7 @@ using namespace GrooveShark;
   \brief DownloadItem: this is the DownloadItem constructor.
   \param parent: The Parent Widget
 */
-DownloadItem::DownloadItem(const SongItemPtr &song, QWidget *parent) :
+DownloadItem::DownloadItem(const PlaylistItemPtr &song, QWidget *parent) :
     QWidget(parent),
     ui_(new Ui::DownloadItem),
     song_(song)
@@ -62,7 +63,7 @@ DownloadItem::DownloadItem(const SongItemPtr &song, QWidget *parent) :
 */
 DownloadItem::~DownloadItem()
 {
-    emit remove(this);
+    emit remove();
 
     if(ui_->multiFuncButton->isCountdownStarted()) {
         ui_->multiFuncButton->stopCountdown();
@@ -351,7 +352,8 @@ void DownloadItem::setProgress(const qint64 &bytesReceived, const qint64 &bytesT
 */
 void DownloadItem::playSong()
 {
-    emit play(song_.data()->source().url().toString());
+    AudioEngine::instance()->playItem(song_);
+    //emit play(song_.data()->source().url().toString());
 }
 
 /*!
@@ -387,7 +389,7 @@ void DownloadItem::multiFuncBtnClicked()
             emit addToQueue(this);
             break;
         case GrooveOff::DownloadingState:
-            emit remove(this);
+            emit remove();
             downloader_->stopDownload();
             ui_->progressBar->setValue(0);
             downloadState_ = GrooveOff::AbortedState;
@@ -417,7 +419,7 @@ bool DownloadItem::operator==(DownloadItem& right) const
 */
 void DownloadItem::removeSong()
 {
-    emit remove(this);
+    emit remove();
 
     if(QFile::exists(songFile())) {
         if(!QFile::remove(songFile()))
@@ -430,7 +432,7 @@ void DownloadItem::removeSong()
     qDebug() << "GrooveOff ::" << songFile() << "removed";
     stateChanged();
     emit song_.data()->requireDownloadIconReload();
-    emit song_.data()->requireRemotion();
+//    emit song_.data()->requireRemotion();
 }
 
 /*!
@@ -522,7 +524,9 @@ void DownloadItem::openFolder()
 
 void DownloadItem::loadCover()
 {
-    if(!song_->info()->coverArtFilename().isEmpty() && QFile::exists(Utility::coversCachePath + song_->info()->coverArtFilename()))
+    if(!song_->info()->coverArtFilename().isEmpty()
+        && QFile::exists(Utility::coversCachePath + song_->info()->coverArtFilename())
+        && song_->info()->coverArtFilename() != "0")
         ui_->coverLabel->setPixmap(QPixmap(Utility::coversCachePath + song_->info()->coverArtFilename()));
     else
         ui_->coverLabel->setPixmap(QIcon::fromTheme(QLatin1String("media-optical"),

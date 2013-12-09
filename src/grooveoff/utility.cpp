@@ -18,7 +18,7 @@
 
 
 #include "utility.h"
-#include "songitem.h"
+#include "playlistitem.h"
 
 #include <QFontMetrics>
 #include <QDir>
@@ -31,7 +31,7 @@ const QString Utility::coversCachePath = QDir::tempPath() + QDir::separator() +
 QString Utility::downloadPath = "";
 QString Utility::token = "";
 QList<Phonon::MediaSource> Utility::audioSources;
-QList< SongItemPtr > Utility::playlist;
+QList< PlaylistItemPtr > Utility::playlist;
 
 QString Utility::elidedText(const QString& text,
                             const Qt::TextElideMode& elideMode,

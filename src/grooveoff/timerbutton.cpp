@@ -17,7 +17,7 @@
 */
 
 
-#include "grooveoff/timerbutton.h"
+#include "timerbutton.h"
 
 #include <QPainter>
 #include <QTimer>

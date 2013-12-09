@@ -21,7 +21,7 @@
 #include <QLibraryInfo>
 #include <QLocale>
 #include <QTextCodec>
-#include "grooveoff/mainwindow.h"
+#include "mainwindow.h"
 
 int main(int argc, char** argv)
 {

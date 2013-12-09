@@ -17,30 +17,25 @@
 */
 
 
-#ifndef MATCHESLISTMODEL_H
-#define MATCHESLISTMODEL_H
+#ifndef DOWNLOADLIST_H
+#define DOWNLOADLIST_H
 
-#include "grooveoff/song.h"
+#include <QListWidget>
+#include "phononnamespace.h"
 
-#include <QtCore/QAbstractItemModel>
+class DownloadItem;
 
-class MatchesListModel : public QAbstractListModel
+class DownloadList : public QListWidget
 {
     Q_OBJECT
-
 public:
-    explicit MatchesListModel(QObject *parent = 0);
-
-    virtual QVariant data ( const QModelIndex& index, int role = Qt::DisplayRole ) const;
-    virtual int rowCount ( const QModelIndex& parent = QModelIndex() ) const;
-    void setElements(QList<Song *> songs);
-    void clear();
+    explicit DownloadList(QWidget *parent = 0);
 
 public slots:
-    void forceRepaint();
-
-private:
-    QList<Song *> songs_;
+    void reloadPlaylist();
+    void cambioStato(Phonon::State newState, QString source);
+    void removeFailedDeletedAborted();
+    void removeDownloaded();
 };
 
-#endif // MATCHESLISTMODEL_H
+#endif // DOWNLOADLIST_H

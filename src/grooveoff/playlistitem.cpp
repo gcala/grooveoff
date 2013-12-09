@@ -17,41 +17,34 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 #include <QDebug>
 
-#include "grooveoff/songitem.h"
-#include "grooveoff/utility.h"
+#include "playlistitem.h"
+#include "utility.h"
 
 #include <QDir>
 
-SongItem::SongItem ( const GrooveShark::SongPtr &song ) :
+PlaylistItem::PlaylistItem ( const GrooveShark::SongPtr &song ) :
     song_(song)
 {
-// qDebug() << "CREO" << id_;
 }
 
 /*!
 \brief ~Song: this is the Song destructor.
 */
-SongItem::~SongItem()
+PlaylistItem::~PlaylistItem()
 {
-// qDebug() << "DISTRUGGO" << id_;
 }
 
-void SongItem::requireCoverReload()
+void PlaylistItem::requireCoverReload()
 {
     emit reloadCover();
 }
 
-void SongItem::requireDownloadIconReload()
+void PlaylistItem::requireDownloadIconReload()
 {
     emit reloadIcon();
 }
 
-void SongItem::requireRemotion()
-{
-    emit removeMe();
-}
-
-void SongItem::setPath(const QString& path)
+void PlaylistItem::setPath(const QString& path)
 {
     path_ = path;
     QString fileName = Utility::fileName(song_);
@@ -59,11 +52,18 @@ void SongItem::setPath(const QString& path)
     source_ = Phonon::MediaSource(completeName + ".mp3");
 }
 
-void SongItem::setPlayerState(Phonon::State state)
+QString PlaylistItem::fileName() const
+{
+    QString fileName = Utility::fileName(song_);
+    return fileName + ".mp3";
+}
+
+
+void PlaylistItem::setPlayerState(Phonon::State state)
 {
     emit stateChanged(state);
 }
 
 
-#include "songitem.moc"
+#include "playlistitem.moc"
 

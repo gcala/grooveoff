@@ -17,7 +17,7 @@
 */
 
 
-#include "grooveoff/settingsitem.h"
+#include "settingsitem.h"
 #include "ui_settingsitem.h"
 
 /*!

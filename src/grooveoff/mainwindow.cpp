@@ -16,20 +16,21 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "grooveoff/mainwindow.h"
-#include "grooveoff/audioplayer.h"
-#include "grooveoff/qled.h"
-#include "grooveoff/downloaditem.h"
-#include "grooveoff/roles.h"
-#include "grooveoff/configdialog.h"
-#include "grooveoff/aboutdialog.h"
-#include "grooveoff/filterproxymodel.h"
-#include "grooveoff/utility.h"
-#include "grooveoff/grooveoffnamespace.h"
-#include "grooveoff/covermanager.h"
+#include "mainwindow.h"
+#include "playerwidget.h"
+#include "qled.h"
+#include "downloaditem.h"
+#include "roles.h"
+#include "configdialog.h"
+#include "aboutdialog.h"
+#include "filterproxymodel.h"
+#include "utility.h"
+#include "grooveoffnamespace.h"
+#include "covermanager.h"
 #include "ui_mainwindow.h"
-#include "grooveoff/matchitem.h"
-#include "songitem.h"
+#include "matchitem.h"
+#include "playlistitem.h"
+#include "audioengine.h"
 
 #include <QtGui/QLabel>
 #include <QtGui/QMenu>
@@ -61,7 +62,7 @@
 using namespace GrooveShark;
 
 // version include
-#include <config-version.h>
+#include <../config-version.h>
 
 Q_DECLARE_METATYPE(QList<int>)
 
@@ -74,7 +75,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui_(new Ui::MainWindow)
 {
     ui_->setupUi(this);
-    playerWidget = new AudioPlayer(this);
+    playerWidget = new PlayerWidget(this);
     setupUi();
     setupActions();
     setupMenus();
@@ -499,7 +500,7 @@ void MainWindow::populateResultsList()
     QStringList albums;
 
     for(int i = 0; i < count; i++) {
-        SongItemPtr songItem(new SongItem(songList_->list().at(i)));
+        PlaylistItemPtr songItem(new PlaylistItem(songList_->list().at(i)));
 
         // Decide if show cover arts
         if(loadCovers_ && !QFile::exists(Utility::coversCachePath + songList_->list().at(i)->coverArtFilename())) {
@@ -512,7 +513,7 @@ void MainWindow::populateResultsList()
         ui_->matchList->addItem(wItem);
         ui_->matchList->setItemWidget(wItem, matchItem);
         wItem->setSizeHint(QSize(Utility::coverSize + Utility::marginSize * 2,Utility::coverSize + Utility::marginSize * 2));
-        connect(matchItem, SIGNAL(download(SongItemPtr)), this, SLOT(addDownloadItem(SongItemPtr)));
+        connect(matchItem, SIGNAL(download(PlaylistItemPtr)), this, SLOT(addDownloadItem(PlaylistItemPtr)));
 
         // populate filter widgets
         bool found = false;
@@ -563,7 +564,7 @@ void MainWindow::populateResultsList()
   \param index : index of item in results list (to download)
   \return void
 */
-void MainWindow::addDownloadItem(SongItemPtr song)
+void MainWindow::addDownloadItem(PlaylistItemPtr song)
 {
     // check if destination folder exists
     if(!QFile::exists(ui_->pathLine->text())) {
@@ -608,6 +609,7 @@ void MainWindow::addDownloadItem(SongItemPtr song)
                                           this);
     connect(item, SIGNAL(play(QString)), playerWidget, SLOT(play(QString)));
     connect(item, SIGNAL(reloadPlaylist()), ui_->downloadList, SLOT(reloadPlaylist()));
+    connect(item, SIGNAL(remove()), playerWidget, SLOT(removeFromPlaylist()));
 
     // check if download queue_ is full
     if(parallelDownloadsCount_ < maxDownloads_) {

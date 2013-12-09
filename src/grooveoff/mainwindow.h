@@ -23,9 +23,10 @@
 #include <QNetworkCookieJar>
 #include <QNetworkConfigurationManager>
 #include <phononnamespace.h>
-#include <libgrooveshark/apirequest.h>
-#include "songitem.h"
+#include "../libgrooveshark/apirequest.h"
+#include "playlistitem.h"
 
+//Qt
 class QLabel;
 class QPushButton;
 class QLed;
@@ -33,11 +34,13 @@ class QLineEdit;
 class QListView;
 class QListWidget;
 class QSplitter;
-class AudioPlayer;
 class QActionGroup;
-class QNetworkAccessManager;
-class SongObject;
 class QBoxLayout;
+class QNetworkAccessManager;
+
+//Custom
+class PlayerWidget;
+class SongObject;
 class DownloadItem;
 class MatchItemListDelegate;
 class CoverManager;
@@ -63,7 +66,7 @@ public:
 
 private slots:
     void selectFolder();
-    void addDownloadItem(SongItemPtr song);
+    void addDownloadItem(PlaylistItemPtr song);
     void beginSearch();
     void getToken();
     void setCompactLayout();
@@ -101,7 +104,7 @@ private:
     bool searchInProgress_;
     int parallelDownloadsCount_;
     QList<DownloadItem *> queue_;
-    AudioPlayer *playerWidget;
+    PlayerWidget *playerWidget;
     CoverManager *cvrMngr_;
 
     QNetworkAccessManager *nam_;

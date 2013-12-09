@@ -17,30 +17,30 @@
 */
 
 
-#ifndef AUDIOPLAYER_H
-#define AUDIOPLAYER_H
+#ifndef PLAYERWIDGET_H
+#define PLAYERWIDGET_H
 
-#include "grooveoff/downloaditem.h"
-#include "grooveoff/grooveoffnamespace.h"
+#include "downloaditem.h"
+#include "grooveoffnamespace.h"
 
 #include <QWidget>
 #include <phonon/MediaObject>
 #include <phonon/AudioOutput>
 
 namespace Ui {
-class AudioPlayer;
+class PlayerWidget;
 }
 
 class QLabel;
 class QPushButton;
 
-class AudioPlayer : public QWidget
+class PlayerWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit AudioPlayer(QWidget *parent = 0);
-    virtual ~AudioPlayer();
+    explicit PlayerWidget(QWidget *parent = 0);
+    virtual ~PlayerWidget();
 
     void showElapsedTimerLabel(bool);
 
@@ -68,7 +68,7 @@ private slots:
     void playNext();
 
 private:
-    Ui::AudioPlayer *ui_;
+    Ui::PlayerWidget *ui_;
     Phonon::MediaObject *mediaObject_;
     Phonon::MediaObject *metaInformationResolver_;
     Phonon::AudioOutput *audioOutput_;
@@ -84,4 +84,4 @@ private:
     int currentIndex(const QString & file);
 };
 
-#endif // AUDIOPLAYER_H
+#endif // PLAYERWIDGET_H

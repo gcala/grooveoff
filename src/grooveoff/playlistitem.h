@@ -17,37 +17,37 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
 
-#ifndef SONGITEM_H
-#define SONGITEM_H
+#ifndef PLAYLISTITEM_H
+#define PLAYLISTITEM_H
 
 #include <QObject>
 #include <Phonon/MediaSource>
-#include <libgrooveshark/song.h>
+#include <../libgrooveshark/song.h>
 
-class SongItem : public QObject
+class PlaylistItem : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit SongItem ( const GrooveShark::SongPtr &song );
-    ~SongItem();
+    explicit PlaylistItem ( const GrooveShark::SongPtr &song );
+    ~PlaylistItem();
 
     QString path() const { return path_; }
     void setPath(const QString& path);
+    QString fileName() const;
     GrooveShark::SongPtr info() { return song_;}
 
     Phonon::MediaSource source() const { return source_; }
 
     void requireCoverReload();
     void requireDownloadIconReload();
-    void requireRemotion();
     void setPlayerState(Phonon::State);
+    bool isPlaying() { return isPlaying_; }
+    void setPlaying(bool ok) {isPlaying_ = ok; }
 
 signals:
     void reloadCover();
     void reloadIcon();
-    void playMe();
-    void removeMe();
     void stateChanged(Phonon::State);
 
 public slots:
@@ -56,9 +56,10 @@ private:
     GrooveShark::SongPtr song_;
     Phonon::MediaSource source_;
     QString path_;
+    bool isPlaying_;
 };
 
-typedef QSharedPointer<SongItem> SongItemPtr;
-Q_DECLARE_METATYPE( SongItemPtr )
+typedef QSharedPointer<PlaylistItem> PlaylistItemPtr;
+Q_DECLARE_METATYPE( PlaylistItemPtr )
 
-#endif // SONGITEM_H
+#endif // PLAYLISTITEM_H

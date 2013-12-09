@@ -23,9 +23,9 @@
 #include <QWidget>
 #include <QVariantMap>
 #include <phonon/MediaObject>
-#include "grooveoff/grooveoffnamespace.h"
-#include "grooveoff/songitem.h"
-#include <libgrooveshark/downloader.h>
+#include "grooveoffnamespace.h"
+#include "playlistitem.h"
+#include <../libgrooveshark/downloader.h>
 
 namespace Ui {
 class DownloadItem;
@@ -41,11 +41,11 @@ class DownloadItem : public QWidget
     Q_OBJECT
 
 public:
-    DownloadItem(const SongItemPtr &song, QWidget *parent = 0);
+    DownloadItem(const PlaylistItemPtr &song, QWidget *parent = 0);
     virtual ~DownloadItem();
     QString songFile();
 
-    const SongItemPtr song() { return song_; }
+    const PlaylistItemPtr song() { return song_; }
     GrooveOff::DownloadState downloadState() { return downloadState_; }
 
     void startDownload();
@@ -56,7 +56,7 @@ public slots:
     void setPlayerState(Phonon::State);
 
 signals:
-    void remove(DownloadItem *i);
+    void remove();
     void downloadFinished();
     void addToQueue(DownloadItem *);
     void pauseResumePlaying();
@@ -80,7 +80,7 @@ private slots:
 
 private:
     Ui::DownloadItem *ui_;
-    SongItemPtr song_;
+    PlaylistItemPtr song_;
     GrooveOff::DownloadState downloadState_;
     Phonon::State playerState_;
     GrooveShark::DownloaderPtr downloader_;

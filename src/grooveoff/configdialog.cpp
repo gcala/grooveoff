@@ -17,9 +17,9 @@
 */
 
 
-#include "grooveoff/configdialog.h"
+#include "configdialog.h"
 #include "ui_configdialog.h"
-#include "grooveoff/settingsitem.h"
+#include "settingsitem.h"
 
 #include <QSettings>
 

@@ -19,7 +19,7 @@
 #ifndef COVERMANAGER_H
 #define COVERMANAGER_H
 
-#include "songitem.h"
+#include "playlistitem.h"
 
 #include <QObject>
 #include <QHash>
@@ -30,7 +30,7 @@ class CoverManager :  public QObject
     Q_OBJECT
 public:
     explicit CoverManager(QObject *parent = 0);
-    void addItem(const SongItemPtr &);
+    void addItem(const PlaylistItemPtr &);
     void clear();
 
 signals:
@@ -40,7 +40,7 @@ public slots:
     void setCover();
 
 private:
-    QHash< QString, QList< SongItemPtr > > coverItems_;
+    QHash< QString, QList< PlaylistItemPtr > > coverItems_;
 };
 
 #endif // COVERMANAGER_H
