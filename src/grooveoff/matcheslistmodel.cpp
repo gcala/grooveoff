@@ -17,8 +17,8 @@
 */
 
 
-#include "grooveoff/matcheslistmodel.h"
-#include "grooveoff/roles.h"
+#include "matcheslistmodel.h"
+#include "roles.h"
 
 /*!
   \brief MatchesListModel: this is the MatchesListModel constructor.

@@ -1,9 +1,12 @@
 ChangeLog
 =========
 
+version 0.1.8 (release 2013-12-09 )
+  * fix to build system
+  
 version 0.1.7 (release 2013-08-05 )
   * added Czech translation by fri
-  
+
 version 0.1.6 (release 2013-08-05 )
   * added Basque translation by alexgabilondo
 

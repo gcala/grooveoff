@@ -3,7 +3,7 @@ project(grooveoff)
 # Information to update before to release this package.
 
 # grooveoff info
-SET(GROOVEOFF_VERSION "0.1.7" )
+SET(GROOVEOFF_VERSION "0.1.8" )
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config-version.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/src/config-version.h )
 # ==================================================================================
 

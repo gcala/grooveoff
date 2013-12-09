@@ -17,10 +17,10 @@
 */
 
 
-#include "grooveoff/downloaditem.h"
-#include "grooveoff/songdownloader.h"
-#include "grooveoff/timerbutton.h"
-#include "grooveoff/utility.h"
+#include "downloaditem.h"
+#include "songdownloader.h"
+#include "timerbutton.h"
+#include "utility.h"
 #include "ui_downloaditem.h"
 
 #include <QLabel>

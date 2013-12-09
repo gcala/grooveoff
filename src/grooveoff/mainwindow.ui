@@ -213,19 +213,19 @@
   <customwidget>
    <class>QLed</class>
    <extends>QWidget</extends>
-   <header location="global">grooveoff/qled.h</header>
+   <header location="global">qled.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>AudioPlayer</class>
    <extends>QFrame</extends>
-   <header location="global">grooveoff/audioplayer.h</header>
+   <header location="global">audioplayer.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>ComboBox</class>
    <extends>QComboBox</extends>
-   <header location="global">grooveoff/combobox.h</header>
+   <header location="global">combobox.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

@@ -17,7 +17,7 @@
 */
 
 
-#include "grooveoff/song.h"
+#include "song.h"
 
 #include <QPixmapCache>
 #include <QNetworkAccessManager>

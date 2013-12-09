@@ -23,7 +23,7 @@
 #include <QWidget>
 #include <QVariantMap>
 #include <phonon/MediaObject>
-#include "grooveoff/grooveoffnamespace.h"
+#include "grooveoffnamespace.h"
 
 namespace Ui {
 class DownloadItem;

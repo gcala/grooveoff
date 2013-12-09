@@ -275,12 +275,12 @@
   <customwidget>
    <class>TimerButton</class>
    <extends>QPushButton</extends>
-   <header location="global">grooveoff/timerbutton.h</header>
+   <header location="global">timerbutton.h</header>
   </customwidget>
   <customwidget>
    <class>ElidedLabel</class>
    <extends>QLabel</extends>
-   <header location="global">grooveoff/elidedlabel.h</header>
+   <header location="global">elidedlabel.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

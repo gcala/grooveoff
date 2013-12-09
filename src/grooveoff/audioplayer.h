@@ -20,7 +20,7 @@
 #ifndef AUDIOPLAYER_H
 #define AUDIOPLAYER_H
 
-#include "grooveoff/downloaditem.h"
+#include "downloaditem.h"
 
 #include <QWidget>
 #include <phonon/MediaObject>

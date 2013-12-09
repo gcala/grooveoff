@@ -17,8 +17,8 @@
 */
 
 
-#include "grooveoff/combobox.h"
-#include "grooveoff/utility.h"
+#include "combobox.h"
+#include "utility.h"
 
 #include <QStylePainter>
 

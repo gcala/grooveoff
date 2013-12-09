@@ -20,7 +20,7 @@
 #ifndef MATCHESLISTMODEL_H
 #define MATCHESLISTMODEL_H
 
-#include "grooveoff/song.h"
+#include "song.h"
 
 #include <QtCore/QAbstractItemModel>
 

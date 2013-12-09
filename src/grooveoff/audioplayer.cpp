@@ -17,9 +17,9 @@
 */
 
 
-#include "grooveoff/audioplayer.h"
+#include "audioplayer.h"
 #include "ui_audioplayer.h"
-#include "grooveoff/utility.h"
+#include "utility.h"
 
 #include <QDir>
 #include <QTime>

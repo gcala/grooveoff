@@ -17,10 +17,10 @@
 */
 
 
-#include "grooveoff/matchitemlistdelegate.h"
-#include "grooveoff/matcheslistmodel.h"
-#include "grooveoff/roles.h"
-#include "grooveoff/utility.h"
+#include "matchitemlistdelegate.h"
+#include "matcheslistmodel.h"
+#include "roles.h"
+#include "utility.h"
 
 #include <QApplication>
 #include <QPainter>

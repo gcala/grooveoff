@@ -13,7 +13,7 @@
  *   http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.               *
  ***************************************************************************/
 
-#include "grooveoff/qled.h"
+#include "qled.h"
 
 #include <QColor>
 #include <QtGlobal>

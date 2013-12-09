@@ -16,18 +16,18 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "grooveoff/mainwindow.h"
-#include "grooveoff/audioplayer.h"
-#include "grooveoff/matcheslistmodel.h"
-#include "grooveoff/matchitemlistdelegate.h"
-#include "grooveoff/qled.h"
-#include "grooveoff/downloaditem.h"
-#include "grooveoff/roles.h"
-#include "grooveoff/configdialog.h"
-#include "grooveoff/aboutdialog.h"
-#include "grooveoff/filterproxymodel.h"
-#include "grooveoff/utility.h"
-#include "grooveoff/grooveoffnamespace.h"
+#include "mainwindow.h"
+#include "audioplayer.h"
+#include "matcheslistmodel.h"
+#include "matchitemlistdelegate.h"
+#include "qled.h"
+#include "downloaditem.h"
+#include "roles.h"
+#include "configdialog.h"
+#include "aboutdialog.h"
+#include "filterproxymodel.h"
+#include "utility.h"
+#include "grooveoffnamespace.h"
 #include "ui_mainwindow.h"
 
 #include <QtGui/QLabel>
@@ -58,7 +58,7 @@
 #include <QDirModel>
 
 // version include
-#include <config-version.h>
+#include <../config-version.h>
 
 Q_DECLARE_METATYPE(QList<int>)
 

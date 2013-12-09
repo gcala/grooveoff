@@ -17,9 +17,9 @@
 */
 
 
-#include "grooveoff/songdownloader.h"
-#include "grooveoff/utility.h"
-#include "grooveoff/grooveoffnamespace.h"
+#include "songdownloader.h"
+#include "utility.h"
+#include "grooveoffnamespace.h"
 
 #include <qjson/serializer.h>
 #include <qjson/parser.h>

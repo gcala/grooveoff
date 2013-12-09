@@ -17,11 +17,11 @@
 */
 
 
-#include "grooveoff/aboutdialog.h"
+#include "aboutdialog.h"
 #include "ui_aboutdialog.h"
 
 // version include
-#include <config-version.h>
+#include <../config-version.h>
 
 #include <QDesktopServices>
 #include <QUrl>
