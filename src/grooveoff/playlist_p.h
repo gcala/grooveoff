@@ -17,30 +17,20 @@
  *
  */
 
-#ifndef PLAYLIST_H
-#define PLAYLIST_H
+#ifndef PLAYLIST_P_H
+#define PLAYLIST_P_H
 
-#include <QObject>
-#include <QSharedPointer>
-#include <QMetaType>
+#include "playlist.h"
 
-class PlaylistPrivate;
-
-class Playlist : public QObject
+class PlaylistPrivate : public QObject
 {
     Q_OBJECT
 public:
-    Playlist(QObject* parent = 0);
-    ~Playlist();
+    PlaylistPrivate(Playlist* qq, QObject* parent = 0);
+    virtual ~PlaylistPrivate();
 
 private:
-    Q_DISABLE_COPY( Playlist )
-    PlaylistPrivate* const d;
-    friend class PlaylistPrivate;
+    Playlist* const q;
 };
 
-typedef QSharedPointer<Playlist> PlaylistPtr;
-
-Q_DECLARE_METATYPE( PlaylistPtr )
-
-#endif // PLAYLIST_H
+#endif // PLAYLISTPRIVATE_H
