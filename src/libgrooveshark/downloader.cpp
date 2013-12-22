@@ -14,6 +14,7 @@ DownloaderPrivate::DownloaderPrivate ( Downloader* qq, QString path, QString fil
     m_path(path),
     m_fileName(fileName),
     m_id(id),
+    reply_(0),
     q ( qq ),
     m_error ( QNetworkReply::NoError )
 {
@@ -35,7 +36,15 @@ void DownloaderPrivate::error ( QNetworkReply::NetworkError error )
 
 void DownloaderPrivate::stopDownload()
 {
-    reply_->abort();
+    // stopping a download we can be in two states:
+    // 1. we are still retrieving the stream key
+    // 2. we are downloading the file
+    if(reply_) { // we are downloading the file
+        reply_->abort();
+    } else { // we are still retrieving the stream key
+        streamKey_->abort();
+        emit q->downloadCompleted(false);
+    }
 }
 
 void DownloaderPrivate::streamKeyRetrieved()

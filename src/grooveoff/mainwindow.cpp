@@ -31,6 +31,7 @@
 #include "matchitem.h"
 #include "playlistitem.h"
 #include "audioengine.h"
+#include "actioncollection.h"
 
 #include <QtGui/QLabel>
 #include <QtGui/QMenu>
@@ -79,9 +80,10 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui_->setupUi(this);
     playerWidget = new PlayerWidget(this);
+    new ActionCollection(this);
     setupUi();
-    setupActions();
     setupMenus();
+    setupSignals();
     loadSettings();
     statusBar()->addPermanentWidget( playerWidget, 1 );
     statusBar()->setSizeGripEnabled(false);
@@ -108,11 +110,11 @@ MainWindow::MainWindow(QWidget *parent) :
     setWindowTitle(QString("GrooveOff %1").arg(GROOVEOFF_VERSION));
 
     if(ui_->splitter->orientation() == Qt::Vertical) {
-        actionCompact_->setChecked(true);
+        ActionCollection::instance()->getAction("actionCompact")->setChecked(true);
         playerWidget->showElapsedTimerLabel(false);
     }
     else {
-        actionWide_->setChecked(true);
+        ActionCollection::instance()->getAction("actionWide")->setChecked(true);
         playerWidget->showElapsedTimerLabel(true);
     }
 
@@ -230,14 +232,6 @@ void MainWindow::setupUi()
     ui_->batchDownloadButton->setIconSize(QSize(16,16));
     ui_->batchDownloadButton->setFixedHeight(fontHeight > 25 ? fontHeight : 25);
 
-    // Connections
-    connect(ui_->searchButton, SIGNAL(clicked(bool)), this, SLOT(beginSearch()));
-    connect(ui_->browseButton, SIGNAL(clicked(bool)), this, SLOT(selectFolder()));
-    connect(ui_->searchLine, SIGNAL(returnPressed()), this, SLOT(beginSearch()));
-    connect(ui_->artistsCB, SIGNAL(activated(int)), this, SLOT(artistChanged()));
-    connect(ui_->albumsCB, SIGNAL(activated(int)), this, SLOT(albumChanged()));
-    connect(ui_->batchDownloadButton, SIGNAL(clicked()), this, SLOT(batchDownload()));
-
     ui_->matchesMessage->setFont(Utility::font(QFont::Bold));
 
     ui_->splitter->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
@@ -246,128 +240,64 @@ void MainWindow::setupUi()
 }
 
 /*!
-  \brief setupActions: setup actions
-  \return void
-*/
-void MainWindow::setupActions()
-{
-    actionClose_ = new QAction(QIcon::fromTheme(QLatin1String("application-exit"),
-                               QIcon(QLatin1String(":/resources/application-exit.png"))),
-                               trUtf8("&Exit"), this);
-    actionClose_->setToolTip(trUtf8("Close GrooveOff"));
-    actionClose_->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Q));
-    connect(actionClose_, SIGNAL(triggered()),
-            this, SLOT(close()));
-
-    actionDonate_ = new QAction(QIcon::fromTheme(QLatin1String("help-donate"),
-                                QIcon(QLatin1String(":/resources/help-donate.png"))),
-                                trUtf8("&Donate"), this);
-    actionDonate_->setToolTip(trUtf8("Donate with PayPal"));
-    connect(actionDonate_, SIGNAL(triggered()),
-            this, SLOT(donate()));
-
-    actionConfigure_ = new QAction(trUtf8("&Configure GrooveOff..."), this);
-    if(QIcon::hasThemeIcon(QLatin1String("configure")))
-        actionConfigure_->setIcon(QIcon::fromTheme(QLatin1String("configure")));
-    else
-        actionConfigure_->setIcon(QIcon::fromTheme(QLatin1String("gconf-editor"),
-                                  QIcon(QLatin1String(":/resources/configure.png"))));
-
-    connect(actionConfigure_, SIGNAL(triggered()),
-            this, SLOT(configure()));
-
-    actionCompact_ = new QAction(QIcon::fromTheme(QLatin1String("view-split-top-bottom"),
-                                 QIcon(QLatin1String(":/resources/view-split-top-bottom.png"))),
-                                 trUtf8("&Compact"), this);
-    actionCompact_->setCheckable(true);
-    connect(actionCompact_, SIGNAL(triggered()),
-            this, SLOT(setCompactLayout()));
-
-    actionWide_ = new QAction(QIcon::fromTheme(QLatin1String("view-split-left-right"),
-                              QIcon(QLatin1String(":/resources/view-split-left-right"))),
-                              trUtf8("&Wide"), this);
-    actionWide_->setCheckable(true);
-    connect(actionWide_, SIGNAL(triggered()),
-            this, SLOT(setWideLayout()));
-
-    actionNewToken_ = new QAction(QIcon::fromTheme(QLatin1String("emblem-new"),
-                                  QIcon(QLatin1String(":/resources/emblem-new.png"))),
-                                  trUtf8("&Get new token..."), this);
-    connect(actionNewToken_, SIGNAL(triggered()),
-            this, SLOT(getToken()));
-
-    layoutGroup_ = new QActionGroup(this);
-    layoutGroup_->addAction(actionCompact_);
-    layoutGroup_->addAction(actionWide_);
-
-    actionStopDownloads_ = new QAction(QIcon::fromTheme(QLatin1String("process-stop"),
-                                      QIcon(QLatin1String(":/resources/process-stop.png"))),
-                                      trUtf8("&Stop all downloads"), this);
-    connect(actionStopDownloads_, SIGNAL(triggered(bool)),
-            ui_->downloadList, SLOT(abortAllDownloads()));
-
-    actionRemoveFailed_ = new QAction(QIcon::fromTheme(QLatin1String("edit-delete"),
-                                      QIcon(QLatin1String(":/resources/edit-delete.png"))),
-                                      trUtf8("&Remove deleted/failed transfers"), this);
-    connect(actionRemoveFailed_, SIGNAL(triggered(bool)),
-            ui_->downloadList, SLOT(removeFailedDeletedAborted()));
-
-    actionClearDownloadList_ = new QAction(QIcon::fromTheme(QLatin1String("edit-clear"),
-                                           QIcon(QLatin1String(":/resources/edit-clear"))),
-                                           trUtf8("Remove all finished"), this);
-    actionClearDownloadList_->setToolTip(trUtf8("Removes all finished transfers and leaves all files on disk"));
-    connect(actionClearDownloadList_, SIGNAL(triggered(bool)),
-            ui_->downloadList, SLOT(removeDownloaded()));
-
-    actionAbout_ = new QAction(QIcon::fromTheme(QLatin1String("help-about"),
-                               QIcon(QLatin1String(":/resources/help-about.png"))),
-                               trUtf8("&About GrooveOff"), this);
-    connect(actionAbout_, SIGNAL(triggered()),
-            this, SLOT(about()));
-
-    actionQtAbout_ = new QAction(QIcon::fromTheme(QLatin1String("qtlogo"),
-                                 QIcon(QLatin1String(":/resources/qtlogo.png"))),
-                                 trUtf8("About &Qt"), this);
-    connect(actionQtAbout_, SIGNAL(triggered()),
-            qApp, SLOT(aboutQt()));
-}
-
-/*!
   \brief setupMenus: setup menus
   \return void
 */
 void MainWindow::setupMenus()
 {
-    fileMenu_ = new QMenu(trUtf8("&File"));
-    fileMenu_->addAction(actionNewToken_);
-    fileMenu_->addSeparator();
-    fileMenu_->addAction(actionDonate_);
-    fileMenu_->addSeparator();
-    fileMenu_->addAction(actionClose_);
-    downloadsMenu_ = new QMenu(trUtf8("&Downloads"));
-    downloadsMenu_->addAction(actionStopDownloads_);
-    downloadsMenu_->addSeparator();
-    downloadsMenu_->addAction(actionRemoveFailed_);
-    downloadsMenu_->addAction(actionClearDownloadList_);
-    viewMenu_ = new QMenu(trUtf8("&View"));
-    settingsMenu_ = new QMenu(trUtf8("&Settings"));
-    settingsMenu_->addAction(actionConfigure_);
-    layoutMenu_ = new QMenu(trUtf8("&Layout"));
-    layoutMenu_->setIcon(QIcon::fromTheme(QLatin1String("view-multiple-objects"),
-                         QIcon(QLatin1String(":/resources/view-multiple-objects.png"))));
-    viewMenu_->addMenu(layoutMenu_);
-    layoutMenu_->addAction(actionCompact_);
-    layoutMenu_->addAction(actionWide_);
-    helpMenu_ = new QMenu(trUtf8("&Help"));
-    helpMenu_->addAction(actionAbout_);
-    helpMenu_->addAction(actionQtAbout_);
-
-    menuBar()->addMenu(fileMenu_);
-    menuBar()->addMenu(downloadsMenu_);
-    menuBar()->addMenu(viewMenu_);
-    menuBar()->addMenu(settingsMenu_);
-    menuBar()->addMenu(helpMenu_);
+    // Always create a menubar, but only create a compactMenu on Windows and X11
+    m_menuBar = ActionCollection::instance()->createMenuBar( this );
+    setMenuBar( m_menuBar );
+    m_compactMainMenu = ActionCollection::instance()->createCompactMenu( this );
 }
+
+void MainWindow::setupSignals()
+{
+    // <Menu Items>
+    ActionCollection *ac = ActionCollection::instance();
+    connect(ac->getAction( "actionClose" ), SIGNAL(triggered()),
+            this, SLOT(close()));
+
+    connect(ac->getAction( "actionDonate" ), SIGNAL(triggered()),
+            this, SLOT(donate()));
+
+
+    connect(ac->getAction( "actionConfigure" ), SIGNAL(triggered()),
+            this, SLOT(configure()));
+
+    connect(ac->getAction( "actionCompact" ), SIGNAL(triggered()),
+            this, SLOT(setCompactLayout()));
+
+    connect(ac->getAction( "actionWide" ), SIGNAL(triggered()),
+            this, SLOT(setWideLayout()));
+
+    connect(ac->getAction( "actionNewToken" ), SIGNAL(triggered()),
+            this, SLOT(getToken()));
+
+    connect(ac->getAction( "actionStopDownloads" ), SIGNAL(triggered(bool)),
+            ui_->downloadList, SLOT(abortAllDownloads()));
+
+    connect(ac->getAction( "actionRemoveFailed" ), SIGNAL(triggered(bool)),
+            ui_->downloadList, SLOT(removeFailedDeletedAborted()));
+
+    connect(ac->getAction( "actionClearDownloadList" ), SIGNAL(triggered(bool)),
+            ui_->downloadList, SLOT(removeDownloaded()));
+
+    connect(ac->getAction( "actionAbout" ), SIGNAL(triggered()),
+            this, SLOT(about()));
+
+    connect(ac->getAction( "actionQtAbout" ), SIGNAL(triggered()),
+            qApp, SLOT(aboutQt()));
+
+    // gui widgets
+    connect(ui_->searchButton, SIGNAL(clicked(bool)), this, SLOT(beginSearch()));
+    connect(ui_->browseButton, SIGNAL(clicked(bool)), this, SLOT(selectFolder()));
+    connect(ui_->searchLine, SIGNAL(returnPressed()), this, SLOT(beginSearch()));
+    connect(ui_->artistsCB, SIGNAL(activated(int)), this, SLOT(artistChanged()));
+    connect(ui_->albumsCB, SIGNAL(activated(int)), this, SLOT(albumChanged()));
+    connect(ui_->batchDownloadButton, SIGNAL(clicked()), this, SLOT(batchDownload()));
+}
+
 
 /*!
   \brief selectFolder: select save folder
@@ -533,7 +463,7 @@ void MainWindow::populateResultsList()
             cvrMngr_->addItem(songItem);
         }
 
-        // build a DownloadItem with all required data
+        // build a MathItem with all required data
         MatchItem *matchItem = new MatchItem(songItem, this);
         QListWidgetItem *wItem = new QListWidgetItem;
         ui_->matchList->addItem(wItem);

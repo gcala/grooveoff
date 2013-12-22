@@ -52,6 +52,13 @@ uint StreamKeyPrivate::id() const
     return m_id;
 }
 
+void StreamKeyPrivate::abort()
+{
+    if(m_reply->isRunning()) {
+        m_reply->abort();
+    }
+}
+
 bool StreamKeyPrivate::parse( const QVariant& data )
 {
     if( !data.canConvert( QVariant::Map ) ) {
@@ -158,6 +165,11 @@ QString StreamKey::ip() const
 uint StreamKey::id() const
 {
     return d->id();
+}
+
+void StreamKey::abort()
+{
+    return d->abort();
 }
 
 #include "streamkey_p.moc"

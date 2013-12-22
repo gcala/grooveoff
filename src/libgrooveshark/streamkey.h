@@ -24,6 +24,7 @@ public:
     QString streamKey() const;
     QString ip() const;
     uint id() const;
+    void abort();
 
 private:
     Q_DISABLE_COPY( StreamKey )

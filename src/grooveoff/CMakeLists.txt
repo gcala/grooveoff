@@ -4,7 +4,7 @@ include_directories(${QT_INCLUDES}
                     ${CMAKE_CURRENT_BINARY_DIR}
                     ${CMAKE_CURRENT_SOURCE_DIR})
 
-set(grooveoff_SRCS aboutdialog.cpp
+set(grooveoff_SRCS actioncollection.cpp aboutdialog.cpp
                    audioengine.cpp
                    combobox.cpp
                    configdialog.cpp

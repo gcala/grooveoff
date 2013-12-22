@@ -115,32 +115,15 @@ private:
     GrooveShark::TokenPtr token_;
     GrooveShark::SongListPtr songList_;
 
-    //Menus
-    QMenu *fileMenu_;
-    QMenu *downloadsMenu_;
-    QMenu *viewMenu_;
-    QMenu *settingsMenu_;
-    QMenu *helpMenu_;
-    QMenu *layoutMenu_;
-
-    //Actions
-    QAction *actionClose_;
-    QAction *actionDonate_;
-    QAction *actionAbout_;
-    QAction *actionQtAbout_;
-    QAction *actionNewToken_;
-    QAction *actionConfigure_;
-    QAction *actionCompact_;
-    QAction *actionWide_;
-    QAction *actionRemoveFailed_;
-    QAction *actionClearDownloadList_;
-    QActionGroup *layoutGroup_;
-    QAction *actionStopDownloads_;
+    // Menus and menu actions: Accounts menu
+    QMenuBar    *m_menuBar;
+    QAction     *m_compactMenuAction;
+    QMenu       *m_compactMainMenu;
 
     // Methods
     void setupUi();
-    void setupActions();
     void setupMenus();
+    void setupSignals();
     void setupCompleter();
     void loadSettings();
     void saveSettings();

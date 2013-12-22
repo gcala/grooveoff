@@ -16,6 +16,7 @@ public:
     QString streamKey() const;
     QString ip() const;
     uint id() const;
+    void abort();
 
 private:
     QNetworkAccessManager* m_nam;
