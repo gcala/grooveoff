@@ -37,6 +37,7 @@ class QSplitter;
 class QActionGroup;
 class QBoxLayout;
 class QNetworkAccessManager;
+class QDomElement;
 
 //Custom
 class PlayerWidget;
@@ -66,7 +67,7 @@ public:
 
 private slots:
     void selectFolder();
-    void addDownloadItem(PlaylistItemPtr song);
+    void downloadRequest(PlaylistItemPtr playlistItem);
     void beginSearch();
     void getToken();
     void setCompactLayout();
@@ -98,6 +99,8 @@ private:
     int searchSize_;
     int maxResults_;
     int maxDownloads_;
+    bool saveSession_;
+    QString sessionFile_;
     bool showHistory_;
     bool saveDestination_;
     bool loadCovers_;
@@ -132,6 +135,7 @@ private:
     QAction *actionRemoveFailed_;
     QAction *actionClearDownloadList_;
     QActionGroup *layoutGroup_;
+    QAction *actionStopDownloads_;
 
     // Methods
     void setupUi();
@@ -145,6 +149,11 @@ private:
     bool isDownloadingQueued(const uint &);
     int visibleItemsCount();
     void reloadItemsDownloadButtons();
+    void loadSession();
+    void saveSession();
+    void parsePlaylistItem(const QDomElement & element, PlaylistItemPtr item);
+    void parseSong(const QDomElement & element, GrooveShark::SongPtr song);
+    void addDownloadItem(PlaylistItemPtr playlistItem);
 };
 
 #endif // MAINWINDOW_H

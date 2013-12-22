@@ -20,6 +20,8 @@
 #include "downloadlist.h"
 #include "downloaditem.h"
 #include "utility.h"
+#include "playlist.h"
+#include "audioengine.h"
 
 #include <QDir>
 
@@ -34,22 +36,11 @@ DownloadList::DownloadList(QWidget *parent) :
 
 void DownloadList::reloadPlaylist()
 {
-    Utility::audioSources.clear();
-    Utility::playlist.clear();
+    Playlist::instance()->clear();
 
-    for(int i = 0; i < count(); i++)
-        if(ITEM(i)->downloadState() == GrooveOff::FinishedState) {
-            Utility::audioSources.append(ITEM(i)->song().data()->source());
-            Utility::playlist.append(ITEM(i)->song());
-        }
-}
-
-void DownloadList::cambioStato(Phonon::State newState, QString source)
-{
     for(int i = 0; i < count(); i++) {
-        if(source == ITEM(i)->song()->path() + QDir::separator() + Utility::fileName(ITEM(i)->song()->info()) + ".mp3") {
-            ITEM(i)->setPlayerState(newState);
-            break;
+        if(ITEM(i)->downloadState() == GrooveOff::FinishedState) {
+            Playlist::instance()->appendItem(ITEM(i)->playlistItem());
         }
     }
 }
@@ -78,15 +69,30 @@ void DownloadList::removeFailedDeletedAborted()
 */
 void DownloadList::removeDownloaded()
 {
+    AudioEngine::instance()->stop();
     for(int i = count() - 1; i >= 0; i--) {
         GrooveOff::DownloadState state = ITEM(i)->downloadState();
         if(state == GrooveOff::FinishedState) {
+            AudioEngine::instance()->removingTrack(ITEM(i)->playlistItem());
             QListWidgetItem *item = takeItem(i);
             removeItemWidget(item);
             delete item;
         }
     }
+
+    Playlist::instance()->clear();
 }
+
+void DownloadList::abortAllDownloads()
+{
+    for(int i = count() - 1; i >= 0; i--) {
+        GrooveOff::DownloadState state = ITEM(i)->downloadState();
+        if(state == GrooveOff::DownloadingState || state == GrooveOff::QueuedState) {
+            ITEM(i)->abortDownload();
+        }
+    }
+}
+
 
 
 #include "downloadlist.moc"

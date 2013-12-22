@@ -23,6 +23,7 @@
 #include "ui_downloaditem.h"
 #include <../libgrooveshark/apirequest.h>
 #include "audioengine.h"
+#include "playlist.h"
 
 #include <QLabel>
 #include <QProgressBar>
@@ -39,23 +40,28 @@ using namespace GrooveShark;
   \brief DownloadItem: this is the DownloadItem constructor.
   \param parent: The Parent Widget
 */
-DownloadItem::DownloadItem(const PlaylistItemPtr &song, QWidget *parent) :
+DownloadItem::DownloadItem(const PlaylistItemPtr &playlistItemPtr, QWidget *parent) :
     QWidget(parent),
     ui_(new Ui::DownloadItem),
-    song_(song)
+    playlistItem_(playlistItemPtr)
 {
     ui_->setupUi(this);
-    connect(song_.data(), SIGNAL(reloadCover()), this, SLOT(loadCover()));
-    connect(song_.data(), SIGNAL(stateChanged(Phonon::State)), this, SLOT(setPlayerState(Phonon::State)));
+    connect(playlistItem_.data(), SIGNAL(reloadCover()), this, SLOT(loadCover()));
+    connect(playlistItem_.data(), SIGNAL(stateChanged(Phonon::State)), this, SLOT(setPlayerState(Phonon::State)));
 
     setupUi();
 
     setupConnections();
 
-    downloadState_ = GrooveOff::QueuedState;
+    if(QFile::exists(playlistItem_->path() + QDir::separator() + Utility::fileName(playlistItem_->song()) + ".mp3")) {
+        emit downloadFinished();
+        downloadState_ = GrooveOff::FinishedState;
+    }
+    else
+        downloadState_ = GrooveOff::QueuedState;
     playerState_ = Phonon::StoppedState;
     stateChanged();
-    qDebug() << "GrooveOff ::" << "Queued download of" << song_->info()->songName();
+    qDebug() << "GrooveOff ::" << "Queued download of" << playlistItem_->song()->songName();
 }
 
 /*!
@@ -63,8 +69,6 @@ DownloadItem::DownloadItem(const PlaylistItemPtr &song, QWidget *parent) :
 */
 DownloadItem::~DownloadItem()
 {
-    emit remove();
-
     if(ui_->multiFuncButton->isCountdownStarted()) {
         ui_->multiFuncButton->stopCountdown();
         removeSong();
@@ -86,7 +90,7 @@ void DownloadItem::setupUi()
 
     loadCover();
 
-    ui_->coverLabel->setToolTip(Utility::fileName(song_->info()));
+    ui_->coverLabel->setToolTip(Utility::fileName(playlistItem_->song()));
 
     QGraphicsDropShadowEffect *coverShadow = new QGraphicsDropShadowEffect(this);
     coverShadow->setBlurRadius(10.0);
@@ -96,12 +100,12 @@ void DownloadItem::setupUi()
     ui_->coverLabel->setGraphicsEffect(coverShadow);
 
     ui_->titleLabel->setFont(Utility::font(QFont::Bold));
-    ui_->titleLabel->setText(song_->info()->songName());
-    ui_->titleLabel->setToolTip(song_->info()->songName());
+    ui_->titleLabel->setText(playlistItem_->song()->songName());
+    ui_->titleLabel->setToolTip(playlistItem_->song()->songName());
     ui_->titleLabel->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred); // fix hidden label
 
-    ui_->artist_albumLabel->setText(song_->info()->artistName() + " - " + song_->info()->albumName());
-    ui_->artist_albumLabel->setToolTip(song_->info()->songName());
+    ui_->artist_albumLabel->setText(playlistItem_->song()->artistName() + " - " + playlistItem_->song()->albumName());
+    ui_->artist_albumLabel->setToolTip(playlistItem_->song()->songName());
     ui_->artist_albumLabel->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred); // fix hidden label
 
     ui_->multiFuncButton->setFixedSize(QSize(Utility::buttonSize,Utility::buttonSize));
@@ -218,6 +222,7 @@ void DownloadItem::stateChanged()
             ui_->openFolderWidget->setVisible(false);
             break;
         case GrooveOff::FinishedState:
+            ui_->playButton->setEnabled(true);
             ui_->multiFuncWidget->setVisible(false);
             ui_->multiFuncButton->setIcon(QIcon::fromTheme(QLatin1String("user-trash"),
                                           QIcon(QLatin1String(":/resources/user-trash.png"))));
@@ -304,7 +309,7 @@ void DownloadItem::startDownload()
 {
     downloadState_ = GrooveOff::DownloadingState;
     stateChanged();
-    downloader_ = ApiRequest::instance()->downloadSong(song_->path(), Utility::fileName(song_->info()), song_->info()->songID(), Utility::token);
+    downloader_ = ApiRequest::instance()->downloadSong(playlistItem_->path(), Utility::fileName(playlistItem_->song()), playlistItem_->song()->songID(), Utility::token);
     connect(downloader_.data(), SIGNAL(progress(qint64,qint64)), this, SLOT(setProgress(qint64,qint64)));
     connect(downloader_.data(), SIGNAL(downloadCompleted(bool)), this, SLOT(downloadFinished(bool)));
 }
@@ -318,7 +323,6 @@ void DownloadItem::downloadFinished(bool ok)
 {
     //...and show others if download was successful
     if(ok) {
-        ui_->playButton->setEnabled(true);
         downloadState_ = GrooveOff::FinishedState;
         stateChanged();
     } else {
@@ -327,7 +331,7 @@ void DownloadItem::downloadFinished(bool ok)
     }
 
     emit downloadFinished();
-    emit song_.data()->requireDownloadIconReload();
+    emit playlistItem_.data()->requireDownloadIconReload();
 }
 
 /*!
@@ -352,7 +356,7 @@ void DownloadItem::setProgress(const qint64 &bytesReceived, const qint64 &bytesT
 */
 void DownloadItem::playSong()
 {
-    AudioEngine::instance()->playItem(song_);
+    AudioEngine::instance()->playItem(playlistItem_);
     //emit play(song_.data()->source().url().toString());
 }
 
@@ -389,7 +393,6 @@ void DownloadItem::multiFuncBtnClicked()
             emit addToQueue(this);
             break;
         case GrooveOff::DownloadingState:
-            emit remove();
             downloader_->stopDownload();
             ui_->progressBar->setValue(0);
             downloadState_ = GrooveOff::AbortedState;
@@ -407,7 +410,7 @@ void DownloadItem::multiFuncBtnClicked()
 
 bool DownloadItem::operator==(DownloadItem& right) const
 {
-    if(song_->info()->songID() == right.song()->info()->songID())
+    if(playlistItem_->song()->songID() == right.playlistItem()->song()->songID())
         return true;
     return false;
 }
@@ -419,7 +422,8 @@ bool DownloadItem::operator==(DownloadItem& right) const
 */
 void DownloadItem::removeSong()
 {
-    emit remove();
+    AudioEngine::instance()->removingTrack(playlistItem_);
+    Playlist::instance()->removeItem(playlistItem_);
 
     if(QFile::exists(songFile())) {
         if(!QFile::remove(songFile()))
@@ -431,8 +435,7 @@ void DownloadItem::removeSong()
     downloadState_ = GrooveOff::DeletedState;
     qDebug() << "GrooveOff ::" << songFile() << "removed";
     stateChanged();
-    emit song_.data()->requireDownloadIconReload();
-//    emit song_.data()->requireRemotion();
+    emit playlistItem_.data()->requireDownloadIconReload();
 }
 
 /*!
@@ -441,7 +444,7 @@ void DownloadItem::removeSong()
 */
 QString DownloadItem::songFile()
 {
-    QString fileName = song_->path() + QDir::separator() + Utility::fileName(song_->info()) + ".mp3";
+    QString fileName = playlistItem_->path() + QDir::separator() + Utility::fileName(playlistItem_->song()) + ".mp3";
     return fileName;
 }
 
@@ -519,19 +522,31 @@ void DownloadItem::setPlayerState(Phonon::State state)
 */
 void DownloadItem::openFolder()
 {
-    QDesktopServices::openUrl(QUrl("file://" + song_->path(), QUrl::TolerantMode));
+    QDesktopServices::openUrl(QUrl("file://" + playlistItem_->path(), QUrl::TolerantMode));
 }
 
 void DownloadItem::loadCover()
 {
-    if(!song_->info()->coverArtFilename().isEmpty()
-        && QFile::exists(Utility::coversCachePath + song_->info()->coverArtFilename())
-        && song_->info()->coverArtFilename() != "0")
-        ui_->coverLabel->setPixmap(QPixmap(Utility::coversCachePath + song_->info()->coverArtFilename()));
+    if(!playlistItem_->song()->coverArtFilename().isEmpty()
+        && QFile::exists(Utility::coversCachePath + playlistItem_->song()->coverArtFilename())
+        && playlistItem_->song()->coverArtFilename() != "0")
+        ui_->coverLabel->setPixmap(QPixmap(Utility::coversCachePath + playlistItem_->song()->coverArtFilename()));
     else
         ui_->coverLabel->setPixmap(QIcon::fromTheme(QLatin1String("media-optical"),
                                    QIcon(QLatin1String(":/resources/media-optical.png"))).pixmap(Utility::coverSize));
 }
+
+void DownloadItem::abortDownload()
+{
+    if(downloadState_ == GrooveOff::DownloadingState) {
+        downloader_->stopDownload();
+        ui_->progressBar->setValue(0);
+    }
+
+    downloadState_ = GrooveOff::AbortedState;
+    stateChanged();
+}
+
 
 
 #include "downloaditem.moc"

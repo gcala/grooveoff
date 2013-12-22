@@ -21,12 +21,18 @@
 
 #include <QPainter>
 #include <QResizeEvent>
+#include <QGraphicsDropShadowEffect>
 
 ElidedLabel::ElidedLabel(QWidget* parent, Qt::WindowFlags f):
     QLabel(parent, f),
     elideMode_(Qt::ElideRight)
 {
     setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
+//     QGraphicsDropShadowEffect *shadow = new QGraphicsDropShadowEffect(this);
+//     shadow->setBlurRadius(3.5);
+//     shadow->setColor(palette().color(QPalette::Shadow));
+//     shadow->setOffset(0.0);
+//     setGraphicsEffect(shadow);
 }
 
 ElidedLabel::ElidedLabel(const QString& text, QWidget* parent, Qt::WindowFlags f):

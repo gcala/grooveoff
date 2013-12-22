@@ -19,6 +19,7 @@ DownloaderPrivate::DownloaderPrivate ( Downloader* qq, QString path, QString fil
 {
     streamKey_ = ApiRequest::instance()->streamKey(id, token);
     connect( streamKey_.data(), SIGNAL(finished()), this, SLOT(streamKeyRetrieved()));
+    connect( streamKey_.data(), SIGNAL(parseError()), this, SLOT(streamKeyParseError()));
 }
 
 QString DownloaderPrivate::errorString() const
@@ -42,7 +43,6 @@ void DownloaderPrivate::streamKeyRetrieved()
     QString key = streamKey_->streamKey();
     QString ip = streamKey_->ip();
 
-    //FIXME: if streamkey is valid:
     aborted_ = false;
     connect(this, SIGNAL(finished(QNetworkReply*)), this, SLOT(onFinished(QNetworkReply*)));
 
@@ -65,6 +65,11 @@ void DownloaderPrivate::streamKeyRetrieved()
     connect(reply_, SIGNAL(finished()), this, SLOT(onReplyFinished()));
 }
 
+void DownloaderPrivate::streamKeyParseError()
+{
+    emit q->downloadCompleted(false);
+}
+
 /*!
   \brief onFinished: manage end of download
   \return void
@@ -72,7 +77,7 @@ void DownloaderPrivate::streamKeyRetrieved()
 void DownloaderPrivate::onFinished(QNetworkReply *)
 {
     if(!reply_->error() == QNetworkReply::NoError) { // if error occurred
-        qDebug() << "GrooveOff ::" << "Reply Error ::" << reply_->errorString() << "for" << m_fileName;
+        qDebug() << "Reply Error ::" << reply_->errorString() << "for" << m_fileName;
 
         emit q->downloadCompleted(false);
         if(file_->isOpen()) {
@@ -89,7 +94,6 @@ void DownloaderPrivate::onFinished(QNetworkReply *)
     }
 
     emit q->downloadCompleted(true);
-    qDebug() << "GrooveOff ::" << "Finished download of" << m_fileName;
 }
 
 /*!

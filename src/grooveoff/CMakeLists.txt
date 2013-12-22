@@ -4,26 +4,27 @@ include_directories(${QT_INCLUDES}
                     ${CMAKE_CURRENT_BINARY_DIR}
                     ${CMAKE_CURRENT_SOURCE_DIR})
 
-set(grooveoff_SRCS utility.cpp
+set(grooveoff_SRCS aboutdialog.cpp
+                   audioengine.cpp
                    combobox.cpp
-                   filterproxymodel.cpp
-                   elidedlabel.cpp
-                   aboutdialog.cpp
-                   settingsitem.cpp
                    configdialog.cpp
-                   timerbutton.cpp
-                   qled.cpp
+                   coverdownloader.cpp
+                   covermanager.cpp
                    downloaditem.cpp
-                   playerwidget.cpp
+                   downloadlist.cpp
+                   elidedlabel.cpp
+                   filterproxymodel.cpp
                    mainwindow.cpp
                    playanimationwidget.cpp
+                   playerwidget.cpp
+                   playlist.cpp
                    playlistitem.cpp
-                   audioengine.cpp
+                   qled.cpp
                    matchitem.cpp
+                   settingsitem.cpp
+                   timerbutton.cpp
                    timerlabel.cpp
-                   covermanager.cpp
-                   downloadlist.cpp
-                   coverdownloader.cpp
+                   utility.cpp
                    ../libgrooveshark/apirequest.cpp
                    ../libgrooveshark/config.cpp
                    ../libgrooveshark/requesthandler.cpp
@@ -60,7 +61,8 @@ target_link_libraries(grooveoff
                       ${QT_QTNETWORK_LIBRARY}
                       ${PHONON_LIBRARY}
                       ${QT_QTSVG_LIBRARY}
-                      ${QJSON_LIBRARY})
+                      ${QJSON_LIBRARY}
+                      ${QT_QTXML_LIBRARY})
 
 install(TARGETS grooveoff RUNTIME DESTINATION bin)
 install(FILES ${grooveoff_I18N} DESTINATION share/grooveoff/translations/)

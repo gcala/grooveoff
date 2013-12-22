@@ -21,17 +21,17 @@
 #include "playlistitem.h"
 
 #include <QFontMetrics>
+#include <QDesktopServices>
 #include <QDir>
 
 const int Utility::coverSize  = 40; // possible values are 40,50,70,80,90,120
 const int Utility::buttonSize = 24;
 const int Utility::marginSize = 5;
-const QString Utility::coversCachePath = QDir::tempPath() + QDir::separator() +
-                                         QLatin1String("grooveoff_cache") + QDir::separator();
+QString Utility::coversCachePath = "";
 QString Utility::downloadPath = "";
 QString Utility::token = "";
-QList<Phonon::MediaSource> Utility::audioSources;
-QList< PlaylistItemPtr > Utility::playlist;
+//QList<Phonon::MediaSource> Utility::audioSources;
+//QList< PlaylistItemPtr > Utility::playlist;
 
 QString Utility::elidedText(const QString& text,
                             const Qt::TextElideMode& elideMode,

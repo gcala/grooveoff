@@ -54,24 +54,34 @@ uint StreamKeyPrivate::id() const
 
 bool StreamKeyPrivate::parse( const QVariant& data )
 {
-    if( !data.canConvert( QVariant::Map ) )
+    if( !data.canConvert( QVariant::Map ) ) {
+        qDebug() << "Can't convert streamkey data to map";
         return false;
+    }
 
     QVariantMap streamKeyMap = data.toMap();
 
-    if(!streamKeyMap.keys().contains("result"))
+    if(!streamKeyMap.keys().contains("result")) {
+        qDebug() << "No 'result' field found";
         return false;
+    }
 
     QVariantMap resultMap = streamKeyMap.value("result").toMap();
 
-    if(resultMap.keys().count() == 0)
+    if(resultMap.keys().count() == 0) {
+        qDebug() << "No keys found";
         return false;
+    }
 
-    if(resultMap.value(resultMap.keys().at(0)).toMap().value("streamKey").toString().isEmpty())
+    if(resultMap.value(resultMap.keys().at(0)).toMap().value("streamKey").toString().isEmpty()) {
+        qDebug() << "No 'streamKey' field found";
         return false;
+    }
 
-    if(resultMap.value(resultMap.keys().at(0)).toMap().value("ip").toString().isEmpty())
+    if(resultMap.value(resultMap.keys().at(0)).toMap().value("ip").toString().isEmpty()) {
+        qDebug() << "No 'ip' field found";
         return false;
+    }
 
     m_ip  = resultMap.value(resultMap.keys().at(0)).toMap().value("ip").toString();
     m_streamKey = resultMap.value(resultMap.keys().at(0)).toMap().value("streamKey").toString();
@@ -87,11 +97,16 @@ bool StreamKeyPrivate::parse ( const QByteArray& data )
     QVariant variant = parser.parse ( data, &ok );
     if ( ok )
     {
-        if ( !parse ( variant ) ) return false;
+        if ( !parse ( variant ) ) {
+            qDebug() << data;
+            return false;
+        }
         return true;
     }
     else
     {
+        qDebug() << "Error converting data to json";
+        qDebug() << data;
         return false;
     }
 }

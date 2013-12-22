@@ -50,6 +50,7 @@ private:
 private slots:
     void error ( QNetworkReply::NetworkError error );
     void streamKeyRetrieved();
+    void streamKeyParseError();
     void onDownloadProgress(qint64,qint64);
     void onFinished(QNetworkReply*);
     void onReadyRead();

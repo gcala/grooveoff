@@ -134,6 +134,7 @@ void ConfigDialog::restoreDefaults()
     configChanged = true;
     ui_->applyButton->setEnabled(true);
     ui_->saveSearches->setChecked(false);
+    ui_->saveSession->setChecked(false);
     ui_->historySize->setEnabled(false);
     ui_->saveDestination->setChecked(false);
     ui_->label_3->setEnabled(false);
@@ -152,6 +153,7 @@ void ConfigDialog::saveSettings()
     ui_->applyButton->setEnabled(false);
     QSettings settings;
     settings.setValue(QLatin1String("saveSearches"), ui_->saveSearches->isChecked());
+    settings.setValue(QLatin1String("saveSession"), ui_->saveSession->isChecked());
     settings.setValue(QLatin1String("historySize"), ui_->historySize->value());
     settings.setValue(QLatin1String("loadCovers"), ui_->loadCovers->isChecked());
     settings.setValue(QLatin1String("numResults"), ui_->numResults->value());
@@ -204,6 +206,7 @@ void ConfigDialog::cfgChanged()
 void ConfigDialog::loadSettings()
 {
     QSettings settings;
+    ui_->saveSession->setChecked(settings.value(QLatin1String("saveSession"),false).toBool());
     ui_->saveSearches->setChecked(settings.value(QLatin1String("saveSearches"),false).toBool());
     if(!ui_->saveSearches->isChecked()) {
         ui_->historySize->setEnabled(false);

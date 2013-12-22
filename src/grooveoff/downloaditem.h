@@ -41,14 +41,16 @@ class DownloadItem : public QWidget
     Q_OBJECT
 
 public:
-    DownloadItem(const PlaylistItemPtr &song, QWidget *parent = 0);
+    DownloadItem(const PlaylistItemPtr &playlistItemPtr, QWidget *parent = 0);
     virtual ~DownloadItem();
     QString songFile();
 
-    const PlaylistItemPtr song() { return song_; }
+    const PlaylistItemPtr playlistItem() { return playlistItem_; }
     GrooveOff::DownloadState downloadState() { return downloadState_; }
+    void setDownloadState(GrooveOff::DownloadState state) { downloadState_ = state; }
 
     void startDownload();
+    void abortDownload();
 
     bool operator==(DownloadItem &) const;
 
@@ -56,7 +58,7 @@ public slots:
     void setPlayerState(Phonon::State);
 
 signals:
-    void remove();
+//    void remove();
     void downloadFinished();
     void addToQueue(DownloadItem *);
     void pauseResumePlaying();
@@ -80,7 +82,7 @@ private slots:
 
 private:
     Ui::DownloadItem *ui_;
-    PlaylistItemPtr song_;
+    PlaylistItemPtr playlistItem_;
     GrooveOff::DownloadState downloadState_;
     Phonon::State playerState_;
     GrooveShark::DownloaderPtr downloader_;

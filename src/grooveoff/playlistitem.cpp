@@ -15,23 +15,36 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
-#include <QDebug>
-
 #include "playlistitem.h"
 #include "utility.h"
 
 #include <QDir>
+#include <QMetaProperty>
 
-PlaylistItem::PlaylistItem ( const GrooveShark::SongPtr &song ) :
+using namespace GrooveShark;
+
+PlaylistItem::PlaylistItem ( const SongPtr &song ) :
     song_(song)
 {
+    state_ = Phonon::StoppedState;
 }
+
+PlaylistItem::PlaylistItem()
+{
+    song_ = SongPtr(new Song());
+}
+
 
 /*!
 \brief ~Song: this is the Song destructor.
 */
 PlaylistItem::~PlaylistItem()
 {
+}
+
+bool PlaylistItem::operator==(PlaylistItem& right) const
+{
+    return song_->songID() == right.song()->songID();
 }
 
 void PlaylistItem::requireCoverReload()
@@ -44,26 +57,36 @@ void PlaylistItem::requireDownloadIconReload()
     emit reloadIcon();
 }
 
+QString PlaylistItem::path() const
+{
+    return path_;
+}
+
 void PlaylistItem::setPath(const QString& path)
 {
     path_ = path;
-    QString fileName = Utility::fileName(song_);
-    QString completeName = path_ + QDir::separator() + fileName.replace('/','-');
-    source_ = Phonon::MediaSource(completeName + ".mp3");
+}
+
+SongPtr PlaylistItem::song()
+{
+    return song_;
+}
+
+void PlaylistItem::setSong(SongPtr song)
+{
+    song_ = song;
 }
 
 QString PlaylistItem::fileName() const
 {
-    QString fileName = Utility::fileName(song_);
-    return fileName + ".mp3";
+    return Utility::fileName(song_) + ".mp3";
 }
 
-
-void PlaylistItem::setPlayerState(Phonon::State state)
+void PlaylistItem::setState(Phonon::State state)
 {
-    emit stateChanged(state);
+    state_ = state;
+    emit stateChanged(state_);
 }
-
 
 #include "playlistitem.moc"
 

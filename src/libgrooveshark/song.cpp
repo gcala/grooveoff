@@ -19,9 +19,18 @@ SongPrivate::SongPrivate ( Song* qq, const QVariant& variant, QObject* parent ) 
     parse ( variant );
 }
 
-uint SongPrivate::albumID() const
+SongPrivate::SongPrivate ( Song* qq, QObject* parent ) : QObject ( parent ), q ( qq )
+{
+}
+
+quint32 SongPrivate::albumID() const
 {
     return m_albumID;
+}
+
+void SongPrivate::setAlbumID(quint32 albumID)
+{
+    m_albumID = albumID;
 }
 
 QString SongPrivate::albumName() const
@@ -29,14 +38,29 @@ QString SongPrivate::albumName() const
     return m_albumName;
 }
 
+void SongPrivate::setAlbumName(QString albumName)
+{
+    m_albumName = albumName;
+}
+
 QString SongPrivate::artistCoverArtFilename() const
 {
     return m_artistCoverArtFilename;
 }
 
-uint SongPrivate::artistID() const
+void SongPrivate::setArtistCoverArtFilename(QString artistCoverArtFilename)
+{
+    m_artistCoverArtFilename = m_artistCoverArtFilename;
+}
+
+quint32 SongPrivate::artistID() const
 {
     return m_artistID;
+}
+
+void SongPrivate::setArtistID(quint32 artistID)
+{
+    m_artistID = artistID;
 }
 
 QString SongPrivate::artistName() const
@@ -44,9 +68,19 @@ QString SongPrivate::artistName() const
     return m_artistName;
 }
 
+void SongPrivate::setArtistName(QString artistName)
+{
+    m_artistName = artistName;
+}
+
 QString SongPrivate::avgDuration() const
 {
     return m_avgDuration;
+}
+
+void SongPrivate::setAvgDuration(QString avgDuration)
+{
+    m_avgDuration = avgDuration;
 }
 
 QString SongPrivate::avgRating() const
@@ -54,9 +88,19 @@ QString SongPrivate::avgRating() const
     return m_avgRating;
 }
 
+void SongPrivate::setAvgRating(QString avgRating)
+{
+    m_avgRating = avgRating;
+}
+
 QString SongPrivate::coverArtFilename() const
 {
     return m_coverArtFilename;
+}
+
+void SongPrivate::setCoverArtFilename(QString coverArtFilename)
+{
+    m_coverArtFilename = coverArtFilename;
 }
 
 QString SongPrivate::estimateDuration() const
@@ -64,14 +108,29 @@ QString SongPrivate::estimateDuration() const
     return m_estimateDuration;
 }
 
-qulonglong SongPrivate::flags() const
+void SongPrivate::setEstimateDuration(QString estimateDuration)
+{
+    m_estimateDuration = estimateDuration;
+}
+
+quint64 SongPrivate::flags() const
 {
     return m_flags;
 }
 
-uint SongPrivate::genreID() const
+void SongPrivate::setFlags(quint64 flags)
+{
+    m_flags = flags;
+}
+
+quint32 SongPrivate::genreID() const
 {
     return m_genreID;
+}
+
+void SongPrivate::setGenreID(quint32 genreID)
+{
+    m_genreID = genreID;
 }
 
 bool SongPrivate::isLowBitrateAvailable() const
@@ -79,24 +138,49 @@ bool SongPrivate::isLowBitrateAvailable() const
     return m_isLowBitrateAvailable;
 }
 
+void SongPrivate::setIsLowBitrateAvailable(bool isLowBitrateAvailable)
+{
+    m_isLowBitrateAvailable = isLowBitrateAvailable;
+}
+
 bool SongPrivate::isVerified() const
 {
     return m_isVerified;
 }
 
-qulonglong SongPrivate::popularity() const
+void SongPrivate::setIsVerified(bool isVerified)
+{
+    m_isVerified = isVerified;
+}
+
+quint64 SongPrivate::popularity() const
 {
     return m_popularity;
 }
 
-qulonglong SongPrivate::popularityIndex() const
+void SongPrivate::setPopularity(quint64 popularity)
+{
+    m_popularity = popularity;
+}
+
+quint64 SongPrivate::popularityIndex() const
 {
     return m_popularityIndex;
 }
 
-qulonglong SongPrivate::rawScore() const
+void SongPrivate::setPopularityIndex(quint64 popularityIndex)
+{
+    m_popularityIndex = popularityIndex;
+}
+
+quint64 SongPrivate::rawScore() const
 {
     return m_rawScore;
+}
+
+void SongPrivate::setRawScore(quint64 rawScore)
+{
+    m_rawScore = rawScore;
 }
 
 double SongPrivate::score() const
@@ -104,9 +188,19 @@ double SongPrivate::score() const
     return m_score;
 }
 
-uint SongPrivate::songID() const
+void SongPrivate::setScore(double score)
+{
+    m_score = score;
+}
+
+quint32 SongPrivate::songID() const
 {
     return m_songID;
+}
+
+void SongPrivate::setSongID(quint32 songID)
+{
+    m_songID = songID;
 }
 
 QString SongPrivate::songName() const
@@ -114,19 +208,39 @@ QString SongPrivate::songName() const
     return m_songName;
 }
 
+void SongPrivate::setSongName(QString songName)
+{
+    m_songName = songName;
+}
+
 QString SongPrivate::tsAdded() const
 {
     return m_tsAdded;
 }
 
-uint SongPrivate::trackNum() const
+void SongPrivate::setTsAdded(QString tsAdded)
+{
+    m_tsAdded = tsAdded;
+}
+
+quint32 SongPrivate::trackNum() const
 {
     return m_trackNum;
 }
 
-uint SongPrivate::year() const
+void SongPrivate::setTrackNum(quint32 trackNum)
+{
+    m_trackNum = trackNum;
+}
+
+quint32 SongPrivate::year() const
 {
     return m_year;
+}
+
+void SongPrivate::setYear(quint32 year)
+{
+    m_year = year;
 }
 
 QString SongPrivate::errorString() const
@@ -309,14 +423,24 @@ Song::Song ( const QVariant& variant, QObject* parent ) : QObject ( parent ), d 
 
 }
 
+Song::Song ( QObject* parent ) : QObject ( parent ), d ( new SongPrivate ( this ) )
+{
+
+}
+
 Song::~Song()
 {
     delete d;
 }
 
-uint Song::albumID() const
+quint32 Song::albumID() const
 {
     return d->albumID();
+}
+
+void Song::setAlbumID(quint32 albumID)
+{
+    d->setAlbumID(albumID);
 }
 
 QString Song::albumName() const
@@ -324,14 +448,29 @@ QString Song::albumName() const
     return d->albumName();
 }
 
+void Song::setAlbumName(QString albumName)
+{
+    d->setAlbumName(albumName);
+}
+
 QString Song::artistCoverArtFilename() const
 {
     return d->artistCoverArtFilename();
 }
 
-uint Song::artistID() const
+void Song::setArtistCoverArtFilename(QString artistCoverArtFilename)
+{
+    d->setArtistCoverArtFilename(artistCoverArtFilename);
+}
+
+quint32 Song::artistID() const
 {
     return d->artistID();
+}
+
+void Song::setArtistID(quint32 artistID)
+{
+    d->setArtistID(artistID);
 }
 
 QString Song::artistName() const
@@ -339,9 +478,19 @@ QString Song::artistName() const
     return d->artistName();
 }
 
+void Song::setArtistName(QString artistName)
+{
+    d->setArtistName(artistName);
+}
+
 QString Song::avgDuration() const
 {
     return d->avgDuration();
+}
+
+void Song::setAvgDuration(QString avgDuration)
+{
+    d->setAvgDuration(avgDuration);
 }
 
 QString Song::avgRating() const
@@ -349,9 +498,19 @@ QString Song::avgRating() const
     return d->avgRating();
 }
 
+void Song::setAvgRating(QString avgRating)
+{
+    d->setAvgRating(avgRating);
+}
+
 QString Song::coverArtFilename() const
 {
     return d->coverArtFilename();
+}
+
+void Song::setCoverArtFilename(QString coverArtFilename)
+{
+    d->setCoverArtFilename(coverArtFilename);
 }
 
 QString Song::estimateDuration() const
@@ -359,14 +518,29 @@ QString Song::estimateDuration() const
     return d->estimateDuration();
 }
 
-qulonglong Song::flags() const
+void Song::setEstimateDuration(QString estimateDuration)
+{
+    d->setEstimateDuration(estimateDuration);
+}
+
+quint64 Song::flags() const
 {
     return d->flags();
 }
 
-uint Song::genreID() const
+void Song::setFlags(quint64 flags)
+{
+    d->setFlags(flags);
+}
+
+quint32 Song::genreID() const
 {
     return d->genreID();
+}
+
+void Song::setGenreID(quint32 genreID)
+{
+    d->setGenreID(genreID);
 }
 
 bool Song::isLowBitrateAvailable() const
@@ -374,24 +548,49 @@ bool Song::isLowBitrateAvailable() const
     return d->isLowBitrateAvailable();
 }
 
+void Song::setIsLowBitrateAvailable(bool isLowBitrateAvailable)
+{
+    d->setIsLowBitrateAvailable(isLowBitrateAvailable);
+}
+
 bool Song::isVerified() const
 {
     return d->isVerified();
 }
 
-qulonglong Song::popularity() const
+void Song::setIsVerified(bool isVerified)
+{
+    d->setIsVerified(isVerified);
+}
+
+quint64 Song::popularity() const
 {
     return d->popularity();
 }
 
-qulonglong Song::popularityIndex() const
+void Song::setPopularity(quint64 popularity)
+{
+    d->setPopularity(popularity);
+}
+
+quint64 Song::popularityIndex() const
 {
     return d->popularityIndex();
 }
 
-qulonglong Song::rawScore() const
+void Song::setPopularityIndex(quint64 popularityIndex)
+{
+    d->setPopularityIndex(popularityIndex);
+}
+
+quint64 Song::rawScore() const
 {
     return d->rawScore();
+}
+
+void Song::setRawScore(quint64 rawScore)
+{
+    d->setRawScore(rawScore);
 }
 
 double Song::score() const
@@ -399,9 +598,19 @@ double Song::score() const
     return d->score();
 }
 
-uint Song::songID() const
+void Song::setScore(double score)
+{
+    d->setScore(score);
+}
+
+quint32 Song::songID() const
 {
     return d->songID();
+}
+
+void Song::setSongID(quint32 songID)
+{
+    d->setSongID(songID);
 }
 
 QString Song::songName() const
@@ -409,19 +618,39 @@ QString Song::songName() const
     return d->songName();
 }
 
+void Song::setSongName(QString songName)
+{
+    d->setSongName(songName);
+}
+
 QString Song::tsAdded() const
 {
     return d->tsAdded();
 }
 
-uint Song::trackNum() const
+void Song::setTsAdded(QString tsAdded)
+{
+    d->setTsAdded(tsAdded);
+}
+
+quint32 Song::trackNum() const
 {
     return d->trackNum();
 }
 
-uint Song::year() const
+void Song::setTrackNum(quint32 trackNum)
+{
+    d->setTrackNum(trackNum);
+}
+
+quint32 Song::year() const
 {
     return d->year();
+}
+
+void Song::setYear(quint32 year)
+{
+    d->setYear(year);
 }
 
 QString Song::errorString() const

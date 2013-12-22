@@ -90,7 +90,10 @@ bool TokenPrivate::parse ( const QByteArray& data )
     QVariant variant = parser.parse ( data, &ok );
     if ( ok )
     {
-        if ( !parse ( variant ) ) return false;
+        if ( !parse ( variant ) ) {
+            qDebug() << data;
+            return false;
+        }
         return true;
     }
     else

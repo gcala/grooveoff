@@ -88,6 +88,13 @@ namespace GrooveOff {
          */
         RemainingState
     };
+
+    enum MessageType {
+        Error = 0,
+        Connected = 1,
+        Idle = 2,
+        Playing = 3
+    };
 }
 
 QT_END_NAMESPACE

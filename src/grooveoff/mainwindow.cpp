@@ -58,6 +58,9 @@
 #include <QApplication>
 #include <QCompleter>
 #include <QDirModel>
+#include <QXmlStreamWriter>
+#include <QMetaProperty>
+#include <QDomDocument>
 
 using namespace GrooveShark;
 
@@ -82,6 +85,15 @@ MainWindow::MainWindow(QWidget *parent) :
     loadSettings();
     statusBar()->addPermanentWidget( playerWidget, 1 );
     statusBar()->setSizeGripEnabled(false);
+
+    if(!QFile::exists(QDesktopServices::storageLocation(QDesktopServices::DataLocation))) {
+        QDir dir;
+        dir.mkpath(QDesktopServices::storageLocation(QDesktopServices::DataLocation));
+    }
+
+    Utility::coversCachePath = QDesktopServices::storageLocation(QDesktopServices::DataLocation)
+                               + QDir::separator()
+                               + QLatin1String("cache/");
 
     nam_ = new QNetworkAccessManager(this);
     api_ = ApiRequest::instance();
@@ -129,6 +141,12 @@ MainWindow::MainWindow(QWidget *parent) :
     Utility::downloadPath = ui_->pathLine->text();
 
     setGeometry(settings.value(QLatin1String("windowGeometry"), QRect(100,100,350,600)).toRect());
+
+    sessionFile_ = QDesktopServices::storageLocation(QDesktopServices::DataLocation)
+                   + QDir::separator()
+                   + QLatin1String("session.xml");
+    if(saveSession_)
+        loadSession();
 }
 
 /*!
@@ -136,6 +154,8 @@ MainWindow::MainWindow(QWidget *parent) :
 */
 MainWindow::~MainWindow()
 {
+    if(saveSession_)
+        saveSession();
     saveSettings();
     delete api_;
 }
@@ -216,8 +236,6 @@ void MainWindow::setupUi()
     connect(ui_->searchLine, SIGNAL(returnPressed()), this, SLOT(beginSearch()));
     connect(ui_->artistsCB, SIGNAL(activated(int)), this, SLOT(artistChanged()));
     connect(ui_->albumsCB, SIGNAL(activated(int)), this, SLOT(albumChanged()));
-    connect(playerWidget, SIGNAL(cambioStato(Phonon::State,QString)),
-            ui_->downloadList, SLOT(cambioStato(Phonon::State,QString)));
     connect(ui_->batchDownloadButton, SIGNAL(clicked()), this, SLOT(batchDownload()));
 
     ui_->matchesMessage->setFont(Utility::font(QFont::Bold));
@@ -282,15 +300,22 @@ void MainWindow::setupActions()
     layoutGroup_->addAction(actionCompact_);
     layoutGroup_->addAction(actionWide_);
 
+    actionStopDownloads_ = new QAction(QIcon::fromTheme(QLatin1String("process-stop"),
+                                      QIcon(QLatin1String(":/resources/process-stop.png"))),
+                                      trUtf8("&Stop all downloads"), this);
+    connect(actionStopDownloads_, SIGNAL(triggered(bool)),
+            ui_->downloadList, SLOT(abortAllDownloads()));
+
     actionRemoveFailed_ = new QAction(QIcon::fromTheme(QLatin1String("edit-delete"),
                                       QIcon(QLatin1String(":/resources/edit-delete.png"))),
-                                      trUtf8("&Remove deleted/failed songs"), this);
+                                      trUtf8("&Remove deleted/failed transfers"), this);
     connect(actionRemoveFailed_, SIGNAL(triggered(bool)),
             ui_->downloadList, SLOT(removeFailedDeletedAborted()));
 
     actionClearDownloadList_ = new QAction(QIcon::fromTheme(QLatin1String("edit-clear"),
                                            QIcon(QLatin1String(":/resources/edit-clear"))),
-                                           trUtf8("Remove &downloaded songs"), this);
+                                           trUtf8("Remove all finished"), this);
+    actionClearDownloadList_->setToolTip(trUtf8("Removes all finished transfers and leaves all files on disk"));
     connect(actionClearDownloadList_, SIGNAL(triggered(bool)),
             ui_->downloadList, SLOT(removeDownloaded()));
 
@@ -320,6 +345,8 @@ void MainWindow::setupMenus()
     fileMenu_->addSeparator();
     fileMenu_->addAction(actionClose_);
     downloadsMenu_ = new QMenu(trUtf8("&Downloads"));
+    downloadsMenu_->addAction(actionStopDownloads_);
+    downloadsMenu_->addSeparator();
     downloadsMenu_->addAction(actionRemoveFailed_);
     downloadsMenu_->addAction(actionClearDownloadList_);
     viewMenu_ = new QMenu(trUtf8("&View"));
@@ -440,9 +467,6 @@ void MainWindow::getToken()
 
 void MainWindow::tokenReturned()
 {
-    //token_->result()
-    //TODO: handle token error
-
     // the application is now free to perform a search
     searchInProgress_ = false;
     ui_->searchButton->setEnabled(true);
@@ -457,11 +481,13 @@ void MainWindow::tokenReturned()
         ui_->qled->setValue(true);
         ui_->qled->setToolTip(trUtf8("You're connected to grooveshark!"));
         ui_->matchList->setEnabled(true);
+
+        // start download of queued songs from last session
+        unqueue();
     } else {
         //statusBar()->showMessage(trUtf8("Token not received!!"), 3000);
-        playerWidget->showMessage(trUtf8("Token not received!!"));
+        playerWidget->showMessage(trUtf8("Connection error!!"));
         qDebug() << "GrooveOff ::" << "Token not received!!";
-//        qDebug() << "GrooveOff ::" << result;
     }
 }
 
@@ -513,7 +539,7 @@ void MainWindow::populateResultsList()
         ui_->matchList->addItem(wItem);
         ui_->matchList->setItemWidget(wItem, matchItem);
         wItem->setSizeHint(QSize(Utility::coverSize + Utility::marginSize * 2,Utility::coverSize + Utility::marginSize * 2));
-        connect(matchItem, SIGNAL(download(PlaylistItemPtr)), this, SLOT(addDownloadItem(PlaylistItemPtr)));
+        connect(matchItem, SIGNAL(download(PlaylistItemPtr)), this, SLOT(downloadRequest(PlaylistItemPtr)));
 
         // populate filter widgets
         bool found = false;
@@ -559,12 +585,7 @@ void MainWindow::populateResultsList()
     applyFilter();
 }
 
-/*!
-  \brief addDownloadItem : add a new download to the list
-  \param index : index of item in results list (to download)
-  \return void
-*/
-void MainWindow::addDownloadItem(PlaylistItemPtr song)
+void MainWindow::downloadRequest(PlaylistItemPtr playlistItem)
 {
     // check if destination folder exists
     if(!QFile::exists(ui_->pathLine->text())) {
@@ -585,49 +606,60 @@ void MainWindow::addDownloadItem(PlaylistItemPtr song)
         return;
     }
 
-    if(isDownloadingQueued(song->info()->songID()))
+    if(isDownloadingQueued(playlistItem->song()->songID()))
         return;
 
     // check file existence
-    if(QFile::exists(ui_->pathLine->text() + QDir::separator() + Utility::fileName(song->info()) + ".mp3")) {
+    if(QFile::exists(ui_->pathLine->text() + QDir::separator() + Utility::fileName(playlistItem->song()) + ".mp3")) {
         int ret = QMessageBox::question(this,
                                         trUtf8("Overwrite File?"),
-                                        trUtf8("A file named \"%1\" already exists. Are you sure you want to overwrite it?").arg(Utility::fileName(song->info())),
+                                        trUtf8("A file named \"%1\" already exists. Are you sure you want to overwrite it?").arg(Utility::fileName(playlistItem->song())),
                                         QMessageBox::Yes | QMessageBox::Cancel,
                                         QMessageBox::Cancel);
         if(ret == QMessageBox::Yes) {
-            QFile::remove(ui_->pathLine->text() + QDir::separator() + Utility::fileName(song->info()) + ".mp3");
+            QFile::remove(ui_->pathLine->text() + QDir::separator() + Utility::fileName(playlistItem->song()) + ".mp3");
         } else {
             return;
         }
     }
 
-    song->setPath(ui_->pathLine->text());
+    playlistItem->setPath(ui_->pathLine->text());
 
+    addDownloadItem(playlistItem);
+}
+
+
+/*!
+  \brief addDownloadItem : add a new download to the list
+  \param index : index of item in results list (to download)
+  \return void
+*/
+void MainWindow::addDownloadItem(PlaylistItemPtr playlistItem)
+{
     // build a DownloadItem with all required data
-    DownloadItem *item = new DownloadItem(song,
+    DownloadItem *item = new DownloadItem(playlistItem,
                                           this);
-    connect(item, SIGNAL(play(QString)), playerWidget, SLOT(play(QString)));
+
     connect(item, SIGNAL(reloadPlaylist()), ui_->downloadList, SLOT(reloadPlaylist()));
-    connect(item, SIGNAL(remove()), playerWidget, SLOT(removeFromPlaylist()));
-
-    // check if download queue_ is full
-    if(parallelDownloadsCount_ < maxDownloads_) {
-        parallelDownloadsCount_++;
-        item->startDownload();
-    } else {
-        queue_.append(item);
-    }
-
     connect(item, SIGNAL(downloadFinished()), this, SLOT(freeDownloadSlot()));
     connect(item, SIGNAL(addToQueue(DownloadItem*)), this, SLOT(addItemToQueue(DownloadItem*)));
 
-    QListWidgetItem *i = new QListWidgetItem;
-    ui_->downloadList->addItem(i);
-    ui_->downloadList->setItemWidget(i, item);
-    ui_->downloadList->setCurrentItem(i);
-    i->setSizeHint(QSize(Utility::coverSize + Utility::marginSize * 2,
-                         Utility::coverSize + Utility::marginSize * 2));
+    if(!QFile::exists(playlistItem->path() + QDir::separator() + Utility::fileName(playlistItem->song()) + ".mp3")) {
+        // check if download queue_ is full
+        if(parallelDownloadsCount_ < maxDownloads_ && !token_->result().isEmpty()) {
+            parallelDownloadsCount_++;
+            item->startDownload();
+        } else {
+            queue_.append(item);
+        }
+    }
+
+    QListWidgetItem *wi = new QListWidgetItem;
+    ui_->downloadList->addItem(wi);
+    ui_->downloadList->setItemWidget(wi, item);
+    ui_->downloadList->setCurrentItem(wi);
+    wi->setSizeHint(QSize(Utility::coverSize + Utility::marginSize * 2,
+                          Utility::coverSize + Utility::marginSize * 2));
 }
 
 /*!
@@ -719,6 +751,7 @@ void MainWindow::loadSettings()
     QSettings settings;
     settings.setIniCodec( "UTF-8" );
 
+    saveSession_     = settings.value(QLatin1String("saveSession"), false).toBool();
     showHistory_     = settings.value(QLatin1String("saveSearches"), false).toBool();
     maxResults_      = settings.value(QLatin1String("numResults"), 0).toInt();
     loadCovers_      = settings.value(QLatin1String("loadCovers"), true).toBool();
@@ -786,8 +819,8 @@ void MainWindow::applyFilter()
     QString album = ui_->albumsCB->currentText();
 
     for(int i = 0; i < ui_->matchList->count(); i++) {
-        QString itemArtist = ((MatchItem *)ui_->matchList->itemWidget(ui_->matchList->item(i)))->song()->info()->artistName();
-        QString itemAlbum  = ((MatchItem *)ui_->matchList->itemWidget(ui_->matchList->item(i)))->song()->info()->albumName();
+        QString itemArtist = ((MatchItem *)ui_->matchList->itemWidget(ui_->matchList->item(i)))->playlistItem()->song()->artistName();
+        QString itemAlbum  = ((MatchItem *)ui_->matchList->itemWidget(ui_->matchList->item(i)))->playlistItem()->song()->albumName();
 
         if( ui_->artistsCB->currentIndex() == 0  && ui_->albumsCB->currentIndex() == 0) {
             ui_->matchList->setRowHidden(i, false);
@@ -894,7 +927,7 @@ bool MainWindow::isDownloadingQueued(const uint &id)
     for(int i = 0; i < ui_->downloadList->count(); i++) {
         GrooveOff::DownloadState state = qobject_cast<DownloadItem *>(ui_->downloadList->itemWidget(ui_->downloadList->item(i)))->downloadState();
         if(state != GrooveOff::DeletedState) {
-            if(id == qobject_cast<DownloadItem *>(ui_->downloadList->itemWidget(ui_->downloadList->item(i)))->song()->info()->songID()) {
+            if(id == qobject_cast<DownloadItem *>(ui_->downloadList->itemWidget(ui_->downloadList->item(i)))->playlistItem()->song()->songID()) {
                 QMessageBox::information(this,
                                         trUtf8("Download in progress"),
                                         trUtf8("A file with the same name is already in your download list."),
@@ -927,7 +960,7 @@ void MainWindow::reloadItemsDownloadButtons()
 void MainWindow::errorDuringToken()
 {
     //statusBar()->showMessage(trUtf8("Token not received!!"), 3000);
-    playerWidget->showMessage(trUtf8("Token not received:") + "\n" + token_->errorString());
+    playerWidget->showMessage(trUtf8("Connection error!!"));
     qDebug() << "GrooveOff ::" << "Token not received: " << token_->errorString();
 }
 
@@ -935,10 +968,117 @@ void MainWindow::batchDownload()
 {
     for(int i = 0; i < ui_->matchList->count(); i++) {
         if(!ui_->matchList->item(i)->isHidden())
-            addDownloadItem(((MatchItem *)ui_->matchList->itemWidget(ui_->matchList->item(i)))->song());
+            addDownloadItem(((MatchItem *)ui_->matchList->itemWidget(ui_->matchList->item(i)))->playlistItem());
     }
-//    ((MatchItem *)ui_->matchList->itemWidget(ui_->matchList->item(i)))->song()->info()->artistName()
 }
 
+void MainWindow::saveSession()
+{
+    QFile sessionFile(sessionFile_);
+    if(!sessionFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        qDebug() << "GrooveOff ::" << "Unable to write to session file" << sessionFile_;
+        return;
+    }
+
+    QXmlStreamWriter stream(&sessionFile);
+    stream.setAutoFormatting(true);
+    stream.writeStartDocument();
+    stream.writeStartElement("playlist");
+
+    for(int i = 0; i < ui_->downloadList->count(); i++) {
+        stream.writeStartElement("item");
+        PlaylistItemPtr pi = ((DownloadItem *)ui_->downloadList->itemWidget(ui_->downloadList->item(i)))->playlistItem();
+        for(int j = 0; j< pi->metaObject()->propertyCount(); j++) {
+            if(pi->metaObject()->property(j).isStored(pi.data())) {
+                if(QString(pi->metaObject()->property(j).name()) == "objectName")
+                    continue;
+                if(QString(pi->metaObject()->property(j).name()) == "song") {
+                    SongPtr song = pi->song();
+                    stream.writeStartElement("song_info");
+                    for(int k = 0; k< song->metaObject()->propertyCount(); k++) {
+                        if(song->metaObject()->property(k).isStored(song.data())) {
+                            if(QString(song->metaObject()->property(k).name()) == "objectName")
+                                continue;
+                            if(QString(song->metaObject()->property(k).name()) == "errorString")
+                                continue;
+                            stream.writeTextElement(song->metaObject()->property(k).name(),
+                                                    song->metaObject()->property(k).read(song.data()).toString());
+                        }
+                    }
+                    stream.writeEndElement(); // song_info
+                } else {
+                    stream.writeTextElement(pi->metaObject()->property(j).name(),
+                                            pi->metaObject()->property(j).read(pi.data()).toString());
+                }
+            }
+        }
+        stream.writeEndElement(); // item
+    }
+
+    stream.writeEndElement(); // playlist
+
+    sessionFile.close();
+}
+
+void MainWindow::loadSession()
+{
+    QFile sessionFile(sessionFile_);
+    if(!sessionFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        qDebug() << "GrooveOff ::" << "Unable to read session file" << sessionFile_;
+        return;
+    }
+
+    QList<PlaylistItemPtr> items;
+
+    QDomDocument doc("mydocument");
+    QString errorStr;
+    int errorLine;
+    int errorColumn;
+    if (!doc.setContent(&sessionFile, true, &errorStr, &errorLine, &errorColumn)) {
+        qDebug() << "GrooveOff ::" << errorStr << errorLine << errorColumn;
+        sessionFile.close();
+        return;
+    }
+    sessionFile.close();
+
+    QDomElement root = doc.documentElement();
+    QDomElement itemEl = root.firstChildElement("item");
+    while (!itemEl.isNull()) {
+        PlaylistItemPtr item(new PlaylistItem());
+        items.append(item);
+        parsePlaylistItem(itemEl, item);
+        itemEl = itemEl.nextSiblingElement("item");
+    }
+
+    for(int i = 0; i < items.count(); i++) {
+        addDownloadItem(items.at(i));
+    }
+
+}
+
+void MainWindow::parsePlaylistItem(const QDomElement& element, PlaylistItemPtr item)
+{
+    QVariant var;
+    for(int i=0; i< item->metaObject()->propertyCount(); ++i) {
+        if(item->metaObject()->property(i).isStored(item.data())) {
+            var = element.firstChildElement(QString(item->metaObject()->property(i).name())).text();
+            item->metaObject()->property(i).write(item.data(), var);
+        }
+    }
+
+    QDomElement songEl = element.firstChildElement("song_info");
+    parseSong(songEl, item->song());
+}
+
+void MainWindow::parseSong(const QDomElement& element, SongPtr song)
+{
+    QVariant var;
+    for(int i=0; i< song->metaObject()->propertyCount(); ++i) {
+        if(song->metaObject()->property(i).isStored(song.data())) {
+            var = element.firstChildElement(QString(song->metaObject()->property(i).name())).text();
+            song->metaObject()->property(i).write(song.data(), var);
+        }
+    }
+}
 
 #include "mainwindow.moc"

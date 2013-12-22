@@ -38,7 +38,7 @@ public:
     static const int marginSize;
     static const QByteArray userAgent;
     static const QLatin1String host;
-    static const QString coversCachePath;
+    static QString coversCachePath;
     static QString downloadPath;
     static QString token;
     static QList<Phonon::MediaSource> audioSources;

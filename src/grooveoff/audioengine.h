@@ -23,8 +23,8 @@
 #include "playlistitem.h"
 
 #include <QObject>
-
-class AudioEnginePrivate;
+#include <phonon/MediaObject>
+#include <phonon/AudioOutput>
 
 class AudioEngine : public QObject
 {
@@ -34,17 +34,28 @@ public:
     enum AudioErrorCode { StreamReadError, AudioDeviceError, DecodeError, UnknownError, NoError };
 
     static AudioEngine * instance();
-    explicit AudioEngine();
     ~AudioEngine();
 
-//     void playPause();
-//     void play();
-//     void pause();
-//     void stop( AudioErrorCode errorCode = NoError );
-//     void previous();
-//     void next();
-//     bool canGoPrevious();
-//     bool canGoNext();
+    void playPause();
+    void play();
+    void pause();
+    void stop( Phonon::ErrorType errorCode = Phonon::NoError );
+
+    Phonon::State state() const;
+    bool isPlaying() const;
+    bool isPaused() const;
+    bool isStopped() const;
+
+    qint64 currentTime() const;
+    qint64 currentTrackTotalTime() const;
+    qint64 remainingTime() const;
+
+    PlaylistItemPtr currentTrack() const;
+
+    void previous();
+    void next();
+    bool canGoPrevious();
+    bool canGoNext();
 //     bool canSeek();
 //     void seek( qint64 ms );
 //     void seek( int ms ); // for compatibility with seekbar in audiocontrols
@@ -53,11 +64,13 @@ public:
 //     void raiseVolume();
 //     void mute();
     void playItem(PlaylistItemPtr track);
+    void removingTrack(PlaylistItemPtr track);
 //     void setPlaylist();
 //     void setQueue();
 //     void setStopAfterTrack();
 //     void setRepeatMode();
 //     void setShuffled( bool enabled );
+    Phonon::MediaObject * mediaObject() { return mediaObject_; }
 
 signals:
     void loading();
@@ -66,6 +79,7 @@ signals:
     void stopped();
     void paused();
     void resumed();
+    void sourceChanged();
 
     //void audioDataReady( QMap< AudioEngine::AudioChannel, QVector<qint16> > data );
     void stopAfterTrackChanged();
@@ -75,7 +89,8 @@ signals:
     void shuffleModeChanged( bool enabled );
     void repeatModeChanged();
     void controlStateChanged();
-    void stateChanged( AudioState newState, AudioState oldState );
+//    void stateChanged( AudioState newState, AudioState oldState );
+    void stateChanged( Phonon::State, Phonon::State );
     void volumeChanged( int volume /* in percent */ );
 
     void timerMilliSeconds( qint64 msElapsed );
@@ -86,14 +101,25 @@ signals:
     void currentTrackPlaylistChanged();
 
     void error( AudioEngine::AudioErrorCode errorCode );
+    void removedPlayingTrack();
 
 private slots:
-    void onAboutToFinish();
     void timerTriggered( qint64 time );
+    void onStateChanged( Phonon::State newState, Phonon::State oldState );
+    void sourceChanged(Phonon::MediaSource);
+    void onFinished();
 
 private:
-    Q_DECLARE_PRIVATE( AudioEngine );
-    AudioEnginePrivate* d_ptr;
+    static bool instanceFlag;
+    static AudioEngine *audioEngine;
+    AudioEngine();
+
+    Phonon::MediaObject *mediaObject_;
+    Phonon::MediaObject *metaInformationResolver_;
+    Phonon::AudioOutput *audioOutput_;
+    PlaylistItemPtr currentTrack_;
+    PlaylistItemPtr oldTrack_;
+    Phonon::State state_;
 };
 
 #endif // AUDIOENGINE_H

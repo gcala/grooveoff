@@ -33,9 +33,9 @@ public:
 
 public slots:
     void reloadPlaylist();
-    void cambioStato(Phonon::State newState, QString source);
     void removeFailedDeletedAborted();
     void removeDownloaded();
+    void abortAllDownloads();
 };
 
 #endif // DOWNLOADLIST_H

@@ -32,16 +32,16 @@ CoverManager::CoverManager(QObject *parent) :
     }
 }
 
-void CoverManager::addItem(const PlaylistItemPtr &song)
+void CoverManager::addItem(const PlaylistItemPtr &playlistItemPtr)
 {
-    QString coverArtFilename = song->info()->coverArtFilename();
+    QString coverArtFilename = playlistItemPtr->song()->coverArtFilename();
     if(coverArtFilename == "0")
         return;
     if(coverItems_.contains(coverArtFilename)) {
-        coverItems_[coverArtFilename].append(song);
+        coverItems_[coverArtFilename].append(playlistItemPtr);
     } else {
         QList< PlaylistItemPtr > listOfSongsWithSameCover;
-        listOfSongsWithSameCover.append(song);
+        listOfSongsWithSameCover.append(playlistItemPtr);
         coverItems_.insert(coverArtFilename, listOfSongsWithSameCover);
         CoverDownloader *downloader = new CoverDownloader(coverArtFilename, this);
         connect(downloader, SIGNAL(done()), this, SLOT(setCover()));

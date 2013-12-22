@@ -13,57 +13,80 @@ class SongPrivate;
 class Song : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY( QString albumName READ albumName CONSTANT )
-    Q_PROPERTY( QString songName READ songName CONSTANT )
-    Q_PROPERTY( QString artistName READ artistName CONSTANT )
-    Q_PROPERTY( QString coverArtFilename READ coverArtFilename CONSTANT )
-    Q_PROPERTY( QString artistCoverArtFilename READ artistCoverArtFilename CONSTANT )
-    Q_PROPERTY( uint albumID READ albumID CONSTANT )
-    Q_PROPERTY( uint songID READ songID CONSTANT )
-    Q_PROPERTY( uint artistID READ artistID CONSTANT )
-    Q_PROPERTY( uint genreID READ genreID CONSTANT )
-    Q_PROPERTY( QString avgDuration READ avgDuration CONSTANT )
-    Q_PROPERTY( QString avgRating READ avgRating CONSTANT )
-    Q_PROPERTY( QString estimateDuration READ estimateDuration CONSTANT )
-    Q_PROPERTY( qulonglong flags READ flags CONSTANT )
-    Q_PROPERTY( bool isLowBitrateAvailable READ isLowBitrateAvailable CONSTANT )
-    Q_PROPERTY( bool isVerified READ isVerified CONSTANT )
-    Q_PROPERTY( qulonglong popularity READ popularity CONSTANT )
-    Q_PROPERTY( qulonglong popularityIndex READ popularityIndex CONSTANT )
-    Q_PROPERTY( qulonglong rawScore READ rawScore CONSTANT )
-    Q_PROPERTY( double score READ score CONSTANT )
-    Q_PROPERTY( QString tsAdded READ tsAdded CONSTANT )
-    Q_PROPERTY( uint trackNum READ trackNum CONSTANT )
-    Q_PROPERTY( uint year READ year CONSTANT )
+    Q_PROPERTY( QString albumName READ albumName WRITE setAlbumName )
+    Q_PROPERTY( QString songName READ songName WRITE setSongName )
+    Q_PROPERTY( QString artistName READ artistName WRITE setArtistName )
+    Q_PROPERTY( QString coverArtFilename READ coverArtFilename WRITE setCoverArtFilename )
+    Q_PROPERTY( QString artistCoverArtFilename READ artistCoverArtFilename WRITE setArtistCoverArtFilename )
+    Q_PROPERTY( quint32 albumID READ albumID WRITE setAlbumID )
+    Q_PROPERTY( quint32 songID READ songID WRITE setSongID )
+    Q_PROPERTY( quint32 artistID READ artistID WRITE setArtistID )
+    Q_PROPERTY( quint32 genreID READ genreID WRITE setGenreID )
+    Q_PROPERTY( QString avgDuration READ avgDuration WRITE setAvgDuration )
+    Q_PROPERTY( QString avgRating READ avgRating WRITE setAvgRating )
+    Q_PROPERTY( QString estimateDuration READ estimateDuration WRITE setEstimateDuration )
+    Q_PROPERTY( quint64 flags READ flags WRITE setFlags )
+    Q_PROPERTY( bool isLowBitrateAvailable READ isLowBitrateAvailable WRITE setIsLowBitrateAvailable )
+    Q_PROPERTY( bool isVerified READ isVerified WRITE setIsVerified )
+    Q_PROPERTY( quint64 popularity READ popularity WRITE setPopularity )
+    Q_PROPERTY( quint64 popularityIndex READ popularityIndex WRITE setPopularityIndex )
+    Q_PROPERTY( quint64 rawScore READ rawScore WRITE setRawScore )
+    Q_PROPERTY( double score READ score WRITE setScore )
+    Q_PROPERTY( QString tsAdded READ tsAdded WRITE setTsAdded )
+    Q_PROPERTY( quint32 trackNum READ trackNum WRITE setTrackNum )
+    Q_PROPERTY( quint32 year READ year WRITE setYear )
     Q_PROPERTY( QString errorString READ errorString CONSTANT )
 
 public:
     Song( QNetworkReply* reply, QObject* parent = 0 );
     Song( const QVariant& variant, QObject* parent = 0 );
+    Song( QObject* parent = 0 );
     virtual ~Song();
 
-    uint albumID() const;
+    quint32 albumID() const;
+    void setAlbumID(quint32);
     QString albumName() const;
+    void setAlbumName(QString);
     QString artistCoverArtFilename() const;
-    uint artistID() const;
+    void setArtistCoverArtFilename(QString);
+    quint32 artistID() const;
+    void setArtistID(quint32);
     QString artistName() const;
+    void setArtistName(QString);
     QString avgDuration() const;
+    void setAvgDuration(QString);
     QString avgRating() const;
+    void setAvgRating(QString);
     QString coverArtFilename() const;
+    void setCoverArtFilename(QString);
     QString estimateDuration() const;
-    qulonglong flags() const;
-    uint genreID() const;
+    void setEstimateDuration(QString);
+    quint64 flags() const;
+    void setFlags(quint64);
+    quint32 genreID() const;
+    void setGenreID(quint32);
     bool isLowBitrateAvailable() const;
+    void setIsLowBitrateAvailable(bool);
     bool isVerified() const;
-    qulonglong popularity() const;
-    qulonglong popularityIndex() const;
-    qulonglong rawScore() const;
+    void setIsVerified(bool);
+    quint64 popularity() const;
+    void setPopularity(quint64);
+    quint64 popularityIndex() const;
+    void setPopularityIndex(quint64);
+    quint64 rawScore() const;
+    void setRawScore(quint64);
     double score() const;
-    uint songID() const;
+    void setScore(double);
+    quint32 songID() const;
+    void setSongID(quint32);
     QString songName() const;
+    void setSongName(QString);
     QString tsAdded() const;
-    uint trackNum() const;
-    uint year() const;
+    void setTsAdded(QString);
+    quint32 trackNum() const;
+    void setTrackNum(quint32);
+    quint32 year() const;
+    void setYear(quint32);
     QString errorString() const;
 
 private:

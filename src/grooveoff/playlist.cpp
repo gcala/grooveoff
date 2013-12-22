@@ -17,27 +17,81 @@
  *
  */
 
-#include "playlist_p.h"
+#include "playlist.h"
 
-PlaylistPrivate::PlaylistPrivate(Playlist* qq, QObject* parent) : QObject ( parent ), q(qq)
+bool Playlist::instanceFlag = false;
+Playlist* Playlist::playlist = NULL;
+
+Playlist* Playlist::instance()
 {
+    if(! instanceFlag)
+    {
+        playlist = new Playlist();
+        instanceFlag = true;
+        return playlist;
+    }
+    else
+    {
+        return playlist;
+    }
 }
 
-PlaylistPrivate::~PlaylistPrivate()
+Playlist::Playlist()
 {
-}
-
-Playlist::Playlist(QObject* parent)
-    : QObject ( parent ), d(new PlaylistPrivate(this))
-{
-
 }
 
 Playlist::~Playlist()
 {
-    delete d;
-
+    instanceFlag = false;
 }
 
-#include "playlist_p.moc"
+void Playlist::appendItem(PlaylistItemPtr item)
+{
+    playlist_.append(item);
+    emit playlistChanged();
+}
+
+void Playlist::clear()
+{
+    playlist_.clear();
+}
+
+int Playlist::count() const
+{
+    return playlist_.count();
+}
+
+PlaylistItemPtr Playlist::item(int row)
+{
+    return playlist_.at(row);
+}
+
+int Playlist::row(PlaylistItemPtr item)
+{
+    int index = 0;
+    bool found = false;
+    for(; index < playlist_.count(); index++) {
+        if(item == playlist_.at(index)) {
+            found = true;
+            break;
+        }
+    }
+
+    if(!found)
+        index = -1;
+
+    return index;
+}
+
+void Playlist::removeItem(PlaylistItemPtr item)
+{
+    for(int i = 0; i < playlist_.count(); i++) {
+        if(playlist_.at(i) == item) {
+            playlist_.takeAt(i);
+            break;
+        }
+    }
+}
+
+
 #include "playlist.moc"

@@ -27,23 +27,26 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 class PlaylistItem : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY( QString path READ path WRITE setPath )
+    Q_PROPERTY( GrooveShark::SongPtr song READ song WRITE setSong )
 
 public:
     explicit PlaylistItem ( const GrooveShark::SongPtr &song );
+    PlaylistItem();
     ~PlaylistItem();
 
-    QString path() const { return path_; }
+    QString path() const;
     void setPath(const QString& path);
     QString fileName() const;
-    GrooveShark::SongPtr info() { return song_;}
-
-    Phonon::MediaSource source() const { return source_; }
+    GrooveShark::SongPtr song();
+    void setSong(GrooveShark::SongPtr song);
 
     void requireCoverReload();
     void requireDownloadIconReload();
-    void setPlayerState(Phonon::State);
-    bool isPlaying() { return isPlaying_; }
-    void setPlaying(bool ok) {isPlaying_ = ok; }
+    bool isPlaying() { return state_ == Phonon::PlayingState; }
+    void setState(Phonon::State state);
+
+    bool operator==(PlaylistItem &) const;
 
 signals:
     void reloadCover();
@@ -53,13 +56,13 @@ signals:
 public slots:
 
 private:
+    Phonon::State state_;
     GrooveShark::SongPtr song_;
-    Phonon::MediaSource source_;
     QString path_;
-    bool isPlaying_;
 };
 
 typedef QSharedPointer<PlaylistItem> PlaylistItemPtr;
+
 Q_DECLARE_METATYPE( PlaylistItemPtr )
 
 #endif // PLAYLISTITEM_H
