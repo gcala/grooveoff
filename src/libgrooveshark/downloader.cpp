@@ -7,6 +7,10 @@
 #include <QDir>
 #include <QDebug>
 
+#if QT_VERSION >= QT_VERSION_CHECK( 5, 0, 0 )
+#include <QUrlQuery>
+#endif
+
 using namespace GrooveShark;
 
 DownloaderPrivate::DownloaderPrivate ( Downloader* qq, QString path, QString fileName, uint id, QString token, QObject* parent ) :
@@ -60,15 +64,24 @@ void DownloaderPrivate::streamKeyRetrieved()
 
     file_->open(QIODevice::WriteOnly);
 
+#if QT_VERSION < QT_VERSION_CHECK( 5, 0, 0 )
     QUrl postData;
+#else
+    QUrlQuery postData;
+#endif
+
     postData.addQueryItem(QLatin1String("streamKey"), streamKey_->streamKey());
 
     // common headers
     mainRequest_.setRawHeader(QByteArray("User-Agent"), Config::instance()->userAgent());
-    mainRequest_.setRawHeader(QByteArray("Referer"), QString("http://%1/JSQueue.swf?%2").arg(Config::instance()->host()).arg(MapBuilder::jsqueue().at(1)).toAscii());
+    mainRequest_.setRawHeader(QByteArray("Referer"), QString("http://%1/JSQueue.swf?%2").arg(Config::instance()->host()).arg(MapBuilder::jsqueue().at(1)).toLatin1());
     mainRequest_.setUrl(QUrl(QString("http://%1/stream.php").arg(streamKey_->ip())));
     mainRequest_.setHeader(QNetworkRequest::ContentTypeHeader, QLatin1String("application/x-www-form-urlencoded"));
+#if QT_VERSION < QT_VERSION_CHECK( 5, 0, 0 )
     reply_ = post(mainRequest_, postData.encodedQuery());
+#else
+    reply_ = post(mainRequest_, postData.query(QUrl::EncodeUnicode).toLatin1());
+#endif
     connect(reply_, SIGNAL(downloadProgress(qint64,qint64)), this, SLOT(onDownloadProgress(qint64,qint64)));
     connect(reply_, SIGNAL(readyRead()), this, SLOT(onReadyRead()));
     connect(reply_, SIGNAL(finished()), this, SLOT(onReplyFinished()));
@@ -151,6 +164,4 @@ void Downloader::stopDownload()
     return d->stopDownload();
 }
 
-#include "downloader_p.moc"
-#include "downloader.moc"
 

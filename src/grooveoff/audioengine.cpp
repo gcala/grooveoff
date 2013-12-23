@@ -96,7 +96,7 @@ void AudioEngine::playItem(PlaylistItemPtr track)
         currentTrack_->setState(Phonon::StoppedState);
 
     currentTrack_ = track;
-    mediaObject_->setCurrentSource(currentTrack_->path() + QDir::separator() + currentTrack_->fileName());
+    mediaObject_->setCurrentSource(QUrl::fromLocalFile(currentTrack_->path() + QDir::separator() + currentTrack_->fileName()));
     play();
 }
 
@@ -226,7 +226,7 @@ void AudioEngine::next()
             currentTrack_->setState(Phonon::StoppedState);
 
         currentTrack_ = track;
-        mediaObject_->setCurrentSource(currentTrack_->path() + QDir::separator() + currentTrack_->fileName());
+        mediaObject_->setCurrentSource(QUrl::fromLocalFile(currentTrack_->path() + QDir::separator() + currentTrack_->fileName()));
         play();
     }
 }
@@ -239,7 +239,7 @@ void AudioEngine::previous()
             currentTrack_->setState(Phonon::StoppedState);
 
         currentTrack_ = track;
-        mediaObject_->setCurrentSource(currentTrack_->path() + QDir::separator() + currentTrack_->fileName());
+        mediaObject_->setCurrentSource(QUrl::fromLocalFile(currentTrack_->path() + QDir::separator() + currentTrack_->fileName()));
         play();
     }
 }
@@ -253,5 +253,3 @@ void AudioEngine::removingTrack(PlaylistItemPtr track)
     }
 }
 
-
-#include "audioengine.moc"

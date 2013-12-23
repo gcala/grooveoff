@@ -48,6 +48,11 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QDesktopServices>
+
+#if QT_VERSION > QT_VERSION_CHECK( 5, 0, 0 )
+#include <QStandardPaths>
+#endif
+
 #include <QTime>
 #include <QFileDialog>
 #include <QDir>
@@ -88,14 +93,26 @@ MainWindow::MainWindow(QWidget *parent) :
     statusBar()->addPermanentWidget( playerWidget, 1 );
     statusBar()->setSizeGripEnabled(false);
 
-    if(!QFile::exists(QDesktopServices::storageLocation(QDesktopServices::DataLocation))) {
+#if QT_VERSION < QT_VERSION_CHECK( 5, 0, 0 )
+    if(!QFile::exists(QDesktopServices::storageLocation(QDesktopServices::DataLocation).replace("/data",""))) {
         QDir dir;
-        dir.mkpath(QDesktopServices::storageLocation(QDesktopServices::DataLocation));
+        dir.mkpath(QDesktopServices::storageLocation(QDesktopServices::DataLocation).replace("/data",""));
     }
 
-    Utility::coversCachePath = QDesktopServices::storageLocation(QDesktopServices::DataLocation)
+    Utility::coversCachePath = QDesktopServices::storageLocation(QDesktopServices::DataLocation).replace("/data","")
                                + QDir::separator()
                                + QLatin1String("cache/");
+#else
+    if(!QFile::exists(QStandardPaths::writableLocation(QStandardPaths::DataLocation))) {
+        QDir dir;
+        dir.mkpath(QStandardPaths::writableLocation(QStandardPaths::DataLocation));
+    }
+
+    Utility::coversCachePath = QStandardPaths::writableLocation(QStandardPaths::DataLocation)
+                               + QDir::separator()
+                               + QLatin1String("cache/");
+#endif
+
 
     nam_ = new QNetworkAccessManager(this);
     api_ = ApiRequest::instance();
@@ -131,22 +148,39 @@ MainWindow::MainWindow(QWidget *parent) :
     QSettings settings;
     settings.setIniCodec( "UTF-8" );
 
+#if QT_VERSION < QT_VERSION_CHECK( 5, 0, 0 )
     if(saveDestination_) {
         ui_->pathLine->setText(settings.value(QLatin1String("destination"),
-                                              QDesktopServices::storageLocation(QDesktopServices::MusicLocation)).toString());
+                               QDesktopServices::storageLocation(QDesktopServices::MusicLocation)).toString());
         if(ui_->pathLine->text().isEmpty())
             ui_->pathLine->setText(QDesktopServices::storageLocation(QDesktopServices::MusicLocation));
     } else {
         ui_->pathLine->setText(QDesktopServices::storageLocation(QDesktopServices::MusicLocation));
     }
+#else
+    if(saveDestination_) {
+        ui_->pathLine->setText(settings.value(QLatin1String("destination"),
+                               QStandardPaths::writableLocation(QStandardPaths::MusicLocation)).toString());
+        if(ui_->pathLine->text().isEmpty())
+            ui_->pathLine->setText(QStandardPaths::writableLocation(QStandardPaths::MusicLocation));
+    } else {
+        ui_->pathLine->setText(QStandardPaths::writableLocation(QStandardPaths::MusicLocation));
+    }
+#endif
 
     Utility::downloadPath = ui_->pathLine->text();
 
     setGeometry(settings.value(QLatin1String("windowGeometry"), QRect(100,100,350,600)).toRect());
 
-    sessionFile_ = QDesktopServices::storageLocation(QDesktopServices::DataLocation)
+#if QT_VERSION < QT_VERSION_CHECK( 5, 0, 0 )
+    sessionFile_ = QDesktopServices::storageLocation(QDesktopServices::DataLocation).replace("/data","")
                    + QDir::separator()
                    + QLatin1String("session.xml");
+#else
+    sessionFile_ = QStandardPaths::writableLocation(QStandardPaths::DataLocation)
+                   + QDir::separator()
+                   + QLatin1String("session.xml");
+#endif
     if(saveSession_)
         loadSession();
 }
@@ -1011,4 +1045,3 @@ void MainWindow::parseSong(const QDomElement& element, SongPtr song)
     }
 }
 
-#include "mainwindow.moc"

@@ -24,8 +24,8 @@ QString randomHex(const int &length)
     return randomHex;
 }
 
-const QByteArray MapBuilder::s_secret = randomHex(32).toAscii();
-const QByteArray MapBuilder::s_uuid = QUuid::createUuid().toString().remove('{').remove('}').toAscii();
+const QByteArray MapBuilder::s_secret = randomHex(32).toLatin1();
+const QByteArray MapBuilder::s_uuid = QUuid::createUuid().toString().remove('{').remove('}').toLatin1();
 
 /*!
   \brief setHeader: setup http headers
@@ -90,7 +90,7 @@ QVariantMap MapBuilder::getTokenMap()
 QString prepToken(const QString &method, const QString &secret, const QString &token)
 {
     QString rnd = randomHex(6);
-    return rnd + QCryptographicHash::hash(QString("%1:%2:%3:%4").arg(method).arg(token).arg(secret).arg(rnd).toAscii(), QCryptographicHash::Sha1).toHex();
+    return rnd + QCryptographicHash::hash(QString("%1:%2:%3:%4").arg(method).arg(token).arg(secret).arg(rnd).toLatin1(), QCryptographicHash::Sha1).toHex();
 }
 
 QVariantMap MapBuilder::getSearchMap(const QString &query, const QString &token)
@@ -134,6 +134,4 @@ QVariantMap MapBuilder::getDownloadMap(const QString &id, const QString &token)
     return p;
 }
 
-
-#include "mapbuilder.moc"
 

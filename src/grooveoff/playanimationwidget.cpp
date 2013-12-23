@@ -103,4 +103,3 @@ int PlayAnimationWidget::randomHeight()
     return qrand() % ( rect().height() - MIN_HEIGHT ) + MIN_HEIGHT;
 }
 
-#include "playanimationwidget.moc"

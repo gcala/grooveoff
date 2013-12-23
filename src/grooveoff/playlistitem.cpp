@@ -88,5 +88,4 @@ void PlaylistItem::setState(Phonon::State state)
     emit stateChanged(state_);
 }
 
-#include "playlistitem.moc"
 

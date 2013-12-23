@@ -93,6 +93,3 @@ void DownloadList::abortAllDownloads()
     }
 }
 
-
-
-#include "downloadlist.moc"

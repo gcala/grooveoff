@@ -112,9 +112,12 @@ void DownloadItem::setupUi()
     ui_->playButton->setFixedSize(QSize(Utility::buttonSize,Utility::buttonSize));
     ui_->playButton->setEnabled(false);
 
+    ui_->barsWidget->setFixedSize(QSize(Utility::buttonSize,Utility::buttonSize));
+
     ui_->progressBar->setMinimum(0);
     ui_->progressBar->setValue(0);
     ui_->progressBar->setFixedWidth(100);
+    ui_->progressBar->setFixedHeight(22);
 
     // seems that gtk DEs use different default values than Qt...
     ui_->mainLayout->setContentsMargins(4,4,4,4);
@@ -547,6 +550,3 @@ void DownloadItem::abortDownload()
     stateChanged();
 }
 
-
-
-#include "downloaditem.moc"

@@ -219,5 +219,3 @@ void ConfigDialog::loadSettings()
     ui_->saveDestination->setChecked(settings.value(QLatin1String("saveDestination"), false).toBool());
 }
 
-
-#include "configdialog.moc"

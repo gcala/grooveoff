@@ -93,5 +93,3 @@ void Playlist::removeItem(PlaylistItemPtr item)
     }
 }
 
-
-#include "playlist.moc"

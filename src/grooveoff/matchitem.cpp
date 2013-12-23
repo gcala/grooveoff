@@ -106,4 +106,3 @@ void MatchItem::setDownloadIcon()
     }
 }
 
-#include "matchitem.moc"

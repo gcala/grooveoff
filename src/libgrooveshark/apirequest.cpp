@@ -10,7 +10,13 @@
 #include <QLatin1String>
 #include <QCryptographicHash>
 #include <QStringList>
+
+#if QT_VERSION < QT_VERSION_CHECK( 5, 0, 0 )
 #include <qjson/serializer.h>
+#else
+#include <QJsonDocument>
+#endif
+
 
 using namespace GrooveShark;
 
@@ -31,8 +37,15 @@ ApiRequestPrivate::~ApiRequestPrivate()
 SongListPtr ApiRequestPrivate::songs(QString match, QString token )
 {
     QVariantMap map = MapBuilder::getSearchMap(match, token);
+    QByteArray json;
+
+#if QT_VERSION < QT_VERSION_CHECK( 5, 0, 0 )
     QJson::Serializer serializer;
-    QByteArray json = serializer.serialize(map);
+    json = serializer.serialize(map);
+#else
+    QJsonDocument doc = QJsonDocument::fromVariant(map);
+    json = doc.toJson();
+#endif
 
     QString requestUrl = UrlBuilder::getSearchUrl() + map.value(QLatin1String("method")).toString();
 
@@ -45,8 +58,15 @@ SongListPtr ApiRequestPrivate::songs(QString match, QString token )
 
 TokenPtr ApiRequestPrivate::token()
 {
+    QByteArray json;
+
+#if QT_VERSION < QT_VERSION_CHECK( 5, 0, 0 )
     QJson::Serializer serializer;
-    QByteArray json = serializer.serialize(MapBuilder::getTokenMap());
+    json = serializer.serialize(MapBuilder::getTokenMap());
+#else
+    QJsonDocument doc = QJsonDocument::fromVariant(MapBuilder::getTokenMap());
+    json = doc.toJson();
+#endif
 
     QString requestUrl = UrlBuilder::getTokenUrl();
 
@@ -117,4 +137,3 @@ DownloaderPtr ApiRequest::downloadSong(QString path, QString fileName, uint id, 
     return d->downloadSong(path, fileName, id, token);
 }
 
-#include "apirequest.moc"

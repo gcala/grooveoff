@@ -81,4 +81,3 @@ void ElidedLabel::resizeEvent(QResizeEvent* e)
     cacheElidedText(e->size().width());
 }
 
-#include "elidedlabel.moc"

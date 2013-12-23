@@ -3,8 +3,14 @@
 #include "urlbuilder.h"
 #include "config.h"
 
+#if QT_VERSION < QT_VERSION_CHECK( 5, 0, 0 )
 #include <qjson/parser.h>
 #include <qjson/serializer.h>
+#else
+#include <QJsonParseError>
+#include <QJsonDocument>
+#endif
+
 #include <QStringList>
 #include <QDebug>
 
@@ -17,8 +23,15 @@ StreamKeyPrivate::StreamKeyPrivate ( StreamKey* qq, uint id, QString token, QObj
     m_error ( QNetworkReply::NoError )
 {
     QVariantMap map = MapBuilder::getDownloadMap(QString::number(id), token);
+    QByteArray json;
+
+#if QT_VERSION < QT_VERSION_CHECK( 5, 0, 0 )
     QJson::Serializer serializer;
-    QByteArray json = serializer.serialize(map);
+    json = serializer.serialize(map);
+#else
+    QJsonDocument doc = QJsonDocument::fromVariant(map);
+    json = doc.toJson();
+#endif
 
     QString requestUrl = UrlBuilder::getSongStreamKeyUrl() + map.value("method").toByteArray();
     QString refererUrl = UrlBuilder::getRefererUrl() + MapBuilder::jsqueue().at(1);
@@ -28,8 +41,8 @@ StreamKeyPrivate::StreamKeyPrivate ( StreamKey* qq, uint id, QString token, QObj
     //FIXME:duplicated code from requesthandler.cpp
     QNetworkRequest request( requestUrl );
     request.setRawHeader("User-Agent", Config::instance()->userAgent() );
-    request.setRawHeader("Referer", refererUrl.toAscii() );
-    request.setHeader(QNetworkRequest::ContentTypeHeader, Config::instance()->contentType().toAscii() );
+    request.setRawHeader("Referer", refererUrl.toLatin1() );
+    request.setHeader(QNetworkRequest::ContentTypeHeader, Config::instance()->contentType().toLatin1() );
 
     m_reply = m_nam->post( request, json );
 
@@ -99,9 +112,24 @@ bool StreamKeyPrivate::parse( const QVariant& data )
 
 bool StreamKeyPrivate::parse ( const QByteArray& data )
 {
-    QJson::Parser parser;
     bool ok;
-    QVariant variant = parser.parse ( data, &ok );
+    QVariant variant;
+
+#if QT_VERSION < QT_VERSION_CHECK( 5, 0, 0 )
+    QJson::Parser parser;
+    variant = parser.parse ( data, &ok );
+#else
+    QJsonParseError *err = new QJsonParseError();
+    QJsonDocument doc = QJsonDocument::fromJson(data, err);
+    if (err->error != 0) {
+        qDebug() << err->errorString();
+        ok = false;
+    } else {
+        variant = doc.toVariant();
+        ok = true;
+    }
+#endif
+
     if ( ok )
     {
         if ( !parse ( variant ) ) {
@@ -172,5 +200,3 @@ void StreamKey::abort()
     return d->abort();
 }
 
-#include "streamkey_p.moc"
-#include "streamkey.moc"

@@ -45,5 +45,4 @@ SettingsItem::SettingsItem(const QString &name, const QString &icon, QWidget *pa
     ui_->settingNameLabel->setText(settingName_);
 }
 
-#include "settingsitem.moc"
 

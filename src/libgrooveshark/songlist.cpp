@@ -1,6 +1,13 @@
 #include "songlist_p.h"
 
+#include <QDebug>
+
+#if QT_VERSION < QT_VERSION_CHECK( 5, 0, 0 )
 #include <qjson/parser.h>
+#else
+#include <QJsonParseError>
+#include <QJsonDocument>
+#endif
 
 using namespace GrooveShark;
 
@@ -48,9 +55,24 @@ bool SongListPrivate::parse( const QVariant& data )
 
 bool SongListPrivate::parse( const QByteArray& data )
 {
-    QJson::Parser parser;
     bool ok;
-    QVariant variant = parser.parse( data, &ok );
+    QVariant variant;
+
+#if QT_VERSION < QT_VERSION_CHECK( 5, 0, 0 )
+    QJson::Parser parser;
+    variant = parser.parse ( data, &ok );
+#else
+    QJsonParseError *err = new QJsonParseError();
+    QJsonDocument doc = QJsonDocument::fromJson(data, err);
+    if (err->error != 0) {
+        qDebug() << err->errorString();
+        ok = false;
+    } else {
+        variant = doc.toVariant();
+        ok = true;
+    }
+#endif
+
     if( ok )
     {
         ok = ( parse( variant ) );
@@ -101,5 +123,3 @@ QVariant SongList::songs() const
     return d->songs();
 }
 
-#include "songlist_p.moc"
-#include "songlist.moc"

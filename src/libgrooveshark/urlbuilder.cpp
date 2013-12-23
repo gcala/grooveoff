@@ -34,5 +34,3 @@ QString UrlBuilder::getRefererUrl()
     return s_server % QLatin1String( "JSQueue.swf?" );
 }
 
-
-#include "urlbuilder.moc"

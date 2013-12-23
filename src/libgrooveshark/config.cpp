@@ -34,7 +34,7 @@ QByteArray ConfigPrivate::userAgent() const
     if ( !m_userAgentPrefix.isEmpty() )
         userAgent = m_userAgentPrefix % QLatin1String( " " );
     userAgent = userAgent % QLatin1String( "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.56 Safari/536.5 " );
-    return userAgent.toAscii();
+    return userAgent.toLatin1();
 }
 
 QLatin1String ConfigPrivate::host() const
@@ -113,4 +113,3 @@ Config* Config::instance()
     return s_instance;
 }
 
-#include "config.moc"

@@ -78,18 +78,12 @@
          <bool>true</bool>
         </property>
         <property name="currentIndex">
-         <number>0</number>
+         <number>1</number>
         </property>
         <widget class="QWidget" name="statusMessagePage">
          <layout class="QGridLayout" name="gridLayout_2">
           <item row="0" column="0">
            <widget class="QLabel" name="messageLabel">
-            <property name="font">
-             <font>
-              <weight>50</weight>
-              <bold>false</bold>
-             </font>
-            </property>
             <property name="text">
              <string/>
             </property>
@@ -131,12 +125,6 @@
            <layout class="QVBoxLayout" name="verticalLayout">
             <item>
              <widget class="ElidedLabel" name="titleLabel">
-              <property name="font">
-               <font>
-                <weight>75</weight>
-                <bold>true</bold>
-               </font>
-              </property>
               <property name="text">
                <string/>
               </property>
@@ -144,12 +132,6 @@
             </item>
             <item>
              <widget class="ElidedLabel" name="album_authorLabel">
-              <property name="font">
-               <font>
-                <weight>75</weight>
-                <bold>true</bold>
-               </font>
-              </property>
               <property name="text">
                <string/>
               </property>

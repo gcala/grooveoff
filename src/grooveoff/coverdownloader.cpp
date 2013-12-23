@@ -62,4 +62,3 @@ void CoverDownloader::downloadFinished()
     emit done();
 }
 
-#include "coverdownloader.moc"

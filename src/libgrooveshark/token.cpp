@@ -1,6 +1,13 @@
 #include "token_p.h"
-#include <qjson/parser.h>
+
 #include <QDebug>
+
+#if QT_VERSION < QT_VERSION_CHECK( 5, 0, 0 )
+#include <qjson/parser.h>
+#else
+#include <QJsonParseError>
+#include <QJsonDocument>
+#endif
 
 using namespace GrooveShark;
 
@@ -85,9 +92,24 @@ bool TokenPrivate::parse( const QVariant& data )
 
 bool TokenPrivate::parse ( const QByteArray& data )
 {
-    QJson::Parser parser;
     bool ok;
-    QVariant variant = parser.parse ( data, &ok );
+    QVariant variant;
+
+#if QT_VERSION < QT_VERSION_CHECK( 5, 0, 0 )
+    QJson::Parser parser;
+    variant = parser.parse ( data, &ok );
+#else
+    QJsonParseError *err = new QJsonParseError();
+    QJsonDocument doc = QJsonDocument::fromJson(data, err);
+    if (err->error != 0) {
+        qDebug() << err->errorString();
+        ok = false;
+    } else {
+        variant = doc.toVariant();
+        ok = true;
+    }
+#endif
+
     if ( ok )
     {
         if ( !parse ( variant ) ) {
@@ -165,5 +187,3 @@ QString Token::errorString() const
     return d->errorString();
 }
 
-#include "token_p.moc"
-#include "token.moc"

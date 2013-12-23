@@ -51,12 +51,11 @@ void RequestHandler::addUserAgent( QNetworkRequest &request )
 
 void RequestHandler::addContentType( QNetworkRequest &request )
 {
-    request.setHeader(QNetworkRequest::ContentTypeHeader, Config::instance()->contentType().toAscii() );
+    request.setHeader(QNetworkRequest::ContentTypeHeader, Config::instance()->contentType().toLatin1() );
 }
 
 void RequestHandler::addReferer( QNetworkRequest &request, const QString &referer )
 {
-    request.setRawHeader("Referer", referer.toAscii() );
+    request.setRawHeader("Referer", referer.toLatin1() );
 }
 
-#include "requesthandler.moc"

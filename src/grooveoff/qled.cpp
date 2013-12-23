@@ -122,4 +122,3 @@ void QLed::toggleValue()
     return;
 }
 
-#include "qled.moc"

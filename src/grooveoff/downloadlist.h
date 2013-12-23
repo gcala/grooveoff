@@ -21,7 +21,7 @@
 #define DOWNLOADLIST_H
 
 #include <QListWidget>
-#include "phononnamespace.h"
+#include <phonon/phononnamespace.h>
 
 class DownloadItem;
 

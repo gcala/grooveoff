@@ -20,9 +20,10 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QNetworkCookie>
 #include <QNetworkCookieJar>
 #include <QNetworkConfigurationManager>
-#include <phononnamespace.h>
+#include <phonon/phononnamespace.h>
 #include "../libgrooveshark/apirequest.h"
 #include "playlistitem.h"
 

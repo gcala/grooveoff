@@ -288,5 +288,3 @@ void PlayerWidget::switchPage()
     ui_->stackedWidget->setCurrentIndex(1);
 }
 
-
-#include "playerwidget.moc"

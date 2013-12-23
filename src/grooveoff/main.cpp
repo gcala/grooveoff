@@ -30,8 +30,10 @@ int main(int argc, char** argv)
     QCoreApplication::setOrganizationDomain(QLatin1String("gcala.blogger.com"));
     app.setApplicationName(QLatin1String("grooveoff"));
 
+#if QT_VERSION < QT_VERSION_CHECK( 5, 0, 0 )
     QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
     QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
+#endif
 
     QTranslator qtTranslator;
     qtTranslator.load(QLatin1String("qt_") + QLocale::system().name(),

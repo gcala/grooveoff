@@ -123,4 +123,3 @@ void TimerButton::stopCountdown()
     countdownStarted_ = false;
 }
 
-#include "timerbutton.moc"

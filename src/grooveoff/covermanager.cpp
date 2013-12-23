@@ -64,4 +64,3 @@ void CoverManager::setCover()
     }
 }
 
-#include "covermanager.moc"

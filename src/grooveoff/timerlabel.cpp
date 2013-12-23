@@ -38,4 +38,3 @@ void TimerLabel::mousePressEvent( QMouseEvent * event )
     emit clicked();
 }
 
-#include "timerlabel.moc"
