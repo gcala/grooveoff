@@ -17,7 +17,8 @@ TokenPrivate::TokenPrivate ( Token* qq, QNetworkReply* reply, QObject* parent ) 
     q ( qq ),
     m_error ( QNetworkReply::NoError )
 {
-    QObject::connect ( m_reply, SIGNAL ( finished() ), this, SLOT ( parseData() ) );
+    QObject::connect ( m_reply, SIGNAL ( finished() ),
+                       this, SLOT ( parseData() ) );
     QObject::connect ( m_reply, SIGNAL ( error ( QNetworkReply::NetworkError ) ),
                        this, SLOT ( error ( QNetworkReply::NetworkError ) ) );
 }
@@ -102,11 +103,13 @@ bool TokenPrivate::parse ( const QByteArray& data )
 #if QT_VERSION < QT_VERSION_CHECK( 5, 0, 0 )
     QJson::Parser parser;
     variant = parser.parse ( data, &ok );
+    if(!ok)
+        m_errorString = parser.errorString();
 #else
     QJsonParseError *err = new QJsonParseError();
     QJsonDocument doc = QJsonDocument::fromJson(data, err);
     if (err->error != 0) {
-        qDebug() << err->errorString();
+        m_errorString = err->errorString();
         ok = false;
     } else {
         variant = doc.toVariant();
@@ -141,6 +144,7 @@ void TokenPrivate::parseData()
 void TokenPrivate::error ( QNetworkReply::NetworkError error )
 {
     this->m_error = error;
+    m_errorString = m_reply->errorString();
     emit q->requestError ( error );
 }
 

@@ -38,9 +38,9 @@ private:
 signals:
     /**Gets emitted when the data is ready to read*/
     void finished();
-    /**Gets emitted when an parse error ocurred*/
+    /**Gets emitted when a parse error ocurred*/
     void parseError();
-    /**Gets emitted when an request error ocurred*/
+    /**Gets emitted when a request error ocurred*/
     void requestError( QNetworkReply::NetworkError error );
 };
 
