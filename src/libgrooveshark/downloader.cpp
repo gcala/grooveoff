@@ -23,8 +23,15 @@ DownloaderPrivate::DownloaderPrivate ( Downloader* qq, QString path, QString fil
     m_error ( QNetworkReply::NoError )
 {
     streamKey_ = ApiRequest::instance()->streamKey(id, token);
-    connect( streamKey_.data(), SIGNAL(finished()), this, SLOT(streamKeyRetrieved()));
-    connect( streamKey_.data(), SIGNAL(parseError()), this, SLOT(streamKeyParseError()));
+
+    connect( streamKey_.data(), SIGNAL(finished()),
+             this, SLOT(streamKeyFinished()));
+
+    connect( streamKey_.data(), SIGNAL(parseError()),
+             this, SLOT(streamKeyError()));
+
+    connect( streamKey_.data(), SIGNAL(requestError(QNetworkReply::NetworkError)),
+             this, SLOT(streamKeyError()));
 }
 
 QString DownloaderPrivate::errorString() const
@@ -35,6 +42,7 @@ QString DownloaderPrivate::errorString() const
 void DownloaderPrivate::error ( QNetworkReply::NetworkError error )
 {
     this->m_error = error;
+    m_errorString = reply_->errorString();
     emit q->requestError ( error );
 }
 
@@ -51,13 +59,14 @@ void DownloaderPrivate::stopDownload()
     }
 }
 
-void DownloaderPrivate::streamKeyRetrieved()
+void DownloaderPrivate::streamKeyFinished()
 {
     QString key = streamKey_->streamKey();
     QString ip = streamKey_->ip();
 
     aborted_ = false;
-    connect(this, SIGNAL(finished(QNetworkReply*)), this, SLOT(onFinished(QNetworkReply*)));
+    connect(this, SIGNAL(finished(QNetworkReply*)),
+            this, SLOT(onFinished(QNetworkReply*)));
 
     file_ = new QFile;
     file_->setFileName(m_path + QDir::separator() + m_fileName + ".mp3");
@@ -77,18 +86,26 @@ void DownloaderPrivate::streamKeyRetrieved()
     mainRequest_.setRawHeader(QByteArray("Referer"), QString("http://%1/JSQueue.swf?%2").arg(Config::instance()->host()).arg(MapBuilder::jsqueue().at(1)).toLatin1());
     mainRequest_.setUrl(QUrl(QString("http://%1/stream.php").arg(streamKey_->ip())));
     mainRequest_.setHeader(QNetworkRequest::ContentTypeHeader, QLatin1String("application/x-www-form-urlencoded"));
+
 #if QT_VERSION < QT_VERSION_CHECK( 5, 0, 0 )
     reply_ = post(mainRequest_, postData.encodedQuery());
 #else
     reply_ = post(mainRequest_, postData.query(QUrl::EncodeUnicode).toLatin1());
 #endif
-    connect(reply_, SIGNAL(downloadProgress(qint64,qint64)), this, SLOT(onDownloadProgress(qint64,qint64)));
-    connect(reply_, SIGNAL(readyRead()), this, SLOT(onReadyRead()));
-    connect(reply_, SIGNAL(finished()), this, SLOT(onReplyFinished()));
+
+    connect(reply_, SIGNAL(downloadProgress(qint64,qint64)),
+            this, SLOT(onDownloadProgress(qint64,qint64)));
+
+    connect(reply_, SIGNAL(readyRead()),
+            this, SLOT(onReadyRead()));
+
+    connect(reply_, SIGNAL(finished()),
+            this, SLOT(onReplyFinished()));
 }
 
-void DownloaderPrivate::streamKeyParseError()
+void DownloaderPrivate::streamKeyError()
 {
+    m_errorString = streamKey_->errorString();
     emit q->downloadCompleted(false);
 }
 
@@ -99,7 +116,7 @@ void DownloaderPrivate::streamKeyParseError()
 void DownloaderPrivate::onFinished(QNetworkReply *)
 {
     if(!reply_->error() == QNetworkReply::NoError) { // if error occurred
-        qDebug() << "Reply Error ::" << reply_->errorString() << "for" << m_fileName;
+        m_errorString = reply_->errorString();
 
         emit q->downloadCompleted(false);
         if(file_->isOpen()) {
@@ -163,5 +180,3 @@ void Downloader::stopDownload()
 {
     return d->stopDownload();
 }
-
-

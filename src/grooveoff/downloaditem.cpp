@@ -312,9 +312,16 @@ void DownloadItem::startDownload()
 {
     downloadState_ = GrooveOff::DownloadingState;
     stateChanged();
-    downloader_ = ApiRequest::instance()->downloadSong(playlistItem_->path(), Utility::fileName(playlistItem_->song()), playlistItem_->song()->songID(), Utility::token);
-    connect(downloader_.data(), SIGNAL(progress(qint64,qint64)), this, SLOT(setProgress(qint64,qint64)));
-    connect(downloader_.data(), SIGNAL(downloadCompleted(bool)), this, SLOT(downloadFinished(bool)));
+    downloader_ = ApiRequest::instance()->downloadSong(playlistItem_->path(),
+                                                       Utility::fileName(playlistItem_->song()),
+                                                       playlistItem_->song()->songID(),
+                                                       Utility::token);
+
+    connect(downloader_.data(), SIGNAL(progress(qint64,qint64)),
+            this, SLOT(setProgress(qint64,qint64)));
+
+    connect(downloader_.data(), SIGNAL(downloadCompleted(bool)),
+            this, SLOT(downloadFinished(bool)));
 }
 
 /*!
@@ -330,6 +337,7 @@ void DownloadItem::downloadFinished(bool ok)
         stateChanged();
     } else {
         downloadState_ = GrooveOff::ErrorState;
+        qDebug() << "GrooveOff ::" << downloader_->errorString();
         stateChanged();
     }
 

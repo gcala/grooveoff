@@ -289,6 +289,7 @@ void MainWindow::setupSignals()
 {
     // <Menu Items>
     ActionCollection *ac = ActionCollection::instance();
+
     connect(ac->getAction( "actionClose" ), SIGNAL(triggered()),
             this, SLOT(close()));
 
@@ -405,9 +406,15 @@ void MainWindow::beginSearch()
     artistsAlbumsContainer_.clear();
 
     songList_ = api_->songs(ui_->searchLine->text(), Utility::token);
-    connect(songList_.data(), SIGNAL(finished()), this, SLOT(populateResultsList()));
-    connect(songList_.data(), SIGNAL(parseError()), this, SLOT(gotSearchError()));
-    connect(songList_.data(), SIGNAL(requestError(QNetworkReply::NetworkError)), this, SLOT(gotSearchRequestError(QNetworkReply::NetworkError)));
+
+    connect(songList_.data(), SIGNAL(finished()), this,
+            SLOT(searchFinished()));
+
+    connect(songList_.data(), SIGNAL(parseError()),
+            this, SLOT(searchError()));
+
+    connect(songList_.data(), SIGNAL(requestError(QNetworkReply::NetworkError)),
+            this, SLOT(searchError()));
 }
 
 /*!
@@ -427,11 +434,18 @@ void MainWindow::getToken()
     playerWidget->showMessage(trUtf8("Connecting..."));
 
     token_ = api_->token();
-    connect( token_.data(), SIGNAL(finished()), this, SLOT(tokenReturned()));
-    connect(token_.data(), SIGNAL(parseError()), this, SLOT(errorDuringToken()));
+
+    connect( token_.data(), SIGNAL(finished()),
+             this, SLOT(tokenFinished()));
+
+    connect(token_.data(), SIGNAL(parseError()),
+            this, SLOT(tokenError()));
+
+    connect(token_.data(), SIGNAL(requestError(QNetworkReply::NetworkError)),
+            this, SLOT(tokenError()));
 }
 
-void MainWindow::tokenReturned()
+void MainWindow::tokenFinished()
 {
     // the application is now free to perform a search
     searchInProgress_ = false;
@@ -457,18 +471,19 @@ void MainWindow::tokenReturned()
     }
 }
 
+void MainWindow::tokenError()
+{
+    playerWidget->showMessage(trUtf8("Connection error!!"));
+    qDebug() << "GrooveOff ::" << songList_->errorString();
+}
 
 /*!
   \brief populateResultsTable : fills results list
   \return void
 */
-void MainWindow::populateResultsList()
+void MainWindow::searchFinished()
 {
-    searchInProgress_ = false;
-
-    ui_->busyLabel->setVisible(false);
-    ui_->searchButton->setVisible(true);
-    busyAnimation_->stop();
+    restoreSearch();
 
     // check if last search returned results
     if(songList_->list().count() == 0) {
@@ -552,26 +567,11 @@ void MainWindow::populateResultsList()
     applyFilter();
 }
 
-void MainWindow::gotSearchError()
+void MainWindow::searchError()
 {
     qDebug() << "GrooveOff ::" << songList_->errorString();
-    searchInProgress_ = false;
-
-    ui_->busyLabel->setVisible(false);
-    ui_->searchButton->setVisible(true);
-    busyAnimation_->stop();
+    restoreSearch();
 }
-
-void MainWindow::gotSearchRequestError(QNetworkReply::NetworkError)
-{
-    qDebug() << "GrooveOff ::" << songList_->errorString();
-    searchInProgress_ = false;
-
-    ui_->busyLabel->setVisible(false);
-    ui_->searchButton->setVisible(true);
-    busyAnimation_->stop();
-}
-
 
 void MainWindow::downloadRequest(PlaylistItemPtr playlistItem)
 {
@@ -945,13 +945,6 @@ void MainWindow::reloadItemsDownloadButtons()
     }
 }
 
-void MainWindow::errorDuringToken()
-{
-    //statusBar()->showMessage(trUtf8("Token not received!!"), 3000);
-    playerWidget->showMessage(trUtf8("Connection error!!"));
-    qDebug() << "GrooveOff ::" << "Token not received: " << token_->errorString();
-}
-
 void MainWindow::batchDownload()
 {
     for(int i = 0; i < ui_->matchList->count(); i++) {
@@ -1068,4 +1061,13 @@ void MainWindow::parseSong(const QDomElement& element, SongPtr song)
         }
     }
 }
+
+void MainWindow::restoreSearch()
+{
+    searchInProgress_ = false;
+    ui_->busyLabel->setVisible(false);
+    ui_->searchButton->setVisible(true);
+    busyAnimation_->stop();
+}
+
 

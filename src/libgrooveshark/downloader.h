@@ -12,22 +12,11 @@ class DownloaderPrivate;
 class Downloader : public QNetworkAccessManager
 {
     Q_OBJECT
-//    Q_PROPERTY( QString result READ result CONSTANT )
-//    Q_PROPERTY( bool prefetchEnabled READ prefetchEnabled CONSTANT )
-//    Q_PROPERTY( QString serviceVersion READ serviceVersion CONSTANT )
-//    Q_PROPERTY( QString session READ session CONSTANT )
-    Q_PROPERTY( QString errorString READ errorString CONSTANT )
-
 public:
     Downloader( QString path, QString fileName, uint id, QString token, QObject* parent = 0 );
     virtual ~Downloader();
 
-//    QString result() const;
-//    bool prefetchEnabled() const;
-//    QString serviceVersion() const;
-//    QString session() const;
     QString errorString() const;
-
     void stopDownload();
 
 private:
@@ -38,9 +27,9 @@ private:
 signals:
     /**Gets emitted when the data is ready to read*/
     void finished();
-    /**Gets emitted when an parse error ocurred*/
+    /**Gets emitted when a parse error ocurred*/
     void parseError();
-    /**Gets emitted when an request error ocurred*/
+    /**Gets emitted when a request error ocurred*/
     void requestError( QNetworkReply::NetworkError error );
 
     void downloadCompleted(bool);

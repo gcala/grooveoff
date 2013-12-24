@@ -69,8 +69,12 @@ public:
 private slots:
     void selectFolder();
     void downloadRequest(PlaylistItemPtr playlistItem);
-    void beginSearch();
     void getToken();
+    void tokenFinished();
+    void tokenError();
+    void beginSearch();
+    void searchFinished();
+    void searchError();
     void setCompactLayout();
     void setWideLayout();
     void about();
@@ -81,13 +85,7 @@ private slots:
     void albumChanged();
     void freeDownloadSlot();
     void addItemToQueue(DownloadItem *);
-    void tokenReturned();
-    void populateResultsList();
-    void gotSearchError();
-    void gotSearchRequestError(QNetworkReply::NetworkError);
     void batchDownload();
-
-    void errorDuringToken();
 
 private:
     Ui::MainWindow *ui_;
@@ -132,6 +130,7 @@ private:
     void saveSettings();
     void unqueue();
     void applyFilter();
+    void restoreSearch();
     bool isDownloadingQueued(const uint &);
     int visibleItemsCount();
     void reloadItemsDownloadButtons();
