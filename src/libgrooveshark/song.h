@@ -39,7 +39,7 @@ class Song : public QObject
 
 public:
     Song( QNetworkReply* reply, QObject* parent = 0 );
-    Song( const QVariant& variant, QObject* parent = 0 );
+    Song( const QVariant& variant, bool fromPlaylist, QObject* parent = 0 );
     Song( QObject* parent = 0 );
     virtual ~Song();
 

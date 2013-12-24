@@ -18,10 +18,14 @@ TokenPrivate::TokenPrivate ( Token* qq, QNetworkReply* reply, QObject* parent ) 
     m_error ( QNetworkReply::NoError )
 {
     QObject::connect ( m_reply, SIGNAL ( finished() ), this, SLOT ( parseData() ) );
-    QObject::connect ( m_reply, SIGNAL ( error ( QNetworkReply::NetworkError ) ), this, SLOT ( error ( QNetworkReply::NetworkError ) ) );
+    QObject::connect ( m_reply, SIGNAL ( error ( QNetworkReply::NetworkError ) ),
+                       this, SLOT ( error ( QNetworkReply::NetworkError ) ) );
 }
 
-TokenPrivate::TokenPrivate ( Token* qq, const QVariant& variant, QObject* parent ) : QObject ( parent ), m_reply ( 0 ), q ( qq )
+TokenPrivate::TokenPrivate ( Token* qq, const QVariant& variant, QObject* parent ) :
+    QObject ( parent ),
+    m_reply ( 0 ),
+    q ( qq )
 {
     parse ( variant );
 }
@@ -110,18 +114,11 @@ bool TokenPrivate::parse ( const QByteArray& data )
     }
 #endif
 
-    if ( ok )
+    if( ok )
     {
-        if ( !parse ( variant ) ) {
-            qDebug() << data;
-            return false;
-        }
-        return true;
+        ok = ( parse( variant ) );
     }
-    else
-    {
-        return false;
-    }
+    return ok;
 }
 
 void TokenPrivate::parseData()
@@ -147,12 +144,16 @@ void TokenPrivate::error ( QNetworkReply::NetworkError error )
     emit q->requestError ( error );
 }
 
-Token::Token ( QNetworkReply* reply, QObject* parent ) : QObject ( parent ), d ( new TokenPrivate ( this, reply ) )
+Token::Token ( QNetworkReply* reply, QObject* parent ) :
+    QObject ( parent ),
+    d ( new TokenPrivate ( this, reply ) )
 {
 
 }
 
-Token::Token ( const QVariant& variant, QObject* parent ) : QObject ( parent ), d ( new TokenPrivate ( this, variant ) )
+Token::Token ( const QVariant& variant, QObject* parent ) :
+    QObject ( parent ),
+    d ( new TokenPrivate ( this, variant ) )
 {
 
 }

@@ -15,15 +15,19 @@ public:
     virtual ~SongListPrivate();
     QList<SongPtr> list() const;
     QVariant songs() const;
+    QString errorString() const;
+
 private:
     SongList* const q;
     QNetworkReply* m_reply;
     QVariant m_songs;
+    QString m_errorString;
 
     QNetworkReply::NetworkError m_error;
 
     bool parse( const QVariant& data );
     bool parse( const QByteArray& data );
+
 private slots:
     void parseData();
     void error( QNetworkReply::NetworkError error );

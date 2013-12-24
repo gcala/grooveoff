@@ -406,6 +406,7 @@ void MainWindow::beginSearch()
 
     songList_ = api_->songs(ui_->searchLine->text(), Utility::token);
     connect(songList_.data(), SIGNAL(finished()), this, SLOT(populateResultsList()));
+    connect(songList_.data(), SIGNAL(parseError()), this, SLOT(gotSearchError()));
 }
 
 /*!
@@ -462,7 +463,6 @@ void MainWindow::tokenReturned()
 */
 void MainWindow::populateResultsList()
 {
-    //TODO: handle errors
     searchInProgress_ = false;
 
     ui_->busyLabel->setVisible(false);
@@ -470,8 +470,10 @@ void MainWindow::populateResultsList()
     busyAnimation_->stop();
 
     // check if last search returned results
-    if(songList_->list().count() == 0)
+    if(songList_->list().count() == 0) {
+        qDebug() << "GrooveOff ::" << "Empty result list";
         return;
+    }
 
     // row index (start from 0)
     row_ = 0;
@@ -547,6 +549,16 @@ void MainWindow::populateResultsList()
     ui_->artistsCB->addItems(artists);
     ui_->albumsCB->addItems(albums);
     applyFilter();
+}
+
+void MainWindow::gotSearchError()
+{
+    qDebug() << "GrooveOff ::" << songList_->errorString();
+    searchInProgress_ = false;
+
+    ui_->busyLabel->setVisible(false);
+    ui_->searchButton->setVisible(true);
+    busyAnimation_->stop();
 }
 
 void MainWindow::downloadRequest(PlaylistItemPtr playlistItem)

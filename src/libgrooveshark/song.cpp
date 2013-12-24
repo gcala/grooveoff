@@ -21,7 +21,11 @@ SongPrivate::SongPrivate ( Song* qq, QNetworkReply* reply, QObject* parent ) :
     QObject::connect ( m_reply, SIGNAL ( error ( QNetworkReply::NetworkError ) ), this, SLOT ( error ( QNetworkReply::NetworkError ) ) );
 }
 
-SongPrivate::SongPrivate ( Song* qq, const QVariant& variant, QObject* parent ) : QObject ( parent ), m_reply ( 0 ), q ( qq )
+SongPrivate::SongPrivate ( Song* qq, const QVariant& variant, bool fromPlaylist, QObject* parent ) :
+    QObject ( parent ),
+    m_reply ( 0 ),
+    m_fromPlaylist(fromPlaylist),
+    q ( qq )
 {
     parse ( variant );
 }
@@ -278,10 +282,12 @@ bool SongPrivate::parse( const QVariant& data )
         qDebug() << "'AlbumName' field is invalid";
     m_albumName = v.toString();
 
-    v = songMap.value( QLatin1String( "ArtistCoverArtFilename" ) );
-    if( !v.canConvert( QVariant::String ) )
-        qDebug() << "'ArtistCoverArtFilename' field is invalid";
-    m_artistCoverArtFilename = v.toString();
+    if(!m_fromPlaylist) {
+        v = songMap.value( QLatin1String( "ArtistCoverArtFilename" ) );
+        if( !v.canConvert( QVariant::String ) )
+            qDebug() << "'ArtistCoverArtFilename' field is invalid";
+        m_artistCoverArtFilename = v.toString();
+    }
 
     v = songMap.value( QLatin1String( "ArtistID" ) );
     if( !v.canConvert( QVariant::UInt ) )
@@ -293,10 +299,12 @@ bool SongPrivate::parse( const QVariant& data )
         qDebug() << "'ArtistName' field is invalid";
     m_artistName = v.toString();
 
-    v = songMap.value( QLatin1String( "AvgDuration" ) );
-    if( !v.canConvert( QVariant::String ) )
-        qDebug() << "'AvgDuration' field is invalid";
-    m_avgDuration = v.toString();
+    if(!m_fromPlaylist) {
+        v = songMap.value( QLatin1String( "AvgDuration" ) );
+        if( !v.canConvert( QVariant::String ) )
+            qDebug() << "'AvgDuration' field is invalid";
+        m_avgDuration = v.toString();
+    }
 
     v = songMap.value( QLatin1String( "AvgRating" ) );
     if( !v.canConvert( QVariant::String ) )
@@ -318,11 +326,6 @@ bool SongPrivate::parse( const QVariant& data )
         qDebug() << "'Flags' field is invalid";
     m_flags = v.toULongLong();
 
-//     v = songMap.value( QLatin1String( "GenreID" ) );
-//     if( !v.canConvert( QVariant::UInt ) )
-//         qDebug() << "'GenreID' field is invalid";
-//     m_genreID = v.toUInt();
-
     v = songMap.value( QLatin1String( "IsLowBitrateAvailable" ) );
     if( !v.canConvert( QVariant::Bool ) )
         qDebug() << "'IsLowBitrateAvailable' field is invalid";
@@ -338,35 +341,43 @@ bool SongPrivate::parse( const QVariant& data )
         qDebug() << "'Popularity' field is invalid";
     m_popularity = v.toULongLong();
 
-    v = songMap.value( QLatin1String( "PopularityIndex" ) );
-    if( !v.canConvert( QVariant::ULongLong ) )
-        qDebug() << "'PopularityIndex' field is invalid";
-    m_popularityIndex = v.toULongLong();
+    if(!m_fromPlaylist) {
+        v = songMap.value( QLatin1String( "PopularityIndex" ) );
+        if( !v.canConvert( QVariant::ULongLong ) )
+            qDebug() << "'PopularityIndex' field is invalid";
+        m_popularityIndex = v.toULongLong();
+    }
 
-    v = songMap.value( QLatin1String( "RawScore" ) );
-    if( !v.canConvert( QVariant::ULongLong ) )
-        qDebug() << "'RawScore' field is invalid";
-    m_rawScore = v.toULongLong();
+    if(!m_fromPlaylist) {
+        v = songMap.value( QLatin1String( "RawScore" ) );
+        if( !v.canConvert( QVariant::ULongLong ) )
+            qDebug() << "'RawScore' field is invalid";
+        m_rawScore = v.toULongLong();
+    }
 
-    v = songMap.value( QLatin1String( "Score" ) );
-    if( !v.canConvert( QVariant::Double ) )
-        qDebug() << "'Score' field is invalid";
-    m_score = v.toDouble();
+    if(!m_fromPlaylist) {
+        v = songMap.value( QLatin1String( "Score" ) );
+        if( !v.canConvert( QVariant::Double ) )
+            qDebug() << "'Score' field is invalid";
+        m_score = v.toDouble();
+    }
 
     v = songMap.value( QLatin1String( "SongID" ) );
     if( !v.canConvert( QVariant::UInt ) )
         qDebug() << "'SongID' field is invalid";
     m_songID = v.toUInt();
 
-    v = songMap.value( QLatin1String( "SongName" ) );
+    v = songMap.value( QLatin1String( m_fromPlaylist ? "Name" : "SongName" ) );
     if( !v.canConvert( QVariant::String ) )
         qDebug() << "'SongName' field is invalid";
     m_songName = v.toString();
 
-    v = songMap.value( QLatin1String( "TSAdded" ) );
-    if( !v.canConvert( QVariant::String ) )
-        qDebug() << "'TSAdded' field is invalid";
-    m_tsAdded = v.toString();
+    if(!m_fromPlaylist) {
+        v = songMap.value( QLatin1String( "TSAdded" ) );
+        if( !v.canConvert( QVariant::String ) )
+            qDebug() << "'TSAdded' field is invalid";
+        m_tsAdded = v.toString();
+    }
 
     v = songMap.value( QLatin1String( "TrackNum" ) );
     if( !v.canConvert( QVariant::UInt ) )
@@ -401,15 +412,11 @@ bool SongPrivate::parse ( const QByteArray& data )
     }
 #endif
 
-    if ( ok )
+    if( ok )
     {
-        if ( !parse ( variant ) ) return false;
-        return true;
+        ok = ( parse( variant ) );
     }
-    else
-    {
-        return false;
-    }
+    return ok;
 }
 
 void SongPrivate::parseData()
@@ -435,17 +442,23 @@ void SongPrivate::error ( QNetworkReply::NetworkError error )
     emit q->requestError ( error );
 }
 
-Song::Song ( QNetworkReply* reply, QObject* parent ) : QObject ( parent ), d ( new SongPrivate ( this, reply ) )
+Song::Song ( QNetworkReply* reply, QObject* parent ) :
+    QObject ( parent ),
+    d ( new SongPrivate ( this, reply ) )
 {
 
 }
 
-Song::Song ( const QVariant& variant, QObject* parent ) : QObject ( parent ), d ( new SongPrivate ( this, variant ) )
+Song::Song ( const QVariant& variant, bool fromPlaylist, QObject* parent ) :
+    QObject ( parent ),
+    d ( new SongPrivate ( this, variant, fromPlaylist ) )
 {
 
 }
 
-Song::Song ( QObject* parent ) : QObject ( parent ), d ( new SongPrivate ( this ) )
+Song::Song ( QObject* parent ) :
+    QObject ( parent ),
+    d ( new SongPrivate ( this ) )
 {
 
 }

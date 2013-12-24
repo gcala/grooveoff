@@ -83,6 +83,7 @@ private slots:
     void addItemToQueue(DownloadItem *);
     void tokenReturned();
     void populateResultsList();
+    void gotSearchError();
     void batchDownload();
 
     void errorDuringToken();

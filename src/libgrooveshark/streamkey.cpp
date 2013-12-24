@@ -130,20 +130,11 @@ bool StreamKeyPrivate::parse ( const QByteArray& data )
     }
 #endif
 
-    if ( ok )
+    if( ok )
     {
-        if ( !parse ( variant ) ) {
-            qDebug() << data;
-            return false;
-        }
-        return true;
+        ok = ( parse( variant ) );
     }
-    else
-    {
-        qDebug() << "Error converting data to json";
-        qDebug() << data;
-        return false;
-    }
+    return ok;
 }
 
 void StreamKeyPrivate::parseData()

@@ -12,7 +12,7 @@ class SongPrivate : public QObject
 
 public:
     SongPrivate ( Song* qq, QNetworkReply* reply, QObject* parent = 0 );
-    SongPrivate ( Song* qq, const QVariant& variant, QObject* parent = 0 );
+    SongPrivate ( Song* qq, const QVariant& variant, bool fromPlaylist, QObject* parent = 0 );
     SongPrivate ( Song* qq, QObject* parent = 0 );
 
     quint32 albumID() const;
@@ -92,6 +92,7 @@ private:
     QNetworkReply::NetworkError m_error;
     bool parse ( const QVariant& data );
     bool parse ( const QByteArray& data );
+    bool m_fromPlaylist;
 
 private slots:
     void parseData();

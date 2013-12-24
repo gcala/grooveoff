@@ -11,10 +11,15 @@
 
 using namespace GrooveShark;
 
-SongListPrivate::SongListPrivate( SongList* qq, QNetworkReply* reply ) : q( qq ), m_reply( reply ), m_songs( QVariant() ), m_error( QNetworkReply::NoError )
+SongListPrivate::SongListPrivate( SongList* qq, QNetworkReply* reply ) :
+    q( qq ),
+    m_reply( reply ),
+    m_songs( QVariant() ),
+    m_error( QNetworkReply::NoError )
 {
     QObject::connect( m_reply, SIGNAL( finished() ), this, SLOT( parseData() ) );
-    QObject::connect( m_reply, SIGNAL( error( QNetworkReply::NetworkError ) ), this, SLOT( error( QNetworkReply::NetworkError ) ) );
+    QObject::connect( m_reply, SIGNAL( error( QNetworkReply::NetworkError ) ),
+                      this, SLOT( error( QNetworkReply::NetworkError ) ) );
 }
 
 SongListPrivate::~SongListPrivate()
@@ -37,16 +42,33 @@ QVariant SongListPrivate::songs() const
     return m_songs;
 }
 
+QString SongListPrivate::errorString() const
+{
+    return m_errorString;
+}
+
 bool SongListPrivate::parse( const QVariant& data )
 {
-    if( !data.toMap()[QLatin1String("result")].toMap()[QLatin1String("result")].canConvert( QVariant::List ) )
+    if(!data.toMap()[QLatin1String("result")].toMap().keys().contains("result")
+        && !data.toMap()[QLatin1String("result")].toMap().keys().contains("Songs")
+    ) {
+        m_errorString = "received data is not valid";
         return false;
-    QVariantList varList = data.toMap()[QLatin1String("result")].toMap()[QLatin1String("result")].toList();
+    }
+
+    bool isPlaylist = data.toMap()[QLatin1String("result")].toMap().keys().contains("Songs");
+
+    QVariantList varList;
+    if(isPlaylist)
+        varList = data.toMap()[QLatin1String("result")].toMap()[QLatin1String("Songs")].toList();
+    else
+        varList = data.toMap()[QLatin1String("result")].toMap()[QLatin1String("result")].toList();
+
     QVariantList songList;
     foreach( QVariant var, varList )
     {
         QVariant v;
-        v.setValue<GrooveShark::SongPtr>( SongPtr( new Song( var ) ) );
+        v.setValue<GrooveShark::SongPtr>( SongPtr( new Song( var, isPlaylist ) ) );
         songList.append( v );
     }
     m_songs = QVariant( songList );
@@ -103,7 +125,9 @@ void SongListPrivate::error( QNetworkReply::NetworkError error )
     emit q->requestError( error );
 }
 
-SongList::SongList( QNetworkReply* reply, QObject* parent ) : QObject( parent ), d( new SongListPrivate( this, reply ) )
+SongList::SongList( QNetworkReply* reply, QObject* parent ) :
+    QObject( parent ),
+    d( new SongListPrivate( this, reply ) )
 {
 
 }
@@ -121,5 +145,10 @@ QList<SongPtr> SongList::list() const
 QVariant SongList::songs() const
 {
     return d->songs();
+}
+
+QString SongList::errorString() const
+{
+    return d->errorString();
 }
 
