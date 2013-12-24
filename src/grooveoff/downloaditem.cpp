@@ -57,11 +57,13 @@ DownloadItem::DownloadItem(const PlaylistItemPtr &playlistItemPtr, QWidget *pare
         emit downloadFinished();
         downloadState_ = GrooveOff::FinishedState;
     }
-    else
+    else {
         downloadState_ = GrooveOff::QueuedState;
+        qDebug() << "GrooveOff ::" << "Queued download of" << playlistItem_->song()->songName();
+    }
+
     playerState_ = Phonon::StoppedState;
     stateChanged();
-    qDebug() << "GrooveOff ::" << "Queued download of" << playlistItem_->song()->songName();
 }
 
 /*!
@@ -322,6 +324,8 @@ void DownloadItem::startDownload()
 
     connect(downloader_.data(), SIGNAL(downloadCompleted(bool)),
             this, SLOT(downloadFinished(bool)));
+
+    qDebug() << "GrooveOff ::" << "Started download of" << playlistItem_->song()->songName();
 }
 
 /*!
@@ -334,10 +338,11 @@ void DownloadItem::downloadFinished(bool ok)
     //...and show others if download was successful
     if(ok) {
         downloadState_ = GrooveOff::FinishedState;
+        qDebug() << "GrooveOff ::" << "Finished download of" << playlistItem_->song()->songName();
         stateChanged();
     } else {
         downloadState_ = GrooveOff::ErrorState;
-        qDebug() << "GrooveOff ::" << downloader_->errorString();
+        qDebug() << "GrooveOff :: Error downloading" << playlistItem_->song()->songName() << "::" << downloader_->errorString();
         stateChanged();
     }
 
