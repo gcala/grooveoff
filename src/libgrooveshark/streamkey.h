@@ -21,6 +21,7 @@ public:
     StreamKey( uint id, QString token, QObject* parent = 0 );
     virtual ~StreamKey();
 
+    QString errorString() const;
     QString streamKey() const;
     QString ip() const;
     uint id() const;

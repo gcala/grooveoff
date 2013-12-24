@@ -46,8 +46,10 @@ StreamKeyPrivate::StreamKeyPrivate ( StreamKey* qq, uint id, QString token, QObj
 
     m_reply = m_nam->post( request, json );
 
-    QObject::connect ( m_reply, SIGNAL ( finished() ), this, SLOT ( parseData() ) );
-    QObject::connect ( m_reply, SIGNAL ( error ( QNetworkReply::NetworkError ) ), this, SLOT ( error ( QNetworkReply::NetworkError ) ) );
+    QObject::connect ( m_reply, SIGNAL ( finished() ),
+                       this, SLOT ( parseData() ) );
+    QObject::connect ( m_reply, SIGNAL ( error ( QNetworkReply::NetworkError ) ),
+                       this, SLOT ( error ( QNetworkReply::NetworkError ) ) );
 }
 
 QString StreamKeyPrivate::streamKey() const
@@ -72,34 +74,39 @@ void StreamKeyPrivate::abort()
     }
 }
 
+QString StreamKeyPrivate::errorString() const
+{
+    return m_errorString;
+}
+
 bool StreamKeyPrivate::parse( const QVariant& data )
 {
     if( !data.canConvert( QVariant::Map ) ) {
-        qDebug() << "Can't convert streamkey data to map";
+        m_errorString = "Can't convert streamkey data to map";
         return false;
     }
 
     QVariantMap streamKeyMap = data.toMap();
 
     if(!streamKeyMap.keys().contains("result")) {
-        qDebug() << "No 'result' field found";
+        m_errorString = "No 'result' field found";
         return false;
     }
 
     QVariantMap resultMap = streamKeyMap.value("result").toMap();
 
     if(resultMap.keys().count() == 0) {
-        qDebug() << "No keys found";
+        m_errorString = "No keys found";
         return false;
     }
 
     if(resultMap.value(resultMap.keys().at(0)).toMap().value("streamKey").toString().isEmpty()) {
-        qDebug() << "No 'streamKey' field found";
+        m_errorString = "No 'streamKey' field found";
         return false;
     }
 
     if(resultMap.value(resultMap.keys().at(0)).toMap().value("ip").toString().isEmpty()) {
-        qDebug() << "No 'ip' field found";
+        m_errorString = "No 'ip' field found";
         return false;
     }
 
@@ -118,11 +125,13 @@ bool StreamKeyPrivate::parse ( const QByteArray& data )
 #if QT_VERSION < QT_VERSION_CHECK( 5, 0, 0 )
     QJson::Parser parser;
     variant = parser.parse ( data, &ok );
+    if(!ok)
+        m_errorString = parser.errorString();
 #else
     QJsonParseError *err = new QJsonParseError();
     QJsonDocument doc = QJsonDocument::fromJson(data, err);
     if (err->error != 0) {
-        qDebug() << err->errorString();
+        m_errorString = err->errorString();
         ok = false;
     } else {
         variant = doc.toVariant();
@@ -158,10 +167,13 @@ void StreamKeyPrivate::parseData()
 void StreamKeyPrivate::error ( QNetworkReply::NetworkError error )
 {
     this->m_error = error;
+    m_errorString = m_reply->errorString();
     emit q->requestError ( error );
 }
 
-StreamKey::StreamKey ( uint id, QString token, QObject* parent ) : QObject ( parent ), d ( new StreamKeyPrivate ( this, id, token ) )
+StreamKey::StreamKey ( uint id, QString token, QObject* parent ) :
+    QObject ( parent ),
+    d ( new StreamKeyPrivate ( this, id, token ) )
 {
 
 }
@@ -189,5 +201,10 @@ uint StreamKey::id() const
 void StreamKey::abort()
 {
     return d->abort();
+}
+
+QString StreamKey::errorString() const
+{
+    return d->errorString();
 }
 

@@ -17,11 +17,13 @@ public:
     QString ip() const;
     uint id() const;
     void abort();
+    QString errorString() const;
 
 private:
     QNetworkAccessManager* m_nam;
     QNetworkReply* m_reply;
     StreamKey* const q;
+    QString m_errorString;
 
     QString m_streamKey;
     QString m_ip;
