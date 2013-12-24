@@ -19,6 +19,8 @@ set(grooveoff_SRCS actioncollection.cpp aboutdialog.cpp
                    timerbutton.cpp
                    timerlabel.cpp
                    utility.cpp
+                   dbus/mpris2.cpp
+                   dbus/mpris_manager.cpp
                    ../libgrooveshark/apirequest.cpp
                    ../libgrooveshark/config.cpp
                    ../libgrooveshark/requesthandler.cpp
@@ -64,6 +66,12 @@ if( NOT Qt5Core_DIR )
     qt4_add_resources(grooveoff_RC_SRCS ${grooveoff_RCS} )
     qt4_wrap_ui(grooveoff_UI_HEADERS ${grooveoff_UI})
     qt4_add_translation(grooveoff_I18N ${TRANSLATIONS})
+    qt4_add_dbus_adaptor(grooveoff_SRCS
+                         dbus/org.mpris.MediaPlayer2.Player.xml
+                         dbus/mpris2.h Mpris2 mpris2Player Mpris2Player)
+    qt4_add_dbus_adaptor(grooveoff_SRCS
+                         dbus/org.mpris.MediaPlayer2.xml
+                         dbus/mpris2.h Mpris2 mpris2Root Mpris2Root)
 endif( NOT Qt5Core_DIR )
 
 add_executable(grooveoff main.cpp ${grooveoff_SRCS} ${grooveoff_RC_SRCS} ${grooveoff_UI_HEADERS} ${grooveoff_I18N})
@@ -73,21 +81,21 @@ target_link_libraries(grooveoff
                       ${Qt5Core_LIBRARIES}
                       ${Qt5Widgets_LIBRARIES}
                       ${Qt5Network_LIBRARIES}
-                      ${Qt5Xml_LIBRARIES}
                       ${Qt5Svg_LIBRARIES}
-                      ${PHONON4QT5_LIBRARY}
-                      ${QT_QTSVG_LIBRARY}
-                      ${QT_QTXML_LIBRARY})
+                      ${Qt5Xml_LIBRARIES}
+                      ${Qt5DBus_LIBRARIES}
+                      ${PHONON4QT5_LIBRARY})
 endif( Qt5Core_DIR )
 if( NOT Qt5Core_DIR )
 target_link_libraries(grooveoff
                       ${QT_QTCORE_LIBRARY}
                       ${QT_QTGUI_LIBRARY}
                       ${QT_QTNETWORK_LIBRARY}
-                      ${PHONON_LIBRARY}
                       ${QT_QTSVG_LIBRARY}
+                      ${QT_QTXML_LIBRARY}
+                      ${QT_QTDBUS_LIBRARY}
                       ${QJSON_LIBRARY}
-                      ${QT_QTXML_LIBRARY})
+                      ${PHONON_LIBRARY})
 endif( NOT Qt5Core_DIR )
 
 install(TARGETS grooveoff RUNTIME DESTINATION bin)

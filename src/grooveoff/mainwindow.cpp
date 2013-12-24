@@ -33,6 +33,10 @@
 #include "audioengine.h"
 #include "actioncollection.h"
 
+// Dbus & remote
+//#include "dbus/dbusnotification.h"
+#include "dbus/mpris_manager.h"
+
 #include <QtGui/QLabel>
 #include <QtGui/QMenu>
 #include <QtGui/QMenuBar>
@@ -86,6 +90,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui_->setupUi(this);
     playerWidget = new PlayerWidget(this);
     new ActionCollection(this);
+    m_mpris_manager   = new MprisManager(this);
     setupUi();
     setupMenus();
     setupSignals();
@@ -762,6 +767,8 @@ void MainWindow::loadSettings()
     }
 
     playerWidget->setTimerState((GrooveOff::TimerState)settings.value(QLatin1String("timerState"), GrooveOff::ElapsedState).toInt());
+
+    m_mpris_manager->reloadSettings();
 }
 
 /*!

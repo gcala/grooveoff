@@ -24,12 +24,14 @@
 #include <QFile>
 #include <QDir>
 
+// Cover sizes available: 40 50 70 80 90 120 200 500
+
 CoverDownloader::CoverDownloader(QString name, QObject *parent) :
     QObject(parent),
     coverName_(name)
 {
     QNetworkRequest request;
-    request.setUrl(QUrl(QString("http://images.gs-cdn.net/static/albums/70_%1").arg(coverName_)));
+    request.setUrl(QUrl(QString("http://images.gs-cdn.net/static/albums/200_%1").arg(coverName_)));
     request.setHeader(QNetworkRequest::ContentTypeHeader, QLatin1String("application/x-www-form-urlencoded"));
     reply_ = qnam_.get(request);
     connect(reply_, SIGNAL(finished()), this, SLOT(downloadFinished()));

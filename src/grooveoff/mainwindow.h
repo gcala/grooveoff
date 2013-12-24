@@ -47,6 +47,10 @@ class DownloadItem;
 class MatchItemListDelegate;
 class CoverManager;
 
+// Dbus & Mpris
+//class DbusNotification;
+class MprisManager;
+
 namespace Ui {
 class MainWindow;
 }
@@ -120,6 +124,8 @@ private:
     QMenuBar    *m_menuBar;
     QAction     *m_compactMenuAction;
     QMenu       *m_compactMainMenu;
+
+    MprisManager *m_mpris_manager;
 
     // Methods
     void setupUi();

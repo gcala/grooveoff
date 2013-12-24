@@ -253,3 +253,32 @@ void AudioEngine::removingTrack(PlaylistItemPtr track)
     }
 }
 
+bool AudioEngine::canSeek()
+{
+    bool phononCanSeek = true;
+    // TODO: When phonon properly reports this, re-enable it
+    if ( mediaObject_ && mediaObject_->isValid() )
+        phononCanSeek = mediaObject_->isSeekable();
+
+    return phononCanSeek;
+//     if ( d->playlist.isNull() )
+//         return phononCanSeek;
+//
+//     return !d->playlist.isNull() && ( d->playlist.data()->seekRestrictions() != PlaylistModes::NoSeek ) && phononCanSeek;
+}
+
+
+void AudioEngine::seek( qint64 ms )
+{
+    if ( !canSeek() )
+    {
+        qDebug() << "Could not seek!";
+        return;
+    }
+
+    if ( isPlaying() || isPaused() )
+    {
+        mediaObject_->seek( ms );
+        emit seeked( ms );
+    }
+}

@@ -56,8 +56,8 @@ public:
     void next();
     bool canGoPrevious();
     bool canGoNext();
-//     bool canSeek();
-//     void seek( qint64 ms );
+    bool canSeek();
+    void seek( qint64 ms );
 //     void seek( int ms ); // for compatibility with seekbar in audiocontrols
 //     void setVolume( int percentage );
 //     void lowerVolume();
@@ -91,7 +91,7 @@ signals:
     void controlStateChanged();
 //    void stateChanged( AudioState newState, AudioState oldState );
     void stateChanged( Phonon::State, Phonon::State );
-    void volumeChanged( int volume /* in percent */ );
+//    void volumeChanged( int volume /* in percent */ );
 
     void timerMilliSeconds( qint64 msElapsed );
     void timerSeconds( unsigned int secondsElapsed );
