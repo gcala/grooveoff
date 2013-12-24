@@ -84,6 +84,7 @@ private slots:
     void tokenReturned();
     void populateResultsList();
     void gotSearchError();
+    void gotSearchRequestError(QNetworkReply::NetworkError);
     void batchDownload();
 
     void errorDuringToken();

@@ -407,6 +407,7 @@ void MainWindow::beginSearch()
     songList_ = api_->songs(ui_->searchLine->text(), Utility::token);
     connect(songList_.data(), SIGNAL(finished()), this, SLOT(populateResultsList()));
     connect(songList_.data(), SIGNAL(parseError()), this, SLOT(gotSearchError()));
+    connect(songList_.data(), SIGNAL(requestError(QNetworkReply::NetworkError)), this, SLOT(gotSearchRequestError(QNetworkReply::NetworkError)));
 }
 
 /*!
@@ -560,6 +561,17 @@ void MainWindow::gotSearchError()
     ui_->searchButton->setVisible(true);
     busyAnimation_->stop();
 }
+
+void MainWindow::gotSearchRequestError(QNetworkReply::NetworkError)
+{
+    qDebug() << "GrooveOff ::" << songList_->errorString();
+    searchInProgress_ = false;
+
+    ui_->busyLabel->setVisible(false);
+    ui_->searchButton->setVisible(true);
+    busyAnimation_->stop();
+}
+
 
 void MainWindow::downloadRequest(PlaylistItemPtr playlistItem)
 {

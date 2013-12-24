@@ -83,11 +83,13 @@ bool SongListPrivate::parse( const QByteArray& data )
 #if QT_VERSION < QT_VERSION_CHECK( 5, 0, 0 )
     QJson::Parser parser;
     variant = parser.parse ( data, &ok );
+    if(!ok)
+        m_errorString = parser.errorString();
 #else
     QJsonParseError *err = new QJsonParseError();
     QJsonDocument doc = QJsonDocument::fromJson(data, err);
     if (err->error != 0) {
-        qDebug() << err->errorString();
+        m_errorString = err->errorString();
         ok = false;
     } else {
         variant = doc.toVariant();
@@ -122,6 +124,7 @@ void SongListPrivate::parseData()
 void SongListPrivate::error( QNetworkReply::NetworkError error )
 {
     this->m_error = error;
+    m_errorString = m_reply->errorString();
     emit q->requestError( error );
 }
 

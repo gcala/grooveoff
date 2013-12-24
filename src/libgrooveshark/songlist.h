@@ -16,7 +16,6 @@ class SongList : public QObject
 {
     Q_OBJECT
     Q_PROPERTY( QVariant songs READ songs CONSTANT )
-    Q_PROPERTY( QString errorString READ errorString CONSTANT )
 public:
     SongList( QNetworkReply* reply, QObject* parent = 0 );
     virtual ~SongList();
@@ -32,9 +31,9 @@ private:
 signals:
     /**Gets emitted when the data is ready to read*/
     void finished();
-    /**Gets emitted when an parse error ocurred*/
+    /**Gets emitted when a parse error ocurred*/
     void parseError();
-    /**Gets emitted when an request error ocurred*/
+    /**Gets emitted when a request error ocurred*/
     void requestError( QNetworkReply::NetworkError error );
 };
 
