@@ -35,12 +35,10 @@ class Song : public QObject
     Q_PROPERTY( QString tsAdded READ tsAdded WRITE setTsAdded )
     Q_PROPERTY( quint32 trackNum READ trackNum WRITE setTrackNum )
     Q_PROPERTY( quint32 year READ year WRITE setYear )
-    Q_PROPERTY( QString errorString READ errorString CONSTANT )
 
 public:
-    Song( QNetworkReply* reply, QObject* parent = 0 );
     Song( const QVariant& variant, bool fromPlaylist, QObject* parent = 0 );
-    Song( QObject* parent = 0 );
+    Song( bool fromPlaylist = false, QObject* parent = 0 );
     virtual ~Song();
 
     quint32 albumID() const;
@@ -87,20 +85,13 @@ public:
     void setTrackNum(quint32);
     quint32 year() const;
     void setYear(quint32);
+
     QString errorString() const;
 
 private:
     Q_DISABLE_COPY( Song )
     SongPrivate* const d;
     friend class SongPrivate;
-
-signals:
-    /**Gets emitted when the data is ready to read*/
-    void finished();
-    /**Gets emitted when an parse error ocurred*/
-    void parseError();
-    /**Gets emitted when an request error ocurred*/
-    void requestError( QNetworkReply::NetworkError error );
 };
 
 typedef QSharedPointer<Song> SongPtr;

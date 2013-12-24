@@ -11,9 +11,8 @@ class SongPrivate : public QObject
     Q_OBJECT
 
 public:
-    SongPrivate ( Song* qq, QNetworkReply* reply, QObject* parent = 0 );
-    SongPrivate ( Song* qq, const QVariant& variant, bool fromPlaylist, QObject* parent = 0 );
-    SongPrivate ( Song* qq, QObject* parent = 0 );
+    SongPrivate ( Song* qq, const QVariant& variant, bool fromPlaylist = false, QObject* parent = 0 );
+    SongPrivate ( Song* qq, bool fromPlaylist = false, QObject* parent = 0 );
 
     quint32 albumID() const;
     void setAlbumID(quint32);
@@ -59,10 +58,10 @@ public:
     void setTrackNum(quint32);
     quint32 year() const;
     void setYear(quint32);
+
     QString errorString() const;
 
 private:
-    QNetworkReply* m_reply;
     Song* const q;
 
     quint32 m_albumID;
@@ -87,16 +86,12 @@ private:
     QString m_tsAdded;
     quint32 m_trackNum;
     quint32 m_year;
+
     QString m_errorString;
 
-    QNetworkReply::NetworkError m_error;
     bool parse ( const QVariant& data );
     bool parse ( const QByteArray& data );
     bool m_fromPlaylist;
-
-private slots:
-    void parseData();
-    void error ( QNetworkReply::NetworkError error );
 };
 
 }

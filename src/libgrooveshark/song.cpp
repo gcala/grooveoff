@@ -11,26 +11,18 @@
 
 using namespace GrooveShark;
 
-SongPrivate::SongPrivate ( Song* qq, QNetworkReply* reply, QObject* parent ) :
-    QObject ( parent ),
-    m_reply ( reply ),
-    q ( qq ),
-    m_error ( QNetworkReply::NoError )
-{
-    QObject::connect ( m_reply, SIGNAL ( finished() ), this, SLOT ( parseData() ) );
-    QObject::connect ( m_reply, SIGNAL ( error ( QNetworkReply::NetworkError ) ), this, SLOT ( error ( QNetworkReply::NetworkError ) ) );
-}
-
 SongPrivate::SongPrivate ( Song* qq, const QVariant& variant, bool fromPlaylist, QObject* parent ) :
     QObject ( parent ),
-    m_reply ( 0 ),
     m_fromPlaylist(fromPlaylist),
     q ( qq )
 {
     parse ( variant );
 }
 
-SongPrivate::SongPrivate ( Song* qq, QObject* parent ) : QObject ( parent ), q ( qq )
+SongPrivate::SongPrivate ( Song* qq, bool fromPlaylist, QObject* parent ) :
+    QObject ( parent ),
+    q ( qq ),
+    m_fromPlaylist(fromPlaylist)
 {
 }
 
@@ -419,36 +411,6 @@ bool SongPrivate::parse ( const QByteArray& data )
     return ok;
 }
 
-void SongPrivate::parseData()
-{
-    //parse and send signal
-    if ( m_reply->error() == QNetworkReply::NoError )
-    {
-        if ( parse ( m_reply->readAll() ) )
-        {
-            emit q->finished();
-        }
-        else
-        {
-            emit q->parseError();
-        }
-    }
-    m_reply->deleteLater();
-}
-
-void SongPrivate::error ( QNetworkReply::NetworkError error )
-{
-    this->m_error = error;
-    emit q->requestError ( error );
-}
-
-Song::Song ( QNetworkReply* reply, QObject* parent ) :
-    QObject ( parent ),
-    d ( new SongPrivate ( this, reply ) )
-{
-
-}
-
 Song::Song ( const QVariant& variant, bool fromPlaylist, QObject* parent ) :
     QObject ( parent ),
     d ( new SongPrivate ( this, variant, fromPlaylist ) )
@@ -456,9 +418,9 @@ Song::Song ( const QVariant& variant, bool fromPlaylist, QObject* parent ) :
 
 }
 
-Song::Song ( QObject* parent ) :
+Song::Song ( bool fromPlaylist, QObject* parent ) :
     QObject ( parent ),
-    d ( new SongPrivate ( this ) )
+    d ( new SongPrivate ( this, fromPlaylist ) )
 {
 
 }
