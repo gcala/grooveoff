@@ -168,7 +168,8 @@ void PlayerWidget::stateChanged(Phonon::State newState, Phonon::State oldState)
             ui_->stackedWidget->setCurrentIndex(0);
         else
             ui_->stackedWidget->setCurrentIndex(1);
-        ui_->playPauseButton->setEnabled(false);
+        if(playedRemoved)
+            ui_->playPauseButton->setEnabled(false);
         ui_->playPauseButton->setIcon(QIcon::fromTheme(QLatin1String("media-playback-start"),
                                       QIcon(QLatin1String(":/resources/media-playback-start.png"))));
         ui_->timeLabel->setText("00:00");

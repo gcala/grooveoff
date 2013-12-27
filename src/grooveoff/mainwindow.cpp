@@ -34,7 +34,7 @@
 #include "actioncollection.h"
 
 // Dbus & remote
-//#include "dbus/dbusnotification.h"
+#include "dbus/dbusnotification.h"
 #include "dbus/mpris_manager.h"
 
 #include <QtGui/QLabel>

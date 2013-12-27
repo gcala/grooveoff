@@ -48,7 +48,7 @@ class MatchItemListDelegate;
 class CoverManager;
 
 // Dbus & Mpris
-//class DbusNotification;
+class DbusNotification;
 class MprisManager;
 
 namespace Ui {
@@ -126,6 +126,7 @@ private:
     QMenu       *m_compactMainMenu;
 
     MprisManager *m_mpris_manager;
+    DbusNotification *m_dbus_notifier;
 
     // Methods
     void setupUi();

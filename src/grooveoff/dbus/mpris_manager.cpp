@@ -1,6 +1,6 @@
 /*
  * GrooveOff - Offline Grooveshark.com music
- * Copyright (C) 2013  Giuseppe Calà <Giuseppe.Cala-1973@poste.it>
+ * Copyright (C) 2013  Giuseppe Calà <jiveaxe@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

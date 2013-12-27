@@ -1,4 +1,5 @@
-set(grooveoff_SRCS actioncollection.cpp aboutdialog.cpp
+set(grooveoff_SRCS actioncollection.cpp
+                   aboutdialog.cpp
                    audioengine.cpp
                    combobox.cpp
                    configdialog.cpp

@@ -1,6 +1,6 @@
 /*
  * GrooveOff - Offline Grooveshark.com music
- * Copyright (C) 2013  Giuseppe Calà <Giuseppe.Cala-1973@poste.it>
+ * Copyright (C) 2013  Giuseppe Calà <jiveaxe@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -124,19 +124,19 @@ public slots:
     void Play();
     void PlayPause();
     void Previous();
-    void Seek( qlonglong Offset );
+    void Seek( qlonglong ms );
     void SetPosition( const QDBusObjectPath& TrackId, qlonglong Position );
     void Stop();
 
 
 private slots:
 //     void slot_onVolumeChanged();
-    void slot_engineStateChanged(Phonon::State, Phonon::State);
+    void engineStateChanged(Phonon::State, Phonon::State);
     void slot_engineMediaChanged();
-    void slot_mediaTick( qint64 );
+    void onSeeked( qint64 );
 
 private:
-    void EmitNotification(const QString& name);
+    void notifyPropertyChanged(const QString& propertyName);
 
 signals:
     void Seeked( qlonglong Position );

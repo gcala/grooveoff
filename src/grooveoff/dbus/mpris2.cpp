@@ -1,6 +1,6 @@
 /*
  * GrooveOff - Offline Grooveshark.com music
- * Copyright (C) 2013  Giuseppe Calà <Giuseppe.Cala-1973@poste.it>
+ * Copyright (C) 2013  Giuseppe Calà <jiveaxe@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 #include "../audioengine.h"
 #include "../playlistitem.h"
 #include "../utility.h"
+#include "../playlist.h"
 
 #include <QApplication>
 #include <QImage>
@@ -41,15 +42,15 @@ Mpris2::Mpris2(QObject* parent)  : QObject(parent)
 
     // Listen to volume changes
 //    connect(AudioEngine::instance(), SIGNAL( volumeChanged() ), SLOT( slot_onVolumeChanged() ) );
-    connect(AudioEngine::instance(), SIGNAL(stateChanged(Phonon::State, Phonon::State)), SLOT(slot_engineStateChanged(Phonon::State, Phonon::State)));
+    connect(AudioEngine::instance(), SIGNAL(stateChanged(Phonon::State, Phonon::State)), SLOT(engineStateChanged(Phonon::State, Phonon::State)));
     connect(AudioEngine::instance(), SIGNAL(sourceChanged()), SLOT(slot_engineMediaChanged()));
-    connect(AudioEngine::instance(), SIGNAL( seeked( qint64 ) ),SLOT( slot_mediaTick( qint64 ) ) );
+    connect(AudioEngine::instance(), SIGNAL( seeked( qint64 ) ),SLOT( onSeeked( qint64 ) ) );
 }
 
 
 Mpris2::~Mpris2()
 {
-    QDBusConnection::sessionBus().unregisterService("org.mpris.MediaPlayer2.yarock");
+    QDBusConnection::sessionBus().unregisterService("org.mpris.MediaPlayer2.grooveoff");
 }
 
 
@@ -140,26 +141,27 @@ bool Mpris2::canControl() const
 
 bool Mpris2::canGoNext() const
 {
-    return true;
+    return AudioEngine::instance()->canGoNext();
 }
 
 
 bool Mpris2::canGoPrevious() const
 {
-    return true;
+    return AudioEngine::instance()->canGoPrevious();
 }
 
 
 bool Mpris2::canPause() const
 {
-    return (playbackStatus() == "Paused" || playbackStatus() == "Stopped");
+//    return (playbackStatus() == "Paused" || playbackStatus() == "Stopped");
+    return AudioEngine::instance()->currentTrack();
 }
 
 
 bool Mpris2::canPlay() const
 {
-    /* to be improved */
-    return true;
+    // If there is a currently playing track, or if there is a playlist with at least 1 track, you can hit play
+    return AudioEngine::instance()->currentTrack() ||  !Playlist::instance()->count();
 }
 
 
@@ -219,10 +221,9 @@ QVariantMap Mpris2::metadata() const
 
     if ( track )
     {
-
         /* Each set of metadata must have a "mpris:trackid" entry at the very least,
          * which contains a string that uniquely identifies this track within the scope of the tracklist.*/
-        metadataMap.insert( "mpris:trackid", track->song()->songID() );
+        metadataMap.insert( "mpris:trackid", QVariant::fromValue(QDBusObjectPath(QString( "/track/" ) + QString::number(track->song()->songID()))));
 
         metadataMap.insert( "xesam:url",    track->path() + "/" + Utility::fileName(track->song()) );
         metadataMap.insert( "xesam:album",  track->song()->albumName() );
@@ -260,13 +261,6 @@ QString Mpris2::playbackStatus() const
       case Phonon::PausedState  : return "Paused";  break;
       default              : return "Stopped"; break;
     }
-}
-
-
-qlonglong Mpris2::position() const
-{
-    /* convert in microsecond */
-    return AudioEngine::instance()->currentTime() * 1000;
 }
 
 
@@ -308,60 +302,68 @@ void Mpris2::setRate( double value )
 
 void Mpris2::Next()
 {
-    //Debug::warning() << "  [Mpris2] Next";
-    if(true /*CanGoNext() */)
-      AudioEngine::instance()->next();
+    AudioEngine::instance()->next();
 }
 
 
 void Mpris2::Previous()
 {
-    //Debug::warning() << "  [Mpris2] Previous";
-    if(true /*CanGoPrevious()*/)
-      AudioEngine::instance()->previous();
-
+    AudioEngine::instance()->previous();
 }
 
 
 void Mpris2::Pause()
 {
-    //Debug::warning() << "  [Mpris2] Pause";
-    if(/*CanPause() && */ AudioEngine::instance()->state() != Phonon::PausedState)
-      AudioEngine::instance()->pause();
+    AudioEngine::instance()->pause();
 }
 
 void Mpris2::Play()
 {
-    //Debug::warning() << "  [Mpris2] Play";
-    if(true /*CanPlay()*/)
-      AudioEngine::instance()->play();
+    AudioEngine::instance()->play();
 }
 
 
 void Mpris2::PlayPause()
 {
-    //Debug::warning() << "  [Mpris2] PlayPause";
-    if(true /*CanPlay()*/)
-      AudioEngine::instance()->playPause();
+    AudioEngine::instance()->playPause();
 }
 
 
 void Mpris2::Seek( qlonglong Offset )
 {
-    //Debug::warning() << "  [Mpris2] Seek";
-    if(true /*CanSeek() */)
-    {
-      int msec = AudioEngine::instance()->currentTime() + Offset*1000;
-      AudioEngine::instance()->seek(msec);
-    }
+    if ( !canSeek() )
+        return;
+
+    qlonglong seekTime = position() + Offset;
+    if ( seekTime < 0 )
+        AudioEngine::instance()->seek( 0 );
+    else if ( seekTime > AudioEngine::instance()->currentTrackTotalTime()*1000 )
+        Next();
+    // seekTime is in microseconds, but we work internally in milliseconds
+    else
+        AudioEngine::instance()->seek( (qint64) ( seekTime / 1000 ) );
+}
+
+
+qlonglong Mpris2::position() const
+{
+    /* convert in microsecond */
+    return (qlonglong) ( AudioEngine::instance()->currentTime() * 1000 );
 }
 
 
 void Mpris2::SetPosition( const QDBusObjectPath& TrackId, qlonglong Position )
 {
-Q_UNUSED(TrackId)
-Q_UNUSED(Position)
+    if ( !canSeek() )
+        return;
 
+    if ( TrackId.path() != QString( "/track/" ) + QString::number(AudioEngine::instance()->currentTrack()->song()->songID()))
+        return;
+
+    if ( ( Position < 0) || ( Position > AudioEngine::instance()->currentTrackTotalTime() * 1000 )  )
+        return;
+
+    AudioEngine::instance()->seek( (qint64) (Position / 1000 ) );
 }
 
 void Mpris2::OpenUri(const QString& uri)
@@ -373,7 +375,6 @@ Q_UNUSED(uri)
 
 void Mpris2::Stop()
 {
-    //Debug::warning() << "  [Mpris2] Stop";
     AudioEngine::instance()->stop();
 }
 
@@ -383,17 +384,18 @@ void Mpris2::Stop()
 //     EmitNotification("Volume");
 // }
 
-void Mpris2::slot_engineStateChanged(Phonon::State engine_state, Phonon::State oldState)
+void Mpris2::engineStateChanged(Phonon::State newState, Phonon::State oldState)
 {
-    //Debug::debug() << "  [Mpris2] slot_engineStateChanged";
-//    Phonon::State engine_state = AudioEngine::instance()->state();
-
-    if(engine_state != Phonon::PlayingState && engine_state != Phonon::PausedState) {
+    if(newState != Phonon::PlayingState && newState != Phonon::PausedState) {
       // clear metadata
-      EmitNotification("Metadata");
+      notifyPropertyChanged("Metadata");
     }
 
-    EmitNotification("PlaybackStatus");
+    notifyPropertyChanged("PlaybackStatus");
+    notifyPropertyChanged("CanSeek");
+    notifyPropertyChanged("CanPause");
+    notifyPropertyChanged( "CanGoNext" );
+    notifyPropertyChanged( "CanGoPrevious" );
 }
 
 
@@ -403,19 +405,19 @@ void Mpris2::slot_engineMediaChanged()
     PlaylistItemPtr track = AudioEngine::instance()->currentTrack();
     //Debug::debug() << "  [Mpris2] slot_engineMediaChanged  track " << track;
 
-    EmitNotification("Metadata");
+    notifyPropertyChanged("Metadata");
 }
 
-void Mpris2::slot_mediaTick( qint64 ms )
+void Mpris2::onSeeked( qint64 ms )
 {
     qlonglong us = (qlonglong) ( ms*1000 );
     emit Seeked( us );
 }
 
 
-void Mpris2::EmitNotification(const QString& name)
+void Mpris2::notifyPropertyChanged(const QString& propertyName)
 {
-    //Debug::debug() << "  [Mpris2] EmitNotification " << name;
+    //Debug::debug() << "  [Mpris2] EmitNotification " << propertyName;
 
     QDBusMessage signal = QDBusMessage::createSignal(
         "/org/mpris/MediaPlayer2",
@@ -424,7 +426,7 @@ void Mpris2::EmitNotification(const QString& name)
     signal << "org.mpris.MediaPlayer2.Player";
 
     QVariantMap changedProps;
-    changedProps.insert(name, property(name.toLatin1()));
+    changedProps.insert(propertyName, property(propertyName.toLatin1()));
     signal << changedProps;
     signal << QStringList();
 

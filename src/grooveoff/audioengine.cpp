@@ -1,6 +1,6 @@
 /*
  * GrooveOff - Offline Grooveshark.com music
- * Copyright (C) 2013  Giuseppe Calà <Giuseppe.Cala-1973@poste.it>
+ * Copyright (C) 2013  Giuseppe Calà <jiveaxe@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -261,10 +261,6 @@ bool AudioEngine::canSeek()
         phononCanSeek = mediaObject_->isSeekable();
 
     return phononCanSeek;
-//     if ( d->playlist.isNull() )
-//         return phononCanSeek;
-//
-//     return !d->playlist.isNull() && ( d->playlist.data()->seekRestrictions() != PlaylistModes::NoSeek ) && phononCanSeek;
 }
 
 
@@ -281,4 +277,10 @@ void AudioEngine::seek( qint64 ms )
         mediaObject_->seek( ms );
         emit seeked( ms );
     }
+}
+
+void
+AudioEngine::seek( int ms )
+{
+    seek( (qint64) ms );
 }
