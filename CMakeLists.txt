@@ -11,6 +11,8 @@ cmake_minimum_required(VERSION 2.8.6)
 #set(GROOVEOFF_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set( CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules )
 set( CMAKE_AUTOMOC ON )
+SET( THIRDPARTY_DIR  ${CMAKE_SOURCE_DIR}/thirdparty )
+
 option(BUILD_WITH_QT5 "Build GrooveOff with Qt5, if found" OFF)
 
 if( BUILD_WITH_QT5 )
@@ -38,4 +40,5 @@ endif( NOT Qt5Core_DIR )
 file( GLOB TRANS_FILES ${CMAKE_SOURCE_DIR}/translations/grooveoff_*.ts)
 set( TRANSLATIONS ${TRANS_FILES} )
 
+add_subdirectory( thirdparty )
 add_subdirectory(src)

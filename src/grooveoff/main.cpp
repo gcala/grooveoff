@@ -16,40 +16,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <QtGui/QApplication>
-#include <QTranslator>
-#include <QLibraryInfo>
-#include <QLocale>
-#include <QTextCodec>
-#include "mainwindow.h"
+#include "app.h"
 
 int main(int argc, char** argv)
 {
-    QApplication app(argc, argv);
-    QCoreApplication::setOrganizationName(QLatin1String("gcala"));
-    QCoreApplication::setOrganizationDomain(QLatin1String("gcala.blogger.com"));
-    app.setApplicationName(QLatin1String("grooveoff"));
-
-#if QT_VERSION < QT_VERSION_CHECK( 5, 0, 0 )
-    QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
-    QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
-#endif
-
-    QTranslator qtTranslator;
-    qtTranslator.load(QLatin1String("qt_") + QLocale::system().name(),
-                      QLibraryInfo::location(QLibraryInfo::TranslationsPath));
-    app.installTranslator(&qtTranslator);
-
-    QLatin1String localeSuffix("/translations");
-    QString localeName(QLatin1String("grooveoff_") + QLocale::system().name());
-
-    QTranslator appSystemTranslator;
-    appSystemTranslator.load(localeName, QLatin1String("/usr/share/grooveoff") + localeSuffix);
-    app.installTranslator(&appSystemTranslator);
-
-    app.setWindowIcon(QIcon(QLatin1String(":/resources/grooveoff.png")));
-
-    MainWindow w;
-    w.show();
+    App app(argc, argv);
     return app.exec();
 }
