@@ -18,7 +18,7 @@
 
 #include "mainwindow.h"
 #include "playerwidget.h"
-#include "qled.h"
+#include "widgets/qled.h"
 #include "downloaditem.h"
 #include "roles.h"
 #include "configdialog.h"
@@ -32,6 +32,8 @@
 #include "playlistitem.h"
 #include "audioengine.h"
 #include "actioncollection.h"
+#include "PaletteHandler.h"
+#include "svghandler.h"
 
 // Dbus & remote
 #include "dbus/dbusnotification.h"
@@ -53,7 +55,7 @@
 #include <QNetworkReply>
 #include <QDesktopServices>
 
-#if QT_VERSION > QT_VERSION_CHECK( 5, 0, 0 )
+#if QT_VERSION >= QT_VERSION_CHECK( 5, 0, 0 )
 #include <QStandardPaths>
 #endif
 
@@ -88,6 +90,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui_(new Ui::MainWindow)
 {
     ui_->setupUi(this);
+    The::paletteHandler()->setPalette( palette() );
     playerWidget = new PlayerWidget(this);
     new ActionCollection(this);
     m_mpris_manager   = new MprisManager(this);
@@ -195,6 +198,9 @@ MainWindow::MainWindow(QWidget *parent) :
 */
 MainWindow::~MainWindow()
 {
+    delete The::paletteHandler();
+    delete The::svgHandler();
+
     if(saveSession_)
         saveSession();
     saveSettings();
@@ -1077,4 +1083,9 @@ void MainWindow::restoreSearch()
     busyAnimation_->stop();
 }
 
-
+void
+MainWindow::changeEvent( QEvent *event )
+{
+    if( event->type() == QEvent::PaletteChange )
+        The::paletteHandler()->setPalette( palette() );
+}

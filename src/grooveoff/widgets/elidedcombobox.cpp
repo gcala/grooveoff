@@ -17,22 +17,22 @@
 */
 
 
-#include "combobox.h"
+#include "elidedcombobox.h"
 #include "utility.h"
 
 #include <QStylePainter>
 
 /*!
-  \brief ComboBox: Custom combobox
+  \brief ElidedComboBox: Custom combobox
   \param parent: The Parent Widget
 */
-ComboBox::ComboBox(QWidget* parent):
+ElidedComboBox::ElidedComboBox(QWidget* parent):
     QComboBox(parent)
 {
 
 }
 
-void ComboBox::paintEvent(QPaintEvent* e)
+void ElidedComboBox::paintEvent(QPaintEvent* e)
 {
     QVariant itemData = this->itemData( this->currentIndex(), Qt::DisplayRole);
 

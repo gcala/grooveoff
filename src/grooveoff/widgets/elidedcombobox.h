@@ -17,20 +17,20 @@
 */
 
 
-#ifndef COMBOBOX_H
-#define COMBOBOX_H
+#ifndef ELIDEDCOMBOBOX_H
+#define ELIDEDCOMBOBOX_H
 
 #include <QComboBox>
 
 
-class ComboBox : public QComboBox
+class ElidedComboBox : public QComboBox
 {
 
 public:
-    explicit ComboBox(QWidget* parent = 0);
+    explicit ElidedComboBox(QWidget* parent = 0);
 
 protected:
     virtual void paintEvent(QPaintEvent* e);
 };
 
-#endif // COMBOBOX_H
+#endif // ELIDEDCOMBOBOX_H

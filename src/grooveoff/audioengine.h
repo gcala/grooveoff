@@ -25,14 +25,12 @@
 #include <QObject>
 #include <phonon/MediaObject>
 #include <phonon/AudioOutput>
+#include <phonon/AudioDataOutput>
 
 class AudioEngine : public QObject
 {
     Q_OBJECT
 public:
-    enum AudioState { Stopped = 0, Playing = 1, Paused = 2, Error = 3, Loading = 4 };
-    enum AudioErrorCode { StreamReadError, AudioDeviceError, DecodeError, UnknownError, NoError };
-
     static AudioEngine * instance();
     ~AudioEngine();
 
@@ -59,10 +57,8 @@ public:
     bool canSeek();
     void seek( qint64 ms );
     void seek( int ms ); // for compatibility with seekbar in audiocontrols
-//     void setVolume( int percentage );
 //     void lowerVolume();
 //     void raiseVolume();
-//     void mute();
     void playItem(PlaylistItemPtr track);
     void removingTrack(PlaylistItemPtr track);
 //     void setPlaylist();
@@ -91,7 +87,7 @@ signals:
     void controlStateChanged();
 //    void stateChanged( AudioState newState, AudioState oldState );
     void stateChanged( Phonon::State, Phonon::State );
-//    void volumeChanged( int volume /* in percent */ );
+    void volumeChanged( int volume /* in percent */ );
 
     void timerMilliSeconds( qint64 msElapsed );
     void timerSeconds( unsigned int secondsElapsed );
@@ -100,7 +96,6 @@ signals:
     void playlistChanged();
     void currentTrackPlaylistChanged();
 
-    void error( AudioEngine::AudioErrorCode errorCode );
     void removedPlayingTrack();
 
 private slots:
@@ -108,18 +103,22 @@ private slots:
     void onStateChanged( Phonon::State newState, Phonon::State oldState );
     void sourceChanged(Phonon::MediaSource);
     void onFinished();
+    void onVolumeChanged( qreal volume );
+    void setVolume( int percentage );
+    void setMuted(bool);
 
 private:
     static bool instanceFlag;
     static AudioEngine *audioEngine;
     AudioEngine();
 
-    Phonon::MediaObject *mediaObject_;
-    Phonon::MediaObject *metaInformationResolver_;
-    Phonon::AudioOutput *audioOutput_;
     PlaylistItemPtr currentTrack_;
     PlaylistItemPtr oldTrack_;
     Phonon::State state_;
+
+    Phonon::MediaObject* mediaObject_;
+    Phonon::AudioOutput* audioOutput_;
+    Phonon::Path audioPath_;
 };
 
 #endif // AUDIOENGINE_H

@@ -70,6 +70,9 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     virtual ~MainWindow();
 
+protected:
+        virtual void changeEvent( QEvent *event );
+
 private slots:
     void selectFolder();
     void downloadRequest(PlaylistItemPtr playlistItem);

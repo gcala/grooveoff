@@ -1,25 +1,34 @@
-set(grooveoff_SRCS actioncollection.cpp
+set(grooveoff_SRCS app.cpp
+                   actioncollection.cpp
                    aboutdialog.cpp
                    audioengine.cpp
-                   combobox.cpp
                    configdialog.cpp
                    coverdownloader.cpp
                    covermanager.cpp
                    downloaditem.cpp
                    downloadlist.cpp
-                   elidedlabel.cpp
                    filterproxymodel.cpp
                    mainwindow.cpp
-                   playanimationwidget.cpp
                    playerwidget.cpp
                    playlist.cpp
                    playlistitem.cpp
-                   qled.cpp
                    matchitem.cpp
                    settingsitem.cpp
-                   timerbutton.cpp
-                   timerlabel.cpp
                    utility.cpp
+                   svghandler.cpp
+                   svgtinter.cpp
+                   PaletteHandler.cpp
+                   widgets/elidedcombobox.cpp
+                   widgets/playanimationwidget.cpp
+                   widgets/qled.cpp
+                   widgets/elidedlabel.cpp
+                   widgets/timerbutton.cpp
+                   widgets/timerlabel.cpp
+                   widgets/volumedial.cpp
+                   widgets/iconbutton.cpp
+                   widgets/playpausebutton.cpp
+                   widgets/nextbutton.cpp
+                   widgets/previousbutton.cpp
                    dbus/mpris2.cpp
                    dbus/mpris_manager.cpp
                    ../libgrooveshark/apirequest.cpp
@@ -32,6 +41,9 @@ set(grooveoff_SRCS actioncollection.cpp
                    ../libgrooveshark/streamkey.cpp
                    ../libgrooveshark/downloader.cpp
                    ../libgrooveshark/mapbuilder.cpp)
+
+LIST(APPEND grooveoff_SRCS ${THIRDPARTY_DIR}/QtSingleApplication/qtsingleapplication.cpp
+                           ${THIRDPARTY_DIR}/QtSingleApplication/qtlocalpeer.cpp)
 
 set(grooveoff_RCS ${CMAKE_SOURCE_DIR}/grooveoff.qrc)
 
@@ -52,7 +64,8 @@ if( Qt5Core_DIR )
                     ${Qt5Svg_INCLUDE_DIRS}
                     ${PHONON4QT5_INCLUDES}
                     ${CMAKE_CURRENT_BINARY_DIR}
-                    ${CMAKE_CURRENT_SOURCE_DIR})
+                    ${CMAKE_CURRENT_SOURCE_DIR}
+                    ${THIRDPARTY_DIR}/QtSingleApplication)
 
     qt5_add_resources(grooveoff_RC_SRCS ${grooveoff_RCS} )
     qt5_wrap_ui(grooveoff_UI_HEADERS ${grooveoff_UI})
@@ -63,7 +76,8 @@ if( NOT Qt5Core_DIR )
                     ${PHONON_INCLUDES}
                     ${QJSON_INCLUDE_DIR}
                     ${CMAKE_CURRENT_BINARY_DIR}
-                    ${CMAKE_CURRENT_SOURCE_DIR})
+                    ${CMAKE_CURRENT_SOURCE_DIR}
+                    ${THIRDPARTY_DIR}/QtSingleApplication)
     qt4_add_resources(grooveoff_RC_SRCS ${grooveoff_RCS} )
     qt4_wrap_ui(grooveoff_UI_HEADERS ${grooveoff_UI})
     qt4_add_translation(grooveoff_I18N ${TRANSLATIONS})
@@ -77,8 +91,11 @@ endif( NOT Qt5Core_DIR )
 
 add_executable(grooveoff main.cpp ${grooveoff_SRCS} ${grooveoff_RC_SRCS} ${grooveoff_UI_HEADERS} ${grooveoff_I18N})
 
+LIST(APPEND LINK_LIBRARIES ${LINK_LIBRARIES} grooveoff_qtsingleapplication )
+
 if( Qt5Core_DIR )
 target_link_libraries(grooveoff
+                      ${LINK_LIBRARIES}
                       ${Qt5Core_LIBRARIES}
                       ${Qt5Widgets_LIBRARIES}
                       ${Qt5Network_LIBRARIES}
@@ -89,6 +106,7 @@ target_link_libraries(grooveoff
 endif( Qt5Core_DIR )
 if( NOT Qt5Core_DIR )
 target_link_libraries(grooveoff
+                      ${LINK_LIBRARIES}
                       ${QT_QTCORE_LIBRARY}
                       ${QT_QTGUI_LIBRARY}
                       ${QT_QTNETWORK_LIBRARY}

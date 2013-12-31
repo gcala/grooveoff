@@ -43,17 +43,13 @@ AudioEngine* AudioEngine::instance()
 
 AudioEngine::AudioEngine()
 {
-    qRegisterMetaType< AudioErrorCode >("AudioErrorCode");
-    qRegisterMetaType< AudioState >("AudioState");
-
     // The media object knows how to playback multimedia
     mediaObject_ = new Phonon::MediaObject( this );
 
     // The AudioOutput class is used to send data to audio output devices
     audioOutput_ = new Phonon::AudioOutput(Phonon::MusicCategory, this);
 
-    // Get the meta information from the music files
-    metaInformationResolver_ = new Phonon::MediaObject(this);
+    audioPath_ = Phonon::createPath( mediaObject_, audioOutput_ );
 
     // Supply with the MediaObject object seekSlider should control
 //    ui_->seekSlider->setMediaObject(mediaObject_);
@@ -72,6 +68,11 @@ AudioEngine::AudioEngine()
     connect( mediaObject_, SIGNAL( finished() ), SLOT( onFinished() ) );
     connect(mediaObject_, SIGNAL(currentSourceChanged(Phonon::MediaSource)),
             this, SLOT(sourceChanged(Phonon::MediaSource)));
+    connect( audioOutput_, SIGNAL( volumeChanged( qreal ) ), SLOT( onVolumeChanged( qreal ) ) );
+
+    onVolumeChanged( audioOutput_->volume() );
+
+    setVolume( 50 );
 }
 
 AudioEngine::~AudioEngine()
@@ -283,4 +284,22 @@ void
 AudioEngine::seek( int ms )
 {
     seek( (qint64) ms );
+}
+
+void AudioEngine::setMuted(bool mute)
+{
+    if(mute)
+        setVolume( 0 );
+}
+
+void AudioEngine::setVolume( int percentage )
+{
+    percentage = qBound( 0, percentage, 100 );
+    audioOutput_->setVolume( (qreal)percentage / 100.0 );
+    emit volumeChanged( percentage );
+}
+
+void AudioEngine::onVolumeChanged( qreal volume )
+{
+    emit volumeChanged( volume * 100 );
 }

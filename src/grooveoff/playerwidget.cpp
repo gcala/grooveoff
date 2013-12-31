@@ -60,6 +60,10 @@ PlayerWidget::PlayerWidget(QWidget *parent) :
             this, SLOT(reloadPreviousNextButtons()));
     connect(AudioEngine::instance(), SIGNAL(removedPlayingTrack()),
             this, SLOT(removedPlayingTrack()));
+
+//    connect( AudioEngine::instance(), SIGNAL(volumeChanged(int)), ui_->volume, SLOT(setValue(int)) );
+    connect( ui_->volume, SIGNAL(valueChanged(int)), AudioEngine::instance(), SLOT(setVolume(int)) );
+    connect( ui_->volume, SIGNAL(muteToggled(bool)), AudioEngine::instance(), SLOT(setMuted(bool)) );
 }
 
 /*!
@@ -78,7 +82,7 @@ void PlayerWidget::setupUi()
 {
     QGraphicsDropShadowEffect *coverShadow = new QGraphicsDropShadowEffect(this);
     coverShadow->setBlurRadius(10.0);
-    coverShadow->setColor(palette().color(QPalette::Shadow));
+    coverShadow->setColor(palette().color(QPalette::Highlight));
     coverShadow->setOffset(0.0);
 
     ui_->coverLabel->setWindowFlags(Qt::FramelessWindowHint);
@@ -91,37 +95,15 @@ void PlayerWidget::setupUi()
     ui_->stackedWidget->setBackgroundRole(QPalette::Base);
     ui_->messageLabel->setFont(Utility::font(QFont::Bold,1));
 
-    ui_->previousButton->setIcon(QIcon::fromTheme(QLatin1String("media-seek-backward"),
-                                 QIcon(QLatin1String(":/resources/media-seek-backward.png"))));
-    ui_->previousButton->setFlat(true);
-    ui_->previousButton->setStyleSheet("border: none; outline: none;");
-    ui_->previousButton->setToolTip(trUtf8("Play Previous"));
-    ui_->previousButton->setFixedSize(QSize(16,16));
-    ui_->previousButton->setIconSize(QSize(16,16));
-    ui_->previousButton->setEnabled(false);
-    connect(ui_->previousButton, SIGNAL(clicked(bool)), this, SLOT(playPrevious()));
+    ui_->previousButton->setButtonEnabled(false);
+    connect(ui_->previousButton, SIGNAL(previousButtonClicked()), this, SLOT(playPrevious()));
 
-    ui_->playPauseButton->setIcon(QIcon::fromTheme(QLatin1String("media-playback-start"),
-                                  QIcon(QLatin1String(":/resources/media-playback-start.png"))));
-    ui_->playPauseButton->setFlat(true);
-    ui_->playPauseButton->setStyleSheet("border: none; outline: none;");
-    ui_->playPauseButton->setToolTip(trUtf8("Play"));
-    ui_->playPauseButton->setFixedSize(QSize(32,32));
-    ui_->playPauseButton->setIconSize(QSize(32,32));
-    ui_->playPauseButton->setEnabled(false);
-    connect(ui_->playPauseButton, SIGNAL(clicked(bool)),
-            this, SLOT(pauseResumePlaying()));
+    ui_->playPauseButton->setButtonEnabled(false);
+    ui_->playPauseButton->setPlaying(false);
+    connect(ui_->playPauseButton, SIGNAL(playButtonClicked()), this, SLOT(pauseResumePlaying()));
 
-    ui_->nextButton->setIcon(QIcon::fromTheme(QLatin1String("media-seek-forward"),
-                             QIcon(QLatin1String(":/resources/media-seek-forward.png"))));
-    ui_->nextButton->setFlat(true);
-    ui_->nextButton->setStyleSheet("border: none; outline: none;");
-    ui_->nextButton->setToolTip(trUtf8("Play Next"));
-    ui_->nextButton->setFixedSize(QSize(16,16));
-    ui_->nextButton->setIconSize(QSize(16,16));
-    ui_->nextButton->setEnabled(false);
-    connect(ui_->nextButton, SIGNAL(clicked(bool)),
-            this, SLOT(playNext()));
+    ui_->nextButton->setButtonEnabled(false);
+    connect(ui_->nextButton, SIGNAL(nextButtonClicked()), this, SLOT(playNext()));
 
     ui_->timeLabel->setText("00:00");
     ui_->timeLabel->setMinimumSize(QSize(50,0));
@@ -130,6 +112,9 @@ void PlayerWidget::setupUi()
     ui_->elapsedTimeLabel->setText("00:00");
     ui_->elapsedTimeLabel->setMinimumSize(QSize(50,0));
     ui_->elapsedTimeLabel->setFont(Utility::monoFont());
+
+    ui_->volume->setFixedSize(QSize(48,48));
+    ui_->volume->setValue(50);
 }
 
 /*!
@@ -155,30 +140,29 @@ void PlayerWidget::stateChanged(Phonon::State newState, Phonon::State oldState)
     switch (newState) {
     case Phonon::ErrorState:
         ui_->stackedWidget->setCurrentIndex(0);
+        ui_->playPauseButton->setPlaying(false);
         break;
     case Phonon::PlayingState:
         playedRemoved = false;
         ui_->stackedWidget->setCurrentIndex(1);
-        ui_->playPauseButton->setEnabled(true);
-        ui_->playPauseButton->setIcon(QIcon::fromTheme(QLatin1String("media-playback-pause"),
-                                      QIcon(QLatin1String(":/resources/media-playback-pause.png"))));
+        ui_->playPauseButton->setButtonEnabled(true);
+        ui_->playPauseButton->setPlaying(true);
         break;
     case Phonon::StoppedState:
         if(playedRemoved)
             ui_->stackedWidget->setCurrentIndex(0);
         else
             ui_->stackedWidget->setCurrentIndex(1);
-        if(playedRemoved)
-            ui_->playPauseButton->setEnabled(false);
-        ui_->playPauseButton->setIcon(QIcon::fromTheme(QLatin1String("media-playback-start"),
-                                      QIcon(QLatin1String(":/resources/media-playback-start.png"))));
+        if(playedRemoved) {
+            ui_->playPauseButton->setButtonEnabled(false);
+        }
+        ui_->playPauseButton->setPlaying(false);
         ui_->timeLabel->setText("00:00");
         ui_->elapsedTimeLabel->setText("00:00");
         break;
     case Phonon::PausedState:
         ui_->stackedWidget->setCurrentIndex(1);
-        ui_->playPauseButton->setIcon(QIcon::fromTheme(QLatin1String("media-playback-start"),
-                                      QIcon(QLatin1String(":/resources/media-playback-start.png"))));
+        ui_->playPauseButton->setPlaying(false);
         break;
     default:
         /* do nothing */
@@ -275,8 +259,9 @@ void PlayerWidget::reloadPreviousNextButtons()
 {
     if(Playlist::instance()->count() == 0)
         ui_->stackedWidget->setCurrentIndex(0);
-    ui_->previousButton->setEnabled(AudioEngine::instance()->canGoPrevious());
-    ui_->nextButton->setEnabled(AudioEngine::instance()->canGoNext());
+
+    ui_->nextButton->setButtonEnabled(AudioEngine::instance()->canGoNext());
+    ui_->previousButton->setButtonEnabled(AudioEngine::instance()->canGoPrevious());
 }
 
 void PlayerWidget::removedPlayingTrack()

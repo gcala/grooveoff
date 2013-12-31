@@ -155,7 +155,7 @@
         </widget>
        </item>
        <item>
-        <widget class="ComboBox" name="artistsCB">
+        <widget class="ElidedComboBox" name="artistsCB">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -174,7 +174,7 @@
         </widget>
        </item>
        <item>
-        <widget class="ComboBox" name="albumsCB">
+        <widget class="ElidedComboBox" name="albumsCB">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -233,13 +233,13 @@
   <customwidget>
    <class>QLed</class>
    <extends>QWidget</extends>
-   <header location="global">qled.h</header>
+   <header location="global">widgets/qled.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>ComboBox</class>
+   <class>ElidedComboBox</class>
    <extends>QComboBox</extends>
-   <header location="global">combobox.h</header>
+   <header location="global">widgets/elidedcombobox.h</header>
   </customwidget>
   <customwidget>
    <class>DownloadList</class>

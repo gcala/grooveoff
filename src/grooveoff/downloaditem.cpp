@@ -18,7 +18,7 @@
 
 
 #include "downloaditem.h"
-#include "timerbutton.h"
+#include "widgets/timerbutton.h"
 #include "utility.h"
 #include "ui_downloaditem.h"
 #include <../libgrooveshark/apirequest.h>

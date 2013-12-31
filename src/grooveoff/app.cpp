@@ -29,7 +29,7 @@ App::App( int & argc, char ** argv):
 
     if(isRunning())
         return;
-    
+
     QCoreApplication::setOrganizationName(QLatin1String("gcala"));
     QCoreApplication::setOrganizationDomain(QLatin1String("gcala.blogger.com"));
     setApplicationName(QLatin1String("grooveoff"));

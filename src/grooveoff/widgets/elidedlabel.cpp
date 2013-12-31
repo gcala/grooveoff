@@ -30,7 +30,7 @@ ElidedLabel::ElidedLabel(QWidget* parent, Qt::WindowFlags f):
     setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
 //     QGraphicsDropShadowEffect *shadow = new QGraphicsDropShadowEffect(this);
 //     shadow->setBlurRadius(20.0);
-//     shadow->setColor(palette().color(QPalette::Mid));
+//     shadow->setColor(palette().color(QPalette::Highlight));
 //     shadow->setOffset(0.0);
 //     setGraphicsEffect(shadow);
 }
