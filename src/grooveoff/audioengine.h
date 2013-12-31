@@ -68,6 +68,20 @@ public:
 //     void setShuffled( bool enabled );
     Phonon::MediaObject * mediaObject() { return mediaObject_; }
 
+    /**
+     * @return @c true if sound output is disabled, @false otherwise
+     */
+    bool isMuted() const;
+
+    /**
+     * Gets the volume
+     * @return the volume as a percentage
+     */
+    int volume() const;
+
+public slots:
+    void setVolume( int percentage );
+
 signals:
     void loading();
     void started();
@@ -98,14 +112,26 @@ signals:
 
     void removedPlayingTrack();
 
+    /**
+     * Called when audio output was enabled or disabled
+     *
+     * NB: if setMute() was called on the engine controller, but it didn't change the
+     * mute state, this will not be called
+     */
+    void muteStateChanged( bool mute );
+
 private slots:
     void timerTriggered( qint64 time );
     void onStateChanged( Phonon::State newState, Phonon::State oldState );
     void sourceChanged(Phonon::MediaSource);
     void onFinished();
-    void onVolumeChanged( qreal volume );
-    void setVolume( int percentage );
     void setMuted(bool);
+
+    /**
+     * For volume/mute changes from the phonon side
+     */
+    void onVolumeChanged( qreal volume );
+    void slotMutedChanged( bool );
 
 private:
     static bool instanceFlag;
@@ -119,6 +145,8 @@ private:
     Phonon::MediaObject* mediaObject_;
     Phonon::AudioOutput* audioOutput_;
     Phonon::Path audioPath_;
+
+    int m_volume;
 };
 
 #endif // AUDIOENGINE_H

@@ -41,7 +41,7 @@ Mpris2::Mpris2(QObject* parent)  : QObject(parent)
     dbus.registerService( "org.mpris.MediaPlayer2.grooveoff" );
 
     // Listen to volume changes
-//    connect(AudioEngine::instance(), SIGNAL( volumeChanged() ), SLOT( slot_onVolumeChanged() ) );
+    connect(AudioEngine::instance(), SIGNAL( volumeChanged( int ) ), SLOT( onVolumeChanged( int ) ) );
     connect(AudioEngine::instance(), SIGNAL(stateChanged(Phonon::State, Phonon::State)), SLOT(engineStateChanged(Phonon::State, Phonon::State)));
     connect(AudioEngine::instance(), SIGNAL(sourceChanged()), SLOT(slot_engineMediaChanged()));
     connect(AudioEngine::instance(), SIGNAL( seeked( qint64 ) ),SLOT( onSeeked( qint64 ) ) );
@@ -288,16 +288,16 @@ void Mpris2::setRate( double value )
 // }
 
 
-// double Mpris2::volume() const
-// {
-//     return (Engine::instance()->volume() / 100);
-// }
+double Mpris2::volume() const
+{
+    return (AudioEngine::instance()->volume());
+}
 
 
-// void Mpris2::setVolume( double value )
-// {
-//     Engine::instance()->setVolume(value * 100);
-// }
+void Mpris2::setVolume( double value )
+{
+    AudioEngine::instance()->setVolume(value * 100);
+}
 
 
 void Mpris2::Next()
@@ -379,10 +379,10 @@ void Mpris2::Stop()
 }
 
 
-// void Mpris2::slot_onVolumeChanged(  )
-// {
-//     EmitNotification("Volume");
-// }
+void Mpris2::onVolumeChanged( int  )
+{
+    notifyPropertyChanged("Volume");
+}
 
 void Mpris2::engineStateChanged(Phonon::State newState, Phonon::State oldState)
 {

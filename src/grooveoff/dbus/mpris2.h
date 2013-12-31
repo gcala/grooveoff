@@ -107,9 +107,9 @@ public:
 //     bool shuffle() const;
 //     void setShuffle( bool value );
 
-//     Q_PROPERTY( double Volume READ volume WRITE setVolume )
-//     double volume() const;
-//     void setVolume( double value );
+    Q_PROPERTY( double Volume READ volume WRITE setVolume )
+    double volume() const;
+    void setVolume( double value );
 
 public slots:
 
@@ -130,7 +130,7 @@ public slots:
 
 
 private slots:
-//     void slot_onVolumeChanged();
+    void onVolumeChanged(int);
     void engineStateChanged(Phonon::State, Phonon::State);
     void slot_engineMediaChanged();
     void onSeeked( qint64 );

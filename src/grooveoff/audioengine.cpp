@@ -42,6 +42,7 @@ AudioEngine* AudioEngine::instance()
 }
 
 AudioEngine::AudioEngine()
+    : m_volume( 0 )
 {
     // The media object knows how to playback multimedia
     mediaObject_ = new Phonon::MediaObject( this );
@@ -69,8 +70,10 @@ AudioEngine::AudioEngine()
     connect(mediaObject_, SIGNAL(currentSourceChanged(Phonon::MediaSource)),
             this, SLOT(sourceChanged(Phonon::MediaSource)));
     connect( audioOutput_, SIGNAL( volumeChanged( qreal ) ), SLOT( onVolumeChanged( qreal ) ) );
+    connect( audioOutput_, SIGNAL(mutedChanged(bool)), SLOT(slotMutedChanged(bool)) );
 
-    onVolumeChanged( audioOutput_->volume() );
+    // Read the volume from phonon
+    m_volume = qBound<qreal>( 0, qRound(audioOutput_->volume()*100), 100 );
 
     setVolume( 50 );
 }
@@ -288,18 +291,45 @@ AudioEngine::seek( int ms )
 
 void AudioEngine::setMuted(bool mute)
 {
-    if(mute)
-        setVolume( 0 );
+    audioOutput_->setMuted(mute);
+    if( !isMuted() )
+        setVolume( m_volume );
+    emit muteStateChanged( mute );
 }
 
 void AudioEngine::setVolume( int percentage )
 {
     percentage = qBound( 0, percentage, 100 );
-    audioOutput_->setVolume( (qreal)percentage / 100.0 );
-    emit volumeChanged( percentage );
+    m_volume = percentage;
+    const qreal volume =  percentage / 100.0;
+
+    if ( audioOutput_->volume() != volume )
+    {
+        audioOutput_->setVolume( volume );
+        emit volumeChanged( percentage );
+    }
 }
 
 void AudioEngine::onVolumeChanged( qreal volume )
 {
-    emit volumeChanged( volume * 100 );
+    int percent = qBound<qreal>( 0, qRound(volume * 100), 100 );
+    if ( m_volume != percent )
+        emit volumeChanged( percent );
+    m_volume = percent;
+}
+
+void AudioEngine::slotMutedChanged(bool mute)
+{
+    emit muteStateChanged( mute );
+}
+
+
+bool AudioEngine::isMuted() const
+{
+    return audioOutput_->isMuted();
+}
+
+int AudioEngine::volume() const
+{
+    return m_volume;
 }

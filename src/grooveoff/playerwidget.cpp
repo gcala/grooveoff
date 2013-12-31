@@ -61,9 +61,10 @@ PlayerWidget::PlayerWidget(QWidget *parent) :
     connect(AudioEngine::instance(), SIGNAL(removedPlayingTrack()),
             this, SLOT(removedPlayingTrack()));
 
-//    connect( AudioEngine::instance(), SIGNAL(volumeChanged(int)), ui_->volume, SLOT(setValue(int)) );
+    connect( AudioEngine::instance(), SIGNAL(volumeChanged(int)), ui_->volume, SLOT(setValue(int)) );
     connect( ui_->volume, SIGNAL(valueChanged(int)), AudioEngine::instance(), SLOT(setVolume(int)) );
     connect( ui_->volume, SIGNAL(muteToggled(bool)), AudioEngine::instance(), SLOT(setMuted(bool)) );
+    connect( AudioEngine::instance(), SIGNAL(muteStateChanged(bool)), this, SLOT(muteStateChanged(bool)) );
 }
 
 /*!
@@ -272,5 +273,10 @@ void PlayerWidget::removedPlayingTrack()
 void PlayerWidget::switchPage()
 {
     ui_->stackedWidget->setCurrentIndex(1);
+}
+
+void PlayerWidget::muteStateChanged(bool mute)
+{
+    ui_->volume->setMuted(mute);
 }
 

@@ -62,6 +62,7 @@ private slots:
     void playNext();
     void removedPlayingTrack();
     void switchPage();
+    void muteStateChanged( bool mute );
 
 private:
     Ui::PlayerWidget *ui_;
