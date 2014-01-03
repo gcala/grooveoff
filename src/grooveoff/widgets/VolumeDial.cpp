@@ -178,8 +178,6 @@ void VolumeDial::mouseReleaseEvent( QMouseEvent *me )
     if ( m_isClick )
     {
         m_isClick = !onRing( rect(), me->pos() );
-//         if ( m_isClick )
-//             emit muteToggled( !m_muted );
         if ( m_isClick ) {
             m_muted = !m_muted;
             emit muteToggled( m_muted );

@@ -1027,6 +1027,9 @@ void MainWindow::saveSession()
 
 void MainWindow::loadSession()
 {
+    // disable temporarily AutoScroll
+    ui_->downloadList->setAutoScroll(false);
+
     QFile sessionFile(sessionFile_);
     if(!sessionFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
         qDebug() << "GrooveOff ::" << "Unable to read session file" << sessionFile_;
@@ -1059,6 +1062,7 @@ void MainWindow::loadSession()
         addDownloadItem(items.at(i));
     }
 
+    ui_->downloadList->setAutoScroll(true);
 }
 
 void MainWindow::parsePlaylistItem(const QDomElement& element, PlaylistItemPtr item)
