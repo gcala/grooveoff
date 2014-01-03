@@ -16,10 +16,27 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "App.h"
 
-int main(int argc, char** argv)
+#ifndef FILTERPROXYMODEL_H
+#define FILTERPROXYMODEL_H
+
+#include <QSortFilterProxyModel>
+
+
+class FilterProxyModel : public QSortFilterProxyModel
 {
-    App app(argc, argv);
-    return app.exec();
-}
+
+public:
+    explicit FilterProxyModel(QObject* parent = 0);
+
+    void setMatchTerms(const QString &, const QString &);
+
+protected:
+    virtual bool filterAcceptsRow(int source_row, const QModelIndex& source_parent) const;
+
+private:
+    QString artist_;
+    QString album_;
+};
+
+#endif // FILTERPROXYMODEL_H

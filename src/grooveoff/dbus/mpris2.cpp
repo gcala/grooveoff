@@ -21,10 +21,10 @@
 #include "mpris2Player.h"
 #include "mpris2Root.h"
 
-#include "../audioengine.h"
-#include "../playlistitem.h"
-#include "../utility.h"
-#include "../playlist.h"
+#include "../AudioEngine.h"
+#include "../PlaylistItem.h"
+#include "../Utility.h"
+#include "../Playlist.h"
 
 #include <QApplication>
 #include <QImage>

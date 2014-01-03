@@ -16,10 +16,31 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "App.h"
+#ifndef COVERMANAGER_H
+#define COVERMANAGER_H
 
-int main(int argc, char** argv)
+#include "PlaylistItem.h"
+
+#include <QObject>
+#include <QHash>
+#include <QSharedPointer>
+
+class CoverManager :  public QObject
 {
-    App app(argc, argv);
-    return app.exec();
-}
+    Q_OBJECT
+public:
+    explicit CoverManager(QObject *parent = 0);
+    void addItem(const PlaylistItemPtr &);
+    void clear();
+
+signals:
+    void coverDownloaded();
+
+public slots:
+    void setCover();
+
+private:
+    QHash< QString, QList< PlaylistItemPtr > > coverItems_;
+};
+
+#endif // COVERMANAGER_H

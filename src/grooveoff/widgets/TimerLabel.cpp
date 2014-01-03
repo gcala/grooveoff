@@ -16,10 +16,25 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "App.h"
 
-int main(int argc, char** argv)
+#include "TimerLabel.h"
+
+#include <QPainter>
+
+TimerLabel::TimerLabel(QWidget *parent) :
+    QLabel(parent)
 {
-    App app(argc, argv);
-    return app.exec();
+
 }
+
+TimerLabel::~TimerLabel()
+{
+
+}
+
+void TimerLabel::mousePressEvent( QMouseEvent * event )
+{
+    Q_UNUSED(event)
+    emit clicked();
+}
+

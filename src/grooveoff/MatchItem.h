@@ -16,10 +16,47 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "App.h"
 
-int main(int argc, char** argv)
-{
-    App app(argc, argv);
-    return app.exec();
+#ifndef MATCHITEM_H
+#define MATCHITEM_H
+
+#include "PlaylistItem.h"
+
+#include <QWidget>
+
+
+namespace Ui {
+class MatchItem;
 }
+
+class QLabel;
+class QPushButton;
+
+class MatchItem : public QWidget
+{
+    Q_OBJECT
+
+public:
+    MatchItem(const PlaylistItemPtr &playlistItem, QWidget *parent = 0);
+    virtual ~MatchItem();
+
+    const PlaylistItemPtr playlistItem() { return playlistItem_; }
+
+signals:
+    void download(PlaylistItemPtr);
+
+public slots:
+    void setDownloadIcon();
+
+private slots:
+    void loadCover();
+    void downloadSlot();
+
+private:
+    Ui::MatchItem *ui_;
+    PlaylistItemPtr playlistItem_;
+
+    void setupUi();
+};
+
+#endif // MATCHITEM_H

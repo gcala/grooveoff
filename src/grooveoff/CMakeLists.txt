@@ -1,34 +1,34 @@
-set(grooveoff_SRCS app.cpp
-                   actioncollection.cpp
-                   aboutdialog.cpp
-                   audioengine.cpp
-                   configdialog.cpp
-                   coverdownloader.cpp
-                   covermanager.cpp
-                   downloaditem.cpp
-                   downloadlist.cpp
-                   filterproxymodel.cpp
-                   mainwindow.cpp
-                   playerwidget.cpp
-                   playlist.cpp
-                   playlistitem.cpp
-                   matchitem.cpp
-                   settingsitem.cpp
-                   utility.cpp
-                   svghandler.cpp
-                   svgtinter.cpp
+set(grooveoff_SRCS App.cpp
+                   ActionCollection.cpp
+                   AboutDialog.cpp
+                   AudioEngine.cpp
+                   ConfigDialog.cpp
+                   CoverDownloader.cpp
+                   CoverManager.cpp
+                   DownloadItem.cpp
+                   DownloadList.cpp
+                   FilterProxyModel.cpp
+                   MainWindow.cpp
+                   PlayerWidget.cpp
+                   Playlist.cpp
+                   PlaylistItem.cpp
+                   MatchItem.cpp
+                   SettingsItem.cpp
+                   Utility.cpp
+                   SvgHandler.cpp
+                   SvgTinter.cpp
                    PaletteHandler.cpp
-                   widgets/elidedcombobox.cpp
-                   widgets/playanimationwidget.cpp
-                   widgets/qled.cpp
-                   widgets/elidedlabel.cpp
-                   widgets/timerbutton.cpp
-                   widgets/timerlabel.cpp
-                   widgets/volumedial.cpp
-                   widgets/iconbutton.cpp
-                   widgets/playpausebutton.cpp
-                   widgets/nextbutton.cpp
-                   widgets/previousbutton.cpp
+                   widgets/ElidedComboBox.cpp
+                   widgets/PlayAnimationWidget.cpp
+                   widgets/QLed.cpp
+                   widgets/ElidedLabel.cpp
+                   widgets/TimerButton.cpp
+                   widgets/TimerLabel.cpp
+                   widgets/VolumeDial.cpp
+                   widgets/IconButton.cpp
+                   widgets/PlayPauseButton.cpp
+                   widgets/NextButton.cpp
+                   widgets/PreviousButton.cpp
                    dbus/mpris2.cpp
                    dbus/mpris_manager.cpp
                    ../libgrooveshark/apirequest.cpp
@@ -48,13 +48,13 @@ LIST(APPEND grooveoff_SRCS ${THIRDPARTY_DIR}/QtSingleApplication/qtsingleapplica
 set(grooveoff_RCS ${CMAKE_SOURCE_DIR}/grooveoff.qrc)
 
 # use ui files
-set(grooveoff_UI downloaditem.ui
-                 playerwidget.ui
-                 mainwindow.ui
-                 configdialog.ui
-                 settingsitem.ui
-                 aboutdialog.ui
-                 matchitem.ui)
+set(grooveoff_UI DownloadItem.ui
+                 PlayerWidget.ui
+                 MainWindow.ui
+                 ConfigDialog.ui
+                 SettingsItem.ui
+                 AboutDialog.ui
+                 MatchItem.ui)
 
 if( Qt5Core_DIR )
     include_directories(${Qt5Core_INCLUDE_DIRS}
