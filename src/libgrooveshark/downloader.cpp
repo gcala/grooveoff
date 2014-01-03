@@ -69,7 +69,7 @@ void DownloaderPrivate::streamKeyFinished()
             this, SLOT(onFinished(QNetworkReply*)));
 
     file_ = new QFile;
-    file_->setFileName(m_path + QDir::separator() + m_fileName + ".mp3");
+    file_->setFileName(m_path + QDir::separator() + m_fileName);
 
     file_->open(QIODevice::WriteOnly);
 
