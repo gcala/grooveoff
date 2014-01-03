@@ -108,26 +108,21 @@ MainWindow::MainWindow(QWidget *parent) :
     spinner_->setText(tr(""));
     spinner_->setType(Spinner::Sun);
 
-#if QT_VERSION < QT_VERSION_CHECK( 5, 0, 0 )
-    if(!QFile::exists(QDesktopServices::storageLocation(QDesktopServices::DataLocation).replace("/data",""))) {
+#if QT_VERSION >= QT_VERSION_CHECK( 5, 0, 0 )
+    if(!QFile::exists(QStandardPaths::writableLocation(QStandardPaths::CacheLocation))) {
         QDir dir;
-        dir.mkpath(QDesktopServices::storageLocation(QDesktopServices::DataLocation).replace("/data",""));
+        dir.mkpath(QStandardPaths::writableLocation(QStandardPaths::CacheLocation));
     }
 
-    Utility::coversCachePath = QDesktopServices::storageLocation(QDesktopServices::DataLocation).replace("/data","")
-                               + QDir::separator()
-                               + QLatin1String("cache/");
+    Utility::coversCachePath = QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QDir::separator();
 #else
-    if(!QFile::exists(QStandardPaths::writableLocation(QStandardPaths::DataLocation))) {
+    if(!QFile::exists(QDesktopServices::storageLocation(QDesktopServices::CacheLocation))) {
         QDir dir;
-        dir.mkpath(QStandardPaths::writableLocation(QStandardPaths::DataLocation));
+        dir.mkpath(QDesktopServices::storageLocation(QDesktopServices::CacheLocation));
     }
 
-    Utility::coversCachePath = QStandardPaths::writableLocation(QStandardPaths::DataLocation)
-                               + QDir::separator()
-                               + QLatin1String("cache/");
+    Utility::coversCachePath = QDesktopServices::storageLocation(QDesktopServices::CacheLocation) + QDir::separator();
 #endif
-
 
     nam_ = new QNetworkAccessManager(this);
     api_ = ApiRequest::instance();
@@ -182,8 +177,6 @@ MainWindow::MainWindow(QWidget *parent) :
         ui_->pathLine->setText(QStandardPaths::writableLocation(QStandardPaths::MusicLocation));
     }
 #endif
-
-    Utility::downloadPath = ui_->pathLine->text();
 
     setGeometry(settings.value(QLatin1String("windowGeometry"), QRect(100,100,350,600)).toRect());
 
@@ -370,7 +363,6 @@ void MainWindow::selectFolder()
     if(QFile::exists(dir))
         ui_->pathLine->setText(dir);
 
-    Utility::downloadPath = ui_->pathLine->text();
     reloadItemsDownloadButtons();
 }
 
@@ -633,7 +625,7 @@ void MainWindow::downloadRequest(PlaylistItemPtr playlistItem)
         }
     }
 
-    playlistItem->setPath(ui_->pathLine->text());
+    playlistItem->setPath(ui_->pathLine->text() + "/");
 
     addDownloadItem(playlistItem);
 }

@@ -225,14 +225,14 @@ QVariantMap Mpris2::metadata() const
          * which contains a string that uniquely identifies this track within the scope of the tracklist.*/
         metadataMap.insert( "mpris:trackid", QVariant::fromValue(QDBusObjectPath(QString( "/track/" ) + QString::number(track->song()->songID()))));
 
-        metadataMap.insert( "xesam:url",    track->path() + "/" + track->fileName() );
+        metadataMap.insert( "xesam:url",    track->path() + track->fileName() );
         metadataMap.insert( "xesam:album",  track->song()->albumName() );
         metadataMap.insert( "xesam:artist", track->song()->artistName() );
         metadataMap.insert( "xesam:title",  track->song()->songName() );
         metadataMap.insert( "xesam:genre",  track->song()->genreID() );
         metadataMap.insert( "mpris:length", static_cast<qlonglong>(The::audioEngine()->currentTrackTotalTime()) * 1000000 );
 
-        const QString coverpath = "/home/gcala/.local/share/gcala/grooveoff/cache/" + track->song()->coverArtFilename();
+        const QString coverpath = Utility::coversCachePath + track->song()->coverArtFilename();
 
         //Debug::debug() << "coverpath = " << coverpath;
 

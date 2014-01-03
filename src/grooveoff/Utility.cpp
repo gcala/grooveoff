@@ -29,7 +29,6 @@ const int Utility::coverSize  = 40; // possible values are 40,50,70,80,90,120
 const int Utility::buttonSize = 24;
 const int Utility::marginSize = 5;
 QString Utility::coversCachePath = "";
-QString Utility::downloadPath = "";
 QString Utility::token = "";
 
 QString Utility::elidedText(const QString& text,

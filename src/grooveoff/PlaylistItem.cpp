@@ -61,7 +61,7 @@ void PlaylistItem::requireDownloadIconReload()
 
 QString PlaylistItem::path() const
 {
-    return path_ + "/";
+    return path_;
 }
 
 void PlaylistItem::setPath(const QString& path)

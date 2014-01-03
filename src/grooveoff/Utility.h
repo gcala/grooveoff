@@ -40,18 +40,13 @@ public:
     static const QByteArray userAgent;
     static const QLatin1String host;
     static QString coversCachePath;
-    static QString downloadPath;
     static QString token;
-    static QList<Phonon::MediaSource> audioSources;
-    static QList< PlaylistItemPtr > playlist;
 
     static QString elidedText(const QString &text, const Qt::TextElideMode &elideMode, const int &width, const QFont::Weight &weight);
 
     static QFont font(const QFont::Weight &weight = QFont::Normal, const int &delta = 0);
 
     static QFont monoFont(const QFont::Weight &weight = QFont::Normal, const int &delta = 0);
-
-//     static QString fileName(const GrooveShark::SongPtr &song);
 
     // from trojita Util.cpp
     static QColor tintColor(const QColor &color, const QColor &tintColor);

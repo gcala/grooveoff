@@ -94,7 +94,7 @@ void MatchItem::downloadSlot()
 
 void MatchItem::setDownloadIcon()
 {
-    if(QFile::exists(Utility::downloadPath + QDir::separator() + playlistItem_->song()->songName() + " - " + playlistItem_->song()->artistName() + ".mp3")) {
+    if(QFile::exists(playlistItem_->path() + playlistItem_->fileName())) {
         ui_->downloadButton->setIcon(QIcon::fromTheme(QLatin1String("view-refresh"),
                                      QIcon(QLatin1String(":/resources/view-refresh.png"))));
     } else {
