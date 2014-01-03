@@ -172,6 +172,22 @@
               </property>
              </widget>
             </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="groupBox_7">
+           <property name="title">
+            <string>MPris</string>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_10">
+            <item>
+             <widget class="QCheckBox" name="mpris">
+              <property name="text">
+               <string>Enable mpris remote interface</string>
+              </property>
+             </widget>
+            </item>
             <item>
              <spacer name="verticalSpacer">
               <property name="orientation">

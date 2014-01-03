@@ -96,7 +96,6 @@ MainWindow::MainWindow(QWidget *parent) :
     The::paletteHandler()->setPalette( palette() );
     playerWidget = new PlayerWidget(this);
     new ActionCollection(this);
-    m_mpris_manager   = new MprisManager(this);
     setupUi();
     setupMenus();
     setupSignals();
@@ -191,6 +190,9 @@ MainWindow::MainWindow(QWidget *parent) :
 #endif
     if(saveSession_)
         loadSession();
+
+    m_mpris_manager   = new MprisManager(this);
+    m_mpris_manager->reloadSettings();
 }
 
 /*!
@@ -777,7 +779,15 @@ void MainWindow::loadSettings()
 
     playerWidget->setTimerState((GrooveOff::TimerState)settings.value(QLatin1String("timerState"), GrooveOff::ElapsedState).toInt());
 
-    m_mpris_manager->reloadSettings();
+//     if(settings.value(QLatin1String("enableMpris"), false).toBool()) {
+//         if(m_mpris_manager == 0) {
+//             m_mpris_manager   = new MprisManager(this);
+//             m_mpris_manager->reloadSettings();
+//         }
+//     } else {
+//         if(m_mpris_manager)
+//             delete m_mpris_manager;
+//     }
 }
 
 /*!

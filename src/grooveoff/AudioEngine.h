@@ -63,13 +63,8 @@ public:
     bool canSeek();
     void seek( qint64 ms );
     void seek( int ms ); // for compatibility with seekbar in audiocontrols
-//     void lowerVolume();
-//     void raiseVolume();
     void playItem(PlaylistItemPtr track);
     void removingTrack(PlaylistItemPtr track);
-//     void setPlaylist();
-//     void setQueue();
-//     void setStopAfterTrack();
 //     void setRepeatMode();
 //     void setShuffled( bool enabled );
     Phonon::MediaObject * mediaObject() { return mediaObject_; }
@@ -106,7 +101,6 @@ signals:
     void shuffleModeChanged( bool enabled );
     void repeatModeChanged();
     void controlStateChanged();
-//    void stateChanged( AudioState newState, AudioState oldState );
     void stateChanged( Phonon::State, Phonon::State );
     void volumeChanged( int volume /* in percent */ );
 
