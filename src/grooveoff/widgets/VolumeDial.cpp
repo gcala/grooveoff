@@ -192,12 +192,12 @@ void VolumeDial::mouseReleaseEvent( QMouseEvent *me )
 
 void VolumeDial::paintEvent( QPaintEvent * )
 {
-    int offset = m_mouseOver ? 4 : 0;
+    int iconOffset = m_mouseOver ? 4 : 0;
     QPainter p( this );
     int icon = m_muted ? 0 : 3;
     if ( icon && value() < 66 )
         icon = value() < 33 ? 1 : 2;
-    icon += offset;
+    icon += iconOffset;
     p.drawPixmap( 0,0, m_icon[ icon ] );
     if ( !m_isClick )
     {
