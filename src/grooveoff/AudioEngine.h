@@ -87,6 +87,7 @@ public:
 
 public slots:
     void setVolume( int percentage );
+    void setMuted(bool);
 
 signals:
     void loading();
@@ -131,7 +132,6 @@ private slots:
     void onStateChanged( Phonon::State newState, Phonon::State oldState );
     void sourceChanged(Phonon::MediaSource);
     void onFinished();
-    void setMuted(bool);
 
     /**
      * For volume/mute changes from the phonon side

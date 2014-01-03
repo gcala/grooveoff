@@ -18,6 +18,8 @@
 
 
 #include "App.h"
+#include "AudioEngine.h"
+#include "Playlist.h"
 
 #include <QTextCodec>
 #include <QLibraryInfo>
@@ -76,6 +78,8 @@ App::App( int & argc, char ** argv):
 App::~App()
 {
     delete mainWindow();
+    delete The::audioEngine();
+    delete The::playlist();
 }
 
 void App::applySettings(bool firstTime)

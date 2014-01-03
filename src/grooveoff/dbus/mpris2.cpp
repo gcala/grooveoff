@@ -391,11 +391,12 @@ void Mpris2::engineStateChanged(Phonon::State newState, Phonon::State oldState)
       notifyPropertyChanged("Metadata");
     }
 
-    notifyPropertyChanged("PlaybackStatus");
-    notifyPropertyChanged("CanSeek");
-    notifyPropertyChanged("CanPause");
+    notifyPropertyChanged( "PlaybackStatus" );
+    notifyPropertyChanged( "CanSeek" );
+    notifyPropertyChanged( "CanPause" );
     notifyPropertyChanged( "CanGoNext" );
     notifyPropertyChanged( "CanGoPrevious" );
+    notifyPropertyChanged( "Volume" );
 }
 
 

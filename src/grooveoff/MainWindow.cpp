@@ -208,9 +208,6 @@ MainWindow::~MainWindow()
 
     saveSettings();
 
-    delete The::playlist();
-    delete The::audioEngine();
-
     delete api_;
 }
 
@@ -775,6 +772,9 @@ void MainWindow::loadSettings()
         ui_->splitter->setSizes(_sizes);
     }
 
+    The::audioEngine()->setVolume(settings.value(QLatin1String("volume"), 50).toInt());
+    The::audioEngine()->setMuted(settings.value(QLatin1String("muted"), false).toBool());
+
     playerWidget->setTimerState((GrooveOff::TimerState)settings.value(QLatin1String("timerState"), GrooveOff::ElapsedState).toInt());
 
     m_mpris_manager->reloadSettings();
@@ -802,6 +802,9 @@ void MainWindow::saveSettings()
         settings.setValue(QLatin1String("destination"), QString());
 
     settings.setValue(QLatin1String("timerState"), playerWidget->getTimerState());
+
+    settings.setValue(QLatin1String("muted"), The::audioEngine()->isMuted());
+    settings.setValue(QLatin1String("volume"), The::audioEngine()->volume());
 }
 
 /*!
