@@ -61,7 +61,7 @@ void PlaylistItem::requireDownloadIconReload()
 
 QString PlaylistItem::path() const
 {
-    return path_;
+    return path_ + "/";
 }
 
 void PlaylistItem::setPath(const QString& path)
@@ -81,7 +81,10 @@ void PlaylistItem::setSong(SongPtr song)
 
 QString PlaylistItem::fileName() const
 {
-    return Utility::fileName(song_) + ".mp3";
+    return song_->songName().replace('/','-')
+           + " - "
+           + song_->artistName().replace('/','-')
+           + ".mp3";
 }
 
 void PlaylistItem::setState(Phonon::State state)

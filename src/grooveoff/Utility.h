@@ -51,7 +51,7 @@ public:
 
     static QFont monoFont(const QFont::Weight &weight = QFont::Normal, const int &delta = 0);
 
-    static QString fileName(const GrooveShark::SongPtr &song);
+//     static QString fileName(const GrooveShark::SongPtr &song);
 
     // from trojita Util.cpp
     static QColor tintColor(const QColor &color, const QColor &tintColor);

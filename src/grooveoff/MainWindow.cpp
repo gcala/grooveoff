@@ -620,14 +620,14 @@ void MainWindow::downloadRequest(PlaylistItemPtr playlistItem)
         return;
 
     // check file existence
-    if(QFile::exists(ui_->pathLine->text() + QDir::separator() + Utility::fileName(playlistItem->song()) + ".mp3")) {
+    if(QFile::exists(ui_->pathLine->text() + QDir::separator() + playlistItem->fileName())) {
         int ret = QMessageBox::question(this,
                                         trUtf8("Overwrite File?"),
-                                        trUtf8("A file named \"%1\" already exists. Are you sure you want to overwrite it?").arg(Utility::fileName(playlistItem->song())),
+                                        trUtf8("A file named \"%1\" already exists. Are you sure you want to overwrite it?").arg(playlistItem->fileName()),
                                         QMessageBox::Yes | QMessageBox::Cancel,
                                         QMessageBox::Cancel);
         if(ret == QMessageBox::Yes) {
-            QFile::remove(ui_->pathLine->text() + QDir::separator() + Utility::fileName(playlistItem->song()) + ".mp3");
+            QFile::remove(ui_->pathLine->text() + QDir::separator() + playlistItem->fileName());
         } else {
             return;
         }
@@ -654,7 +654,7 @@ void MainWindow::addDownloadItem(PlaylistItemPtr playlistItem)
     connect(item, SIGNAL(downloadFinished()), this, SLOT(freeDownloadSlot()));
     connect(item, SIGNAL(addToQueue(DownloadItem*)), this, SLOT(addItemToQueue(DownloadItem*)));
 
-    if(!QFile::exists(playlistItem->path() + QDir::separator() + Utility::fileName(playlistItem->song()) + ".mp3")) {
+    if(!QFile::exists(playlistItem->path() + playlistItem->fileName())) {
         // check if download queue_ is full
         if(parallelDownloadsCount_ < maxDownloads_ && !token_->result().isEmpty()) {
             parallelDownloadsCount_++;

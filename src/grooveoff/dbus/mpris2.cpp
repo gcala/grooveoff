@@ -225,7 +225,7 @@ QVariantMap Mpris2::metadata() const
          * which contains a string that uniquely identifies this track within the scope of the tracklist.*/
         metadataMap.insert( "mpris:trackid", QVariant::fromValue(QDBusObjectPath(QString( "/track/" ) + QString::number(track->song()->songID()))));
 
-        metadataMap.insert( "xesam:url",    track->path() + "/" + Utility::fileName(track->song()) );
+        metadataMap.insert( "xesam:url",    track->path() + "/" + track->fileName() );
         metadataMap.insert( "xesam:album",  track->song()->albumName() );
         metadataMap.insert( "xesam:artist", track->song()->artistName() );
         metadataMap.insert( "xesam:title",  track->song()->songName() );

@@ -63,10 +63,10 @@ QFont Utility::monoFont(const QFont::Weight& weight, const int &delta)
     return systemFont;
 }
 
-QString Utility::fileName(const GrooveShark::SongPtr &song)
-{
-    return song->songName().replace('/','-') + " - " + song->artistName().replace('/','-');
-}
+// QString Utility::fileName(const GrooveShark::SongPtr &song)
+// {
+//     return song->songName().replace('/','-') + " - " + song->artistName().replace('/','-');
+// }
 
 
 /** @short Return the source color tinted with the tintColor

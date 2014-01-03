@@ -53,7 +53,7 @@ DownloadItem::DownloadItem(const PlaylistItemPtr &playlistItemPtr, QWidget *pare
 
     setupConnections();
 
-    if(QFile::exists(playlistItem_->path() + QDir::separator() + Utility::fileName(playlistItem_->song()) + ".mp3")) {
+    if(QFile::exists(playlistItem_->path() + playlistItem_->fileName())) {
         emit downloadFinished();
         downloadState_ = GrooveOff::FinishedState;
     }
@@ -92,7 +92,7 @@ void DownloadItem::setupUi()
 
     loadCover();
 
-    ui_->coverLabel->setToolTip(Utility::fileName(playlistItem_->song()));
+    ui_->coverLabel->setToolTip(playlistItem_->fileName());
 
     QGraphicsDropShadowEffect *coverShadow = new QGraphicsDropShadowEffect(this);
     coverShadow->setBlurRadius(10.0);
@@ -315,7 +315,7 @@ void DownloadItem::startDownload()
     downloadState_ = GrooveOff::DownloadingState;
     stateChanged();
     downloader_ = ApiRequest::instance()->downloadSong(playlistItem_->path(),
-                                                       Utility::fileName(playlistItem_->song()),
+                                                       playlistItem_->fileName(),
                                                        playlistItem_->song()->songID(),
                                                        Utility::token);
 
@@ -460,8 +460,7 @@ void DownloadItem::removeSong()
 */
 QString DownloadItem::songFile()
 {
-    QString fileName = playlistItem_->path() + QDir::separator() + Utility::fileName(playlistItem_->song()) + ".mp3";
-    return fileName;
+    return playlistItem_->path() + playlistItem_->fileName();
 }
 
 /*!
