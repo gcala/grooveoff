@@ -59,8 +59,8 @@ void CoverManager::setCover()
     CoverDownloader *coverDownloader = (CoverDownloader *)QObject::sender();
     if(coverDownloader->isSuccess()) {
         QString coverArtFilename = coverDownloader->coverName();
-        foreach (PlaylistItemPtr song, coverItems_.value(coverArtFilename)) {
-            song.data()->requireCoverReload();
+        foreach (PlaylistItemPtr playlistItem, coverItems_.value(coverArtFilename)) {
+            playlistItem.data()->requireCoverReload();
         }
     }
 }

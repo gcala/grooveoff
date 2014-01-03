@@ -62,9 +62,9 @@ PlayerWidget::PlayerWidget(QWidget *parent) :
             this, SLOT(removedPlayingTrack()));
 
     connect( The::audioEngine(), SIGNAL(volumeChanged(int)), ui_->volume, SLOT(setValue(int)) );
+    connect( The::audioEngine(), SIGNAL(muteStateChanged(bool)), this, SLOT(muteStateChanged(bool)) );
     connect( ui_->volume, SIGNAL(valueChanged(int)), The::audioEngine(), SLOT(setVolume(int)) );
     connect( ui_->volume, SIGNAL(muteToggled(bool)), The::audioEngine(), SLOT(setMuted(bool)) );
-    connect( The::audioEngine(), SIGNAL(muteStateChanged(bool)), this, SLOT(muteStateChanged(bool)) );
 }
 
 /*!

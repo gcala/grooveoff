@@ -491,7 +491,7 @@ void MainWindow::tokenError()
 }
 
 /*!
-  \brief populateResultsTable : fills results list
+  \brief searchFinished : fills results list
   \return void
 */
 void MainWindow::searchFinished()
@@ -521,15 +521,15 @@ void MainWindow::searchFinished()
     QStringList albums;
 
     for(int i = 0; i < count; i++) {
-        PlaylistItemPtr songItem(new PlaylistItem(songList_->list().at(i)));
+        PlaylistItemPtr playlistItem(new PlaylistItem(songList_->list().at(i)));
 
         // Decide if show cover arts
         if(loadCovers_ && !QFile::exists(Utility::coversCachePath + songList_->list().at(i)->coverArtFilename())) {
-            cvrMngr_->addItem(songItem);
+            cvrMngr_->addItem(playlistItem);
         }
 
         // build a MathItem with all required data
-        MatchItem *matchItem = new MatchItem(songItem, this);
+        MatchItem *matchItem = new MatchItem(playlistItem, this);
         QListWidgetItem *wItem = new QListWidgetItem;
         ui_->matchList->addItem(wItem);
         ui_->matchList->setItemWidget(wItem, matchItem);
@@ -1058,6 +1058,7 @@ void MainWindow::loadSession()
     QDomElement itemEl = root.firstChildElement("item");
     while (!itemEl.isNull()) {
         PlaylistItemPtr item(new PlaylistItem());
+
         items.append(item);
         parsePlaylistItem(itemEl, item);
         itemEl = itemEl.nextSiblingElement("item");
@@ -1082,6 +1083,11 @@ void MainWindow::parsePlaylistItem(const QDomElement& element, PlaylistItemPtr i
 
     QDomElement songEl = element.firstChildElement("song_info");
     parseSong(songEl, item->song());
+
+    // Download covers if missing
+    if(loadCovers_ && !QFile::exists(Utility::coversCachePath + item->song()->coverArtFilename())) {
+        cvrMngr_->addItem(item);
+    }
 }
 
 void MainWindow::parseSong(const QDomElement& element, SongPtr song)
