@@ -1,10 +1,10 @@
 #include "song_p.h"
 
-#if QT_VERSION < QT_VERSION_CHECK( 5, 0, 0 )
-#include <qjson/parser.h>
-#else
+#if QT_VERSION >= QT_VERSION_CHECK( 5, 0, 0 )
 #include <QJsonParseError>
 #include <QJsonDocument>
+#else
+#include <qjson/parser.h>
 #endif
 
 #include <QDebug>

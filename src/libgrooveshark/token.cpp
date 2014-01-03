@@ -2,11 +2,11 @@
 
 #include <QDebug>
 
-#if QT_VERSION < QT_VERSION_CHECK( 5, 0, 0 )
-#include <qjson/parser.h>
-#else
+#if QT_VERSION >= QT_VERSION_CHECK( 5, 0, 0 )
 #include <QJsonParseError>
 #include <QJsonDocument>
+#else
+#include <qjson/parser.h>
 #endif
 
 using namespace GrooveShark;
@@ -100,12 +100,7 @@ bool TokenPrivate::parse ( const QByteArray& data )
     bool ok;
     QVariant variant;
 
-#if QT_VERSION < QT_VERSION_CHECK( 5, 0, 0 )
-    QJson::Parser parser;
-    variant = parser.parse ( data, &ok );
-    if(!ok)
-        m_errorString = parser.errorString();
-#else
+#if QT_VERSION >= QT_VERSION_CHECK( 5, 0, 0 )
     QJsonParseError *err = new QJsonParseError();
     QJsonDocument doc = QJsonDocument::fromJson(data, err);
     if (err->error != 0) {
@@ -115,6 +110,11 @@ bool TokenPrivate::parse ( const QByteArray& data )
         variant = doc.toVariant();
         ok = true;
     }
+#else
+    QJson::Parser parser;
+    variant = parser.parse ( data, &ok );
+    if(!ok)
+        m_errorString = parser.errorString();
 #endif
 
     if( ok )

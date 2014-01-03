@@ -73,10 +73,10 @@ void DownloaderPrivate::streamKeyFinished()
 
     file_->open(QIODevice::WriteOnly);
 
-#if QT_VERSION < QT_VERSION_CHECK( 5, 0, 0 )
-    QUrl postData;
-#else
+#if QT_VERSION >= QT_VERSION_CHECK( 5, 0, 0 )
     QUrlQuery postData;
+#else
+    QUrl postData;
 #endif
 
     postData.addQueryItem(QLatin1String("streamKey"), streamKey_->streamKey());
@@ -87,10 +87,10 @@ void DownloaderPrivate::streamKeyFinished()
     mainRequest_.setUrl(QUrl(QString("http://%1/stream.php").arg(streamKey_->ip())));
     mainRequest_.setHeader(QNetworkRequest::ContentTypeHeader, QLatin1String("application/x-www-form-urlencoded"));
 
-#if QT_VERSION < QT_VERSION_CHECK( 5, 0, 0 )
-    reply_ = post(mainRequest_, postData.encodedQuery());
-#else
+#if QT_VERSION >= QT_VERSION_CHECK( 5, 0, 0 )
     reply_ = post(mainRequest_, postData.query(QUrl::EncodeUnicode).toLatin1());
+#else
+    reply_ = post(mainRequest_, postData.encodedQuery());
 #endif
 
     connect(reply_, SIGNAL(downloadProgress(qint64,qint64)),

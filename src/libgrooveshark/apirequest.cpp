@@ -79,16 +79,6 @@ TokenPtr ApiRequestPrivate::token()
 
 StreamKeyPtr ApiRequestPrivate::streamKey(uint id, QString token)
 {
-//     QVariantMap map = downloadMap(QString::number(id), token);
-//     QJson::Serializer serializer;
-//     QByteArray json = serializer.serialize(map);
-//
-//     QString requestUrl = UrlBuilder::getSongStreamKeyUrl() + map.value("method").toByteArray();
-//     QString refererUrl = UrlBuilder::getRefererUrl() + jsqueue().at(1);
-//
-//     QNetworkReply *reply;
-//     reply = m_requestHandler->postFileRequest( requestUrl, refererUrl, json );
-
     StreamKeyPtr streamKey( new StreamKey( id, token ) );
     return streamKey;
 }

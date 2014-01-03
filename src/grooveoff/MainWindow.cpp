@@ -157,16 +157,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QSettings settings;
     settings.setIniCodec( "UTF-8" );
 
-#if QT_VERSION < QT_VERSION_CHECK( 5, 0, 0 )
-    if(saveDestination_) {
-        ui_->pathLine->setText(settings.value(QLatin1String("destination"),
-                               QDesktopServices::storageLocation(QDesktopServices::MusicLocation)).toString());
-        if(ui_->pathLine->text().isEmpty())
-            ui_->pathLine->setText(QDesktopServices::storageLocation(QDesktopServices::MusicLocation));
-    } else {
-        ui_->pathLine->setText(QDesktopServices::storageLocation(QDesktopServices::MusicLocation));
-    }
-#else
+#if QT_VERSION >= QT_VERSION_CHECK( 5, 0, 0 )
     if(saveDestination_) {
         ui_->pathLine->setText(settings.value(QLatin1String("destination"),
                                QStandardPaths::writableLocation(QStandardPaths::MusicLocation)).toString());
@@ -175,16 +166,25 @@ MainWindow::MainWindow(QWidget *parent) :
     } else {
         ui_->pathLine->setText(QStandardPaths::writableLocation(QStandardPaths::MusicLocation));
     }
+#else
+    if(saveDestination_) {
+        ui_->pathLine->setText(settings.value(QLatin1String("destination"),
+                               QDesktopServices::storageLocation(QDesktopServices::MusicLocation)).toString());
+        if(ui_->pathLine->text().isEmpty())
+            ui_->pathLine->setText(QDesktopServices::storageLocation(QDesktopServices::MusicLocation));
+    } else {
+        ui_->pathLine->setText(QDesktopServices::storageLocation(QDesktopServices::MusicLocation));
+    }
 #endif
 
     setGeometry(settings.value(QLatin1String("windowGeometry"), QRect(100,100,350,600)).toRect());
 
-#if QT_VERSION < QT_VERSION_CHECK( 5, 0, 0 )
-    sessionFile_ = QDesktopServices::storageLocation(QDesktopServices::DataLocation).replace("/data","")
+#if QT_VERSION >= QT_VERSION_CHECK( 5, 0, 0 )
+    sessionFile_ = QStandardPaths::writableLocation(QStandardPaths::DataLocation)
                    + QDir::separator()
                    + QLatin1String("session.xml");
 #else
-    sessionFile_ = QStandardPaths::writableLocation(QStandardPaths::DataLocation)
+    sessionFile_ = QDesktopServices::storageLocation(QDesktopServices::DataLocation).replace("/data","")
                    + QDir::separator()
                    + QLatin1String("session.xml");
 #endif

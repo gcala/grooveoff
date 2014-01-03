@@ -62,12 +62,6 @@ QFont Utility::monoFont(const QFont::Weight& weight, const int &delta)
     return systemFont;
 }
 
-// QString Utility::fileName(const GrooveShark::SongPtr &song)
-// {
-//     return song->songName().replace('/','-') + " - " + song->artistName().replace('/','-');
-// }
-
-
 /** @short Return the source color tinted with the tintColor
 
 This is shamelessly stolen from Qt5's qtquick1 module.

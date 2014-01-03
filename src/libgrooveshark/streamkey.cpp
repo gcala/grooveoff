@@ -3,12 +3,12 @@
 #include "urlbuilder.h"
 #include "config.h"
 
-#if QT_VERSION < QT_VERSION_CHECK( 5, 0, 0 )
-#include <qjson/parser.h>
-#include <qjson/serializer.h>
-#else
+#if QT_VERSION >= QT_VERSION_CHECK( 5, 0, 0 )
 #include <QJsonParseError>
 #include <QJsonDocument>
+#else
+#include <qjson/parser.h>
+#include <qjson/serializer.h>
 #endif
 
 #include <QStringList>
