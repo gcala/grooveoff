@@ -14,6 +14,8 @@
 * this program.  If not, see <http://www.gnu.org/licenses/>.                           *
 ****************************************************************************************/
 
+// Slightly modified for GrooveOff
+
 #ifndef VOLUMEDIAL_H
 #define VOLUMEDIAL_H
 

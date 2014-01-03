@@ -1,6 +1,6 @@
 /*
     GrooveOff - Offline Grooveshark.com music
-    Copyright (C) 2013  Giuseppe Calà <jiveaxe@gmail.com>
+    Copyright (C) 2013-2014  Giuseppe Calà <jiveaxe@gmail.com>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -15,6 +15,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+
 
 #include "CoverManager.h"
 #include "CoverDownloader.h"

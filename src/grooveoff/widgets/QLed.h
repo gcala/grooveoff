@@ -13,6 +13,8 @@
  *   http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.               *
  ***************************************************************************/
 
+// Slightly modified for GrooveOff
+
 
 #ifndef QLED_H
 #define QLED_H

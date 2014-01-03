@@ -20,6 +20,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+// Slightly modified for GrooveOff
+
 #ifndef SPINNER_H
 #define SPINNER_H
 
