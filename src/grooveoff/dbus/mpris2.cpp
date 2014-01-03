@@ -41,10 +41,10 @@ Mpris2::Mpris2(QObject* parent)  : QObject(parent)
     dbus.registerService( "org.mpris.MediaPlayer2.grooveoff" );
 
     // Listen to volume changes
-    connect(AudioEngine::instance(), SIGNAL( volumeChanged( int ) ), SLOT( onVolumeChanged( int ) ) );
-    connect(AudioEngine::instance(), SIGNAL(stateChanged(Phonon::State, Phonon::State)), SLOT(engineStateChanged(Phonon::State, Phonon::State)));
-    connect(AudioEngine::instance(), SIGNAL(sourceChanged()), SLOT(slot_engineMediaChanged()));
-    connect(AudioEngine::instance(), SIGNAL( seeked( qint64 ) ),SLOT( onSeeked( qint64 ) ) );
+    connect(The::audioEngine(), SIGNAL( volumeChanged( int ) ), SLOT( onVolumeChanged( int ) ) );
+    connect(The::audioEngine(), SIGNAL(stateChanged(Phonon::State, Phonon::State)), SLOT(engineStateChanged(Phonon::State, Phonon::State)));
+    connect(The::audioEngine(), SIGNAL(sourceChanged()), SLOT(slot_engineMediaChanged()));
+    connect(The::audioEngine(), SIGNAL( seeked( qint64 ) ),SLOT( onSeeked( qint64 ) ) );
 }
 
 
@@ -141,27 +141,27 @@ bool Mpris2::canControl() const
 
 bool Mpris2::canGoNext() const
 {
-    return AudioEngine::instance()->canGoNext();
+    return The::audioEngine()->canGoNext();
 }
 
 
 bool Mpris2::canGoPrevious() const
 {
-    return AudioEngine::instance()->canGoPrevious();
+    return The::audioEngine()->canGoPrevious();
 }
 
 
 bool Mpris2::canPause() const
 {
 //    return (playbackStatus() == "Paused" || playbackStatus() == "Stopped");
-    return AudioEngine::instance()->currentTrack();
+    return The::audioEngine()->currentTrack();
 }
 
 
 bool Mpris2::canPlay() const
 {
     // If there is a currently playing track, or if there is a playlist with at least 1 track, you can hit play
-    return AudioEngine::instance()->currentTrack() ||  !Playlist::instance()->count();
+    return The::audioEngine()->currentTrack() ||  !The::playlist()->count();
 }
 
 
@@ -215,7 +215,7 @@ QVariantMap Mpris2::metadata() const
     QVariantMap metadataMap;
 
     /* get media track playing */
-    PlaylistItemPtr track = AudioEngine::instance()->currentTrack();
+    PlaylistItemPtr track = The::audioEngine()->currentTrack();
     if(!track)
       return metadataMap;
 
@@ -230,7 +230,7 @@ QVariantMap Mpris2::metadata() const
         metadataMap.insert( "xesam:artist", track->song()->artistName() );
         metadataMap.insert( "xesam:title",  track->song()->songName() );
         metadataMap.insert( "xesam:genre",  track->song()->genreID() );
-        metadataMap.insert( "mpris:length", static_cast<qlonglong>(AudioEngine::instance()->currentTrackTotalTime()) * 1000000 );
+        metadataMap.insert( "mpris:length", static_cast<qlonglong>(The::audioEngine()->currentTrackTotalTime()) * 1000000 );
 
         const QString coverpath = "/home/gcala/.local/share/gcala/grooveoff/cache/" + track->song()->coverArtFilename();
 
@@ -255,7 +255,7 @@ double Mpris2::minimumRate() const
 
 QString Mpris2::playbackStatus() const
 {
-    switch (AudioEngine::instance()->state())
+    switch (The::audioEngine()->state())
     {
       case Phonon::PlayingState : return "Playing"; break;
       case Phonon::PausedState  : return "Paused";  break;
@@ -290,42 +290,42 @@ void Mpris2::setRate( double value )
 
 double Mpris2::volume() const
 {
-    return (AudioEngine::instance()->volume());
+    return (The::audioEngine()->volume());
 }
 
 
 void Mpris2::setVolume( double value )
 {
-    AudioEngine::instance()->setVolume(value * 100);
+    The::audioEngine()->setVolume(value * 100);
 }
 
 
 void Mpris2::Next()
 {
-    AudioEngine::instance()->next();
+    The::audioEngine()->next();
 }
 
 
 void Mpris2::Previous()
 {
-    AudioEngine::instance()->previous();
+    The::audioEngine()->previous();
 }
 
 
 void Mpris2::Pause()
 {
-    AudioEngine::instance()->pause();
+    The::audioEngine()->pause();
 }
 
 void Mpris2::Play()
 {
-    AudioEngine::instance()->play();
+    The::audioEngine()->play();
 }
 
 
 void Mpris2::PlayPause()
 {
-    AudioEngine::instance()->playPause();
+    The::audioEngine()->playPause();
 }
 
 
@@ -336,19 +336,19 @@ void Mpris2::Seek( qlonglong Offset )
 
     qlonglong seekTime = position() + Offset;
     if ( seekTime < 0 )
-        AudioEngine::instance()->seek( 0 );
-    else if ( seekTime > AudioEngine::instance()->currentTrackTotalTime()*1000 )
+        The::audioEngine()->seek( 0 );
+    else if ( seekTime > The::audioEngine()->currentTrackTotalTime()*1000 )
         Next();
     // seekTime is in microseconds, but we work internally in milliseconds
     else
-        AudioEngine::instance()->seek( (qint64) ( seekTime / 1000 ) );
+        The::audioEngine()->seek( (qint64) ( seekTime / 1000 ) );
 }
 
 
 qlonglong Mpris2::position() const
 {
     /* convert in microsecond */
-    return (qlonglong) ( AudioEngine::instance()->currentTime() * 1000 );
+    return (qlonglong) ( The::audioEngine()->currentTime() * 1000 );
 }
 
 
@@ -357,13 +357,13 @@ void Mpris2::SetPosition( const QDBusObjectPath& TrackId, qlonglong Position )
     if ( !canSeek() )
         return;
 
-    if ( TrackId.path() != QString( "/track/" ) + QString::number(AudioEngine::instance()->currentTrack()->song()->songID()))
+    if ( TrackId.path() != QString( "/track/" ) + QString::number(The::audioEngine()->currentTrack()->song()->songID()))
         return;
 
-    if ( ( Position < 0) || ( Position > AudioEngine::instance()->currentTrackTotalTime() * 1000 )  )
+    if ( ( Position < 0) || ( Position > The::audioEngine()->currentTrackTotalTime() * 1000 )  )
         return;
 
-    AudioEngine::instance()->seek( (qint64) (Position / 1000 ) );
+    The::audioEngine()->seek( (qint64) (Position / 1000 ) );
 }
 
 void Mpris2::OpenUri(const QString& uri)
@@ -375,7 +375,7 @@ Q_UNUSED(uri)
 
 void Mpris2::Stop()
 {
-    AudioEngine::instance()->stop();
+    The::audioEngine()->stop();
 }
 
 
@@ -402,7 +402,7 @@ void Mpris2::engineStateChanged(Phonon::State newState, Phonon::State oldState)
 void Mpris2::slot_engineMediaChanged()
 {
     /* get media track playing */
-    PlaylistItemPtr track = AudioEngine::instance()->currentTrack();
+    PlaylistItemPtr track = The::audioEngine()->currentTrack();
     //Debug::debug() << "  [Mpris2] slot_engineMediaChanged  track " << track;
 
     notifyPropertyChanged("Metadata");

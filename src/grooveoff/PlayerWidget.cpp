@@ -43,28 +43,28 @@ PlayerWidget::PlayerWidget(QWidget *parent) :
     connect(timer_, SIGNAL(timeout()), this, SLOT(switchPage()));
 
     // Supply with the MediaObject object seekSlider should control
-    ui_->seekSlider->setMediaObject(AudioEngine::instance()->mediaObject());
+    ui_->seekSlider->setMediaObject(The::audioEngine()->mediaObject());
 
     playedRemoved = false;
 
     connect(ui_->timeLabel, SIGNAL(clicked()),
             this, SLOT(toggleTimeLabel()));
 
-    connect(AudioEngine::instance(), SIGNAL(seeked(qint64)),
+    connect(The::audioEngine(), SIGNAL(seeked(qint64)),
             this, SLOT(tick(qint64)));
-    connect(AudioEngine::instance(), SIGNAL(stateChanged(Phonon::State,Phonon::State)),
+    connect(The::audioEngine(), SIGNAL(stateChanged(Phonon::State,Phonon::State)),
             this, SLOT(stateChanged(Phonon::State, Phonon::State)));
-    connect(AudioEngine::instance(), SIGNAL(sourceChanged()),
+    connect(The::audioEngine(), SIGNAL(sourceChanged()),
             this, SLOT(sourceChanged()));
-    connect(Playlist::instance(), SIGNAL(playlistChanged()),
+    connect(The::playlist(), SIGNAL(playlistChanged()),
             this, SLOT(reloadPreviousNextButtons()));
-    connect(AudioEngine::instance(), SIGNAL(removedPlayingTrack()),
+    connect(The::audioEngine(), SIGNAL(removedPlayingTrack()),
             this, SLOT(removedPlayingTrack()));
 
-    connect( AudioEngine::instance(), SIGNAL(volumeChanged(int)), ui_->volume, SLOT(setValue(int)) );
-    connect( ui_->volume, SIGNAL(valueChanged(int)), AudioEngine::instance(), SLOT(setVolume(int)) );
-    connect( ui_->volume, SIGNAL(muteToggled(bool)), AudioEngine::instance(), SLOT(setMuted(bool)) );
-    connect( AudioEngine::instance(), SIGNAL(muteStateChanged(bool)), this, SLOT(muteStateChanged(bool)) );
+    connect( The::audioEngine(), SIGNAL(volumeChanged(int)), ui_->volume, SLOT(setValue(int)) );
+    connect( ui_->volume, SIGNAL(valueChanged(int)), The::audioEngine(), SLOT(setVolume(int)) );
+    connect( ui_->volume, SIGNAL(muteToggled(bool)), The::audioEngine(), SLOT(setMuted(bool)) );
+    connect( The::audioEngine(), SIGNAL(muteStateChanged(bool)), this, SLOT(muteStateChanged(bool)) );
 }
 
 /*!
@@ -72,7 +72,7 @@ PlayerWidget::PlayerWidget(QWidget *parent) :
 */
 PlayerWidget::~PlayerWidget()
 {
-    AudioEngine::instance()->stop(Phonon::NoError);
+    The::audioEngine()->stop(Phonon::NoError);
 }
 
 /*!
@@ -178,10 +178,10 @@ void PlayerWidget::stateChanged(Phonon::State newState, Phonon::State oldState)
 */
 void PlayerWidget::tick(qint64 elapsedTime)
 {
-    if(AudioEngine::instance()->state() == Phonon::StoppedState)
+    if(The::audioEngine()->state() == Phonon::StoppedState)
         return;
 
-    quint64 remainingTime = AudioEngine::instance()->remainingTime();
+    quint64 remainingTime = The::audioEngine()->remainingTime();
 
     if(ui_->elapsedTimeLabel->isVisible()) {
         ui_->elapsedTimeLabel->setText(QTime(0, (elapsedTime / 60000) % 60, (elapsedTime / 1000) % 60).toString("mm:ss"));
@@ -205,7 +205,7 @@ void PlayerWidget::tick(qint64 elapsedTime)
 void PlayerWidget::pauseResumePlaying()
 {
     playedRemoved = false;
-    AudioEngine::instance()->playPause();
+    The::audioEngine()->playPause();
 }
 
 void PlayerWidget::toggleTimeLabel()
@@ -215,7 +215,7 @@ void PlayerWidget::toggleTimeLabel()
 
 void PlayerWidget::showMessage(const QString& message)
 {
-    if(AudioEngine::instance()->state() == Phonon::PlayingState || AudioEngine::instance()->state() == Phonon::PausedState) {
+    if(The::audioEngine()->state() == Phonon::PlayingState || The::audioEngine()->state() == Phonon::PausedState) {
         timer_->setSingleShot(true);
         timer_->start(3000);
     }
@@ -226,11 +226,11 @@ void PlayerWidget::showMessage(const QString& message)
 void PlayerWidget::sourceChanged()
 {
     reloadPreviousNextButtons();
-    QString title = AudioEngine::instance()->currentTrack()->song()->songName();
-    QString artist = AudioEngine::instance()->currentTrack()->song()->artistName();
-    QString album = AudioEngine::instance()->currentTrack()->song()->albumName();
-    QString path = AudioEngine::instance()->currentTrack()->path();
-    QString coverName = AudioEngine::instance()->currentTrack()->song()->coverArtFilename();
+    QString title = The::audioEngine()->currentTrack()->song()->songName();
+    QString artist = The::audioEngine()->currentTrack()->song()->artistName();
+    QString album = The::audioEngine()->currentTrack()->song()->albumName();
+    QString path = The::audioEngine()->currentTrack()->path();
+    QString coverName = The::audioEngine()->currentTrack()->song()->coverArtFilename();
 
     ui_->titleLabel->setText(title);
     ui_->titleLabel->setToolTip(title);
@@ -248,21 +248,21 @@ void PlayerWidget::sourceChanged()
 
 void PlayerWidget::playNext()
 {
-    AudioEngine::instance()->next();
+    The::audioEngine()->next();
 }
 
 void PlayerWidget::playPrevious()
 {
-    AudioEngine::instance()->previous();
+    The::audioEngine()->previous();
 }
 
 void PlayerWidget::reloadPreviousNextButtons()
 {
-    if(Playlist::instance()->count() == 0)
+    if(The::playlist()->count() == 0)
         ui_->stackedWidget->setCurrentIndex(0);
 
-    ui_->nextButton->setButtonEnabled(AudioEngine::instance()->canGoNext());
-    ui_->previousButton->setButtonEnabled(AudioEngine::instance()->canGoPrevious());
+    ui_->nextButton->setButtonEnabled(The::audioEngine()->canGoNext());
+    ui_->previousButton->setButtonEnabled(The::audioEngine()->canGoPrevious());
 }
 
 void PlayerWidget::removedPlayingTrack()

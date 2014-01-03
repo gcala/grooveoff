@@ -27,11 +27,17 @@
 #include <phonon/AudioOutput>
 #include <phonon/AudioDataOutput>
 
+class AudioEngine;
+
+namespace The {
+    AudioEngine* audioEngine();
+}
+
 class AudioEngine : public QObject
 {
     Q_OBJECT
 public:
-    static AudioEngine * instance();
+    friend AudioEngine* The::audioEngine();
     ~AudioEngine();
 
     void playPause();
@@ -134,8 +140,6 @@ private slots:
     void slotMutedChanged( bool );
 
 private:
-    static bool instanceFlag;
-    static AudioEngine *audioEngine;
     AudioEngine();
 
     PlaylistItemPtr currentTrack_;

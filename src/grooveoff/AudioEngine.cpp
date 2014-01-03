@@ -24,20 +24,15 @@
 #include <QDir>
 #include <QDebug>
 
-bool AudioEngine::instanceFlag = false;
-AudioEngine* AudioEngine::audioEngine = NULL;
+namespace The {
+    static AudioEngine* s_AudioEngine_instance = 0;
 
-AudioEngine* AudioEngine::instance()
-{
-    if(! instanceFlag)
+    AudioEngine* audioEngine()
     {
-        audioEngine = new AudioEngine();
-        instanceFlag = true;
-        return audioEngine;
-    }
-    else
-    {
-        return audioEngine;
+        if( !s_AudioEngine_instance )
+            s_AudioEngine_instance = new AudioEngine();
+
+        return s_AudioEngine_instance;
     }
 }
 
@@ -80,7 +75,6 @@ AudioEngine::AudioEngine()
 
 AudioEngine::~AudioEngine()
 {
-    instanceFlag = false;
 }
 
 void AudioEngine::timerTriggered( qint64 time )
@@ -199,9 +193,9 @@ qint64 AudioEngine::remainingTime() const
 bool AudioEngine::canGoNext()
 {
     if(currentTrack_) {
-        int currentIndex = Playlist::instance()->row(currentTrack_);
+        int currentIndex = The::playlist()->row(currentTrack_);
         if(currentIndex >= 0) {
-            if(currentIndex < (Playlist::instance()->count() - 1))
+            if(currentIndex < (The::playlist()->count() - 1))
                 return true;
         }
         return false;
@@ -213,7 +207,7 @@ bool AudioEngine::canGoNext()
 bool AudioEngine::canGoPrevious()
 {
     if(currentTrack_) {
-        int currentIndex = Playlist::instance()->row(currentTrack_);
+        int currentIndex = The::playlist()->row(currentTrack_);
         if(currentIndex > 0)
             return true;
         return false;
@@ -225,7 +219,7 @@ bool AudioEngine::canGoPrevious()
 void AudioEngine::next()
 {
     if(canGoNext()) {
-        PlaylistItemPtr track = Playlist::instance()->item(Playlist::instance()->row(currentTrack_) + 1);
+        PlaylistItemPtr track = The::playlist()->item(The::playlist()->row(currentTrack_) + 1);
         if(currentTrack_)
             currentTrack_->setState(Phonon::StoppedState);
 
@@ -238,7 +232,7 @@ void AudioEngine::next()
 void AudioEngine::previous()
 {
     if(canGoPrevious()) {
-        PlaylistItemPtr track = Playlist::instance()->item(Playlist::instance()->row(currentTrack_) - 1);
+        PlaylistItemPtr track = The::playlist()->item(The::playlist()->row(currentTrack_) - 1);
         if(currentTrack_)
             currentTrack_->setState(Phonon::StoppedState);
 

@@ -19,20 +19,15 @@
 
 #include "Playlist.h"
 
-bool Playlist::instanceFlag = false;
-Playlist* Playlist::playlist = NULL;
+namespace The {
+    static Playlist* s_Playlist_instance = 0;
 
-Playlist* Playlist::instance()
-{
-    if(! instanceFlag)
+    Playlist* playlist()
     {
-        playlist = new Playlist();
-        instanceFlag = true;
-        return playlist;
-    }
-    else
-    {
-        return playlist;
+        if( !s_Playlist_instance )
+            s_Playlist_instance = new Playlist();
+
+        return s_Playlist_instance;
     }
 }
 
@@ -42,7 +37,6 @@ Playlist::Playlist()
 
 Playlist::~Playlist()
 {
-    instanceFlag = false;
 }
 
 void Playlist::appendItem(PlaylistItemPtr item)

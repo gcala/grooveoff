@@ -24,11 +24,17 @@
 
 #include <QObject>
 
+class Playlist;
+
+namespace The {
+    Playlist* playlist();
+}
+
 class Playlist : public QObject
 {
     Q_OBJECT
 public:
-    static Playlist * instance();
+    friend Playlist* The::playlist();
     ~Playlist();
 
     void clear();
@@ -42,8 +48,6 @@ signals:
     void playlistChanged();
 
 private:
-    static bool instanceFlag;
-    static Playlist *playlist;
     Playlist();
 
     QList<PlaylistItemPtr> playlist_;

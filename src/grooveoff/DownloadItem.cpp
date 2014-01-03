@@ -372,7 +372,7 @@ void DownloadItem::setProgress(const qint64 &bytesReceived, const qint64 &bytesT
 */
 void DownloadItem::playSong()
 {
-    AudioEngine::instance()->playItem(playlistItem_);
+    The::audioEngine()->playItem(playlistItem_);
     //emit play(song_.data()->source().url().toString());
 }
 
@@ -438,8 +438,8 @@ bool DownloadItem::operator==(DownloadItem& right) const
 */
 void DownloadItem::removeSong()
 {
-    AudioEngine::instance()->removingTrack(playlistItem_);
-    Playlist::instance()->removeItem(playlistItem_);
+    The::audioEngine()->removingTrack(playlistItem_);
+    The::playlist()->removeItem(playlistItem_);
 
     if(QFile::exists(songFile())) {
         if(!QFile::remove(songFile()))

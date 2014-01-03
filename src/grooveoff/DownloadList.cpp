@@ -36,11 +36,11 @@ DownloadList::DownloadList(QWidget *parent) :
 
 void DownloadList::reloadPlaylist()
 {
-    Playlist::instance()->clear();
+    The::playlist()->clear();
 
     for(int i = 0; i < count(); i++) {
         if(ITEM(i)->downloadState() == GrooveOff::FinishedState) {
-            Playlist::instance()->appendItem(ITEM(i)->playlistItem());
+            The::playlist()->appendItem(ITEM(i)->playlistItem());
         }
     }
 }
@@ -69,18 +69,18 @@ void DownloadList::removeFailedDeletedAborted()
 */
 void DownloadList::removeDownloaded()
 {
-    AudioEngine::instance()->stop();
+    The::audioEngine()->stop();
     for(int i = count() - 1; i >= 0; i--) {
         GrooveOff::DownloadState state = ITEM(i)->downloadState();
         if(state == GrooveOff::FinishedState) {
-            AudioEngine::instance()->removingTrack(ITEM(i)->playlistItem());
+            The::audioEngine()->removingTrack(ITEM(i)->playlistItem());
             QListWidgetItem *item = takeItem(i);
             removeItemWidget(item);
             delete item;
         }
     }
 
-    Playlist::instance()->clear();
+    The::playlist()->clear();
 }
 
 void DownloadList::abortAllDownloads()
