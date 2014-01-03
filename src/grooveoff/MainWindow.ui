@@ -96,11 +96,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="busyLabel">
-          <property name="text">
-           <string/>
-          </property>
-         </widget>
+         <widget class="QWidget" name="spinnerWidget" native="true"/>
         </item>
        </layout>
       </item>
@@ -223,7 +219,7 @@
      <x>0</x>
      <y>0</y>
      <width>624</width>
-     <height>22</height>
+     <height>27</height>
     </rect>
    </property>
   </widget>

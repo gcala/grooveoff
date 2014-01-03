@@ -47,6 +47,7 @@ class SongObject;
 class DownloadItem;
 class MatchItemListDelegate;
 class CoverManager;
+class Spinner;
 
 // Dbus & Mpris
 class DbusNotification;
@@ -97,7 +98,6 @@ private slots:
 
 private:
     Ui::MainWindow *ui_;
-    QMovie *busyAnimation_;
     QNetworkConfigurationManager *qncm_;
     QList<QPair<QString, QStringList> > artistsAlbumsContainer_;
     MyJar *jar_;
@@ -118,6 +118,7 @@ private:
     QList<DownloadItem *> queue_;
     PlayerWidget *playerWidget;
     CoverManager *cvrMngr_;
+    Spinner *spinner_;
 
     QNetworkAccessManager *nam_;
     GrooveShark::ApiRequest *api_;

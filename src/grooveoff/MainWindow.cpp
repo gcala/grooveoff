@@ -34,6 +34,9 @@
 #include "ActionCollection.h"
 #include "PaletteHandler.h"
 #include "SvgHandler.h"
+#include "Playlist.h"
+#include "AudioEngine.h"
+#include "widgets/Spinner.h"
 
 // Dbus & remote
 #include "dbus/dbusnotification.h"
@@ -65,7 +68,6 @@
 #include <QFile>
 #include <qjson/serializer.h>
 #include <qjson/parser.h>
-#include <QMovie>
 #include <QMessageBox>
 #include <QApplication>
 #include <QCompleter>
@@ -100,6 +102,10 @@ MainWindow::MainWindow(QWidget *parent) :
     loadSettings();
     statusBar()->addPermanentWidget( playerWidget, 1 );
     statusBar()->setSizeGripEnabled(false);
+
+    spinner_ = new Spinner(ui_->spinnerWidget);
+    spinner_->setText(tr(""));
+    spinner_->setType(Spinner::Sun);
 
 #if QT_VERSION < QT_VERSION_CHECK( 5, 0, 0 )
     if(!QFile::exists(QDesktopServices::storageLocation(QDesktopServices::DataLocation).replace("/data",""))) {
@@ -201,9 +207,16 @@ MainWindow::~MainWindow()
     delete The::paletteHandler();
     delete The::svgHandler();
 
+    spinner_->stop();
+
     if(saveSession_)
         saveSession();
+
     saveSettings();
+
+    delete The::playlist();
+    delete The::audioEngine();
+
     delete api_;
 }
 
@@ -262,13 +275,9 @@ void MainWindow::setupUi()
     ui_->browseButton->setIconSize(QSize(16,16));
     ui_->browseButton->setFixedHeight(fontHeight > 25 ? fontHeight : 25);
 
-    // label with spinning image: requires QMovie
-    ui_->busyLabel->setMaximumSize(QSize(fontHeight > 25 ? fontHeight : 25,
-                                         fontHeight > 25 ? fontHeight : 25));
-    ui_->busyLabel->setScaledContents(true);
-    busyAnimation_ = new QMovie(QLatin1String(":/resources/busywidget.gif"));
-    ui_->busyLabel->setMovie(busyAnimation_);
-    ui_->busyLabel->setVisible(false);
+    ui_->spinnerWidget->setMinimumSize(QSize(fontHeight > 30 ? fontHeight : 30,
+                                         fontHeight > 30 ? fontHeight : 30));
+    ui_->spinnerWidget->setVisible(false);
 
     ui_->combosContainer->setVisible(false);
 
@@ -395,9 +404,10 @@ void MainWindow::beginSearch()
     searchInProgress_ = true;
 
     // some ui setups
-    ui_->busyLabel->setVisible(true);
     ui_->searchButton->setVisible(false);
-    busyAnimation_->start();
+
+    ui_->spinnerWidget->setVisible(true);
+    spinner_->start(0);
 
     // clear cover manager
     cvrMngr_->clear();
@@ -1078,9 +1088,10 @@ void MainWindow::parseSong(const QDomElement& element, SongPtr song)
 void MainWindow::restoreSearch()
 {
     searchInProgress_ = false;
-    ui_->busyLabel->setVisible(false);
     ui_->searchButton->setVisible(true);
-    busyAnimation_->stop();
+
+    ui_->spinnerWidget->setVisible(false);
+    spinner_->stop();
 }
 
 void

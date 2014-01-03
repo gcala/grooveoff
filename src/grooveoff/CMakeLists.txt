@@ -29,6 +29,7 @@ set(grooveoff_SRCS App.cpp
                    widgets/PlayPauseButton.cpp
                    widgets/NextButton.cpp
                    widgets/PreviousButton.cpp
+                   widgets/Spinner.cpp
                    dbus/mpris2.cpp
                    dbus/mpris_manager.cpp
                    ../libgrooveshark/apirequest.cpp

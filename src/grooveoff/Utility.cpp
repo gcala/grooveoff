@@ -23,6 +23,7 @@
 #include <QFontMetrics>
 #include <QDesktopServices>
 #include <QDir>
+#include <QColor>
 
 const int Utility::coverSize  = 40; // possible values are 40,50,70,80,90,120
 const int Utility::buttonSize = 24;
@@ -30,8 +31,6 @@ const int Utility::marginSize = 5;
 QString Utility::coversCachePath = "";
 QString Utility::downloadPath = "";
 QString Utility::token = "";
-//QList<Phonon::MediaSource> Utility::audioSources;
-//QList< PlaylistItemPtr > Utility::playlist;
 
 QString Utility::elidedText(const QString& text,
                             const Qt::TextElideMode& elideMode,
@@ -67,4 +66,29 @@ QFont Utility::monoFont(const QFont::Weight& weight, const int &delta)
 QString Utility::fileName(const GrooveShark::SongPtr &song)
 {
     return song->songName().replace('/','-') + " - " + song->artistName().replace('/','-');
+}
+
+
+/** @short Return the source color tinted with the tintColor
+
+This is shamelessly stolen from Qt5's qtquick1 module.
+*/
+QColor Utility::tintColor(const QColor &color, const QColor &tintColor)
+{
+    QColor finalColor;
+    int a = tintColor.alpha();
+    if (a == 0xff) {
+        finalColor = tintColor;
+    } else if (a == 0x00) {
+        finalColor = color;
+    } else {
+        qreal a = tintColor.alphaF();
+        qreal inv_a = 1.0 - a;
+
+        finalColor.setRgbF(tintColor.redF() * a + color.redF() * inv_a,
+                           tintColor.greenF() * a + color.greenF() * inv_a,
+                           tintColor.blueF() * a + color.blueF() * inv_a,
+                           a + inv_a * color.alphaF());
+    }
+    return finalColor;
 }
