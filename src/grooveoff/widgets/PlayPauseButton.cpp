@@ -69,7 +69,9 @@ void PlayPauseButton::mouseReleaseEvent( QMouseEvent *me )
 
 void PlayPauseButton::clicked()
 {
-    emit playButtonClicked();
+    // emit signal only if button is enabled
+    if(m_isEnabled)
+        emit playButtonClicked();
 }
 
 void PlayPauseButton::reloadContent( const QSize &sz )

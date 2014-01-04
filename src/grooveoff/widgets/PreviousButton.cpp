@@ -54,7 +54,9 @@ void PreviousButton::mouseReleaseEvent( QMouseEvent *me )
 
 void PreviousButton::clicked()
 {
-   emit previousButtonClicked();
+    // emit signal only if button is enabled
+    if(m_isEnabled)
+        emit previousButtonClicked();
 }
 
 void PreviousButton::reloadContent( const QSize &sz )
