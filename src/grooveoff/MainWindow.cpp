@@ -39,10 +39,6 @@
 #include "AudioEngine.h"
 #include "widgets/Spinner.h"
 
-// Dbus & remote
-#include "dbus/dbusnotification.h"
-#include "dbus/mpris_manager.h"
-
 #include <QtGui/QLabel>
 #include <QtGui/QMenu>
 #include <QtGui/QMenuBar>
@@ -191,8 +187,7 @@ MainWindow::MainWindow(QWidget *parent) :
     if(saveSession_)
         loadSession();
 
-    m_mpris_manager   = new MprisManager(this);
-    m_mpris_manager->reloadSettings();
+    mpris_ = new mpris::Mpris(this);
 }
 
 /*!
@@ -211,6 +206,7 @@ MainWindow::~MainWindow()
     saveSettings();
 
     delete api_;
+    delete mpris_;
 }
 
 /*!

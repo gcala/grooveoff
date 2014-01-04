@@ -20,7 +20,7 @@
 			<arg direction='in' name='Uri' type='s'/>
 		</method>
 		<signal name='Seeked'>
-			<arg type="x" name="Position" direction="out" />
+			<arg name='Position' type='x'/>
 		</signal>
 		<property name='PlaybackStatus' type='s' access='read'/>
 		<property name='LoopStatus' type='s' access='readwrite'/>

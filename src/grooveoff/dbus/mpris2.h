@@ -1,146 +1,173 @@
 /*
- * GrooveOff - Offline Grooveshark.com music
- * Copyright (C) 2013  Giuseppe Calà <jiveaxe@gmail.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
- */
+    GrooveOff - Offline Grooveshark.com music
+    Copyright (C) 2013-2014  Giuseppe Calà <jiveaxe@gmail.com>
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 
 #ifndef MPRIS2_H
 #define MPRIS2_H
 
+#include <PlaylistItem.h>
 
+#include <QMetaObject>
 #include <QObject>
-#include <QVariant>
-#include <QVariantMap>
-#include <QDBusObjectPath>
-#include <phononnamespace.h>
+#include <QtDBus>
+#include <phonon/phononnamespace.h>
+
+typedef QList<QVariantMap> TrackMetadata;
+typedef QList<QDBusObjectPath> TrackIds;
+Q_DECLARE_METATYPE(TrackMetadata)
+
+namespace mpris {
+
+class Mpris1;
 
 class Mpris2 : public QObject
 {
-Q_OBJECT
+    Q_OBJECT
 
 public:
-    Mpris2(QObject* parent);
-    ~Mpris2();
+    //org.mpris.MediaPlayer2 MPRIS 2.0 Root interface
+    Q_PROPERTY( bool CanQuit READ CanQuit )
+    Q_PROPERTY( bool CanRaise READ CanRaise )
+    Q_PROPERTY( bool HasTrackList READ HasTrackList )
+    Q_PROPERTY( QString Identity READ Identity )
+    Q_PROPERTY( QString DesktopEntry READ DesktopEntry )
+    Q_PROPERTY( QStringList SupportedUriSchemes READ SupportedUriSchemes )
+    Q_PROPERTY( QStringList SupportedMimeTypes READ SupportedMimeTypes )
 
-    // MPRIS DBus Methods
+    //org.mpris.MediaPlayer2 MPRIS 2.2 Root interface
+    Q_PROPERTY( bool CanSetFullscreen READ CanSetFullscreen )
+    Q_PROPERTY( bool Fullscreen READ Fullscreen WRITE SetFullscreen )
 
-    // org.mpris.MediaPlayer2
+    //org.mpris.MediaPlayer2.Player MPRIS 2.0 Player interface
+    Q_PROPERTY( QString PlaybackStatus READ PlaybackStatus )
+    Q_PROPERTY( double Rate READ Rate WRITE SetRate )
+    Q_PROPERTY( QVariantMap Metadata READ Metadata )
+    Q_PROPERTY( double Volume READ Volume WRITE SetVolume )
+    Q_PROPERTY( qlonglong Position READ Position )
+    Q_PROPERTY( double MinimumRate READ MinimumRate )
+    Q_PROPERTY( double MaximumRate READ MaximumRate )
+    Q_PROPERTY( bool CanGoNext READ CanGoNext )
+    Q_PROPERTY( bool CanGoPrevious READ CanGoPrevious )
+    Q_PROPERTY( bool CanPlay READ CanPlay )
+    Q_PROPERTY( bool CanPause READ CanPause )
+    Q_PROPERTY( bool CanSeek READ CanSeek )
+    Q_PROPERTY( bool CanControl READ CanControl )
 
-    Q_PROPERTY( bool CanQuit READ canQuit )
-    bool canQuit() const;
+    //org.mpris.MediaPlayer2.TrackList MPRIS 2.0 Player interface
+    Q_PROPERTY( TrackIds Tracks READ Tracks )
+    Q_PROPERTY( bool CanEditTracks READ CanEditTracks )
 
-    Q_PROPERTY( bool CanRaise READ canRaise )
-    bool canRaise() const;
+    Mpris2(Mpris1* mpris1, QObject* parent = 0);
 
-    Q_PROPERTY( QString DesktopEntry READ desktopEntry )
-    QString desktopEntry() const;
+    // Root Properties
+    bool CanQuit() const;
+    bool CanRaise() const;
+    bool HasTrackList() const;
+    QString Identity() const;
+    QString DesktopEntry() const;
+    QStringList SupportedUriSchemes() const;
+    QStringList SupportedMimeTypes() const;
 
-    Q_PROPERTY( bool HasTrackList READ hasTrackList )
-    bool hasTrackList() const;
+    // Root Properties added in MPRIS 2.2
+    bool CanSetFullscreen() const { return false; }
+    bool Fullscreen() const { return false; }
+    void SetFullscreen(bool) {}
 
-    Q_PROPERTY( QString Identity READ identity )
-    QString identity() const;
-
-    Q_PROPERTY( QStringList SupportedMimeTypes READ supportedMimeTypes )
-    QStringList supportedMimeTypes() const;
-
-    Q_PROPERTY( QStringList SupportedUriSchemes READ supportedUriSchemes )
-    QStringList supportedUriSchemes() const;
-
-    // org.mpris.MediaPlayer2.Player
-
-    Q_PROPERTY( bool CanControl READ canControl )
-    bool canControl() const;
-
-    Q_PROPERTY( bool CanGoNext READ canGoNext )
-    bool canGoNext() const;
-
-    Q_PROPERTY( bool CanGoPrevious READ canGoPrevious )
-    bool canGoPrevious() const;
-
-    Q_PROPERTY( bool CanPause READ canPause )
-    bool canPause() const;
-
-    Q_PROPERTY( bool CanPlay READ canPlay )
-    bool canPlay() const;
-
-    Q_PROPERTY( bool CanSeek READ canSeek )
-    bool canSeek() const;
-
-//     Q_PROPERTY( QString LoopStatus READ loopStatus WRITE setLoopStatus )
-//     QString loopStatus() const;
-//     void setLoopStatus( const QString& value );
-
-    Q_PROPERTY( double MaximumRate READ maximumRate )
-    double maximumRate() const;
-
-    Q_PROPERTY( QVariantMap Metadata READ metadata )
-    QVariantMap metadata() const;
-
-    Q_PROPERTY( double MinimumRate READ minimumRate )
-    double minimumRate() const;
-
-    Q_PROPERTY( QString PlaybackStatus READ playbackStatus )
-    QString playbackStatus() const;
-
-    Q_PROPERTY( qlonglong Position READ position )
-    qlonglong position() const;
-
-    Q_PROPERTY( double Rate READ rate WRITE setRate )
-    double rate() const;
-    void setRate( double value );
-
-//     Q_PROPERTY( bool Shuffle READ shuffle WRITE setShuffle )
-//     bool shuffle() const;
-//     void setShuffle( bool value );
-
-    Q_PROPERTY( double Volume READ volume WRITE setVolume )
-    double volume() const;
-    void setVolume( double value );
-
-public slots:
-
-    // org.mpris.MediaPlayer2
+    // Methods
     void Raise();
     void Quit();
 
-    // org.mpris.MediaPlayer2.Player
+    // Player Properties
+    QString PlaybackStatus() const;
+    double Rate() const;
+    void SetRate(double value);
+    QVariantMap Metadata() const;
+    double Volume() const;
+    void SetVolume(double value);
+    qlonglong Position() const;
+    double MaximumRate() const;
+    double MinimumRate() const;
+    bool CanGoNext() const;
+    bool CanGoPrevious() const;
+    bool CanPlay() const;
+    bool CanPause() const;
+    bool CanSeek() const;
+    bool CanControl() const;
+
+    // Methods
     void Next();
-    void OpenUri( const QString& Uri );
-    void Pause();
-    void Play();
-    void PlayPause();
     void Previous();
-    void Seek( qlonglong ms );
-    void SetPosition( const QDBusObjectPath& TrackId, qlonglong Position );
+    void Pause();
+    void PlayPause();
     void Stop();
+    void Play();
+    void Seek(qlonglong offset);
+    void SetPosition(const QDBusObjectPath& trackId, qlonglong offset);
+    void OpenUri(const QString& uri);
 
+    // TrackList Properties
+    TrackIds Tracks() const;
+    bool CanEditTracks() const;
 
-private slots:
-    void onVolumeChanged(int);
-    void engineStateChanged(Phonon::State, Phonon::State);
-    void slot_engineMediaChanged();
-    void onSeeked( qint64 );
-
-private:
-    void notifyPropertyChanged(const QString& propertyName);
+    // Methods
+    TrackMetadata GetTracksMetadata(const TrackIds& tracks) const;
+    void AddTrack(const QString& uri, const QDBusObjectPath& afterTrack, bool setAsCurrent);
+    void RemoveTrack(const QDBusObjectPath& trackId);
+    void GoTo(const QDBusObjectPath& trackId);
 
 signals:
-    void Seeked( qlonglong Position );
+    // Player
+    void Seeked(qint64 position);
+
+    // TrackList
+    void TrackListReplaced(const TrackIds& Tracks, QDBusObjectPath CurrentTrack);
+    void TrackAdded(const TrackMetadata& Metadata, QDBusObjectPath AfterTrack);
+    void TrackRemoved(const QDBusObjectPath& trackId);
+    void TrackMetadataChanged(const QDBusObjectPath& trackId, const TrackMetadata& metadata);
+
+    void RaiseMainWindow();
+
+private slots:
+    void EngineStateChanged(Phonon::State newState, Phonon::State oldState);
+    void VolumeChanged(int);
+
+    void CurrentSongChanged();
+
+private:
+    void EmitNotification(const QString& name);
+    void EmitNotification(const QString& name, const QVariant& val);
+
+    QString PlaybackStatus(Phonon::State state) const;
+
+    QString current_track_id() const;
+
+    QString DesktopEntryAbsolutePath() const;
+
+private:
+    static const char* kMprisObjectPath;
+    static const char* kServiceName;
+    static const char* kFreedesktopPath;
+
+    QVariantMap last_metadata_;
+
+    Mpris1* mpris1_;
 };
 
+} // namespace mpris
 
-#endif // MPRIS2_H
+#endif

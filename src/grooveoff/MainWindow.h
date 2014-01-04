@@ -23,6 +23,11 @@
 #include "../libgrooveshark/apirequest.h"
 #include "PlaylistItem.h"
 
+// Dbus & remote
+#include "dbus/mpris.h"
+#include "dbus/mpris2.h"
+#include "dbus/mpris_common.h"
+
 #include <QMainWindow>
 #include <QNetworkCookie>
 #include <QNetworkCookieJar>
@@ -49,10 +54,6 @@ class DownloadItem;
 class MatchItemListDelegate;
 class CoverManager;
 class Spinner;
-
-// Dbus & Mpris
-class DbusNotification;
-class MprisManager;
 
 namespace Ui {
 class MainWindow;
@@ -131,8 +132,7 @@ private:
     QAction     *m_compactMenuAction;
     QMenu       *m_compactMainMenu;
 
-    MprisManager *m_mpris_manager;
-    DbusNotification *m_dbus_notifier;
+    mpris::Mpris *mpris_;
 
     // Methods
     void setupUi();
