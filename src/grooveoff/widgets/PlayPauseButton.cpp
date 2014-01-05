@@ -21,6 +21,7 @@
 
 #include <QMouseEvent>
 #include <QPainter>
+#include <QDebug>
 
 
 PlayPauseButton::PlayPauseButton( QWidget *parent ) : IconButton( parent )
@@ -33,37 +34,23 @@ PlayPauseButton::PlayPauseButton( QWidget *parent ) : IconButton( parent )
 
 void PlayPauseButton::enterEvent( QEvent * )
 {
-    if(!m_isEnabled)
-        setIcon( m_icon.play[2], 3 );
-    else
-        setIcon( m_isPlaying ? m_icon.pause[1] : m_icon.play[1], 3 );
+    setIcon( icon(), 3);
 }
 
 void PlayPauseButton::leaveEvent( QEvent * )
 {
-    if(!m_isEnabled)
-        setIcon( m_icon.play[2], 3 );
-    else
-        setIcon( m_isPlaying ? m_icon.pause[0] : m_icon.play[0], 6 );
+    setIcon( icon(), m_isEnabled ? 6 : 3);
 }
 
 void PlayPauseButton::mousePressEvent( QMouseEvent *me )
 {
-    if(!m_isEnabled)
-        setIcon( m_icon.play[2], 3 );
-    else
-        setIcon( m_isPlaying ? m_icon.pause[0] : m_icon.play[0] );
-
+    setIcon( icon(), m_isEnabled ? 0 : 3);
     IconButton::mousePressEvent( me );
 }
 
 void PlayPauseButton::mouseReleaseEvent( QMouseEvent *me )
 {
-    if(!m_isEnabled)
-        setIcon( m_icon.play[2], 3 );
-    else
-        setIcon( m_isPlaying ? m_icon.pause[1] : m_icon.play[1] );
-
+    setIcon( icon(), m_isEnabled ? 0 : 3);
     IconButton::mouseReleaseEvent( me );
 }
 
@@ -97,7 +84,7 @@ void PlayPauseButton::reloadContent( const QSize &sz )
             m_icon.pause[i] = m_icon.pause[i].mirrored( true, false );
         }
     }
-    setIcon( m_isEnabled ? ( m_isPlaying ? m_icon.pause[underMouse()] : m_icon.play[underMouse()] ) : m_icon.play[2] );
+    setIcon( icon() );
 }
 
 void PlayPauseButton::setPlaying( bool playing )
@@ -108,12 +95,27 @@ void PlayPauseButton::setPlaying( bool playing )
     setToolTip( playing ? trUtf8( "Pause" ) : trUtf8( "Play" ) );
 
     m_isPlaying = playing;
-    setIcon( m_isPlaying ? m_icon.pause[underMouse()] : m_icon.play[underMouse()], 4 );
+    setIcon( icon(), 4 );
 }
 
 void PlayPauseButton::setButtonEnabled(bool ok)
 {
+    qDebug() << (ok ? "abilitato" : "disabilitato");
     m_isEnabled = ok;
+    setIcon( icon() );
 }
+
+QImage PlayPauseButton::icon()
+{
+    if(m_isEnabled) {
+        if(m_isPlaying)
+            return m_icon.pause[underMouse()];
+        else
+            return m_icon.play[underMouse()];
+    }
+
+    return m_icon.play[2];
+}
+
 
 

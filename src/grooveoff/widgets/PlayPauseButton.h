@@ -56,6 +56,8 @@ private:
     } m_icon;
 
     bool m_isEnabled;
+
+    QImage icon();
 };
 
 
