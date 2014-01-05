@@ -54,8 +54,7 @@ DownloadItem::DownloadItem(const PlaylistItemPtr &playlistItemPtr, QWidget *pare
     setupConnections();
 
     if(QFile::exists(playlistItem_->path() + playlistItem_->fileName())) {
-        emit downloadFinished();
-        downloadState_ = GrooveOff::FinishedState;
+        downloadFinished(true);
     }
     else {
         downloadState_ = GrooveOff::QueuedState;
@@ -252,7 +251,6 @@ void DownloadItem::stateChanged()
             ui_->infoIconWidget->setVisible(false);
             ui_->infoMessageWidget->setVisible(false);
             ui_->openFolderWidget->setVisible(false);
-            emit reloadPlaylist();
             break;
         case GrooveOff::AbortedState:
             ui_->playWidget->setVisible(false);
@@ -339,12 +337,13 @@ void DownloadItem::downloadFinished(bool ok)
     if(ok) {
         downloadState_ = GrooveOff::FinishedState;
         qDebug() << "GrooveOff ::" << "Finished download of" << playlistItem_->song()->songName();
-        stateChanged();
+        emit reloadPlaylist();
     } else {
         downloadState_ = GrooveOff::ErrorState;
         qDebug() << "GrooveOff :: Error downloading" << playlistItem_->song()->songName() << "::" << downloader_->errorString();
-        stateChanged();
     }
+
+    stateChanged();
 
     emit downloadFinished();
     emit playlistItem_.data()->requireDownloadIconReload();

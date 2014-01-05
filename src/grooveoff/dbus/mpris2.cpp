@@ -109,7 +109,6 @@ void Mpris2::EmitNotification(const QString& name)
     else if (name == "Position")        value = Position();
     else if (name == "CanGoNext")       value = CanGoNext();
     else if (name == "CanGoPrevious")   value = CanGoPrevious();
-    else if (name == "Position")        value = Position();
     else if (name == "CanPause")        value = CanPause();
 
     if (value.isValid())

@@ -1065,6 +1065,7 @@ void MainWindow::loadSession()
     }
 
     ui_->downloadList->setAutoScroll(true);
+    ui_->downloadList->reloadPlaylist();
 }
 
 void MainWindow::parsePlaylistItem(const QDomElement& element, PlaylistItemPtr item)

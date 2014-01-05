@@ -205,7 +205,12 @@ void PlayerWidget::tick(qint64 elapsedTime)
 void PlayerWidget::pauseResumePlaying()
 {
     playedRemoved = false;
-    The::audioEngine()->playPause();
+    if(The::audioEngine()->currentTrack())
+        The::audioEngine()->playPause();
+    else {
+        if(The::playlist()->count() > 0)
+            The::audioEngine()->playItem(The::playlist()->item(0));
+    }
 }
 
 void PlayerWidget::toggleTimeLabel()
@@ -260,9 +265,11 @@ void PlayerWidget::reloadPreviousNextButtons()
 {
     if(The::playlist()->count() == 0)
         ui_->stackedWidget->setCurrentIndex(0);
-
-    ui_->nextButton->setButtonEnabled(The::audioEngine()->canGoNext());
-    ui_->previousButton->setButtonEnabled(The::audioEngine()->canGoPrevious());
+    else {
+        ui_->playPauseButton->setButtonEnabled(true);
+        ui_->nextButton->setButtonEnabled(The::audioEngine()->canGoNext());
+        ui_->previousButton->setButtonEnabled(The::audioEngine()->canGoPrevious());
+    }
 }
 
 void PlayerWidget::removedPlayingTrack()
