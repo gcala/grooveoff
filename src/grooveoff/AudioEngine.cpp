@@ -45,11 +45,6 @@ AudioEngine::AudioEngine()
     // The AudioOutput class is used to send data to audio output devices
     audioOutput_ = new Phonon::AudioOutput(Phonon::MusicCategory, this);
 
-    audioPath_ = Phonon::createPath( mediaObject_, audioOutput_ );
-
-    // Supply with the MediaObject object seekSlider should control
-//    ui_->seekSlider->setMediaObject(mediaObject_);
-
     mediaObject_->setTickInterval(1000);
 
     state_ = Phonon::StoppedState;
@@ -209,10 +204,9 @@ bool AudioEngine::canGoPrevious()
         int currentIndex = The::playlist()->row(currentTrack_);
         if(currentIndex > 0)
             return true;
-        return false;
-    } else {
-        return false;
     }
+
+    return false;
 }
 
 void AudioEngine::next()
@@ -315,7 +309,6 @@ void AudioEngine::slotMutedChanged(bool mute)
 {
     emit muteStateChanged( mute );
 }
-
 
 bool AudioEngine::isMuted() const
 {

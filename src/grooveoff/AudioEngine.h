@@ -65,8 +65,6 @@ public:
     void seek( int ms ); // for compatibility with seekbar in audiocontrols
     void playItem(PlaylistItemPtr track);
     void removingTrack(PlaylistItemPtr track);
-//     void setRepeatMode();
-//     void setShuffled( bool enabled );
     Phonon::MediaObject * mediaObject() { return mediaObject_; }
 
     /**
@@ -92,12 +90,8 @@ signals:
     void paused();
     void resumed();
     void sourceChanged();
-
-    //void audioDataReady( QMap< AudioEngine::AudioChannel, QVector<qint16> > data );
     void stopAfterTrackChanged();
-
     void seeked( qint64 ms );
-
     void shuffleModeChanged( bool enabled );
     void repeatModeChanged();
     void controlStateChanged();
@@ -137,12 +131,10 @@ private:
     AudioEngine();
 
     PlaylistItemPtr currentTrack_;
-    PlaylistItemPtr oldTrack_;
     Phonon::State state_;
 
     Phonon::MediaObject* mediaObject_;
     Phonon::AudioOutput* audioOutput_;
-    Phonon::Path audioPath_;
 
     int m_volume;
 };
