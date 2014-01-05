@@ -155,7 +155,8 @@ void PlayerWidget::stateChanged(Phonon::State newState, Phonon::State oldState)
         else
             ui_->stackedWidget->setCurrentIndex(1);
         if(playedRemoved) {
-            ui_->playPauseButton->setButtonEnabled(false);
+            if(!The::playlist()->count())
+                ui_->playPauseButton->setButtonEnabled(false);
         }
         ui_->playPauseButton->setPlaying(false);
         ui_->timeLabel->setText("00:00");

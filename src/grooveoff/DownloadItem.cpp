@@ -136,6 +136,7 @@ void DownloadItem::setupUi()
     ui_->openFolderButton->setIcon(QIcon::fromTheme(QLatin1String("folder-open")));
     ui_->openFolderButton->setToolTip(trUtf8("Open folder"));
     ui_->openFolderButton->setFixedSize(QSize(Utility::buttonSize,Utility::buttonSize));
+    ui_->playButton->setFixedSize(QSize(Utility::buttonSize,Utility::buttonSize));
 }
 
 /*!
@@ -186,7 +187,7 @@ void DownloadItem::stateChanged()
             ui_->multiFuncButton->setToolTip(trUtf8("Remove from queue"));
             ui_->animationWidget->setVisible(false);
             ui_->barsWidget->stopAnimation();
-            ui_->playButton->setVisible(false);
+            ui_->playWidget->setVisible(false);
             ui_->progressWidget->setVisible(false);
             ui_->openFolderWidget->setVisible(false);
             if(QIcon::hasThemeIcon(QLatin1String("download-later")))
@@ -206,13 +207,13 @@ void DownloadItem::stateChanged()
             if(playerState_ == Phonon::StoppedState) {
                 ui_->animationWidget->setVisible(false);
                 ui_->barsWidget->stopAnimation();
-                ui_->playButton->setVisible(true);
+                ui_->playWidget->setVisible(true);
             } else if(playerState_ == Phonon::PlayingState) {
-                ui_->playButton->setVisible(false);
+                ui_->playWidget->setVisible(false);
                 ui_->animationWidget->setVisible(true);
                 ui_->barsWidget->startAnimation();
             } else {
-                ui_->playButton->setVisible(false);
+                ui_->playWidget->setVisible(false);
                 ui_->animationWidget->setVisible(true);
                 ui_->barsWidget->stopAnimation();
             }
@@ -228,15 +229,15 @@ void DownloadItem::stateChanged()
                                           QIcon(QLatin1String(":/resources/user-trash.png"))));
             ui_->multiFuncButton->setToolTip(trUtf8("Delete this song"));
             if(playerState_ == Phonon::StoppedState) {
-                ui_->playButton->setVisible(true);
+                ui_->playWidget->setVisible(true);
                 ui_->animationWidget->setVisible(false);
                 ui_->barsWidget->stopAnimation();
             } else if(playerState_ == Phonon::PlayingState) {
-                ui_->playButton->setVisible(false);
+                ui_->playWidget->setVisible(false);
                 ui_->animationWidget->setVisible(true);
                 ui_->barsWidget->startAnimation();
             } else {
-                ui_->playButton->setVisible(false);
+                ui_->playWidget->setVisible(false);
                 ui_->animationWidget->setVisible(true);
                 ui_->barsWidget->stopAnimation();
             }
@@ -246,7 +247,7 @@ void DownloadItem::stateChanged()
             ui_->openFolderWidget->setVisible(false);
             break;
         case GrooveOff::AbortedState:
-            ui_->playButton->setVisible(false);
+            ui_->playWidget->setVisible(false);
             ui_->animationWidget->setVisible(false);
             ui_->barsWidget->stopAnimation();
             ui_->progressWidget->setVisible(false);
@@ -266,7 +267,7 @@ void DownloadItem::stateChanged()
             break;
         case GrooveOff::DeletedState:
             ui_->multiFuncWidget->setVisible(false);
-            ui_->playButton->setVisible(false);
+            ui_->playWidget->setVisible(false);
             ui_->animationWidget->setVisible(false);
             ui_->barsWidget->stopAnimation();
             ui_->progressWidget->setVisible(false);
@@ -279,7 +280,7 @@ void DownloadItem::stateChanged()
             emit reloadPlaylist();
             break;
         default:
-            ui_->playButton->setVisible(false);
+            ui_->playWidget->setVisible(false);
             ui_->animationWidget->setVisible(false);
             ui_->barsWidget->stopAnimation();
             ui_->progressWidget->setVisible(false);

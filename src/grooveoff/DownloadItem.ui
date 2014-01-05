@@ -237,7 +237,7 @@
     </widget>
    </item>
    <item>
-    <widget class="PlayPauseButton" name="playButton" native="true">
+    <widget class="QWidget" name="playWidget" native="true">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
        <horstretch>0</horstretch>
@@ -256,6 +256,11 @@
        <height>30</height>
       </size>
      </property>
+     <layout class="QGridLayout" name="gridLayout_3">
+      <item row="0" column="0">
+       <widget class="PlayPauseButton" name="playButton" native="true"/>
+      </item>
+     </layout>
     </widget>
    </item>
    <item>

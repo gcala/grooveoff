@@ -198,10 +198,9 @@ bool AudioEngine::canGoNext()
             if(currentIndex < (The::playlist()->count() - 1))
                 return true;
         }
-        return false;
-    } else {
-        return false;
     }
+
+    return false;
 }
 
 bool AudioEngine::canGoPrevious()
