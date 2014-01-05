@@ -131,6 +131,7 @@ private:
     AudioEngine();
 
     PlaylistItemPtr currentTrack_;
+    PlaylistItemPtr oldTrack_;
     Phonon::State state_;
 
     Phonon::MediaObject* mediaObject_;

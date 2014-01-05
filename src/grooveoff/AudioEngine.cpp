@@ -89,6 +89,7 @@ void AudioEngine::playItem(PlaylistItemPtr track)
         currentTrack_->setState(Phonon::StoppedState);
 
     currentTrack_ = track;
+    oldTrack_ = track;
     mediaObject_->setCurrentSource(QUrl::fromLocalFile(currentTrack_->path() + QDir::separator() + currentTrack_->fileName()));
     play();
 }
@@ -187,8 +188,8 @@ qint64 AudioEngine::remainingTime() const
 
 bool AudioEngine::canGoNext()
 {
-    if(currentTrack_) {
-        int currentIndex = The::playlist()->row(currentTrack_);
+    if(oldTrack_) {
+        int currentIndex = The::playlist()->row(oldTrack_);
         if(currentIndex >= 0) {
             if(currentIndex < (The::playlist()->count() - 1))
                 return true;
@@ -200,8 +201,8 @@ bool AudioEngine::canGoNext()
 
 bool AudioEngine::canGoPrevious()
 {
-    if(currentTrack_) {
-        int currentIndex = The::playlist()->row(currentTrack_);
+    if(oldTrack_) {
+        int currentIndex = The::playlist()->row(oldTrack_);
         if(currentIndex > 0)
             return true;
     }
@@ -212,11 +213,12 @@ bool AudioEngine::canGoPrevious()
 void AudioEngine::next()
 {
     if(canGoNext()) {
-        PlaylistItemPtr track = The::playlist()->item(The::playlist()->row(currentTrack_) + 1);
+        PlaylistItemPtr track = The::playlist()->item(The::playlist()->row(oldTrack_) + 1);
         if(currentTrack_)
             currentTrack_->setState(Phonon::StoppedState);
 
         currentTrack_ = track;
+        oldTrack_ = track;
         mediaObject_->setCurrentSource(QUrl::fromLocalFile(currentTrack_->path() + QDir::separator() + currentTrack_->fileName()));
         play();
     }
@@ -230,6 +232,7 @@ void AudioEngine::previous()
             currentTrack_->setState(Phonon::StoppedState);
 
         currentTrack_ = track;
+        oldTrack_ = track;
         mediaObject_->setCurrentSource(QUrl::fromLocalFile(currentTrack_->path() + QDir::separator() + currentTrack_->fileName()));
         play();
     }
@@ -240,6 +243,7 @@ void AudioEngine::removingTrack(PlaylistItemPtr track)
     if(currentTrack_ == track) {
         emit removedPlayingTrack();
         mediaObject_->stop();
+        currentTrack_ = PlaylistItemPtr();
         next();
     }
 }
