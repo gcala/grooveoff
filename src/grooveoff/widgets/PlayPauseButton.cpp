@@ -100,7 +100,6 @@ void PlayPauseButton::setPlaying( bool playing )
 
 void PlayPauseButton::setButtonEnabled(bool ok)
 {
-    qDebug() << (ok ? "abilitato" : "disabilitato");
     m_isEnabled = ok;
     setIcon( icon() );
 }

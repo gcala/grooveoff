@@ -84,5 +84,6 @@ void Playlist::removeItem(PlaylistItemPtr item)
             break;
         }
     }
+    emit playlistChanged();
 }
 
