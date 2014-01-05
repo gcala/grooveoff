@@ -110,8 +110,9 @@ void DownloadItem::setupUi()
     ui_->artist_albumLabel->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred); // fix hidden label
 
     ui_->multiFuncButton->setFixedSize(QSize(Utility::buttonSize,Utility::buttonSize));
-    ui_->playButton->setFixedSize(QSize(Utility::buttonSize,Utility::buttonSize));
-    ui_->playButton->setEnabled(false);
+
+    ui_->playButton->setButtonEnabled(false);
+    ui_->playButton->setPlaying(false);
 
     ui_->barsWidget->setFixedSize(QSize(Utility::buttonSize,Utility::buttonSize));
 
@@ -125,14 +126,12 @@ void DownloadItem::setupUi()
     ui_->multiFuncLayout->setContentsMargins(0,4,0,4);
     ui_->infoIconLayout->setContentsMargins(0,4,0,4);
     ui_->infoMessageLayout->setContentsMargins(0,4,0,4);
-    ui_->playLayout->setContentsMargins(0,4,0,4);
     ui_->openFolderLayout->setContentsMargins(0,4,0,4);
     ui_->progressLayout->setContentsMargins(0,4,0,4);
     ui_->songWidgetLayout->setContentsMargins(1,1,0,2);
     ui_->songWidgetLayout->setHorizontalSpacing(5);
     ui_->infoIcon->setFixedSize(QSize(Utility::buttonSize,Utility::buttonSize));
     ui_->multiFuncButton->setIconSize(QSize(16,16));
-    ui_->playButton->setIconSize(QSize(16,16));
     ui_->openFolderButton->setIconSize(QSize(16,16));
     ui_->openFolderButton->setIcon(QIcon::fromTheme(QLatin1String("folder-open")));
     ui_->openFolderButton->setToolTip(trUtf8("Open folder"));
@@ -145,7 +144,7 @@ void DownloadItem::setupUi()
 */
 void DownloadItem::setupConnections()
 {
-    connect(ui_->playButton, SIGNAL(clicked()), this, SLOT(playSong()));
+    connect(ui_->playButton, SIGNAL(playButtonClicked()), this, SLOT(playSong()));
     connect(ui_->multiFuncButton, SIGNAL(clicked()), this, SLOT(multiFuncBtnClicked()));
     connect(ui_->multiFuncButton, SIGNAL(countdownFinished()), this, SLOT(removeSong()));
     connect(ui_->openFolderButton, SIGNAL(clicked()), this, SLOT(openFolder()));
@@ -187,7 +186,7 @@ void DownloadItem::stateChanged()
             ui_->multiFuncButton->setToolTip(trUtf8("Remove from queue"));
             ui_->animationWidget->setVisible(false);
             ui_->barsWidget->stopAnimation();
-            ui_->playWidget->setVisible(false);
+            ui_->playButton->setVisible(false);
             ui_->progressWidget->setVisible(false);
             ui_->openFolderWidget->setVisible(false);
             if(QIcon::hasThemeIcon(QLatin1String("download-later")))
@@ -207,16 +206,13 @@ void DownloadItem::stateChanged()
             if(playerState_ == Phonon::StoppedState) {
                 ui_->animationWidget->setVisible(false);
                 ui_->barsWidget->stopAnimation();
-                ui_->playWidget->setVisible(true);
-                ui_->playButton->setIcon(QIcon::fromTheme(QLatin1String("media-playback-start"),
-                                         QIcon(QLatin1String(":/resources/media-playback-start.png"))));
-                ui_->playButton->setToolTip(trUtf8("Play"));
+                ui_->playButton->setVisible(true);
             } else if(playerState_ == Phonon::PlayingState) {
-                ui_->playWidget->setVisible(false);
+                ui_->playButton->setVisible(false);
                 ui_->animationWidget->setVisible(true);
                 ui_->barsWidget->startAnimation();
             } else {
-                ui_->playWidget->setVisible(false);
+                ui_->playButton->setVisible(false);
                 ui_->animationWidget->setVisible(true);
                 ui_->barsWidget->stopAnimation();
             }
@@ -226,24 +222,21 @@ void DownloadItem::stateChanged()
             ui_->openFolderWidget->setVisible(false);
             break;
         case GrooveOff::FinishedState:
-            ui_->playButton->setEnabled(true);
+            ui_->playButton->setButtonEnabled(true);
             ui_->multiFuncWidget->setVisible(false);
             ui_->multiFuncButton->setIcon(QIcon::fromTheme(QLatin1String("user-trash"),
                                           QIcon(QLatin1String(":/resources/user-trash.png"))));
             ui_->multiFuncButton->setToolTip(trUtf8("Delete this song"));
             if(playerState_ == Phonon::StoppedState) {
-                ui_->playWidget->setVisible(true);
+                ui_->playButton->setVisible(true);
                 ui_->animationWidget->setVisible(false);
                 ui_->barsWidget->stopAnimation();
-                ui_->playButton->setIcon(QIcon::fromTheme(QLatin1String("media-playback-start"),
-                                         QIcon(QLatin1String(":/resources/media-playback-start.png"))));
-                ui_->playButton->setToolTip(trUtf8("Play"));
             } else if(playerState_ == Phonon::PlayingState) {
-                ui_->playWidget->setVisible(false);
+                ui_->playButton->setVisible(false);
                 ui_->animationWidget->setVisible(true);
                 ui_->barsWidget->startAnimation();
             } else {
-                ui_->playWidget->setVisible(false);
+                ui_->playButton->setVisible(false);
                 ui_->animationWidget->setVisible(true);
                 ui_->barsWidget->stopAnimation();
             }
@@ -253,7 +246,7 @@ void DownloadItem::stateChanged()
             ui_->openFolderWidget->setVisible(false);
             break;
         case GrooveOff::AbortedState:
-            ui_->playWidget->setVisible(false);
+            ui_->playButton->setVisible(false);
             ui_->animationWidget->setVisible(false);
             ui_->barsWidget->stopAnimation();
             ui_->progressWidget->setVisible(false);
@@ -273,7 +266,7 @@ void DownloadItem::stateChanged()
             break;
         case GrooveOff::DeletedState:
             ui_->multiFuncWidget->setVisible(false);
-            ui_->playWidget->setVisible(false);
+            ui_->playButton->setVisible(false);
             ui_->animationWidget->setVisible(false);
             ui_->barsWidget->stopAnimation();
             ui_->progressWidget->setVisible(false);
@@ -286,7 +279,7 @@ void DownloadItem::stateChanged()
             emit reloadPlaylist();
             break;
         default:
-            ui_->playWidget->setVisible(false);
+            ui_->playButton->setVisible(false);
             ui_->animationWidget->setVisible(false);
             ui_->barsWidget->stopAnimation();
             ui_->progressWidget->setVisible(false);
@@ -359,7 +352,7 @@ void DownloadItem::setProgress(const qint64 &bytesReceived, const qint64 &bytesT
 {
     // enable play button if downloaded at least 1MiB
     if(bytesReceived > 1024*1024)
-        ui_->playButton->setEnabled(true);
+        ui_->playButton->setButtonEnabled(true);
 
     ui_->progressBar->setValue(bytesReceived);
     ui_->progressBar->setMaximum(bytesTotal);

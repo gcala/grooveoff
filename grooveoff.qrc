@@ -2,7 +2,6 @@
     <qresource prefix="/">
         <file>resources/circle_green.svg</file>
         <file>resources/circle_red.svg</file>
-        <file>resources/busywidget.gif</file>
         <file>resources/gplv3-127x51.png</file>
         <file>resources/grooveoff.png</file>
         <file>resources/btn_donate_LG.gif</file>
@@ -27,9 +26,6 @@
         <file>resources/user-trash.png</file>
         <file>resources/user-trash-full.png</file>
         <file>resources/emblem-new.png</file>
-        <file>resources/media-playback-pause.png</file>
-        <file>resources/media-playback-start.png</file>
-        <file>resources/media-playback-stop.png</file>
         <file>resources/media-optical.png</file>
         <file>resources/download-later.png</file>
         <file>resources/edit-clear.png</file>

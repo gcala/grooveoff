@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>572</width>
-    <height>52</height>
+    <height>55</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -237,7 +237,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QWidget" name="playWidget" native="true">
+    <widget class="PlayPauseButton" name="playButton" native="true">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
        <horstretch>0</horstretch>
@@ -256,24 +256,6 @@
        <height>30</height>
       </size>
      </property>
-     <layout class="QGridLayout" name="playLayout">
-      <property name="leftMargin">
-       <number>0</number>
-      </property>
-      <property name="rightMargin">
-       <number>0</number>
-      </property>
-      <item row="0" column="0">
-       <widget class="QPushButton" name="playButton">
-        <property name="text">
-         <string/>
-        </property>
-        <property name="flat">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-     </layout>
     </widget>
    </item>
    <item>
@@ -326,6 +308,12 @@
    <class>PlayAnimationWidget</class>
    <extends>QWidget</extends>
    <header location="global">widgets/PlayAnimationWidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>PlayPauseButton</class>
+   <extends>QWidget</extends>
+   <header>widgets/PlayPauseButton.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
