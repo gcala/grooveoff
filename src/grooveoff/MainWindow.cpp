@@ -774,16 +774,6 @@ void MainWindow::loadSettings()
     The::audioEngine()->setMuted(settings.value(QLatin1String("muted"), false).toBool());
 
     playerWidget->setTimerState((GrooveOff::TimerState)settings.value(QLatin1String("timerState"), GrooveOff::ElapsedState).toInt());
-
-//     if(settings.value(QLatin1String("enableMpris"), false).toBool()) {
-//         if(m_mpris_manager == 0) {
-//             m_mpris_manager   = new MprisManager(this);
-//             m_mpris_manager->reloadSettings();
-//         }
-//     } else {
-//         if(m_mpris_manager)
-//             delete m_mpris_manager;
-//     }
 }
 
 /*!

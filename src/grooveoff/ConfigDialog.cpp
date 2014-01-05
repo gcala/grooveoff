@@ -141,7 +141,6 @@ void ConfigDialog::restoreDefaults()
     ui_->loadCovers->setChecked(true);
     ui_->numResults->setValue(0);
     ui_->maxDownloads->setValue(5);
-    ui_->mpris->setChecked(false);
 }
 
 /*!
@@ -160,7 +159,6 @@ void ConfigDialog::saveSettings()
     settings.setValue(QLatin1String("numResults"), ui_->numResults->value());
     settings.setValue(QLatin1String("maxDownloads"), ui_->maxDownloads->value());
     settings.setValue(QLatin1String("saveDestination"), ui_->saveDestination->isChecked());
-    settings.setValue(QLatin1String("enableMpris"), ui_->mpris->isChecked());
 }
 
 /*!
@@ -219,6 +217,5 @@ void ConfigDialog::loadSettings()
     ui_->numResults->setValue(settings.value(QLatin1String("numResults"), 0).toInt());
     ui_->maxDownloads->setValue(settings.value(QLatin1String("maxDownloads"), 5).toInt());
     ui_->saveDestination->setChecked(settings.value(QLatin1String("saveDestination"), false).toBool());
-    ui_->mpris->setChecked(settings.value(QLatin1String("enableMpris"), false).toBool());
 }
 
