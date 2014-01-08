@@ -54,11 +54,6 @@ void PlaylistItem::requireCoverReload()
     emit reloadCover();
 }
 
-void PlaylistItem::requireDownloadIconReload()
-{
-    emit reloadIcon();
-}
-
 QString PlaylistItem::path() const
 {
     return path_;

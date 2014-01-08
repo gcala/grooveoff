@@ -66,16 +66,31 @@ public:
     void clear() { setAllCookies(QList<QNetworkCookie>());}
 };
 
+class MainWindow;
+
+namespace The {
+    MainWindow* mainWindow();
+}
+
+/**
+  * @class MainWindow
+  * @short The MainWindow widget class.
+  *
+  * This is the main window widget.
+  */
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
+    friend MainWindow* The::mainWindow();
 
 public:
     explicit MainWindow(QWidget *parent = 0);
     virtual ~MainWindow();
 
+    void reloadItemsDownloadButtons();
+
 protected:
-        virtual void changeEvent( QEvent *event );
+    virtual void changeEvent( QEvent *event );
 
 private slots:
     void selectFolder();
@@ -97,6 +112,7 @@ private slots:
     void freeDownloadSlot();
     void addItemToQueue(DownloadItem *);
     void batchDownload();
+    void changeDestinationPath();
 
 private:
     Ui::MainWindow *ui_;
@@ -134,6 +150,8 @@ private:
 
     mpris::Mpris *mpris_;
 
+    static QWeakPointer<MainWindow> s_instance;
+
     // Methods
     void setupUi();
     void setupMenus();
@@ -146,7 +164,6 @@ private:
     void restoreSearch();
     bool isDownloadingQueued(const uint &);
     int visibleItemsCount();
-    void reloadItemsDownloadButtons();
     void loadSession();
     void saveSession();
     void parsePlaylistItem(const QDomElement & element, PlaylistItemPtr item);

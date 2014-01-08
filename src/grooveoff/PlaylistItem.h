@@ -42,7 +42,6 @@ public:
     void setSong(GrooveShark::SongPtr song);
 
     void requireCoverReload();
-    void requireDownloadIconReload();
     bool isPlaying() { return state_ == Phonon::PlayingState; }
     void setState(Phonon::State state);
 

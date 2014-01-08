@@ -80,6 +80,12 @@ using namespace GrooveShark;
 
 Q_DECLARE_METATYPE(QList<int>)
 
+QWeakPointer<MainWindow> MainWindow::s_instance;
+
+namespace The {
+    MainWindow* mainWindow() { return MainWindow::s_instance.data(); }
+}
+
 /*!
   \brief MainWindow: this is the MainWindow constructor.
   \param parent: The Parent Widget
@@ -89,6 +95,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui_(new Ui::MainWindow)
 {
     ui_->setupUi(this);
+    s_instance = this;
     The::paletteHandler()->setPalette( palette() );
     playerWidget = new PlayerWidget(this);
     new ActionCollection(this);
@@ -340,6 +347,7 @@ void MainWindow::setupSignals()
     connect(ui_->artistsCB, SIGNAL(activated(int)), this, SLOT(artistChanged()));
     connect(ui_->albumsCB, SIGNAL(activated(int)), this, SLOT(albumChanged()));
     connect(ui_->batchDownloadButton, SIGNAL(clicked()), this, SLOT(batchDownload()));
+    connect(ui_->pathLine, SIGNAL(textChanged(QString)), this, SLOT(changeDestinationPath()));
 }
 
 
@@ -358,8 +366,15 @@ void MainWindow::selectFolder()
     if(QFile::exists(dir))
         ui_->pathLine->setText(dir);
 
+    changeDestinationPath();
+}
+
+void MainWindow::changeDestinationPath()
+{
+    Utility::destinationPath = ui_->pathLine->text();
     reloadItemsDownloadButtons();
 }
+
 
 /*!
   \brief beginSearch: start search
@@ -424,6 +439,9 @@ void MainWindow::beginSearch()
 
     connect(songList_.data(), SIGNAL(requestError(QNetworkReply::NetworkError)),
             this, SLOT(searchError()));
+
+    // force downloadList repaint to prevent blank items
+    ui_->downloadList->repaint();
 }
 
 /*!
@@ -574,6 +592,9 @@ void MainWindow::searchFinished()
     ui_->artistsCB->addItems(artists);
     ui_->albumsCB->addItems(albums);
     applyFilter();
+
+    // force downloadList repaint to prevent blank items
+    ui_->downloadList->repaint();
 }
 
 void MainWindow::searchError()

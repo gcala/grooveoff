@@ -59,7 +59,6 @@ public slots:
     void setPlayerState(Phonon::State);
 
 signals:
-//    void remove();
     void downloadFinished();
     void addToQueue(DownloadItem *);
     void pauseResumePlaying();
@@ -87,6 +86,7 @@ private:
     GrooveOff::DownloadState downloadState_;
     Phonon::State playerState_;
     GrooveShark::DownloaderPtr downloader_;
+    bool oneShot_;
 
     void setupUi();
     void setupConnections();

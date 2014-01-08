@@ -24,6 +24,7 @@
 #include <../libgrooveshark/apirequest.h>
 #include "AudioEngine.h"
 #include "Playlist.h"
+#include "MainWindow.h"
 
 #include <QLabel>
 #include <QProgressBar>
@@ -40,10 +41,11 @@ using namespace GrooveShark;
   \brief DownloadItem: this is the DownloadItem constructor.
   \param parent: The Parent Widget
 */
-DownloadItem::DownloadItem(const PlaylistItemPtr &playlistItemPtr, QWidget *parent) :
-    QWidget(parent),
-    ui_(new Ui::DownloadItem),
-    playlistItem_(playlistItemPtr)
+DownloadItem::DownloadItem(const PlaylistItemPtr &playlistItemPtr, QWidget *parent)
+    : QWidget(parent)
+    , ui_(new Ui::DownloadItem)
+    , playlistItem_(playlistItemPtr)
+    , oneShot_(true)
 {
     ui_->setupUi(this);
     connect(playlistItem_.data(), SIGNAL(reloadCover()), this, SLOT(loadCover()));
@@ -304,6 +306,7 @@ void DownloadItem::stateChanged()
 */
 void DownloadItem::startDownload()
 {
+    oneShot_ = true;
     downloadState_ = GrooveOff::DownloadingState;
     stateChanged();
     downloader_ = ApiRequest::instance()->downloadSong(playlistItem_->path(),
@@ -340,7 +343,7 @@ void DownloadItem::downloadFinished(bool ok)
     stateChanged();
 
     emit downloadFinished();
-    emit playlistItem_.data()->requireDownloadIconReload();
+    The::mainWindow()->reloadItemsDownloadButtons();
 }
 
 /*!
@@ -351,6 +354,10 @@ void DownloadItem::downloadFinished(bool ok)
 */
 void DownloadItem::setProgress(const qint64 &bytesReceived, const qint64 &bytesTotal)
 {
+    if(oneShot_) {
+        The::mainWindow()->reloadItemsDownloadButtons();
+        oneShot_ = false;
+    }
     // enable play button if downloaded at least 1MiB
     if(bytesReceived > 1024*1024)
         ui_->playButton->setButtonEnabled(true);
@@ -366,7 +373,6 @@ void DownloadItem::setProgress(const qint64 &bytesReceived, const qint64 &bytesT
 void DownloadItem::playSong()
 {
     The::audioEngine()->playItem(playlistItem_);
-    //emit play(song_.data()->source().url().toString());
 }
 
 /*!
@@ -444,7 +450,7 @@ void DownloadItem::removeSong()
     downloadState_ = GrooveOff::DeletedState;
     qDebug() << "GrooveOff ::" << songFile() << "removed";
     stateChanged();
-    emit playlistItem_.data()->requireDownloadIconReload();
+    The::mainWindow()->reloadItemsDownloadButtons();
 }
 
 /*!
@@ -553,5 +559,9 @@ void DownloadItem::abortDownload()
 
     downloadState_ = GrooveOff::AbortedState;
     stateChanged();
+
+    // FIXME: seems that file remove is slower than this call
+    // and the icon is updated as expected
+    The::mainWindow()->reloadItemsDownloadButtons();
 }
 

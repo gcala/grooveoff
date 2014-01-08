@@ -41,6 +41,7 @@ public:
     static const QLatin1String host;
     static QString coversCachePath;
     static QString token;
+    static QString destinationPath;
 
     static QString elidedText(const QString &text, const Qt::TextElideMode &elideMode, const int &width, const QFont::Weight &weight);
 

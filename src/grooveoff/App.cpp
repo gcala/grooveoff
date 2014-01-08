@@ -58,19 +58,11 @@ App::App( int & argc, char ** argv):
     // Creating MainWindow
     m_mainWindow = new MainWindow();
 
-    // Creating DBus handlers
-
-
     //DON'T DELETE THIS NEXT LINE or the app crashes when you click the X (unless we reimplement closeEvent)
     //Reason: in ~App we have to call the deleteBrowsers method or else we run afoul of refcount foobar in KHTMLPart
     //But if you click the X (not Action->Quit) it automatically kills MainWindow because KMainWindow sets this
     //for us as default (bad KMainWindow)
     mainWindow()->setAttribute( Qt::WA_DeleteOnClose, false );
-
-    // applySettings
-
-    //The::engineController()->setVolume( AmarokConfig::masterVolume() );
-    //The::engineController()->setMuted( AmarokConfig::muteState() );
 
     m_mainWindow.data()->show();
 }
