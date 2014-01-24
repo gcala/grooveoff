@@ -38,11 +38,11 @@ public:
     // FRIENDS
     friend class MainWindow; //requires access to applySettings()
 
-signals:
+Q_SIGNALS:
     void prepareToQuit();
     void settingsChanged();
 
-public slots:
+public Q_SLOTS:
     void applySettings( bool firstTime = false );
     void slotConfigGrooveOff( const QString& page = QString() );
     void quit();

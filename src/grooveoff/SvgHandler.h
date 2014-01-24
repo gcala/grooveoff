@@ -42,39 +42,39 @@ class SvgHandler : public QObject
     Q_OBJECT
     friend SvgHandler* The::svgHandler();
 
-    public:
-        ~SvgHandler();
+public:
+    ~SvgHandler();
 
-        /**
-        * Overloaded function that uses the current theme
-        * @param keyname the name of the key to save in the cache
-        * @param width Width of the resulting pixmap
-        * @param height Height of the resulting pixmap
-        * @param element The theme element to render ( if none the entire svg is rendered )
-        * @param skipCache If true, the pixmap will always get rendered and never fetched from the cache.
-        * @param opacity The opacity used for rendering. Range 0.0 to 1.0.
-        * @return The svg element/file rendered into a pixmap
-        */
-        QPixmap renderSvg( const QString& keyname, int width, int height, const QString& element = QString(), const qreal opacity = 1.0 );
+    /**
+    * Overloaded function that uses the current theme
+    * @param keyname the name of the key to save in the cache
+    * @param width Width of the resulting pixmap
+    * @param height Height of the resulting pixmap
+    * @param element The theme element to render ( if none the entire svg is rendered )
+    * @param skipCache If true, the pixmap will always get rendered and never fetched from the cache.
+    * @param opacity The opacity used for rendering. Range 0.0 to 1.0.
+    * @return The svg element/file rendered into a pixmap
+    */
+    QPixmap renderSvg( const QString& keyname, int width, int height, const QString& element = QString(), const qreal opacity = 1.0 );
 
-    public slots:
-        void reTint();
+public Q_SLOTS:
+    void reTint();
 
-    signals:
-        void retinted();
+Q_SIGNALS:
+    void retinted();
 
-    private slots:
-        void discardCache();
+private Q_SLOTS:
+    void discardCache();
 
-    private:
-        SvgHandler( QObject* parent = 0 );
+private:
+    SvgHandler( QObject* parent = 0 );
 
-        bool loadSvg( const QString& name );
+    bool loadSvg( const QString& name );
 
-        QHash<QString,QSvgRenderer*> m_renderers;
-        QReadWriteLock m_lock;
+    QHash<QString,QSvgRenderer*> m_renderers;
+    QReadWriteLock m_lock;
 
-        QString m_themeFile;
+    QString m_themeFile;
 };
 
 #endif

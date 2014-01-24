@@ -55,10 +55,10 @@ public:
 
     bool operator==(DownloadItem &) const;
 
-public slots:
+public Q_SLOTS:
     void setPlayerState(Phonon::State);
 
-signals:
+Q_SIGNALS:
     void downloadFinished();
     void addToQueue(DownloadItem *);
     void pauseResumePlaying();
@@ -71,7 +71,7 @@ protected:
     virtual void leaveEvent ( QEvent * event );
     virtual void enterEvent ( QEvent * event );
 
-private slots:
+private Q_SLOTS:
     void downloadFinished(bool ok);
     void setProgress(const qint64 &bytesReceived, const qint64 &bytesTotal);
     void playSong();

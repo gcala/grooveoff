@@ -49,11 +49,11 @@ public:
 
     void showMessage(const QString &message);
 
-public slots:
+public Q_SLOTS:
     void pauseResumePlaying();
     void reloadPreviousNextButtons();
 
-private slots:
+private Q_SLOTS:
     void tick(qint64 elapsedTime, bool userSeek);
     void stateChanged(Phonon::State state);
     void toggleTimeLabel();

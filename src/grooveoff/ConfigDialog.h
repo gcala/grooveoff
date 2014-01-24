@@ -33,7 +33,7 @@ class ConfigDialog : public QDialog
 public:
     explicit ConfigDialog(QWidget *parent = 0);
 
-private slots:
+private Q_SLOTS:
     void restoreDefaults();
     void saveSettings();
     void okClicked();

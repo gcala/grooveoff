@@ -44,7 +44,7 @@ public:
     PlaylistItemPtr item(int row);
     int row(PlaylistItemPtr item);
 
-signals:
+Q_SIGNALS:
     void playlistChanged();
 
 private:

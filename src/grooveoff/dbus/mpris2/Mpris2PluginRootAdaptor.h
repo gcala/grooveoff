@@ -53,7 +53,7 @@ public:
     Mpris2PluginRootAdaptor(QObject *parent = 0);
     virtual ~Mpris2PluginRootAdaptor();
 
-public slots:
+public Q_SLOTS:
      void Quit();
      void Raise();
 };

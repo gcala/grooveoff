@@ -41,7 +41,7 @@ public:
 
     ~Mpris1PluginRootAdaptor();
 
-public slots:
+public Q_SLOTS:
     QString Identity();
     Version MprisVersion();
     void Quit();

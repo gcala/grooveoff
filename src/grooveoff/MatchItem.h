@@ -42,13 +42,13 @@ public:
 
     const PlaylistItemPtr playlistItem() { return playlistItem_; }
 
-signals:
+Q_SIGNALS:
     void download(PlaylistItemPtr);
 
-public slots:
+public Q_SLOTS:
     void setDownloadIcon();
 
-private slots:
+private Q_SLOTS:
     void loadCover();
     void downloadSlot();
 

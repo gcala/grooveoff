@@ -34,10 +34,10 @@ public:
     void addItem(const PlaylistItemPtr &);
     void clear();
 
-signals:
+Q_SIGNALS:
     void coverDownloaded();
 
-public slots:
+public Q_SLOTS:
     void setCover();
 
 private:

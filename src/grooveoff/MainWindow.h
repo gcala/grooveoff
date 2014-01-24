@@ -90,7 +90,7 @@ public:
 protected:
     virtual void changeEvent( QEvent *event );
 
-private slots:
+private Q_SLOTS:
     void selectFolder();
     void downloadRequest(PlaylistItemPtr playlistItem);
     void getToken();

@@ -47,12 +47,12 @@ public:
 
     bool operator==(PlaylistItem &) const;
 
-signals:
+Q_SIGNALS:
     void reloadCover();
     void reloadIcon();
     void stateChanged(Phonon::State);
 
-public slots:
+public Q_SLOTS:
 
 private:
     Phonon::State state_;

@@ -33,10 +33,10 @@ public:
     bool isSuccess() { return success_; }
     QString coverName() { return coverName_; }
 
-signals:
+Q_SIGNALS:
     void done();
 
-public slots:
+public Q_SLOTS:
     void downloadFinished();
 
 private:

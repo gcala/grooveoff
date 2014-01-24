@@ -39,21 +39,21 @@ class SvgTinter
 {
     friend SvgTinter* The::svgTinter();
 
-    public:
-        ~SvgTinter();
+public:
+    ~SvgTinter();
 
-        QByteArray tint( const QString &filename );
-        void init();
+    QByteArray tint( const QString &filename );
+    void init();
 
-        QColor blendColors( const QColor& color1, const QColor& color2, int percent );
+    QColor blendColors( const QColor& color1, const QColor& color2, int percent );
 
-    private:
-        SvgTinter();
+private:
+    SvgTinter();
 
-        QHash<QByteArray, QString> m_tintMap;
+    QHash<QByteArray, QString> m_tintMap;
 
-        QPalette m_lastPalette;
-        bool m_firstRun;
+    QPalette m_lastPalette;
+    bool m_firstRun;
 };
 
 #endif

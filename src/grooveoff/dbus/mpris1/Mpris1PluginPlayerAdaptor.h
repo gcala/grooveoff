@@ -58,7 +58,7 @@ public:
     };
 
 
-public slots:
+public Q_SLOTS:
     void Next();
     void Prev();
     void Pause();
@@ -73,12 +73,12 @@ public slots:
     void PositionSet( int position );
     int PositionGet();
 
-signals:
+Q_SIGNALS:
     void CapsChange( int );
     void TrackChange( QVariantMap );
     void StatusChange( PlayerStatus );
 
-private slots:
+private Q_SLOTS:
     void updateCaps();
     void updateTrack();
     void updateStatus();
