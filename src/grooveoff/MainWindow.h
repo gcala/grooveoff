@@ -25,8 +25,6 @@
 
 // Dbus & remote
 #include "dbus/mpris.h"
-#include "dbus/mpris2.h"
-#include "dbus/mpris_common.h"
 
 #include <QMainWindow>
 #include <QNetworkCookie>
@@ -148,7 +146,7 @@ private:
     QAction     *m_compactMenuAction;
     QMenu       *m_compactMainMenu;
 
-    mpris::Mpris *mpris_;
+    Mpris *mpris_;
 
     static QWeakPointer<MainWindow> s_instance;
 

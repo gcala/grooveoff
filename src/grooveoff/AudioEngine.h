@@ -60,12 +60,12 @@ public:
     void next();
     bool canGoPrevious();
     bool canGoNext();
-    bool canSeek();
     void seek( qint64 ms );
     void seek( int ms ); // for compatibility with seekbar in audiocontrols
     void playItem(PlaylistItemPtr track);
     void removingTrack(PlaylistItemPtr track);
     Phonon::MediaObject * mediaObject() { return mediaObject_; }
+    bool isSeekable() const;
 
     /**
      * @return @c true if sound output is disabled, @false otherwise
@@ -78,11 +78,11 @@ public:
      */
     int volume() const;
 
-public slots:
+public Q_SLOTS:
     void setVolume( int percentage );
     void setMuted(bool);
 
-signals:
+Q_SIGNALS:
     void loading();
     void started();
     void finished();
@@ -91,11 +91,11 @@ signals:
     void resumed();
     void sourceChanged();
     void stopAfterTrackChanged();
-    void seeked( qint64 ms );
+    void seeked( qint64 ms, bool userSeek );
     void shuffleModeChanged( bool enabled );
     void repeatModeChanged();
     void controlStateChanged();
-    void stateChanged( Phonon::State, Phonon::State );
+    void stateChanged( Phonon::State );
     void volumeChanged( int volume /* in percent */ );
 
     void timerMilliSeconds( qint64 msElapsed );
@@ -115,7 +115,18 @@ signals:
      */
     void muteStateChanged( bool mute );
 
-private slots:
+    /**
+     * Called when the seekable value was changed
+     */
+    void seekableChanged( bool seekable );
+
+    /**
+       Called when the track length changes, typically because the track has changed but
+       also when phonon manages to determine the full track length.
+     */
+    void trackLengthChanged( qint64 milliseconds );
+
+private Q_SLOTS:
     void timerTriggered( qint64 time );
     void onStateChanged( Phonon::State newState, Phonon::State oldState );
     void sourceChanged(Phonon::MediaSource);
@@ -126,6 +137,9 @@ private slots:
      */
     void onVolumeChanged( qreal volume );
     void slotMutedChanged( bool );
+
+    void slotSeekableChanged( bool );
+    void slotTrackLengthChanged( qint64 );
 
 private:
     AudioEngine();

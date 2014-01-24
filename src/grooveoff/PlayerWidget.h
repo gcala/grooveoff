@@ -54,8 +54,8 @@ public slots:
     void reloadPreviousNextButtons();
 
 private slots:
-    void tick(qint64 elapsedTime);
-    void stateChanged(Phonon::State newState, Phonon::State oldState);
+    void tick(qint64 elapsedTime, bool userSeek);
+    void stateChanged(Phonon::State state);
     void toggleTimeLabel();
     void sourceChanged();
     void playPrevious();

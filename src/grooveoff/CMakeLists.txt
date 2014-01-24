@@ -31,8 +31,10 @@ set(grooveoff_SRCS App.cpp
                    widgets/PreviousButton.cpp
                    widgets/Spinner.cpp
                    dbus/mpris.cpp
-                   dbus/mpris1.cpp
-                   dbus/mpris2.cpp
+                   dbus/mpris1/Mpris1PluginRootAdaptor.cpp
+                   dbus/mpris1/Mpris1PluginPlayerAdaptor.cpp
+                   dbus/mpris2/Mpris2PluginRootAdaptor.cpp
+                   dbus/mpris2/Mpris2PluginPlayerAdaptor.cpp
                    ../libgrooveshark/apirequest.cpp
                    ../libgrooveshark/config.cpp
                    ../libgrooveshark/requesthandler.cpp
@@ -83,22 +85,6 @@ if( NOT Qt5Core_DIR )
     qt4_add_resources(grooveoff_RC_SRCS ${grooveoff_RCS} )
     qt4_wrap_ui(grooveoff_UI_HEADERS ${grooveoff_UI})
     qt4_add_translation(grooveoff_I18N ${TRANSLATIONS})
-
-    # MPRIS DBUS interfaces
-    qt4_add_dbus_adaptor(grooveoff_SRCS
-                         dbus/org.freedesktop.MediaPlayer.player.xml
-                         dbus/mpris1.h mpris::Mpris1Player mpris_player MprisPlayer)
-    qt4_add_dbus_adaptor(grooveoff_SRCS
-                         dbus/org.freedesktop.MediaPlayer.root.xml
-                         dbus/mpris1.h mpris::Mpris1Root mpris_root MprisRoot)
-
-    # MPRIS 2.0 DBUS interfaces
-    qt4_add_dbus_adaptor(grooveoff_SRCS
-                         dbus/org.mpris.MediaPlayer2.Player.xml
-                         dbus/mpris2.h mpris::Mpris2 mpris2_player Mpris2Player)
-    qt4_add_dbus_adaptor(grooveoff_SRCS
-                         dbus/org.mpris.MediaPlayer2.xml
-                         dbus/mpris2.h mpris::Mpris2 mpris2_root Mpris2Root)
 endif( NOT Qt5Core_DIR )
 
 add_executable(grooveoff main.cpp ${grooveoff_SRCS} ${grooveoff_RC_SRCS} ${grooveoff_UI_HEADERS} ${grooveoff_I18N})

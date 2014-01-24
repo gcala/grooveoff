@@ -16,15 +16,35 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef MPRIS_H
-#define MPRIS_H
 
-class Mpris : public QObject
+#ifndef MPRIS1PLUGINROOTADAPTOR_H
+#define MPRIS1PLUGINROOTADAPTOR_H
+
+#include <QObject>
+#include <QVariantMap>
+
+struct Version
+{
+    quint16 major;
+    quint16 minor;
+};
+
+Q_DECLARE_METATYPE( Version );
+
+class Mpris1PluginRootAdaptor : public QObject
 {
     Q_OBJECT
+    Q_CLASSINFO( "D-Bus Interface", "org.freedesktop.MediaPlayer" )
+
 public:
-    Mpris(QObject *parent = 0);
-    ~Mpris();
+    Mpris1PluginRootAdaptor( QObject *parent = 0 );
+
+    ~Mpris1PluginRootAdaptor();
+
+public slots:
+    QString Identity();
+    Version MprisVersion();
+    void Quit();
 };
 
 #endif

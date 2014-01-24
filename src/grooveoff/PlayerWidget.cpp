@@ -50,10 +50,10 @@ PlayerWidget::PlayerWidget(QWidget *parent) :
     connect(ui_->timeLabel, SIGNAL(clicked()),
             this, SLOT(toggleTimeLabel()));
 
-    connect(The::audioEngine(), SIGNAL(seeked(qint64)),
-            this, SLOT(tick(qint64)));
-    connect(The::audioEngine(), SIGNAL(stateChanged(Phonon::State,Phonon::State)),
-            this, SLOT(stateChanged(Phonon::State, Phonon::State)));
+    connect(The::audioEngine(), SIGNAL(seeked(qint64, bool)),
+            this, SLOT(tick(qint64, bool)));
+    connect(The::audioEngine(), SIGNAL(stateChanged(Phonon::State)),
+            this, SLOT(stateChanged(Phonon::State)));
     connect(The::audioEngine(), SIGNAL(sourceChanged()),
             this, SLOT(sourceChanged()));
     connect(The::playlist(), SIGNAL(playlistChanged()),
@@ -134,11 +134,9 @@ void PlayerWidget::showElapsedTimerLabel(bool ok)
   \param oldState: old state
   \return void
 */
-void PlayerWidget::stateChanged(Phonon::State newState, Phonon::State oldState)
+void PlayerWidget::stateChanged(Phonon::State state)
 {
-    Q_UNUSED(oldState)
-
-    switch (newState) {
+    switch (state) {
     case Phonon::ErrorState:
         ui_->stackedWidget->setCurrentIndex(0);
         ui_->playPauseButton->setPlaying(false);
@@ -177,8 +175,10 @@ void PlayerWidget::stateChanged(Phonon::State newState, Phonon::State oldState)
   \param time: current play time
   \return void
 */
-void PlayerWidget::tick(qint64 elapsedTime)
+void PlayerWidget::tick(qint64 elapsedTime, bool userSeek)
 {
+    Q_UNUSED(userSeek)
+
     if(The::audioEngine()->state() == Phonon::StoppedState)
         return;
 

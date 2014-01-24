@@ -61,6 +61,10 @@ AudioEngine::AudioEngine()
             this, SLOT(sourceChanged(Phonon::MediaSource)));
     connect( audioOutput_, SIGNAL( volumeChanged( qreal ) ), SLOT( onVolumeChanged( qreal ) ) );
     connect( audioOutput_, SIGNAL(mutedChanged(bool)), SLOT(slotMutedChanged(bool)) );
+    connect( mediaObject_, SIGNAL( seekableChanged( bool ) ),
+                           SLOT( slotSeekableChanged( bool ) ) );
+    connect( mediaObject_, SIGNAL( totalTimeChanged( qint64 ) ),
+                           SLOT( slotTrackLengthChanged( qint64 ) ) );
 
     // Read the volume from phonon
     m_volume = qBound<qreal>( 0, qRound(audioOutput_->volume()*100), 100 );
@@ -74,7 +78,7 @@ AudioEngine::~AudioEngine()
 
 void AudioEngine::timerTriggered( qint64 time )
 {
-    emit seeked(time);
+    emit seeked( time, false );
 }
 
 void AudioEngine::onFinished()
@@ -96,6 +100,8 @@ void AudioEngine::playItem(PlaylistItemPtr track)
 
 void AudioEngine::onStateChanged(Phonon::State newState, Phonon::State oldState)
 {
+    Q_UNUSED(oldState)
+
     if ( newState == Phonon::ErrorState )
     {
         if (mediaObject_->errorType() == Phonon::FatalError) {
@@ -109,7 +115,7 @@ void AudioEngine::onStateChanged(Phonon::State newState, Phonon::State oldState)
 
     state_ = newState;
 
-    emit stateChanged(newState, oldState);
+    emit stateChanged(newState);
 }
 
 void AudioEngine::playPause()
@@ -128,6 +134,12 @@ void AudioEngine::pause()
 
 void AudioEngine::play()
 {
+    if(mediaObject_->currentSource().url().isEmpty()) {
+        if(The::playlist()->count() > 0) {
+            playItem(The::playlist()->item(0));
+            return;
+        }
+    }
     mediaObject_->play();
     currentTrack_->setState(Phonon::PlayingState);
 }
@@ -248,20 +260,9 @@ void AudioEngine::removingTrack(PlaylistItemPtr track)
     }
 }
 
-bool AudioEngine::canSeek()
-{
-    bool phononCanSeek = true;
-    // TODO: When phonon properly reports this, re-enable it
-    if ( mediaObject_ && mediaObject_->isValid() )
-        phononCanSeek = mediaObject_->isSeekable();
-
-    return phononCanSeek;
-}
-
-
 void AudioEngine::seek( qint64 ms )
 {
-    if ( !canSeek() )
+    if ( !isSeekable() )
     {
         qDebug() << "Could not seek!";
         return;
@@ -270,7 +271,7 @@ void AudioEngine::seek( qint64 ms )
     if ( isPlaying() || isPaused() )
     {
         mediaObject_->seek( ms );
-        emit seeked( ms );
+        emit seeked( ms, true );
     }
 }
 
@@ -322,4 +323,21 @@ bool AudioEngine::isMuted() const
 int AudioEngine::volume() const
 {
     return m_volume;
+}
+
+bool AudioEngine::isSeekable() const
+{
+    if( mediaObject_ )
+        return mediaObject_->isSeekable();
+    return false;
+}
+
+void AudioEngine::slotSeekableChanged( bool seekable )
+{
+    emit seekableChanged( seekable );
+}
+
+void AudioEngine::slotTrackLengthChanged( qint64 milliseconds )
+{
+    emit trackLengthChanged( milliseconds );
 }

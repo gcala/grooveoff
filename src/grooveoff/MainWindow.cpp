@@ -194,7 +194,7 @@ MainWindow::MainWindow(QWidget *parent) :
     if(saveSession_)
         loadSession();
 
-    mpris_ = new mpris::Mpris(this);
+    mpris_ = new Mpris(this);
 }
 
 /*!
