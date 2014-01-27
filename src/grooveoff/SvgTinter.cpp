@@ -42,8 +42,7 @@ SvgTinter::SvgTinter()
 SvgTinter::~SvgTinter()
 {}
 
-QByteArray
-SvgTinter::tint( const QString &filename)
+QByteArray SvgTinter::tint( const QString &filename)
 {
     QFile file( filename );
     if ( !file.open( QIODevice::ReadOnly ) )
@@ -63,8 +62,7 @@ SvgTinter::tint( const QString &filename)
     return svg_source;
 }
 
-void
-SvgTinter::init()
+void SvgTinter::init()
 {
     if ( m_lastPalette != App::instance()->palette() || m_firstRun ) {
         m_tintMap.insert( "#666765", App::instance()->palette().window().color().name() );
@@ -91,8 +89,7 @@ SvgTinter::init()
     }
 }
 
-QColor
-SvgTinter::blendColors( const QColor& color1, const QColor& color2, int percent )
+QColor SvgTinter::blendColors( const QColor& color1, const QColor& color2, int percent )
 {
     const float factor1 = ( float ) percent / 100;
     const float factor2 = ( 100 - ( float ) percent ) / 100;

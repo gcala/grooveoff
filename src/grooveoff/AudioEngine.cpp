@@ -54,13 +54,18 @@ AudioEngine::AudioEngine()
     // function, which is part of the Phonon namespace.
     Phonon::createPath(mediaObject_, audioOutput_);
 
-    connect( mediaObject_, SIGNAL( stateChanged( Phonon::State, Phonon::State ) ), SLOT( onStateChanged( Phonon::State, Phonon::State ) ) );
-    connect( mediaObject_, SIGNAL( tick( qint64 ) ), SLOT( timerTriggered( qint64 ) ) );
-    connect( mediaObject_, SIGNAL( finished() ), SLOT( onFinished() ) );
-    connect(mediaObject_, SIGNAL(currentSourceChanged(Phonon::MediaSource)),
-            this, SLOT(sourceChanged(Phonon::MediaSource)));
-    connect( audioOutput_, SIGNAL( volumeChanged( qreal ) ), SLOT( onVolumeChanged( qreal ) ) );
-    connect( audioOutput_, SIGNAL(mutedChanged(bool)), SLOT(slotMutedChanged(bool)) );
+    connect( mediaObject_, SIGNAL( stateChanged( Phonon::State, Phonon::State ) ),
+                           SLOT( onStateChanged( Phonon::State, Phonon::State ) ) );
+    connect( mediaObject_, SIGNAL( tick( qint64 ) ),
+                           SLOT( timerTriggered( qint64 ) ) );
+    connect( mediaObject_, SIGNAL( finished() ),
+                           SLOT( onFinished() ) );
+    connect( mediaObject_, SIGNAL(currentSourceChanged(Phonon::MediaSource)),
+                           SLOT(sourceChanged(Phonon::MediaSource)));
+    connect( audioOutput_, SIGNAL( volumeChanged( qreal ) ),
+                           SLOT( onVolumeChanged( qreal ) ) );
+    connect( audioOutput_, SIGNAL(mutedChanged(bool)),
+                           SLOT(slotMutedChanged(bool)) );
     connect( mediaObject_, SIGNAL( seekableChanged( bool ) ),
                            SLOT( slotSeekableChanged( bool ) ) );
     connect( mediaObject_, SIGNAL( totalTimeChanged( qint64 ) ),

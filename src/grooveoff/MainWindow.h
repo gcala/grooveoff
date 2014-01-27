@@ -26,6 +26,7 @@
 // Dbus & remote
 #include "dbus/mpris.h"
 
+#include <QPointer>
 #include <QMainWindow>
 #include <QNetworkCookie>
 #include <QNetworkCookieJar>

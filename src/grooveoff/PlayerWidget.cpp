@@ -106,11 +106,11 @@ void PlayerWidget::setupUi()
     ui_->nextButton->setButtonEnabled(false);
     connect(ui_->nextButton, SIGNAL(nextButtonClicked()), this, SLOT(playNext()));
 
-    ui_->timeLabel->setText("00:00");
+    ui_->timeLabel->setText( QLatin1String( "00:00" ) );
     ui_->timeLabel->setMinimumSize(QSize(50,0));
     ui_->timeLabel->setFont(Utility::monoFont());
 
-    ui_->elapsedTimeLabel->setText("00:00");
+    ui_->elapsedTimeLabel->setText( QLatin1String( "00:00") );
     ui_->elapsedTimeLabel->setMinimumSize(QSize(50,0));
     ui_->elapsedTimeLabel->setFont(Utility::monoFont());
 
@@ -157,8 +157,8 @@ void PlayerWidget::stateChanged(Phonon::State state)
                 ui_->playPauseButton->setButtonEnabled(false);
         }
         ui_->playPauseButton->setPlaying(false);
-        ui_->timeLabel->setText("00:00");
-        ui_->elapsedTimeLabel->setText("00:00");
+        ui_->timeLabel->setText( QLatin1String( "00:00" ) );
+        ui_->elapsedTimeLabel->setText( QLatin1String( "00:00" ) );
         break;
     case Phonon::PausedState:
         ui_->stackedWidget->setCurrentIndex(1);

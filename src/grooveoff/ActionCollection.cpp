@@ -44,22 +44,21 @@ ActionCollection::~ActionCollection()
         delete m_actionCollection[ key ];
 }
 
-void
-ActionCollection::initActions()
+void ActionCollection::initActions()
 {
     QAction *actionClose = new QAction(QIcon::fromTheme(QLatin1String("application-exit"),
                                QIcon(QLatin1String(":/resources/application-exit.png"))),
                                trUtf8("&Exit"), this);
     actionClose->setToolTip(trUtf8("Close GrooveOff"));
     actionClose->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Q));
-    m_actionCollection[ "actionClose" ] = actionClose;
-    m_actionCollection[ "actionClose" ]->setMenuRole( QAction::QuitRole );
+    m_actionCollection[ QLatin1String( "actionClose" ) ] = actionClose;
+    m_actionCollection[ QLatin1String( "actionClose" ) ]->setMenuRole( QAction::QuitRole );
 
     QAction *actionDonate = new QAction(QIcon::fromTheme(QLatin1String("help-donate"),
                                 QIcon(QLatin1String(":/resources/help-donate.png"))),
                                 trUtf8("&Donate"), this);
     actionDonate->setToolTip(trUtf8("Donate with PayPal"));
-    m_actionCollection[ "actionDonate" ] = actionDonate;
+    m_actionCollection[ QLatin1String( "actionDonate" ) ] = actionDonate;
 
     QAction *actionConfigure = new QAction(trUtf8("&Configure GrooveOff..."), this);
     if(QIcon::hasThemeIcon(QLatin1String("configure")))
@@ -67,85 +66,84 @@ ActionCollection::initActions()
     else
         actionConfigure->setIcon(QIcon::fromTheme(QLatin1String("gconf-editor"),
                                   QIcon(QLatin1String(":/resources/configure.png"))));
-    m_actionCollection[ "actionConfigure" ] = actionConfigure;
+    m_actionCollection[ QLatin1String( "actionConfigure" ) ] = actionConfigure;
 
     QAction *actionCompact = new QAction(QIcon::fromTheme(QLatin1String("view-split-top-bottom"),
                                  QIcon(QLatin1String(":/resources/view-split-top-bottom.png"))),
                                  trUtf8("&Compact Layout"), this);
     actionCompact->setCheckable(true);
-    m_actionCollection[ "actionCompact" ] = actionCompact;
+    m_actionCollection[ QLatin1String( "actionCompact" ) ] = actionCompact;
 
     QAction *actionWide = new QAction(QIcon::fromTheme(QLatin1String("view-split-left-right"),
                               QIcon(QLatin1String(":/resources/view-split-left-right"))),
                               trUtf8("&Wide Layout"), this);
     actionWide->setCheckable(true);
-    m_actionCollection[ "actionWide" ] = actionWide;
+    m_actionCollection[ QLatin1String( "actionWide" ) ] = actionWide;
 
     QAction *actionNewToken = new QAction(QIcon::fromTheme(QLatin1String("emblem-new"),
                                   QIcon(QLatin1String(":/resources/emblem-new.png"))),
                                   trUtf8("&Get new token..."), this);
-    m_actionCollection[ "actionNewToken" ] = actionNewToken;
+    m_actionCollection[ QLatin1String( "actionNewToken" ) ] = actionNewToken;
 
     QAction *actionStopDownloads = new QAction(QIcon::fromTheme(QLatin1String("process-stop"),
                                       QIcon(QLatin1String(":/resources/process-stop.png"))),
                                       trUtf8("&Stop all downloads"), this);
-    m_actionCollection[ "actionStopDownloads" ] = actionStopDownloads;
+    m_actionCollection[ QLatin1String( "actionStopDownloads" ) ] = actionStopDownloads;
 
     QAction *actionRemoveFailed = new QAction(QIcon::fromTheme(QLatin1String("edit-delete"),
                                       QIcon(QLatin1String(":/resources/edit-delete.png"))),
                                       trUtf8("&Remove deleted/failed transfers"), this);
-    m_actionCollection[ "actionRemoveFailed" ] = actionRemoveFailed;
+    m_actionCollection[ QLatin1String( "actionRemoveFailed" ) ] = actionRemoveFailed;
 
     QAction *actionClearDownloadList = new QAction(QIcon::fromTheme(QLatin1String("edit-clear"),
                                            QIcon(QLatin1String(":/resources/edit-clear"))),
                                            trUtf8("Remove all finished"), this);
     actionClearDownloadList->setToolTip(trUtf8("Removes all finished transfers and leaves all files on disk"));
-    m_actionCollection[ "actionClearDownloadList" ] = actionClearDownloadList;
+    m_actionCollection[ QLatin1String( "actionClearDownloadList" ) ] = actionClearDownloadList;
 
     QAction *actionAbout = new QAction(QIcon::fromTheme(QLatin1String("help-about"),
                                QIcon(QLatin1String(":/resources/help-about.png"))),
                                trUtf8("&About GrooveOff"), this);
-    m_actionCollection[ "actionAbout" ] = actionAbout;
+    m_actionCollection[ QLatin1String( "actionAbout" ) ] = actionAbout;
 
     QAction *actionQtAbout = new QAction(QIcon::fromTheme(QLatin1String("qtlogo"),
                                  QIcon(QLatin1String(":/resources/qtlogo.png"))),
                                  trUtf8("About &Qt"), this);
-    m_actionCollection[ "actionQtAbout" ] = actionQtAbout;
-    m_actionCollection[ "actionQtAbout" ]->setMenuRole( QAction::AboutQtRole );
+    m_actionCollection[ QLatin1String( "actionQtAbout" ) ] = actionQtAbout;
+    m_actionCollection[ QLatin1String( "actionQtAbout" ) ]->setMenuRole( QAction::AboutQtRole );
 }
 
-QMenuBar*
-ActionCollection::createMenuBar( QWidget *parent )
+QMenuBar* ActionCollection::createMenuBar( QWidget *parent )
 {
     QMenuBar* menuBar = new QMenuBar( parent );
 
     QMenu* fileMenu = new QMenu( trUtf8( "&File" ), menuBar );
-    fileMenu->addAction( m_actionCollection[ "actionNewToken" ] );
+    fileMenu->addAction( m_actionCollection[ QLatin1String( "actionNewToken" ) ] );
     fileMenu->addSeparator();
-    fileMenu->addAction( m_actionCollection[ "actionDonate" ] );
+    fileMenu->addAction( m_actionCollection[ QLatin1String( "actionDonate" ) ] );
     fileMenu->addSeparator();
-    fileMenu->addAction( m_actionCollection[ "actionClose" ] );
+    fileMenu->addAction( m_actionCollection[ QLatin1String( "actionClose" ) ] );
 
     QMenu* downloadsMenu = new QMenu( trUtf8( "&Downloads" ), menuBar );
-    downloadsMenu->addAction( m_actionCollection[ "actionStopDownloads" ] );
+    downloadsMenu->addAction( m_actionCollection[ QLatin1String( "actionStopDownloads" ) ] );
     downloadsMenu->addSeparator();
-    downloadsMenu->addAction( m_actionCollection[ "actionRemoveFailed" ] );
-    downloadsMenu->addAction( m_actionCollection[ "actionClearDownloadList" ] );
+    downloadsMenu->addAction( m_actionCollection[ QLatin1String( "actionRemoveFailed" ) ] );
+    downloadsMenu->addAction( m_actionCollection[ QLatin1String( "actionClearDownloadList" ) ] );
 
     QActionGroup *alignmentGroup = new QActionGroup(this);
-    alignmentGroup->addAction( m_actionCollection[ "actionCompact" ] );
-    alignmentGroup->addAction( m_actionCollection[ "actionWide" ] );
+    alignmentGroup->addAction( m_actionCollection[ QLatin1String( "actionCompact" ) ] );
+    alignmentGroup->addAction( m_actionCollection[ QLatin1String( "actionWide" ) ] );
     QMenu* viewMenu = new QMenu( trUtf8( "&View" ), menuBar );
-    viewMenu->addAction( m_actionCollection[ "actionCompact" ] );
-    viewMenu->addAction( m_actionCollection[ "actionWide" ] );
+    viewMenu->addAction( m_actionCollection[ QLatin1String( "actionCompact" ) ] );
+    viewMenu->addAction( m_actionCollection[ QLatin1String( "actionWide" ) ] );
 
 
     QMenu* settingsMenu = new QMenu( trUtf8( "&Settings" ), menuBar );
-    settingsMenu->addAction( m_actionCollection[ "actionConfigure" ] );
+    settingsMenu->addAction( m_actionCollection[ QLatin1String( "actionConfigure" ) ] );
 
     QMenu* helpMenu = new QMenu( trUtf8( "&Help" ), menuBar );
-    helpMenu->addAction( m_actionCollection[ "actionAbout" ] );
-    helpMenu->addAction( m_actionCollection[ "actionQtAbout" ] );
+    helpMenu->addAction( m_actionCollection[ QLatin1String( "actionAbout" ) ] );
+    helpMenu->addAction( m_actionCollection[ QLatin1String( "actionQtAbout" ) ] );
 
     menuBar->addMenu( fileMenu );
     menuBar->addMenu( downloadsMenu );
@@ -157,33 +155,31 @@ ActionCollection::createMenuBar( QWidget *parent )
 }
 
 
-QMenu*
-ActionCollection::createCompactMenu( QWidget *parent )
+QMenu* ActionCollection::createCompactMenu( QWidget *parent )
 {
     QMenu* compactMenu = new QMenu( tr( "Main Menu" ), parent );
 
-    compactMenu->addAction( m_actionCollection[ "actionNewToken" ] );
+    compactMenu->addAction( m_actionCollection[ QLatin1String( "actionNewToken" ) ] );
     compactMenu->addSeparator();
-    compactMenu->addAction( m_actionCollection[ "actionStopDownloads" ] );
-    compactMenu->addAction( m_actionCollection[ "actionRemoveFailed" ] );
-    compactMenu->addAction( m_actionCollection[ "actionClearDownloadList" ] );
+    compactMenu->addAction( m_actionCollection[ QLatin1String( "actionStopDownloads" ) ] );
+    compactMenu->addAction( m_actionCollection[ QLatin1String( "actionRemoveFailed" ) ] );
+    compactMenu->addAction( m_actionCollection[ QLatin1String( "actionClearDownloadList" ) ] );
     compactMenu->addSeparator();
-    compactMenu->addAction( m_actionCollection[ "actionCompact" ] );
-    compactMenu->addAction( m_actionCollection[ "actionWide" ] );
+    compactMenu->addAction( m_actionCollection[ QLatin1String( "actionCompact" ) ] );
+    compactMenu->addAction( m_actionCollection[ QLatin1String( "actionWide" ) ] );
     compactMenu->addSeparator();
-    compactMenu->addAction( m_actionCollection[ "actionConfigure" ] );
+    compactMenu->addAction( m_actionCollection[ QLatin1String( "actionConfigure" ) ] );
     compactMenu->addSeparator();
-    compactMenu->addAction( m_actionCollection[ "actionAbout" ] );
-    compactMenu->addAction( m_actionCollection[ "actionDonate" ] );
+    compactMenu->addAction( m_actionCollection[ QLatin1String( "actionAbout" ) ] );
+    compactMenu->addAction( m_actionCollection[ QLatin1String( "actionDonate" ) ] );
     compactMenu->addSeparator();
-    compactMenu->addAction( m_actionCollection[ "actionClose" ] );
+    compactMenu->addAction( m_actionCollection[ QLatin1String( "actionClose" ) ] );
 
     return compactMenu;
 }
 
 
-QAction*
-ActionCollection::getAction( const QString& name )
+QAction* ActionCollection::getAction( const QString& name )
 {
     return m_actionCollection.value( name, 0 );
 }

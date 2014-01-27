@@ -137,14 +137,14 @@ MainWindow::MainWindow(QWidget *parent) :
     //fake
     searchInProgress_ = true;
 
-    setWindowTitle(QString("GrooveOff %1").arg(GROOVEOFF_VERSION));
+    setWindowTitle(QString::fromLatin1( "GrooveOff %1" ).arg( GROOVEOFF_VERSION ));
 
     if(ui_->splitter->orientation() == Qt::Vertical) {
-        ActionCollection::instance()->getAction("actionCompact")->setChecked(true);
+        ActionCollection::instance()->getAction( QLatin1String( "actionCompact" ) )->setChecked(true);
         playerWidget->showElapsedTimerLabel(false);
     }
     else {
-        ActionCollection::instance()->getAction("actionWide")->setChecked(true);
+        ActionCollection::instance()->getAction( QLatin1String( "actionWide" ) )->setChecked(true);
         playerWidget->showElapsedTimerLabel(true);
     }
 
@@ -188,7 +188,7 @@ MainWindow::MainWindow(QWidget *parent) :
                    + QDir::separator()
                    + QLatin1String("session.xml");
 #else
-    sessionFile_ = QDesktopServices::storageLocation(QDesktopServices::DataLocation).replace("/data","")
+    sessionFile_ = QDesktopServices::storageLocation(QDesktopServices::DataLocation).replace( QLatin1String( "/data" ),"")
                    + QDir::separator()
                    + QLatin1String("session.xml");
 #endif
@@ -451,7 +451,7 @@ void MainWindow::beginSearch()
 */
 void MainWindow::getToken()
 {
-    ui_->searchLine->setStyleSheet("background-color:#E7A2A9;");
+    ui_->searchLine->setStyleSheet( QLatin1String( "background-color:#E7A2A9;" ) );
 
     // clear cookies
     jar_->clear();
@@ -480,7 +480,7 @@ void MainWindow::tokenFinished()
     ui_->searchButton->setEnabled(true);
 
     if(!token_->result().isEmpty()) {
-        ui_->searchLine->setStyleSheet("");
+        ui_->searchLine->setStyleSheet( QLatin1String( "" ) );
 
         Utility::token = token_->result();
 
@@ -1001,23 +1001,23 @@ void MainWindow::saveSession()
     QXmlStreamWriter stream(&sessionFile);
     stream.setAutoFormatting(true);
     stream.writeStartDocument();
-    stream.writeStartElement("playlist");
+    stream.writeStartElement( QLatin1String( "playlist" ) );
 
     for(int i = 0; i < ui_->downloadList->count(); i++) {
-        stream.writeStartElement("item");
+        stream.writeStartElement( QLatin1String( "item" ) );
         PlaylistItemPtr pi = ((DownloadItem *)ui_->downloadList->itemWidget(ui_->downloadList->item(i)))->playlistItem();
         for(int j = 0; j< pi->metaObject()->propertyCount(); j++) {
             if(pi->metaObject()->property(j).isStored(pi.data())) {
-                if(QString(pi->metaObject()->property(j).name()) == "objectName")
+                if(QString(pi->metaObject()->property(j).name()) ==  QLatin1String( "objectName" ) )
                     continue;
-                if(QString(pi->metaObject()->property(j).name()) == "song") {
+                if(QString(pi->metaObject()->property(j).name()) ==  QLatin1String( "song" ) ) {
                     SongPtr song = pi->song();
-                    stream.writeStartElement("song_info");
+                    stream.writeStartElement( QLatin1String( "song_info" ) );
                     for(int k = 0; k< song->metaObject()->propertyCount(); k++) {
                         if(song->metaObject()->property(k).isStored(song.data())) {
-                            if(QString(song->metaObject()->property(k).name()) == "objectName")
+                            if(QString(song->metaObject()->property(k).name()) ==  QLatin1String( "objectName" ) )
                                 continue;
-                            if(QString(song->metaObject()->property(k).name()) == "errorString")
+                            if(QString(song->metaObject()->property(k).name()) ==  QLatin1String( "errorString" ) )
                                 continue;
                             stream.writeTextElement(song->metaObject()->property(k).name(),
                                                     song->metaObject()->property(k).read(song.data()).toString());
@@ -1051,7 +1051,7 @@ void MainWindow::loadSession()
 
     QList<PlaylistItemPtr> items;
 
-    QDomDocument doc("mydocument");
+    QDomDocument doc( QLatin1String( "mydocument" ) );
     QString errorStr;
     int errorLine;
     int errorColumn;
@@ -1063,13 +1063,13 @@ void MainWindow::loadSession()
     sessionFile.close();
 
     QDomElement root = doc.documentElement();
-    QDomElement itemEl = root.firstChildElement("item");
+    QDomElement itemEl = root.firstChildElement( QLatin1String( "item" ) );
     while (!itemEl.isNull()) {
         PlaylistItemPtr item(new PlaylistItem());
 
         items.append(item);
         parsePlaylistItem(itemEl, item);
-        itemEl = itemEl.nextSiblingElement("item");
+        itemEl = itemEl.nextSiblingElement( QLatin1String( "item" ) );
     }
 
     for(int i = 0; i < items.count(); i++) {
@@ -1090,7 +1090,7 @@ void MainWindow::parsePlaylistItem(const QDomElement& element, PlaylistItemPtr i
         }
     }
 
-    QDomElement songEl = element.firstChildElement("song_info");
+    QDomElement songEl = element.firstChildElement( QLatin1String( "song_info" ) );
     parseSong(songEl, item->song());
 
     // Download covers if missing

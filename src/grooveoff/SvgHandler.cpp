@@ -43,7 +43,7 @@ namespace The {
 
 SvgHandler::SvgHandler( QObject* parent )
     : QObject( parent )
-    , m_themeFile( "/usr/share/apps/grooveoff/resources/default-theme-clean.svg" )
+    , m_themeFile(  QLatin1String( "/usr/share/apps/grooveoff/resources/default-theme-clean.svg" ) )
 {
     connect( The::paletteHandler(), SIGNAL(newPalette(QPalette)), this, SLOT(discardCache()) );
 }
@@ -62,7 +62,6 @@ bool SvgHandler::loadSvg( const QString& name )
 
     if ( !renderer->isValid() )
     {
-//        qDebug() << "Bluddy 'ell mateys, aye canna' load ya Ess Vee Gee at " << svgFilename;
         delete renderer;
         return false;
     }

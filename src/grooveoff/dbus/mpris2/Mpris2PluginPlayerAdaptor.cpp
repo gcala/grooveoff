@@ -87,7 +87,7 @@ bool Mpris2PluginPlayerAdaptor::canSeek() const
 
 QString Mpris2PluginPlayerAdaptor::loopStatus() const
 {
-    return "None";
+    return QString::fromLatin1( "None" );
 }
 
 void Mpris2PluginPlayerAdaptor::setLoopStatus( const QString &value )
@@ -106,21 +106,17 @@ QVariantMap Mpris2PluginPlayerAdaptor::metadata() const
         return QVariantMap();
 
     PlaylistItemPtr track = m_engine->currentTrack();
+    const QString coverpath = Utility::coversCachePath + track->song()->coverArtFilename();
+    QByteArray playingTrackFileId = idFromPlaylistItem( track );
 
     QVariantMap map;
-    map["mpris:length"] = qMax( m_engine->currentTrackTotalTime() * 1000 , qint64( 0 ) );
-
-    const QString coverpath = Utility::coversCachePath + track->song()->coverArtFilename();
-    map["mpris:artUrl"] = QUrl::fromLocalFile( coverpath ).toString();
-
-    map["xesam:album"] = track->song()->albumName();
-    map["xesam:artist"] = QStringList( track->song()->artistName() );
-    map["xesam:title"] = track->song()->songName();
-
-    QByteArray playingTrackFileId = idFromPlaylistItem( track );
-    map["mpris:trackid"] = QVariant::fromValue< QDBusObjectPath >( QDBusObjectPath( playingTrackFileId.constData() ) );
-
-    map["xesam:url"] =  QUrl::fromLocalFile( track->path() + track->fileName() ).toString();
+    map[ QLatin1String( "mpris:length"  ) ] = qMax( m_engine->currentTrackTotalTime() * 1000 , qint64( 0 ) );
+    map[ QLatin1String( "mpris:artUrl"  ) ] = QUrl::fromLocalFile( coverpath ).toString();
+    map[ QLatin1String( "xesam:album"   ) ] = track->song()->albumName();
+    map[ QLatin1String( "xesam:artist"  ) ] = QStringList( track->song()->artistName() );
+    map[ QLatin1String( "xesam:title"   ) ] = track->song()->songName();
+    map[ QLatin1String( "mpris:trackid" ) ] = QVariant::fromValue< QDBusObjectPath >( QDBusObjectPath( playingTrackFileId.constData() ) );
+    map[ QLatin1String( "xesam:url"     ) ] =  QUrl::fromLocalFile( track->path() + track->fileName() ).toString();
     return map;
 }
 
@@ -132,10 +128,10 @@ double Mpris2PluginPlayerAdaptor::minimumRate() const
 QString Mpris2PluginPlayerAdaptor::playbackStatus() const
 {
     if( m_engine->state() == Phonon::PlayingState )
-        return "Playing";
-    else if ( m_engine->state() == Phonon::PausedState )
-        return "Paused";
-    return "Stopped";
+        return QString::fromLatin1( "Playing" );
+    else if( m_engine->state() == Phonon::PausedState )
+        return QString::fromLatin1( "Paused" );
+    return QString::fromLatin1( "Stopped" );
 }
 
 double Mpris2PluginPlayerAdaptor::rate() const
@@ -246,33 +242,33 @@ void Mpris2PluginPlayerAdaptor::Stop()
 
 void Mpris2PluginPlayerAdaptor::emitPropertiesChanged()
 {
-    QList<QByteArray> changedProps;
-    if( m_props["CanGoNext"] != canGoNext() )
-        changedProps << "CanGoNext";
-    if( m_props["CanGoPrevious"] != canGoPrevious() )
-        changedProps << "CanGoPrevious";
-    if( m_props["CanPause"] != canPause() )
-        changedProps << "CanPause";
-    if( m_props["CanPlay"] != canPlay() )
-        changedProps << "CanPlay";
-    if( m_props["CanSeek"] != canSeek() )
-        changedProps << "CanSeek";
-    if( m_props["LoopStatus"] != loopStatus() )
-        changedProps << "LoopStatus";
-    if( m_props["MaximumRate"] != maximumRate() )
-        changedProps << "MaximumRate";
-    if( m_props["MinimumRate"] != minimumRate() )
-        changedProps << "MinimumRate";
-    if( m_props["PlaybackStatus"] != playbackStatus() )
-        changedProps << "PlaybackStatus";
-    if( m_props["Rate"] != rate() )
-        changedProps << "Rate";
-    if( m_props["Shuffle"] != shuffle() )
-        changedProps << "Shuffle";
-    if( m_props["Volume"] != volume() )
-        changedProps << "Volume";
-    if( m_props["Metadata"] != metadata() )
-        changedProps << "Metadata";
+    QList<QLatin1String> changedProps;
+    if( m_props[ QLatin1String( "CanGoNext" ) ] != canGoNext() )
+        changedProps << QLatin1String( "CanGoNext" );
+    if( m_props[ QLatin1String( "CanGoPrevious" ) ] != canGoPrevious() )
+        changedProps << QLatin1String( "CanGoPrevious" );
+    if( m_props[ QLatin1String( "CanPause" ) ] != canPause() )
+        changedProps << QLatin1String( "CanPause" );
+    if( m_props[ QLatin1String( "CanPlay" ) ] != canPlay() )
+        changedProps << QLatin1String( "CanPlay" );
+    if( m_props[ QLatin1String( "CanSeek" ) ] != canSeek() )
+        changedProps << QLatin1String( "CanSeek" );
+    if( m_props[ QLatin1String( "LoopStatus" ) ] != loopStatus() )
+        changedProps << QLatin1String( "LoopStatus" );
+    if( m_props[ QLatin1String( "MaximumRate" ) ] != maximumRate() )
+        changedProps << QLatin1String( "MaximumRate" );
+    if( m_props[ QLatin1String( "MinimumRate" ) ] != minimumRate() )
+        changedProps << QLatin1String( "MinimumRate" );
+    if( m_props[ QLatin1String( "PlaybackStatus" ) ] != playbackStatus() )
+        changedProps << QLatin1String( "PlaybackStatus" );
+    if( m_props[ QLatin1String( "Rate" ) ] != rate() )
+        changedProps << QLatin1String( "Rate" );
+    if( m_props[ QLatin1String( "Shuffle" ) ] != shuffle() )
+        changedProps << QLatin1String( "Shuffle" );
+    if( m_props[ QLatin1String( "Volume" ) ] != volume() )
+        changedProps << QLatin1String( "Volume" );
+    if( m_props[ QLatin1String( "Metadata" ) ] != metadata() )
+        changedProps << QLatin1String( "Metadata" );
 
     if( changedProps.isEmpty() )
         return;
@@ -280,13 +276,13 @@ void Mpris2PluginPlayerAdaptor::emitPropertiesChanged()
     syncProperties();
 
     QVariantMap map;
-    foreach( QByteArray name, changedProps )
+    foreach( QLatin1String name, changedProps )
         map.insert( name, m_props.value( name ) );
 
-    QDBusMessage msg = QDBusMessage::createSignal("/org/mpris/MediaPlayer2",
-                                                  "org.freedesktop.DBus.Properties",
-                                                  "PropertiesChanged");
-    msg << "org.mpris.MediaPlayer2.Player";
+    QDBusMessage msg = QDBusMessage::createSignal(QLatin1String( "/org/mpris/MediaPlayer2" ),
+                                                  QLatin1String( "org.freedesktop.DBus.Properties" ),
+                                                  QLatin1String( "PropertiesChanged" ) );
+    msg << QLatin1String( "org.mpris.MediaPlayer2.Player" );
     msg << map;
     msg << QStringList();
     QDBusConnection::sessionBus().send( msg );
@@ -300,17 +296,17 @@ void Mpris2PluginPlayerAdaptor::onSeeked( qint64 elapsed, bool userSeek )
 
 void Mpris2PluginPlayerAdaptor::syncProperties()
 {
-    m_props["CanGoNext"] = canGoNext();
-    m_props["CanGoPrevious"] = canGoPrevious();
-    m_props["CanPause"] = canPause();
-    m_props["CanPlay"] = canPlay();
-    m_props["CanSeek"] = canSeek();
-    m_props["LoopStatus"] = loopStatus();
-    m_props["MaximumRate"] = maximumRate();
-    m_props["MinimumRate"] = minimumRate();
-    m_props["PlaybackStatus"] = playbackStatus();
-    m_props["Rate"] = rate();
-    m_props["Shuffle"] = shuffle();
-    m_props["Volume"] = volume();
-    m_props["Metadata"] = metadata();
+    m_props[ QLatin1String( "CanGoNext"      ) ] = canGoNext();
+    m_props[ QLatin1String( "CanGoPrevious"  ) ] = canGoPrevious();
+    m_props[ QLatin1String( "CanPause"       ) ] = canPause();
+    m_props[ QLatin1String( "CanPlay"        ) ] = canPlay();
+    m_props[ QLatin1String( "CanSeek"        ) ] = canSeek();
+    m_props[ QLatin1String( "LoopStatus"     ) ] = loopStatus();
+    m_props[ QLatin1String( "MaximumRate"    ) ] = maximumRate();
+    m_props[ QLatin1String( "MinimumRate"    ) ] = minimumRate();
+    m_props[ QLatin1String( "PlaybackStatus" ) ] = playbackStatus();
+    m_props[ QLatin1String( "Rate"           ) ] = rate();
+    m_props[ QLatin1String( "Shuffle"        ) ] = shuffle();
+    m_props[ QLatin1String( "Volume"         ) ] = volume();
+    m_props[ QLatin1String( "Metadata"       ) ] = metadata();
 }

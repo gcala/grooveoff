@@ -40,7 +40,7 @@ bool Mpris2PluginRootAdaptor::canRaise() const
 
 QString Mpris2PluginRootAdaptor::desktopEntry() const
 {
-    return "grooveoff";
+    return QString::fromLatin1( "grooveoff" );
 }
 
 bool Mpris2PluginRootAdaptor::hasTrackList() const
@@ -49,7 +49,7 @@ bool Mpris2PluginRootAdaptor::hasTrackList() const
 }
 QString Mpris2PluginRootAdaptor::identity() const
 {
-    return "GrooveOff";
+    return QString::fromLatin1( "GrooveOff" );
 }
 
 QStringList Mpris2PluginRootAdaptor::supportedMimeTypes() const
@@ -60,7 +60,7 @@ QStringList Mpris2PluginRootAdaptor::supportedMimeTypes() const
 QStringList Mpris2PluginRootAdaptor::supportedUriSchemes() const
 {
     QStringList uriSchemes;
-    uriSchemes << "grooveoff";
+    uriSchemes << QLatin1String( "grooveoff" );
     return uriSchemes;
 }
 

@@ -57,8 +57,7 @@ Mpris1PluginRootAdaptor::~Mpris1PluginRootAdaptor()
 
 QString Mpris1PluginRootAdaptor::Identity()
 {
-    QString name = QString( "GrooveOff %1" ).arg( GROOVEOFF_VERSION );
-    return name;
+    return QString::fromLatin1( "GrooveOff %1" ).arg( GROOVEOFF_VERSION );
 }
 
 Version Mpris1PluginRootAdaptor::MprisVersion()

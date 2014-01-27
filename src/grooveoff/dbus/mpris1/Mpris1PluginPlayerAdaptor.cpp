@@ -123,14 +123,14 @@ QVariantMap Mpris1PluginPlayerAdaptor::GetMetadata()
     QVariantMap map;
     PlaylistItemPtr track = m_engine->currentTrack();
 
-    map.insert( "location", "file://" + track->path() + track->fileName() );
-    map.insert( "arturl", Utility::coversCachePath + track->song()->coverArtFilename() );
-    map.insert( "title", track->song()->songName() );
-    map.insert( "artist", track->song()->artistName() );
-    map.insert( "album", track->song()->albumName() );
-    map.insert( "time", ( quint32 ) m_engine->currentTrackTotalTime() / 1000 );
-    map.insert( "mtime", ( quint32 ) m_engine->currentTrackTotalTime() );
-    map.insert( "year", track->song()->year() );
+    map.insert( QLatin1String( "location" ), "file://" + track->path() + track->fileName() );
+    map.insert( QLatin1String( "arturl" ), Utility::coversCachePath + track->song()->coverArtFilename() );
+    map.insert( QLatin1String( "title" ), track->song()->songName() );
+    map.insert( QLatin1String( "artist" ), track->song()->artistName() );
+    map.insert( QLatin1String( "album" ), track->song()->albumName() );
+    map.insert( QLatin1String( "time" ), ( quint32 ) m_engine->currentTrackTotalTime() / 1000 );
+    map.insert( QLatin1String( "mtime" ), ( quint32 ) m_engine->currentTrackTotalTime() );
+    map.insert( QLatin1String( "year" ), track->song()->year() );
     return map;
 }
 
