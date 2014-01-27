@@ -72,6 +72,7 @@
 #include <QXmlStreamWriter>
 #include <QMetaProperty>
 #include <QDomDocument>
+#include <QPointer>
 
 using namespace GrooveShark;
 
@@ -80,7 +81,7 @@ using namespace GrooveShark;
 
 Q_DECLARE_METATYPE(QList<int>)
 
-QWeakPointer<MainWindow> MainWindow::s_instance;
+QPointer<MainWindow> MainWindow::s_instance;
 
 namespace The {
     MainWindow* mainWindow() { return MainWindow::s_instance.data(); }

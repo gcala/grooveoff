@@ -21,7 +21,7 @@
 #define PLAYLISTITEM_H
 
 #include <QObject>
-#include <Phonon/MediaSource>
+#include <phonon/mediasource.h>
 #include <../libgrooveshark/song.h>
 
 class PlaylistItem : public QObject

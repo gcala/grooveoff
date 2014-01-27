@@ -23,6 +23,7 @@
 #include "MainWindow.h"
 
 #include <QtSingleApplication>
+#include <QPointer>
 
 class App : public QtSingleApplication
 {
@@ -48,7 +49,7 @@ public Q_SLOTS:
     void quit();
 
 private:
-    QWeakPointer<MainWindow>    m_mainWindow;
+    QPointer<MainWindow>    m_mainWindow;
 };
 
 #define pApp static_cast<App*>(qApp)

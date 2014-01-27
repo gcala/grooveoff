@@ -148,7 +148,7 @@ private:
 
     Mpris *mpris_;
 
-    static QWeakPointer<MainWindow> s_instance;
+    static QPointer<MainWindow> s_instance;
 
     // Methods
     void setupUi();
