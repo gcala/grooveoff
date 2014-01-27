@@ -272,7 +272,7 @@ bool SongPrivate::parse( const QVariant& data )
     v = songMap.value( QLatin1String( "AlbumName" ) );
     if( !v.canConvert( QVariant::String ) )
         qDebug() << "'AlbumName' field is invalid";
-    m_albumName = v.toString();
+    m_albumName = v.toString().replace('/','-');
 
     if(!m_fromPlaylist) {
         v = songMap.value( QLatin1String( "ArtistCoverArtFilename" ) );
@@ -289,7 +289,7 @@ bool SongPrivate::parse( const QVariant& data )
     v = songMap.value( QLatin1String( "ArtistName" ) );
     if( !v.canConvert( QVariant::String ) )
         qDebug() << "'ArtistName' field is invalid";
-    m_artistName = v.toString();
+    m_artistName = v.toString().replace('/','-');
 
     if(!m_fromPlaylist) {
         v = songMap.value( QLatin1String( "AvgDuration" ) );
@@ -362,7 +362,7 @@ bool SongPrivate::parse( const QVariant& data )
     v = songMap.value( QLatin1String( m_fromPlaylist ? "Name" : "SongName" ) );
     if( !v.canConvert( QVariant::String ) )
         qDebug() << "'SongName' field is invalid";
-    m_songName = v.toString();
+    m_songName = v.toString().replace('/','-');
 
     if(!m_fromPlaylist) {
         v = songMap.value( QLatin1String( "TSAdded" ) );
