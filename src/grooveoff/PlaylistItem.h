@@ -28,6 +28,7 @@ class PlaylistItem : public QObject
 {
     Q_OBJECT
     Q_PROPERTY( QString path READ path WRITE setPath )
+    Q_PROPERTY( QString namingSchema READ namingSchema WRITE setNamingSchema )
     Q_PROPERTY( GrooveShark::SongPtr song READ song WRITE setSong )
 
 public:
@@ -37,10 +38,12 @@ public:
 
     QString path() const;
     void setPath(const QString& path);
-    QString fileName() const;
     GrooveShark::SongPtr song();
     void setSong(GrooveShark::SongPtr song);
+    QString namingSchema() const;
+    void setNamingSchema(const QString& schema);
 
+    QString fileName() const;
     void requireCoverReload();
     bool isPlaying() { return state_ == Phonon::PlayingState; }
     void setState(Phonon::State state);
@@ -58,6 +61,7 @@ private:
     Phonon::State state_;
     GrooveShark::SongPtr song_;
     QString path_;
+    QString namingSchema_;
 };
 
 typedef QSharedPointer<PlaylistItem> PlaylistItemPtr;

@@ -64,6 +64,16 @@ void PlaylistItem::setPath(const QString& path)
     path_ = path;
 }
 
+QString PlaylistItem::namingSchema() const
+{
+    return namingSchema_;
+}
+
+void PlaylistItem::setNamingSchema(const QString& schema)
+{
+    namingSchema_ = schema;
+}
+
 SongPtr PlaylistItem::song()
 {
     return song_;
@@ -76,10 +86,13 @@ void PlaylistItem::setSong(SongPtr song)
 
 QString PlaylistItem::fileName() const
 {
-    return song_->songName().replace('/','-')
-           + " - "
-           + song_->artistName().replace('/','-')
-           + ".mp3";
+    QString fileName = namingSchema_;
+    fileName.replace(QLatin1String("%title"), song_->songName(), Qt::CaseInsensitive);
+    fileName.replace(QLatin1String("%artist"), song_->artistName(), Qt::CaseInsensitive);
+    fileName.replace(QLatin1String("%album"), song_->albumName(), Qt::CaseInsensitive);
+    fileName.replace(QLatin1String("%track"), QString::number(song_->trackNum()), Qt::CaseInsensitive);
+
+    return fileName + ".mp3";
 }
 
 void PlaylistItem::setState(Phonon::State state)
@@ -87,5 +100,3 @@ void PlaylistItem::setState(Phonon::State state)
     state_ = state;
     emit stateChanged(state_);
 }
-
-

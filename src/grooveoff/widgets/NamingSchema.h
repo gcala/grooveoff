@@ -16,39 +16,29 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+// this code was "borrowed" from ktp-kded-integration-module
 
-#ifndef CONFIGDIALOG_H
-#define CONFIGDIALOG_H
+#ifndef NAMINGSCHEMA_H
+#define NAMINGSCHEMA_H
 
-#include <QDialog>
+#include <QLineEdit>
 
-namespace Ui {
-class ConfigDialog;
-}
-
-class ConfigDialog : public QDialog
+class NamingSchema : public QLineEdit    //krazy:exclude=qclasses
 {
-    Q_OBJECT
+     Q_OBJECT
 
 public:
-    explicit ConfigDialog(QWidget *parent = 0);
+    NamingSchema(QWidget *parent = 0);
+    virtual ~NamingSchema();
 
-private Q_SLOTS:
-    void restoreDefaults();
-    void saveSettings();
-    void okClicked();
-    void switchPage(int);
-    void cfgChanged();
+    void setLocalizedTagNames(QStringList tagNames);
+
+protected:
+    void dropEvent(QDropEvent *event);
+    void mousePressEvent(QMouseEvent *event);
 
 private:
-    Ui::ConfigDialog *ui_;
-    QStringList m_tagNames;
     QStringList m_localizedTagNames;
-    QString m_localizedTimeTagName;
-
-    void setupUi();
-    bool configChanged;
-    void loadSettings();
 };
 
-#endif // CONFIGDIALOG_H
+#endif // NAMINGSCHEMA_H

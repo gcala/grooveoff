@@ -94,7 +94,13 @@ void MatchItem::downloadSlot()
 
 void MatchItem::setDownloadIcon()
 {
-    if(QFile::exists(Utility::destinationPath + QDir::separator() + playlistItem_->fileName())) {
+    QString schema = Utility::namingSchema;
+    schema.replace(QLatin1String("%title"), playlistItem_->song()->songName(), Qt::CaseInsensitive);
+    schema.replace(QLatin1String("%artist"), playlistItem_->song()->artistName(), Qt::CaseInsensitive);
+    schema.replace(QLatin1String("%album"), playlistItem_->song()->albumName(), Qt::CaseInsensitive);
+    schema.replace(QLatin1String("%track"), QString::number(playlistItem_->song()->trackNum()), Qt::CaseInsensitive);
+
+    if(QFile::exists(Utility::destinationPath + QDir::separator() + schema + ".mp3")) {
         ui_->downloadButton->setIcon(QIcon::fromTheme(QLatin1String("view-refresh"),
                                      QIcon(QLatin1String(":/resources/view-refresh.png"))));
     } else {

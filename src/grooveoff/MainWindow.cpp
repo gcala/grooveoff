@@ -576,10 +576,13 @@ void MainWindow::searchFinished()
             e.first = songList_->list().at(i)->artistName();
             e.second << songList_->list().at(i)->albumName();
             artistsAlbumsContainer_.append(e);
-            artists << songList_->list().at(i)->artistName();
+
+            if(!songList_->list().at(i)->artistName().isEmpty())
+                artists << songList_->list().at(i)->artistName();
         }
 
-        albums << songList_->list().at(i)->albumName();
+        if(!songList_->list().at(i)->albumName().isEmpty())
+            albums << songList_->list().at(i)->albumName();
     }
 
     // removing duplicates
@@ -606,6 +609,15 @@ void MainWindow::searchError()
 
 void MainWindow::downloadRequest(PlaylistItemPtr playlistItem)
 {
+    // at this point playlistItem doesn't contain own naming schema
+    QString schema = Utility::namingSchema;
+    schema.replace(QLatin1String("%title"), playlistItem->song()->songName(), Qt::CaseInsensitive);
+    schema.replace(QLatin1String("%artist"), playlistItem->song()->artistName(), Qt::CaseInsensitive);
+    schema.replace(QLatin1String("%album"), playlistItem->song()->albumName(), Qt::CaseInsensitive);
+    schema.replace(QLatin1String("%track"), QString::number(playlistItem->song()->trackNum()), Qt::CaseInsensitive);
+
+    QFileInfo fi(ui_->pathLine->text() + QDir::separator() + schema + ".mp3");
+
     // check if destination folder exists
     if(!QFile::exists(ui_->pathLine->text())) {
         QMessageBox::information(this, trUtf8("Attention"),
@@ -616,8 +628,7 @@ void MainWindow::downloadRequest(PlaylistItemPtr playlistItem)
     }
 
     // check if destination folder is writable
-    QFileInfo fi(ui_->pathLine->text());
-    if(!fi.isWritable()) {
+    if(!QFileInfo(ui_->pathLine->text()).isWritable()) {
         QMessageBox::information(this, trUtf8("Attention"),
                                        trUtf8("The destination folder is not writable.\n"
                                               "Select a valid path"),
@@ -625,11 +636,15 @@ void MainWindow::downloadRequest(PlaylistItemPtr playlistItem)
         return;
     }
 
-    if(isDownloadingQueued(playlistItem->song()->songID()))
+    if(isDownloadingQueued(playlistItem->song()->songID())) {
+        QMessageBox::information(this, trUtf8("Attention"),
+                                       trUtf8("The song is already in queue."),
+                                 QMessageBox::Ok);
         return;
+    }
 
     // check file existence
-    if(QFile::exists(ui_->pathLine->text() + QDir::separator() + playlistItem->fileName())) {
+    if(QFile::exists(ui_->pathLine->text() + QDir::separator() + schema + ".mp3")) {
         int ret = QMessageBox::question(this,
                                         trUtf8("Overwrite File?"),
                                         trUtf8("A file named \"%1\" already exists. Are you sure you want to overwrite it?").arg(playlistItem->fileName()),
@@ -642,7 +657,17 @@ void MainWindow::downloadRequest(PlaylistItemPtr playlistItem)
         }
     }
 
+    // Creating path, if needed
+    if(!fi.absoluteDir().exists())
+        if(!fi.absoluteDir().mkpath(fi.absolutePath())) {
+            QMessageBox::information(this, trUtf8("Attention"),
+                                           trUtf8("Can't create destination path:\n\n%1\n\nAborting...").arg(fi.absolutePath()),
+                                           QMessageBox::Ok);
+            return;
+        }
+
     playlistItem->setPath(ui_->pathLine->text() + "/");
+    playlistItem->setNamingSchema(Utility::namingSchema);
 
     addDownloadItem(playlistItem);
 }
@@ -796,6 +821,10 @@ void MainWindow::loadSettings()
     The::audioEngine()->setMuted(settings.value(QLatin1String("muted"), false).toBool());
 
     playerWidget->setTimerState((GrooveOff::TimerState)settings.value(QLatin1String("timerState"), GrooveOff::ElapsedState).toInt());
+
+    //Naming Schema
+    Utility::namingSchema = settings.value(QLatin1String("namingSchema"),
+                                        trUtf8("%1 - %2").arg(QLatin1String("%artist")).arg(QLatin1String("%title"))).toString();
 }
 
 /*!

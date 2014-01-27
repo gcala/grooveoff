@@ -16,39 +16,37 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+// this code was "borrowed" from ktp-kded-integration-module
 
-#ifndef CONFIGDIALOG_H
-#define CONFIGDIALOG_H
 
-#include <QDialog>
+#ifndef NAMINGELEMENTS_H
+#define NAMINGELEMENTS_H
 
-namespace Ui {
-class ConfigDialog;
-}
+#include <QListWidget>
+#include <QDragEnterEvent>
 
-class ConfigDialog : public QDialog
+class NamingElements : public QListWidget
 {
-    Q_OBJECT
+     Q_OBJECT
 
 public:
-    explicit ConfigDialog(QWidget *parent = 0);
+    NamingElements(QWidget *parent = 0);
+    virtual ~NamingElements();
 
-private Q_SLOTS:
-    void restoreDefaults();
-    void saveSettings();
-    void okClicked();
-    void switchPage(int);
-    void cfgChanged();
+    void setLocalizedTagNames(QStringList tagNames);
+    void setItemsIcons(QStringList itemsIcons);
+    void setupItems();
+
+protected:
+    void resizeEvent(QResizeEvent *event);
+    void dragEnterEvent(QDragEnterEvent *event);
+    void dragMoveEvent(QDragMoveEvent *event);
+    void mousePressEvent(QMouseEvent *event);
+    QStringList mimeTypes() const;
 
 private:
-    Ui::ConfigDialog *ui_;
-    QStringList m_tagNames;
     QStringList m_localizedTagNames;
-    QString m_localizedTimeTagName;
-
-    void setupUi();
-    bool configChanged;
-    void loadSettings();
+    QStringList m_itemsIcons;
 };
 
-#endif // CONFIGDIALOG_H
+#endif // NAMINGELEMENTS_H

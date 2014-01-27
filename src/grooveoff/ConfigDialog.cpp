@@ -46,14 +46,43 @@ ConfigDialog::ConfigDialog(QWidget *parent):
     // connect all checkboxes to the same slot
     QList<QCheckBox *> checkboxList = this->findChildren<QCheckBox *>();
     foreach(QCheckBox *cb, checkboxList) {
-        connect(cb, SIGNAL(toggled(bool)), this, SLOT(cfgChanged()));
+        connect(cb, SIGNAL(toggled(bool)),
+                    SLOT(cfgChanged()));
     }
 
     // connect all spinboxes to the same slot
     QList<QSpinBox *> spinboxList = this->findChildren<QSpinBox *>();
     foreach(QSpinBox *sb, spinboxList) {
-        connect(sb, SIGNAL(valueChanged(int)), this, SLOT(cfgChanged()));
+        connect(sb, SIGNAL(valueChanged(int)),
+                    SLOT(cfgChanged()));
     }
+
+    connect(ui_->m_nowPlayingText, SIGNAL(textChanged(QString)),
+                                   SLOT(cfgChanged()));
+
+    m_tagNames << QLatin1String("%title") << QLatin1String("%artist") << QLatin1String("%album") << QLatin1String("%track");
+    // xgettext: no-c-format
+    m_localizedTagNames << trUtf8("%title")
+                        // xgettext: no-c-format
+                        << trUtf8("%artist")
+                        // xgettext: no-c-format
+                        << trUtf8("%album")
+                        // xgettext: no-c-format
+                        << trUtf8("%track");
+    // xgettext: no-c-format
+    m_localizedTimeTagName = trUtf8("%time");
+
+    QStringList itemsIcons;
+    itemsIcons << QLatin1String("view-media-lyrics")   //%title
+               << QLatin1String("view-media-artist")   //%artist
+               << QLatin1String("view-media-playlist") //%album
+               << QLatin1String("mixer-cd");           //%track
+
+    ui_->m_tagListWidget->setItemsIcons(itemsIcons);
+    ui_->m_tagListWidget->setLocalizedTagNames(m_localizedTagNames);
+    ui_->m_tagListWidget->setupItems(); //populate the list, load items icons and set list's maximum size
+
+    ui_->m_nowPlayingText->setLocalizedTagNames(m_localizedTagNames);
 
     connect(ui_->cancelButton, SIGNAL(clicked()), this, SLOT(close()));
     connect(ui_->restoreButton, SIGNAL(clicked()), this, SLOT(restoreDefaults()));
@@ -141,6 +170,7 @@ void ConfigDialog::restoreDefaults()
     ui_->loadCovers->setChecked(true);
     ui_->numResults->setValue(0);
     ui_->maxDownloads->setValue(5);
+    ui_->m_nowPlayingText->setText(trUtf8("%1 - %2").arg(QLatin1String("%artist")).arg(QLatin1String("%title")));
 }
 
 /*!
@@ -159,6 +189,14 @@ void ConfigDialog::saveSettings()
     settings.setValue(QLatin1String("numResults"), ui_->numResults->value());
     settings.setValue(QLatin1String("maxDownloads"), ui_->maxDownloads->value());
     settings.setValue(QLatin1String("saveDestination"), ui_->saveDestination->isChecked());
+
+    //we store a nowPlayingText version with untranslated tag names
+    QString modifiedNamingSchema = ui_->m_nowPlayingText->text();
+    for (int i = 0; i < m_tagNames.size(); i++) {
+        modifiedNamingSchema.replace(m_localizedTagNames.at(i), m_tagNames.at(i));
+    }
+
+    settings.setValue(QLatin1String("namingSchema"), modifiedNamingSchema);
 }
 
 /*!
@@ -217,5 +255,16 @@ void ConfigDialog::loadSettings()
     ui_->numResults->setValue(settings.value(QLatin1String("numResults"), 0).toInt());
     ui_->maxDownloads->setValue(settings.value(QLatin1String("maxDownloads"), 5).toInt());
     ui_->saveDestination->setChecked(settings.value(QLatin1String("saveDestination"), false).toBool());
+
+    //Naming Schema
+    QString namingSchemaText = settings.value(QLatin1String("namingSchema"),
+                                              trUtf8("%1 - %2").arg(QLatin1String("%artist")).arg(QLatin1String("%title"))).toString();
+
+    //in namingSchemaText tag names aren't localized, here they're replaced with the localized ones
+    for (int i = 0; i < m_tagNames.size(); i++) {
+        namingSchemaText.replace(m_tagNames.at(i), m_localizedTagNames.at(i));
+    }
+
+    ui_->m_nowPlayingText->setText(namingSchemaText);
 }
 

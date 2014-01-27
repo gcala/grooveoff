@@ -42,6 +42,7 @@ public:
     static QString coversCachePath;
     static QString token;
     static QString destinationPath;
+    static QString namingSchema;
 
     static QString elidedText(const QString &text, const Qt::TextElideMode &elideMode, const int &width, const QFont::Weight &weight);
 

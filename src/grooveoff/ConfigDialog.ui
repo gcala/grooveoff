@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>503</width>
-    <height>461</height>
+    <width>617</width>
+    <height>543</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -172,6 +172,21 @@
               </property>
              </widget>
             </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="groupBox_7">
+           <property name="title">
+            <string>Naming pattern</string>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_10">
+            <item>
+             <widget class="NamingSchema" name="m_nowPlayingText"/>
+            </item>
+            <item>
+             <widget class="NamingElements" name="m_tagListWidget"/>
+            </item>
             <item>
              <spacer name="verticalSpacer">
               <property name="orientation">
@@ -179,8 +194,8 @@
               </property>
               <property name="sizeHint" stdset="0">
                <size>
-                <width>235</width>
-                <height>18</height>
+                <width>20</width>
+                <height>40</height>
                </size>
               </property>
              </spacer>
@@ -430,6 +445,18 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>NamingSchema</class>
+   <extends>QLineEdit</extends>
+   <header location="global">widgets/NamingSchema.h</header>
+  </customwidget>
+  <customwidget>
+   <class>NamingElements</class>
+   <extends>QLineEdit</extends>
+   <header location="global">widgets/NamingElements.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

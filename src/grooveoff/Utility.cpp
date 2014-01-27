@@ -31,6 +31,7 @@ const int Utility::marginSize = 5;
 QString Utility::coversCachePath = "";
 QString Utility::token = "";
 QString Utility::destinationPath = "";
+QString Utility::namingSchema = "";
 
 QString Utility::elidedText(const QString& text,
                             const Qt::TextElideMode& elideMode,

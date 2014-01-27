@@ -27,6 +27,8 @@ set(grooveoff_SRCS App.cpp
                    widgets/VolumeDial.cpp
                    widgets/IconButton.cpp
                    widgets/PlayPauseButton.cpp
+                   widgets/NamingElements.cpp
+                   widgets/NamingSchema.cpp
                    widgets/NextButton.cpp
                    widgets/PreviousButton.cpp
                    widgets/Spinner.cpp
