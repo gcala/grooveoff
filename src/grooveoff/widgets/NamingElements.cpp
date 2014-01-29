@@ -21,6 +21,8 @@
 #include "NamingElements.h"
 
 #include <QScrollBar>
+#include <QDrag>
+#include <QMimeData>
 
 NamingElements::NamingElements(QWidget *parent)
 : QListWidget(parent)
