@@ -36,6 +36,8 @@ if( NOT Qt5Core_DIR )
     find_package(QJson REQUIRED)
 endif( NOT Qt5Core_DIR )
 
+find_package(Taglib REQUIRED)
+
 # Handle Translations, pick all grooveoff_* files from trans directory.
 file( GLOB TRANS_FILES ${CMAKE_SOURCE_DIR}/translations/grooveoff_*.ts)
 set( TRANSLATIONS ${TRANS_FILES} )

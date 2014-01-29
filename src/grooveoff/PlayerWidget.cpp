@@ -28,6 +28,11 @@
 #include <QTimer>
 #include <QGraphicsDropShadowEffect>
 
+// Taglib
+#include <taglib/fileref.h>
+#include <taglib/audioproperties.h>
+
+
 /*!
   \brief PlayerWidget: this is the PlayerWidget constructor.
   \param parent: The Parent Widget
@@ -231,12 +236,12 @@ void PlayerWidget::showMessage(const QString& message)
 
 void PlayerWidget::sourceChanged()
 {
+    PlaylistItemPtr track = The::audioEngine()->currentTrack();
     reloadPreviousNextButtons();
-    QString title = The::audioEngine()->currentTrack()->song()->songName();
-    QString artist = The::audioEngine()->currentTrack()->song()->artistName();
-    QString album = The::audioEngine()->currentTrack()->song()->albumName();
-    QString path = The::audioEngine()->currentTrack()->path();
-    QString coverName = The::audioEngine()->currentTrack()->song()->coverArtFilename();
+    QString title = track->song()->songName();
+    QString artist = track->song()->artistName();
+    QString album = track->song()->albumName();
+    QString coverName = track->song()->coverArtFilename();
 
     ui_->titleLabel->setText(title);
     ui_->titleLabel->setToolTip(title);
@@ -250,6 +255,17 @@ void PlayerWidget::sourceChanged()
     else
         ui_->coverLabel->setPixmap(QIcon::fromTheme(QLatin1String("media-optical"),
                                    QIcon(QLatin1String(":/resources/media-optical.png"))).pixmap(ui_->coverLabel->size()));
+
+    // Audio Properties
+    TagLib::FileRef f(QString(track->path() + track->fileName()).toLatin1(), true, TagLib::AudioProperties::Average);
+    if(f.isNull()) {
+        qDebug() << track->path() + track->fileName() << "is null";
+        return;
+    }
+
+    int bitrate = f.audioProperties()->bitrate();        // in kb/s
+    int channel =  f.audioProperties()->channels();
+    int sampleRate =  f.audioProperties()->sampleRate(); // in Hz
 }
 
 void PlayerWidget::playNext()

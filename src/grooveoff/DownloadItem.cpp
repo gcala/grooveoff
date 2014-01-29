@@ -536,7 +536,8 @@ void DownloadItem::setPlayerState(Phonon::State state)
 */
 void DownloadItem::openFolder()
 {
-    QDesktopServices::openUrl(QUrl("file://" + playlistItem_->path(), QUrl::TolerantMode));
+    QFileInfo fileInfo(playlistItem_->path() + playlistItem_->fileName());
+    QDesktopServices::openUrl(QUrl("file://" + fileInfo.absolutePath(), QUrl::TolerantMode));
 }
 
 void DownloadItem::loadCover()

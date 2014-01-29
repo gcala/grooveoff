@@ -23,6 +23,12 @@
 #include <QDir>
 #include <QMetaProperty>
 
+#if QT_VERSION >= QT_VERSION_CHECK( 5, 0, 0 )
+#include <QStandardPaths>
+#else
+#include <QDesktopServices>
+#endif
+
 using namespace GrooveShark;
 
 PlaylistItem::PlaylistItem ( const SongPtr &song ) :
@@ -56,6 +62,15 @@ void PlaylistItem::requireCoverReload()
 
 QString PlaylistItem::path() const
 {
+    if(path_.isEmpty()) {
+        qWarning() << "GrooveOff ::" << "path is empty";
+        // returning standard music path
+#if QT_VERSION >= QT_VERSION_CHECK( 5, 0, 0 )
+        return QStandardPaths::writableLocation(QStandardPaths::MusicLocation);
+#else
+        return QDesktopServices::storageLocation(QDesktopServices::MusicLocation);
+#endif
+    }
     return path_;
 }
 
@@ -66,6 +81,12 @@ void PlaylistItem::setPath(const QString& path)
 
 QString PlaylistItem::namingSchema() const
 {
+    if(namingSchema_.isEmpty()) {
+        qWarning() << "GrooveOff ::" << "naming schema is empty";
+        // returning standard naming schema
+        return QLatin1String( "%artist - %title" );
+    }
+
     return namingSchema_;
 }
 
@@ -87,6 +108,12 @@ void PlaylistItem::setSong(SongPtr song)
 QString PlaylistItem::fileName() const
 {
     QString fileName = namingSchema_;
+
+    if(fileName.isEmpty()) { // namingSchema_ is erroneously empty
+        qWarning() << "naming schema is empty";
+        fileName = "%artist - %title";
+    }
+
     fileName.replace(QLatin1String("%title"), song_->songName(), Qt::CaseInsensitive);
     fileName.replace(QLatin1String("%artist"), song_->artistName(), Qt::CaseInsensitive);
     fileName.replace(QLatin1String("%album"), song_->albumName(), Qt::CaseInsensitive);
