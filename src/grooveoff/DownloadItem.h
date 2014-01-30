@@ -36,6 +36,7 @@ class QLabel;
 class QPushButton;
 class QProgressBar;
 class TimerButton;
+class QDir;
 
 class DownloadItem : public QWidget
 {

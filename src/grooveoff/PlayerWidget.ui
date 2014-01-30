@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>747</width>
-    <height>93</height>
+    <height>100</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -203,11 +203,8 @@
              <property name="spacing">
               <number>0</number>
              </property>
-             <property name="topMargin">
-              <number>1</number>
-             </property>
-             <property name="bottomMargin">
-              <number>1</number>
+             <property name="margin">
+              <number>0</number>
              </property>
              <item>
               <spacer name="verticalSpacer">
@@ -224,43 +221,31 @@
              </item>
              <item>
               <widget class="QLabel" name="bitrateLabel">
-               <property name="font">
-                <font>
-                 <pointsize>9</pointsize>
-                 <weight>75</weight>
-                 <bold>true</bold>
-                </font>
-               </property>
                <property name="text">
                 <string>TextLabel</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
                </property>
               </widget>
              </item>
              <item>
               <widget class="QLabel" name="samplerateLabel">
-               <property name="font">
-                <font>
-                 <pointsize>9</pointsize>
-                 <weight>75</weight>
-                 <bold>true</bold>
-                </font>
-               </property>
                <property name="text">
                 <string>TextLabel</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
                </property>
               </widget>
              </item>
              <item>
               <widget class="QLabel" name="channelsLabel">
-               <property name="font">
-                <font>
-                 <pointsize>9</pointsize>
-                 <weight>75</weight>
-                 <bold>true</bold>
-                </font>
-               </property>
                <property name="text">
                 <string>TextLabel</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
                </property>
               </widget>
              </item>

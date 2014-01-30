@@ -52,24 +52,35 @@ PlayerWidget::PlayerWidget(QWidget *parent) :
 
     playedRemoved = false;
 
-    connect(ui_->timeLabel, SIGNAL(clicked()),
-            this, SLOT(toggleTimeLabel()));
+    connect( ui_->timeLabel, SIGNAL(clicked()),
+                             SLOT(toggleTimeLabel()));
 
-    connect(The::audioEngine(), SIGNAL(seeked(qint64, bool)),
-            this, SLOT(tick(qint64, bool)));
-    connect(The::audioEngine(), SIGNAL(stateChanged(Phonon::State)),
-            this, SLOT(stateChanged(Phonon::State)));
-    connect(The::audioEngine(), SIGNAL(sourceChanged()),
-            this, SLOT(sourceChanged()));
-    connect(The::playlist(), SIGNAL(playlistChanged()),
-            this, SLOT(reloadPreviousNextButtons()));
-    connect(The::audioEngine(), SIGNAL(removedPlayingTrack()),
-            this, SLOT(removedPlayingTrack()));
+    connect( The::audioEngine(), SIGNAL(seeked(qint64, bool)),
+                                 SLOT(tick(qint64, bool)));
 
-    connect( The::audioEngine(), SIGNAL(volumeChanged(int)), ui_->volume, SLOT(setValue(int)) );
-    connect( The::audioEngine(), SIGNAL(muteStateChanged(bool)), this, SLOT(muteStateChanged(bool)) );
-    connect( ui_->volume, SIGNAL(valueChanged(int)), The::audioEngine(), SLOT(setVolume(int)) );
-    connect( ui_->volume, SIGNAL(muteToggled(bool)), The::audioEngine(), SLOT(setMuted(bool)) );
+    connect( The::audioEngine(), SIGNAL(stateChanged(Phonon::State)),
+                                 SLOT(stateChanged(Phonon::State)));
+
+    connect( The::audioEngine(), SIGNAL(sourceChanged()),
+                                 SLOT(sourceChanged()));
+
+    connect( The::audioEngine(), SIGNAL(removedPlayingTrack()),
+                                 SLOT(removedPlayingTrack()));
+
+    connect( The::audioEngine(), SIGNAL(volumeChanged(int)),
+             ui_->volume,        SLOT(setValue(int)) );
+
+    connect( The::audioEngine(), SIGNAL(muteStateChanged(bool)),
+                                 SLOT(muteStateChanged(bool)) );
+
+    connect( The::playlist(), SIGNAL(playlistChanged()),
+                              SLOT(reloadPreviousNextButtons()));
+
+    connect( ui_->volume,        SIGNAL(valueChanged(int)),
+             The::audioEngine(), SLOT(setVolume(int)) );
+
+    connect( ui_->volume,        SIGNAL(muteToggled(bool)),
+             The::audioEngine(), SLOT(setMuted(bool)) );
 }
 
 /*!
@@ -98,18 +109,23 @@ void PlayerWidget::setupUi()
     ui_->coverLabel->setScaledContents(true);
     ui_->titleLabel->setFont(Utility::font(QFont::Bold));
     ui_->album_authorLabel->setFont(Utility::font(QFont::Bold));
-    ui_->stackedWidget->setBackgroundRole(QPalette::Base);
+    ui_->stackedWidget->setBackgroundRole(QPalette::AlternateBase);
     ui_->messageLabel->setFont(Utility::font(QFont::Bold,1));
 
     ui_->previousButton->setButtonEnabled(false);
-    connect(ui_->previousButton, SIGNAL(previousButtonClicked()), this, SLOT(playPrevious()));
+
+    connect(ui_->previousButton, SIGNAL(previousButtonClicked()),
+                                 SLOT(playPrevious()));
 
     ui_->playPauseButton->setButtonEnabled(false);
     ui_->playPauseButton->setPlaying(false);
-    connect(ui_->playPauseButton, SIGNAL(playButtonClicked()), this, SLOT(pauseResumePlaying()));
+
+    connect(ui_->playPauseButton, SIGNAL(playButtonClicked()),
+                                  SLOT(pauseResumePlaying()));
 
     ui_->nextButton->setButtonEnabled(false);
-    connect(ui_->nextButton, SIGNAL(nextButtonClicked()), this, SLOT(playNext()));
+    connect(ui_->nextButton, SIGNAL(nextButtonClicked()),
+                             SLOT(playNext()));
 
     ui_->timeLabel->setText( QLatin1String( "00:00" ) );
     ui_->timeLabel->setMinimumSize(QSize(50,0));
@@ -121,6 +137,14 @@ void PlayerWidget::setupUi()
 
     ui_->volume->setFixedSize(QSize(48,48));
     ui_->volume->setValue(50);
+
+    ui_->bitrateLabel->setToolTip(trUtf8("Bit Rate"));
+    ui_->samplerateLabel->setToolTip(trUtf8("Sample Rate"));
+//     ui_->channelsLabel->setToolTip();
+
+    ui_->bitrateLabel->setFont(Utility::font(QFont::Bold,-3));
+    ui_->samplerateLabel->setFont(Utility::font(QFont::Bold,-3));
+    ui_->channelsLabel->setFont(Utility::font(QFont::Bold,-3));
 }
 
 /*!
