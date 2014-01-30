@@ -1226,8 +1226,7 @@ void MainWindow::restoreSearch()
     spinner_->stop();
 }
 
-void
-MainWindow::changeEvent( QEvent *event )
+void MainWindow::changeEvent( QEvent *event )
 {
     if( event->type() == QEvent::PaletteChange )
         The::paletteHandler()->setPalette( palette() );

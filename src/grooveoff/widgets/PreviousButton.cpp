@@ -27,7 +27,7 @@ PreviousButton::PreviousButton( QWidget *parent ) : IconButton( parent )
     , m_isEnabled(false)
 {
     connect (this, SIGNAL(clicked()), this, SLOT(clicked()) );
-    setToolTip( trUtf8( "Previous" ) );
+//    setToolTip( trUtf8( "Previous" ) );
 }
 
 void PreviousButton::enterEvent( QEvent * )

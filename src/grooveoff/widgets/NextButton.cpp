@@ -27,7 +27,7 @@ NextButton::NextButton( QWidget *parent ) : IconButton( parent )
     , m_isEnabled(false)
 {
     connect (this, SIGNAL(clicked()), this, SLOT(clicked()) );
-    setToolTip( trUtf8( "Next" ) );
+//    setToolTip( trUtf8( "Next" ) );
 }
 
 void NextButton::enterEvent( QEvent * )
