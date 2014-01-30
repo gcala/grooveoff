@@ -59,6 +59,7 @@ void PlayAnimationWidget::stopAnimation()
     for(int i = 0; i < NUM_BARS; i++) {
         currentHeights_[i] = MIN_HEIGHT;
     }
+    timer_.stop();
     animating_ = false;
 }
 

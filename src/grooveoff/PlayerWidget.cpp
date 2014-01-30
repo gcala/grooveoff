@@ -264,8 +264,12 @@ void PlayerWidget::sourceChanged()
     }
 
     int bitrate = f.audioProperties()->bitrate();        // in kb/s
-    int channel =  f.audioProperties()->channels();
+    int channels =  f.audioProperties()->channels();
     int sampleRate =  f.audioProperties()->sampleRate(); // in Hz
+
+    ui_->bitrateLabel->setText(QString::number(bitrate) + QLatin1String(" kb/s"));
+    ui_->samplerateLabel->setText(QString::number(sampleRate) + QLatin1String(" Hz"));
+    ui_->channelsLabel->setText(channels >= 2 ? QLatin1String("STEREO") : QLatin1String("MONO"));
 }
 
 void PlayerWidget::playNext()

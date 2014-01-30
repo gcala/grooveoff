@@ -80,6 +80,8 @@ DownloadItem::~DownloadItem()
     if(downloadState_ == GrooveOff::DownloadingState) {
         downloader_->stopDownload();
     }
+
+    removeEmptyFolder(QFileInfo(playlistItem_->path() + playlistItem_->fileName()).absoluteDir());
 }
 
 /*!
