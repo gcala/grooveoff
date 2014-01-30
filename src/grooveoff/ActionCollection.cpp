@@ -80,6 +80,12 @@ void ActionCollection::initActions()
     actionWide->setCheckable(true);
     m_actionCollection[ QLatin1String( "actionWide" ) ] = actionWide;
 
+    QAction *miniPlayer = new QAction(QIcon::fromTheme(QLatin1String("view-split-left-right"),
+                              QIcon(QLatin1String(":/resources/view-split-left-right"))),
+                              trUtf8("&Mini Player"), this);
+    miniPlayer->setCheckable(true);
+    m_actionCollection[ QLatin1String( "miniPlayer" ) ] = miniPlayer;
+
     QAction *actionNewToken = new QAction(QIcon::fromTheme(QLatin1String("emblem-new"),
                                   QIcon(QLatin1String(":/resources/emblem-new.png"))),
                                   trUtf8("&Get new token..."), this);
@@ -133,10 +139,11 @@ QMenuBar* ActionCollection::createMenuBar( QWidget *parent )
     QActionGroup *alignmentGroup = new QActionGroup(this);
     alignmentGroup->addAction( m_actionCollection[ QLatin1String( "actionCompact" ) ] );
     alignmentGroup->addAction( m_actionCollection[ QLatin1String( "actionWide" ) ] );
+    alignmentGroup->addAction( m_actionCollection[ QLatin1String( "miniPlayer" ) ] );
     QMenu* viewMenu = new QMenu( trUtf8( "&View" ), menuBar );
     viewMenu->addAction( m_actionCollection[ QLatin1String( "actionCompact" ) ] );
     viewMenu->addAction( m_actionCollection[ QLatin1String( "actionWide" ) ] );
-
+    viewMenu->addAction( m_actionCollection[ QLatin1String( "miniPlayer" ) ] );
 
     QMenu* settingsMenu = new QMenu( trUtf8( "&Settings" ), menuBar );
     settingsMenu->addAction( m_actionCollection[ QLatin1String( "actionConfigure" ) ] );
@@ -167,6 +174,7 @@ QMenu* ActionCollection::createCompactMenu( QWidget *parent )
     compactMenu->addSeparator();
     compactMenu->addAction( m_actionCollection[ QLatin1String( "actionCompact" ) ] );
     compactMenu->addAction( m_actionCollection[ QLatin1String( "actionWide" ) ] );
+    compactMenu->addAction( m_actionCollection[ QLatin1String( "miniPlayer" ) ] );
     compactMenu->addSeparator();
     compactMenu->addAction( m_actionCollection[ QLatin1String( "actionConfigure" ) ] );
     compactMenu->addSeparator();

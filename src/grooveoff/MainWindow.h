@@ -80,9 +80,16 @@ namespace The {
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
+    Q_ENUMS( GuiLayout )
     friend MainWindow* The::mainWindow();
 
 public:
+    enum GuiLayout {
+        Compact = 0,
+        Wide = 1,
+        Mini = 2
+    };
+
     explicit MainWindow(QWidget *parent = 0);
     virtual ~MainWindow();
 
@@ -102,6 +109,7 @@ private Q_SLOTS:
     void searchError();
     void setCompactLayout();
     void setWideLayout();
+    void setMiniPlayerLayout();
     void about();
     void configure();
     void onlineStateChanged(bool isOnline);
@@ -136,6 +144,7 @@ private:
     PlayerWidget *playerWidget;
     CoverManager *cvrMngr_;
     Spinner *spinner_;
+    GuiLayout guiLayout_;
 
     QNetworkAccessManager *nam_;
     GrooveShark::ApiRequest *api_;
@@ -169,5 +178,7 @@ private:
     void parseSong(const QDomElement & element, GrooveShark::SongPtr song);
     void addDownloadItem(PlaylistItemPtr playlistItem);
 };
+
+Q_DECLARE_METATYPE( MainWindow::GuiLayout )
 
 #endif // MAINWINDOW_H

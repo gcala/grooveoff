@@ -139,7 +139,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
     setWindowTitle(QString::fromLatin1( "GrooveOff %1" ).arg( GROOVEOFF_VERSION ));
 
-    if(ui_->splitter->orientation() == Qt::Vertical) {
+    if(guiLayout_ == Mini) {
+        ActionCollection::instance()->getAction( QLatin1String( "miniPlayer" ) )->setChecked(true);
+        playerWidget->showElapsedTimerLabel(true);
+    } else if(ui_->splitter->orientation() == Qt::Vertical) {
         ActionCollection::instance()->getAction( QLatin1String( "actionCompact" ) )->setChecked(true);
         playerWidget->showElapsedTimerLabel(false);
     }
@@ -322,6 +325,9 @@ void MainWindow::setupSignals()
 
     connect(ac->getAction( "actionWide" ), SIGNAL(triggered()),
             this, SLOT(setWideLayout()));
+
+    connect(ac->getAction( "miniPlayer" ), SIGNAL(triggered()),
+            this, SLOT(setMiniPlayerLayout()));
 
     connect(ac->getAction( "actionNewToken" ), SIGNAL(triggered()),
             this, SLOT(getToken()));
@@ -715,13 +721,32 @@ void MainWindow::addDownloadItem(PlaylistItemPtr playlistItem)
 */
 void MainWindow::setCompactLayout()
 {
+    QSettings settings;
+    settings.setIniCodec( "UTF-8" );
+
+    // if previous layout was Mini, restore saved splitter size/window geometry
+    if(guiLayout_ == Mini) {
+        ui_->splitter->setVisible(true);
+        ui_->searchWidgets->setVisible(true);
+        setMaximumHeight(16777215);
+        ui_->splitter->setOrientation((Qt::Orientation)settings.value(QLatin1String("splitterOrientation"), Qt::Vertical).toInt());
+        QList<int> _sizes = settings.value(QLatin1String("splitterSizes")).value< QList<int> >();
+
+        if(!_sizes.isEmpty()) {
+            ui_->splitter->setSizes(_sizes);
+        }
+
+        QRect rect = settings.value(QLatin1String("windowGeometry"), QRect(100,100,350,600)).toRect();
+        setGeometry(geometry().x(), geometry().y(), geometry().width(), rect.height());
+    }
+
     ui_->splitter->setOrientation(Qt::Vertical);
     playerWidget->showElapsedTimerLabel(false);
 
     // save choice
-    QSettings settings;
-    settings.setIniCodec( "UTF-8" );
     settings.setValue(QLatin1String("splitterOrientation"), ui_->splitter->orientation());
+
+    guiLayout_ = Compact;
 }
 
 /*!
@@ -730,14 +755,49 @@ void MainWindow::setCompactLayout()
 */
 void MainWindow::setWideLayout()
 {
+    QSettings settings;
+    settings.setIniCodec( "UTF-8" );
+
+    // if previous layout was Mini, restore saved splitter size/window geometry
+    if(guiLayout_ == Mini) {
+        ui_->splitter->setVisible(true);
+        ui_->searchWidgets->setVisible(true);
+        setMaximumHeight(16777215);
+        ui_->splitter->setOrientation((Qt::Orientation)settings.value(QLatin1String("splitterOrientation"), Qt::Vertical).toInt());
+        QList<int> _sizes = settings.value(QLatin1String("splitterSizes")).value< QList<int> >();
+
+        if(!_sizes.isEmpty()) {
+            ui_->splitter->setSizes(_sizes);
+        }
+
+        QRect rect = settings.value(QLatin1String("windowGeometry"), QRect(100,100,350,600)).toRect();
+        setGeometry(geometry().x(), geometry().y(), geometry().width(), rect.height());
+    }
+
     ui_->splitter->setOrientation(Qt::Horizontal);
     playerWidget->showElapsedTimerLabel(true);
 
     // save choice
-    QSettings settings;
-    settings.setIniCodec( "UTF-8" );
     settings.setValue(QLatin1String("splitterOrientation"), ui_->splitter->orientation());
+    guiLayout_ = Wide;
 }
+
+void MainWindow::setMiniPlayerLayout()
+{
+    // if previous layout was Compact/Wide, save gemetry/splitter data
+    if(guiLayout_ == Compact || guiLayout_ == Wide) {
+        QSettings settings;
+        settings.setIniCodec( "UTF-8" );
+        settings.setValue(QLatin1String("windowGeometry"), geometry());
+    }
+
+    ui_->splitter->setVisible(false);
+    ui_->searchWidgets->setVisible(false);
+    playerWidget->showElapsedTimerLabel(true);
+    setMaximumHeight(40);
+    guiLayout_ = Mini;
+}
+
 
 /*!
   \brief about : open application's about dialog
@@ -804,6 +864,7 @@ void MainWindow::loadSettings()
     loadCovers_      = settings.value(QLatin1String("loadCovers"), true).toBool();
     maxDownloads_    = settings.value(QLatin1String("maxDownloads"), 5).toInt();
     saveDestination_ = settings.value(QLatin1String("saveDestination"), false).toBool();
+    guiLayout_       = (GuiLayout)settings.value(QLatin1String("guiLayout"), Compact).toInt();
 
     if(showHistory_) {
         searchSize_ = settings.value(QLatin1String("historySize"), 5).toInt();
@@ -828,6 +889,9 @@ void MainWindow::loadSettings()
     //Naming Schema
     Utility::namingSchema = settings.value(QLatin1String("namingSchema"),
                                         trUtf8("%1 - %2").arg(QLatin1String("%artist")).arg(QLatin1String("%title"))).toString();
+
+    if(guiLayout_ == Mini)
+        setMiniPlayerLayout();
 }
 
 /*!
@@ -839,8 +903,17 @@ void MainWindow::saveSettings()
     QSettings settings;
     settings.setIniCodec( "UTF-8" );
 
-    settings.setValue(QLatin1String("splitterSizes"), QVariant::fromValue< QList<int> >(ui_->splitter->sizes()));
-    settings.setValue(QLatin1String("windowGeometry"), geometry());
+    // Do not overwrite splittersSizes/windowGeometry if mini layout
+    if(guiLayout_ != Mini) {
+        settings.setValue(QLatin1String("splitterSizes"), QVariant::fromValue< QList<int> >(ui_->splitter->sizes()));
+        settings.setValue(QLatin1String("windowGeometry"), geometry());
+    } else {
+        // if mini layout, save only x,y,width
+        QRect rect = settings.value(QLatin1String("windowGeometry"), QRect(100,100,350,600)).toRect();
+        rect.setWidth(geometry().width());
+        settings.setValue(QLatin1String("windowGeometry"), rect);
+    }
+
     if(!showHistory_)
         settings.setValue(QLatin1String("searchTerms"), QStringList());
     else
@@ -855,6 +928,8 @@ void MainWindow::saveSettings()
 
     settings.setValue(QLatin1String("muted"), The::audioEngine()->isMuted());
     settings.setValue(QLatin1String("volume"), The::audioEngine()->volume());
+
+    settings.setValue(QLatin1String("guiLayout"), guiLayout_);
 }
 
 /*!
