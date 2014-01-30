@@ -138,7 +138,7 @@ void DownloadItem::setupUi()
     ui_->openFolderButton->setIcon(QIcon::fromTheme(QLatin1String("folder-open")));
     ui_->openFolderButton->setToolTip(trUtf8("Open folder"));
     ui_->openFolderButton->setFixedSize(QSize(Utility::buttonSize,Utility::buttonSize));
-    ui_->playButton->setFixedSize(QSize(Utility::buttonSize,Utility::buttonSize));
+    ui_->playButton->setFixedSize(QSize(16,16));
 }
 
 /*!
@@ -336,6 +336,7 @@ void DownloadItem::downloadFinished(bool ok)
         qDebug() << "GrooveOff ::" << "Finished download of" << playlistItem_->song()->songName();
         emit reloadPlaylist();
     } else {
+        removeEmptyFolder(QFileInfo(playlistItem_->path() + playlistItem_->fileName()).absoluteDir());
         downloadState_ = GrooveOff::ErrorState;
         qDebug() << "GrooveOff :: Error downloading" << playlistItem_->song()->songName() << "::" << downloader_->errorString();
     }
@@ -446,6 +447,8 @@ void DownloadItem::removeSong()
     } else {
         qDebug() << "GrooveOff ::"  << songFile() << "not found";
     }
+
+    removeEmptyFolder(QFileInfo(playlistItem_->path() + playlistItem_->fileName()).absoluteDir());
 
     downloadState_ = GrooveOff::DeletedState;
     qDebug() << "GrooveOff ::" << songFile() << "removed";
@@ -564,5 +567,19 @@ void DownloadItem::abortDownload()
     // FIXME: seems that file remove is slower than this call
     // and the icon is updated as expected
     The::mainWindow()->reloadItemsDownloadButtons();
+
+    removeEmptyFolder(QFileInfo(playlistItem_->path() + playlistItem_->fileName()).absoluteDir());
+}
+
+void DownloadItem::removeEmptyFolder(QDir folder)
+{
+    if(!folder.exists())
+        return;
+
+    if(folder.entryList(QDir::NoDotAndDotDot).count() == 0) {
+        folder.rmdir(folder.path());
+        if(folder.cdUp())
+            removeEmptyFolder(folder);
+    }
 }
 

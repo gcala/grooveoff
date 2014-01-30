@@ -91,6 +91,7 @@ private:
     void setupUi();
     void setupConnections();
     void stateChanged();
+    void removeEmptyFolder(QDir folder);
 };
 
 #endif // DOWNLOADITEM_H

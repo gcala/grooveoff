@@ -33,7 +33,6 @@ private:
     QNetworkReply *reply_;
     QFile *file_;
     QNetworkRequest mainRequest_;
-    bool aborted_;
 
 private slots:
     void error ( QNetworkReply::NetworkError error );

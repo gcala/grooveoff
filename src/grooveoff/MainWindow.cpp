@@ -657,16 +657,6 @@ void MainWindow::downloadRequest(PlaylistItemPtr playlistItem)
         }
     }
 
-    // Creating path, if needed
-    if(!fi.absoluteDir().exists()) {
-        if(!fi.absoluteDir().mkpath(fi.absolutePath())) {
-            QMessageBox::information(this, trUtf8("Attention"),
-                                           trUtf8("Can't create destination path:\n\n%1\n\nAborting...").arg(fi.absolutePath()),
-                                           QMessageBox::Ok);
-            return;
-        }
-    }
-
     playlistItem->setPath(ui_->pathLine->text() + "/");
     playlistItem->setNamingSchema(Utility::namingSchema);
 
@@ -681,6 +671,18 @@ void MainWindow::downloadRequest(PlaylistItemPtr playlistItem)
 */
 void MainWindow::addDownloadItem(PlaylistItemPtr playlistItem)
 {
+    QFileInfo fi(playlistItem->path() + playlistItem->fileName());
+
+    // Creating path, if needed
+    if(!fi.absoluteDir().exists()) {
+        if(!fi.absoluteDir().mkpath(fi.absolutePath())) {
+            QMessageBox::information(this, trUtf8("Attention"),
+                                           trUtf8("Can't create destination path:\n\n%1\n\nAborting...").arg(fi.absolutePath()),
+                                           QMessageBox::Ok);
+            return;
+        }
+    }
+
     // build a DownloadItem with all required data
     DownloadItem *item = new DownloadItem(playlistItem,
                                           this);

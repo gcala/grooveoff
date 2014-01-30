@@ -64,7 +64,6 @@ void DownloaderPrivate::streamKeyFinished()
     QString key = streamKey_->streamKey();
     QString ip = streamKey_->ip();
 
-    aborted_ = false;
     connect(this, SIGNAL(finished(QNetworkReply*)),
             this, SLOT(onFinished(QNetworkReply*)));
 
@@ -118,12 +117,14 @@ void DownloaderPrivate::onFinished(QNetworkReply *)
     if(!reply_->error() == QNetworkReply::NoError) { // if error occurred
         m_errorString = reply_->errorString();
 
-        emit q->downloadCompleted(false);
         if(file_->isOpen()) {
             file_->close();
             file_->remove();
             file_->deleteLater();
         }
+
+        emit q->downloadCompleted(false);
+
         return;
     }
 
