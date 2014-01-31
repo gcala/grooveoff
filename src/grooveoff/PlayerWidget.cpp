@@ -314,14 +314,14 @@ void PlayerWidget::reloadPreviousNextButtons()
         ui_->playPauseButton->setButtonEnabled(true);
         if(The::audioEngine()->canGoNext()) {
             int currentRow = The::playlist()->row(The::audioEngine()->currentTrack());
-            ui_->nextButton->setToolTip(trUtf8("Next: ") +  The::playlist()->item(currentRow + 1)->song()->songName());
+            ui_->nextButton->setToolTip(The::playlist()->item(currentRow + 1)->song()->songName());
         } else {
             ui_->nextButton->setToolTip("");
         }
 
         if(The::audioEngine()->canGoPrevious()) {
             int currentRow = The::playlist()->row(The::audioEngine()->currentTrack());
-            ui_->previousButton->setToolTip(trUtf8("Previous: ") +  The::playlist()->item(currentRow - 1)->song()->songName());
+            ui_->previousButton->setToolTip(The::playlist()->item(currentRow - 1)->song()->songName());
         } else {
             ui_->previousButton->setToolTip("");
         }
