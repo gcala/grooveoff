@@ -1,6 +1,10 @@
 ChangeLog
 =========
 
+version 0.1.9 (release 2014-10-03 )
+  * Added Portuguese (Brazil) translation by JAKSON
+  * Added Russian translation by Sema1011
+
 version 0.1.8 (release 2013-12-09 )
   * fix to build system
   
