@@ -22,81 +22,91 @@
 
 namespace GrooveOff {
     /**
+     * The context in which DownloadItem can be found
+     */
+    enum Context {
+         Download, // when DownloadItem is used in DownloadList
+         Session,  // when DownloadItem is used as Session item
+         Track     // when DownloadItem is used as track item in SessionManager
+    };
+
+    /**
      * The state of song download
      */
     enum DownloadState {
         /**
          * The initial state.
          */
-        QueuedState,
-        /**
-         * Download in progress.
-         */
-        DownloadingState,
-        /**
-         * Download finished successfully.
-         */
-        FinishedState,
-        /**
-         * Download was aborted or error occurred.
-         */
-        AbortedState,
-        /**
-         * Song was deleted
-         */
-        DeletedState,
-        /**
-         * Something goes wrong during download
-         */
-        ErrorState
+         QueuedState,
+         /**
+          * Download in progress.
+          */
+         DownloadingState,
+         /**
+          * Download finished successfully.
+          */
+         FinishedState,
+         /**
+          * Download was aborted or error occurred.
+          */
+         AbortedState,
+         /**
+          * Song was deleted
+          */
+         DeletedState,
+         /**
+          * Something goes wrong during download
+          */
+         ErrorState
     };
 
     /**
      * The network operation
      */
     enum NetworkJob {
-        /**
-         * Retrieval of site token
-         */
-        TokenJob,
-        /**
-         * Search for a given text
-         */
-        SearchJob,
-        /**
-         * Get key
-         */
-        KeyJob,
-        /**
-         * Get song
-         */
-        SongJob
+         /**
+          * Retrieval of site token
+          */
+         TokenJob,
+         /**
+          * Search for a given text
+          */
+         SearchJob,
+         /**
+          * Get key
+          */
+         KeyJob,
+         /**
+          * Get song
+          */
+         SongJob
     };
 
     /**
      * The player timer state
      */
     enum TimerState {
-        /**
-         * Elapsed time
-         */
-        ElapsedState,
-        /**
-         * Remaining time
-         */
-        RemainingState
+         /**
+          * Elapsed time
+          */
+         ElapsedState,
+         /**
+          * Remaining time
+          */
+         RemainingState
     };
 
     enum MessageType {
-        Error = 0,
-        Connected = 1,
-        Idle = 2,
-        Playing = 3
+         Error,
+         Connected,
+         Idle,
+         Playing
     };
 }
 
 #include <QtCore/QMetaType>
 
+Q_DECLARE_METATYPE(GrooveOff::Context)
 Q_DECLARE_METATYPE(GrooveOff::DownloadState)
 Q_DECLARE_METATYPE(GrooveOff::NetworkJob)
 

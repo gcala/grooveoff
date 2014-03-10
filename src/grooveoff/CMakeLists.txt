@@ -1,4 +1,5 @@
-set(grooveoff_SRCS App.cpp
+set(grooveoff_SRCS widgets/SessionList.cpp widgets/TrackList.cpp SessionReaderWriter.cpp
+                   App.cpp
                    ActionCollection.cpp
                    AboutDialog.cpp
                    AudioEngine.cpp
@@ -18,6 +19,8 @@ set(grooveoff_SRCS App.cpp
                    SvgHandler.cpp
                    SvgTinter.cpp
                    PaletteHandler.cpp
+                   SessionManager.cpp
+                   SessionItem.cpp
                    widgets/ElidedComboBox.cpp
                    widgets/PlayAnimationWidget.cpp
                    widgets/QLed.cpp
@@ -60,7 +63,9 @@ set(grooveoff_UI DownloadItem.ui
                  ConfigDialog.ui
                  SettingsItem.ui
                  AboutDialog.ui
-                 MatchItem.ui)
+                 MatchItem.ui
+                 SessionManager.ui
+                 SessionItem.ui)
 
 if( Qt5Core_DIR )
     include_directories(${Qt5Core_INCLUDE_DIRS}

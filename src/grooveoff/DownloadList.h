@@ -20,6 +20,8 @@
 #ifndef DOWNLOADLIST_H
 #define DOWNLOADLIST_H
 
+#include "PlaylistItem.h"
+
 #include <QListWidget>
 #include <phonon/phononnamespace.h>
 
@@ -30,6 +32,8 @@ class DownloadList : public QListWidget
     Q_OBJECT
 public:
     explicit DownloadList(QWidget *parent = 0);
+
+    QList<PlaylistItemPtr> playlistItems() const;
 
 public Q_SLOTS:
     void reloadPlaylist();

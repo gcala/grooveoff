@@ -60,6 +60,18 @@ void ActionCollection::initActions()
     actionDonate->setToolTip(trUtf8("Donate with PayPal"));
     m_actionCollection[ QLatin1String( "actionDonate" ) ] = actionDonate;
 
+    QAction *actionManageSessions = new QAction(QIcon::fromTheme(QLatin1String("edit-rename"),
+                                QIcon(QLatin1String(":/resources/edit-rename.png"))),
+                                trUtf8("&Manage Sessions"), this);
+    actionManageSessions->setToolTip(trUtf8("Open Session Manager"));
+    m_actionCollection[ QLatin1String( "actionManageSessions" ) ] = actionManageSessions;
+
+    QAction *actionSaveSessionAs = new QAction(QIcon::fromTheme(QLatin1String("document-save-as"),
+                                QIcon(QLatin1String(":/resources/document-save-as.png"))),
+                                trUtf8("&Save Session As..."), this);
+    actionSaveSessionAs->setToolTip(trUtf8("Save Session As..."));
+    m_actionCollection[ QLatin1String( "actionSaveSessionAs" ) ] = actionSaveSessionAs;
+
     QAction *actionConfigure = new QAction(trUtf8("&Configure GrooveOff..."), this);
     if(QIcon::hasThemeIcon(QLatin1String("configure")))
         actionConfigure->setIcon(QIcon::fromTheme(QLatin1String("configure")));
@@ -123,18 +135,28 @@ QMenuBar* ActionCollection::createMenuBar( QWidget *parent )
 {
     QMenuBar* menuBar = new QMenuBar( parent );
 
+    QMenu* sessionsMenu = new QMenu( trUtf8( "&Load Session" ), menuBar );
+    m_menuCollection[ QLatin1String( "sessionsMenu" ) ] = sessionsMenu;
+
     QMenu* fileMenu = new QMenu( trUtf8( "&File" ), menuBar );
     fileMenu->addAction( m_actionCollection[ QLatin1String( "actionNewToken" ) ] );
+    fileMenu->addSeparator();
+    fileMenu->addMenu(sessionsMenu);
+    fileMenu->addSeparator();
+    fileMenu->addAction( m_actionCollection[ QLatin1String( "actionSaveSessionAs" ) ] );
+    fileMenu->addAction( m_actionCollection[ QLatin1String( "actionManageSessions" ) ] );
     fileMenu->addSeparator();
     fileMenu->addAction( m_actionCollection[ QLatin1String( "actionDonate" ) ] );
     fileMenu->addSeparator();
     fileMenu->addAction( m_actionCollection[ QLatin1String( "actionClose" ) ] );
+    m_menuCollection[ QLatin1String( "fileMenu" ) ] = fileMenu;
 
     QMenu* downloadsMenu = new QMenu( trUtf8( "&Downloads" ), menuBar );
     downloadsMenu->addAction( m_actionCollection[ QLatin1String( "actionStopDownloads" ) ] );
     downloadsMenu->addSeparator();
     downloadsMenu->addAction( m_actionCollection[ QLatin1String( "actionRemoveFailed" ) ] );
     downloadsMenu->addAction( m_actionCollection[ QLatin1String( "actionClearDownloadList" ) ] );
+    m_menuCollection[ QLatin1String( "downloadsMenu" ) ] = downloadsMenu;
 
     QActionGroup *alignmentGroup = new QActionGroup(this);
     alignmentGroup->addAction( m_actionCollection[ QLatin1String( "actionCompact" ) ] );
@@ -144,13 +166,16 @@ QMenuBar* ActionCollection::createMenuBar( QWidget *parent )
     viewMenu->addAction( m_actionCollection[ QLatin1String( "actionCompact" ) ] );
     viewMenu->addAction( m_actionCollection[ QLatin1String( "actionWide" ) ] );
     viewMenu->addAction( m_actionCollection[ QLatin1String( "miniPlayer" ) ] );
+    m_menuCollection[ QLatin1String( "viewMenu" ) ] = viewMenu;
 
     QMenu* settingsMenu = new QMenu( trUtf8( "&Settings" ), menuBar );
     settingsMenu->addAction( m_actionCollection[ QLatin1String( "actionConfigure" ) ] );
+    m_menuCollection[ QLatin1String( "settingsMenu" ) ] = settingsMenu;
 
     QMenu* helpMenu = new QMenu( trUtf8( "&Help" ), menuBar );
     helpMenu->addAction( m_actionCollection[ QLatin1String( "actionAbout" ) ] );
     helpMenu->addAction( m_actionCollection[ QLatin1String( "actionQtAbout" ) ] );
+    m_menuCollection[ QLatin1String( "helpMenu" ) ] = helpMenu;
 
     menuBar->addMenu( fileMenu );
     menuBar->addMenu( downloadsMenu );
@@ -191,3 +216,9 @@ QAction* ActionCollection::getAction( const QString& name )
 {
     return m_actionCollection.value( name, 0 );
 }
+
+QMenu* ActionCollection::getMenu(const QString& name)
+{
+    return m_menuCollection.value( name, 0 );
+}
+

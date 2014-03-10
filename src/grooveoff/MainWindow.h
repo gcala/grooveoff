@@ -44,11 +44,9 @@ class QSplitter;
 class QActionGroup;
 class QBoxLayout;
 class QNetworkAccessManager;
-class QDomElement;
 
 //Custom
 class PlayerWidget;
-class SongObject;
 class DownloadItem;
 class MatchItemListDelegate;
 class CoverManager;
@@ -120,6 +118,9 @@ private Q_SLOTS:
     void addItemToQueue(DownloadItem *);
     void batchDownload();
     void changeDestinationPath();
+    void saveSessionAs();
+    void loadSessionFile();
+    void openSessionManager();
 
 private:
     Ui::MainWindow *ui_;
@@ -134,7 +135,8 @@ private:
     int maxResults_;
     int maxDownloads_;
     bool saveSession_;
-    QString sessionFile_;
+    QString sessionFileName_;
+    QString sessionFilePath_;
     bool showHistory_;
     bool saveDestination_;
     bool loadCovers_;
@@ -145,6 +147,7 @@ private:
     CoverManager *cvrMngr_;
     Spinner *spinner_;
     GuiLayout guiLayout_;
+    bool sessionChanged_;
 
     QNetworkAccessManager *nam_;
     GrooveShark::ApiRequest *api_;
@@ -173,9 +176,8 @@ private:
     bool isDownloadingQueued(const uint &);
     int visibleItemsCount();
     void loadSession();
+    void loadSessions();
     void saveSession();
-    void parsePlaylistItem(const QDomElement & element, PlaylistItemPtr item);
-    void parseSong(const QDomElement & element, GrooveShark::SongPtr song);
     void addDownloadItem(PlaylistItemPtr playlistItem);
 };
 

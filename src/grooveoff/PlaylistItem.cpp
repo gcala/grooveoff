@@ -127,3 +127,24 @@ void PlaylistItem::setState(Phonon::State state)
     state_ = state;
     emit stateChanged(state_);
 }
+
+QDataStream& operator<<( QDataStream& dataStream, const PlaylistItemPtr item )
+{
+    for(int i=0; i< item->metaObject()->propertyCount(); ++i) {
+        if(item->metaObject()->property(i).isStored(item.data())) {
+            dataStream << item->metaObject()->property(i).read(item.data());
+        }
+    }
+    return dataStream;
+}
+
+QDataStream & operator>>(QDataStream & dataStream, PlaylistItemPtr item) {
+    QVariant var;
+    for(int i = 0; i < item->metaObject()->propertyCount(); ++i) {
+        if(item->metaObject()->property(i).isStored(item.data())) {
+            dataStream >> var;
+            item->metaObject()->property(i).write(item.data(), var);
+        }
+    }
+    return dataStream;
+}

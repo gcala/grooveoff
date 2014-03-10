@@ -40,11 +40,13 @@ public:
     QMenuBar *createMenuBar( QWidget *parent );
     QMenu *createCompactMenu( QWidget *parent );
     QAction* getAction( const QString& name );
+    QMenu* getMenu( const QString& name );
 
 private:
     static ActionCollection* s_instance;
 
     QHash< QString, QAction* > m_actionCollection;
+    QHash< QString, QMenu* > m_menuCollection;
 };
 
 #endif // ACTIONCOLLECTION_H

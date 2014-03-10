@@ -39,6 +39,7 @@ class Song : public QObject
 public:
     Song( const QVariant& variant, bool fromPlaylist, QObject* parent = 0 );
     Song( bool fromPlaylist = false, QObject* parent = 0 );
+    Song( const Song & song, QObject *parent = 0);
     virtual ~Song();
 
     quint32 albumID() const;
@@ -97,6 +98,9 @@ private:
 typedef QSharedPointer<Song> SongPtr;
 
 }
+
+QDataStream& operator<<( QDataStream& dataStream, const GrooveShark::SongPtr song );
+QDataStream& operator>>( QDataStream& dataStream, GrooveShark::SongPtr song ); // deprecated: throw( UserException )
 
 Q_DECLARE_METATYPE( GrooveShark::SongPtr )
 

@@ -38,6 +38,8 @@
 #include "Playlist.h"
 #include "AudioEngine.h"
 #include "widgets/Spinner.h"
+#include "SessionManager.h"
+#include "SessionReaderWriter.h"
 
 #include <QtGui/QLabel>
 #include <QtGui/QMenu>
@@ -54,6 +56,7 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QDesktopServices>
+#include <QInputDialog>
 
 #if QT_VERSION >= QT_VERSION_CHECK( 5, 0, 0 )
 #include <QStandardPaths>
@@ -69,9 +72,6 @@
 #include <QApplication>
 #include <QCompleter>
 #include <QDirModel>
-#include <QXmlStreamWriter>
-#include <QMetaProperty>
-#include <QDomDocument>
 #include <QPointer>
 
 using namespace GrooveShark;
@@ -95,6 +95,9 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui_(new Ui::MainWindow)
 {
+    qRegisterMetaType<PlaylistItemPtr>("PlaylistItemPtr");
+    qRegisterMetaTypeStreamOperators<PlaylistItemPtr>("PlaylistItemPtr");
+
     ui_->setupUi(this);
     s_instance = this;
     The::paletteHandler()->setPalette( palette() );
@@ -155,7 +158,8 @@ MainWindow::MainWindow(QWidget *parent) :
     qsrand((uint)time.msec());
 
     qncm_ = new QNetworkConfigurationManager(this);
-    connect(qncm_, SIGNAL(onlineStateChanged(bool)), this, SLOT(onlineStateChanged(bool)));
+    connect(qncm_, SIGNAL(onlineStateChanged(bool)),
+                   SLOT(onlineStateChanged(bool)));
     if(qncm_->isOnline())
         getToken();
 
@@ -187,16 +191,16 @@ MainWindow::MainWindow(QWidget *parent) :
     setGeometry(settings.value(QLatin1String("windowGeometry"), QRect(100,100,350,600)).toRect());
 
 #if QT_VERSION >= QT_VERSION_CHECK( 5, 0, 0 )
-    sessionFile_ = QStandardPaths::writableLocation(QStandardPaths::DataLocation)
-                   + QDir::separator()
-                   + QLatin1String("session.xml");
+    sessionFilePath_ = QStandardPaths::writableLocation(QStandardPaths::DataLocation)
+                   + QDir::separator();
 #else
-    sessionFile_ = QDesktopServices::storageLocation(QDesktopServices::DataLocation).replace( QLatin1String( "/data" ),"")
-                   + QDir::separator()
-                   + QLatin1String("session.xml");
+    sessionFilePath_ = QDesktopServices::storageLocation(QDesktopServices::DataLocation).replace( QLatin1String( "/data" ),"")
+                   + QDir::separator();
 #endif
     if(saveSession_)
         loadSession();
+
+    loadSessions();
 
     mpris_ = new Mpris(this);
 }
@@ -311,50 +315,63 @@ void MainWindow::setupSignals()
     ActionCollection *ac = ActionCollection::instance();
 
     connect(ac->getAction( "actionClose" ), SIGNAL(triggered()),
-            this, SLOT(close()));
+                                            SLOT(close()));
 
     connect(ac->getAction( "actionDonate" ), SIGNAL(triggered()),
-            this, SLOT(donate()));
-
+                                             SLOT(donate()));
 
     connect(ac->getAction( "actionConfigure" ), SIGNAL(triggered()),
-            this, SLOT(configure()));
+                                                SLOT(configure()));
 
     connect(ac->getAction( "actionCompact" ), SIGNAL(triggered()),
-            this, SLOT(setCompactLayout()));
+                                              SLOT(setCompactLayout()));
 
     connect(ac->getAction( "actionWide" ), SIGNAL(triggered()),
-            this, SLOT(setWideLayout()));
+                                           SLOT(setWideLayout()));
 
     connect(ac->getAction( "miniPlayer" ), SIGNAL(triggered()),
-            this, SLOT(setMiniPlayerLayout()));
+                                           SLOT(setMiniPlayerLayout()));
 
     connect(ac->getAction( "actionNewToken" ), SIGNAL(triggered()),
-            this, SLOT(getToken()));
+                                               SLOT(getToken()));
 
     connect(ac->getAction( "actionStopDownloads" ), SIGNAL(triggered(bool)),
-            ui_->downloadList, SLOT(abortAllDownloads()));
+            ui_->downloadList,                      SLOT(abortAllDownloads()));
 
     connect(ac->getAction( "actionRemoveFailed" ), SIGNAL(triggered(bool)),
-            ui_->downloadList, SLOT(removeFailedDeletedAborted()));
+            ui_->downloadList,                     SLOT(removeFailedDeletedAborted()));
 
     connect(ac->getAction( "actionClearDownloadList" ), SIGNAL(triggered(bool)),
-            ui_->downloadList, SLOT(removeDownloaded()));
+            ui_->downloadList,                          SLOT(removeDownloaded()));
 
     connect(ac->getAction( "actionAbout" ), SIGNAL(triggered()),
-            this, SLOT(about()));
+                                            SLOT(about()));
+
+    connect(ac->getAction( "actionSaveSessionAs" ), SIGNAL(triggered()),
+                                                    SLOT(saveSessionAs()));
+
+    connect(ac->getAction( "actionManageSessions" ), SIGNAL(triggered()),
+                                                     SLOT(openSessionManager()));
 
     connect(ac->getAction( "actionQtAbout" ), SIGNAL(triggered()),
-            qApp, SLOT(aboutQt()));
+            qApp,                             SLOT(aboutQt()));
+
 
     // gui widgets
-    connect(ui_->searchButton, SIGNAL(clicked(bool)), this, SLOT(beginSearch()));
-    connect(ui_->browseButton, SIGNAL(clicked(bool)), this, SLOT(selectFolder()));
-    connect(ui_->searchLine, SIGNAL(returnPressed()), this, SLOT(beginSearch()));
-    connect(ui_->artistsCB, SIGNAL(activated(int)), this, SLOT(artistChanged()));
-    connect(ui_->albumsCB, SIGNAL(activated(int)), this, SLOT(albumChanged()));
-    connect(ui_->batchDownloadButton, SIGNAL(clicked()), this, SLOT(batchDownload()));
-    connect(ui_->pathLine, SIGNAL(textChanged(QString)), this, SLOT(changeDestinationPath()));
+    connect(ui_->searchButton, SIGNAL(clicked(bool)),
+                               SLOT(beginSearch()));
+    connect(ui_->browseButton, SIGNAL(clicked(bool)),
+                               SLOT(selectFolder()));
+    connect(ui_->searchLine, SIGNAL(returnPressed()),
+                             SLOT(beginSearch()));
+    connect(ui_->artistsCB, SIGNAL(activated(int)),
+                            SLOT(artistChanged()));
+    connect(ui_->albumsCB, SIGNAL(activated(int)),
+                           SLOT(albumChanged()));
+    connect(ui_->batchDownloadButton, SIGNAL(clicked()),
+                                      SLOT(batchDownload()));
+    connect(ui_->pathLine, SIGNAL(textChanged(QString)),
+                           SLOT(changeDestinationPath()));
 }
 
 
@@ -408,7 +425,7 @@ void MainWindow::beginSearch()
         setupCompleter();
     }
 
-    qDebug() << "GrooveOff ::" << "Searching for" << ui_->searchLine->text();
+//    qDebug() << "GrooveOff ::" << "Searching for" << ui_->searchLine->text();
 
     // flag that prevents multiple searches
     searchInProgress_ = true;
@@ -438,14 +455,14 @@ void MainWindow::beginSearch()
 
     songList_ = api_->songs(ui_->searchLine->text(), Utility::token);
 
-    connect(songList_.data(), SIGNAL(finished()), this,
-            SLOT(searchFinished()));
+    connect(songList_.data(), SIGNAL(finished()),
+                              SLOT(searchFinished()));
 
     connect(songList_.data(), SIGNAL(parseError()),
-            this, SLOT(searchError()));
+                              SLOT(searchError()));
 
     connect(songList_.data(), SIGNAL(requestError(QNetworkReply::NetworkError)),
-            this, SLOT(searchError()));
+                              SLOT(searchError()));
 
     // force downloadList repaint to prevent blank items
     ui_->downloadList->repaint();
@@ -502,13 +519,14 @@ void MainWindow::tokenFinished()
         //statusBar()->showMessage(trUtf8("Token not received!!"), 3000);
         playerWidget->showMessage(trUtf8("Connection error!!"));
         qDebug() << "GrooveOff ::" << "Token not received!!";
+        Utility::token.clear();
     }
 }
 
 void MainWindow::tokenError()
 {
     playerWidget->showMessage(trUtf8("Connection error!!"));
-    qDebug() << "GrooveOff ::" << songList_->errorString();
+    qDebug() << "GrooveOff ::" << token_->errorString();
 }
 
 /*!
@@ -541,6 +559,8 @@ void MainWindow::searchFinished()
     QStringList artists;
     QStringList albums;
 
+    ui_->matchesMessage->setText(trUtf8("%n song(s) found", "", count));
+
     for(int i = 0; i < count; i++) {
         PlaylistItemPtr playlistItem(new PlaylistItem(songList_->list().at(i)));
 
@@ -556,6 +576,9 @@ void MainWindow::searchFinished()
         ui_->matchList->setItemWidget(wItem, matchItem);
         wItem->setSizeHint(QSize(Utility::coverSize + Utility::marginSize * 2,Utility::coverSize + Utility::marginSize * 2));
         connect(matchItem, SIGNAL(download(PlaylistItemPtr)), this, SLOT(downloadRequest(PlaylistItemPtr)));
+
+        // don't freeze gui inserting items
+        QCoreApplication::processEvents();
 
         // populate filter widgets
         bool found = false;
@@ -865,6 +888,7 @@ void MainWindow::loadSettings()
     maxDownloads_    = settings.value(QLatin1String("maxDownloads"), 5).toInt();
     saveDestination_ = settings.value(QLatin1String("saveDestination"), false).toBool();
     guiLayout_       = (GuiLayout)settings.value(QLatin1String("guiLayout"), Compact).toInt();
+    sessionFileName_ = settings.value(QLatin1String("sessionFile"), QLatin1String("default")).toString();
 
     if(showHistory_) {
         searchSize_ = settings.value(QLatin1String("historySize"), 5).toInt();
@@ -925,11 +949,10 @@ void MainWindow::saveSettings()
         settings.setValue(QLatin1String("destination"), QString());
 
     settings.setValue(QLatin1String("timerState"), playerWidget->getTimerState());
-
     settings.setValue(QLatin1String("muted"), The::audioEngine()->isMuted());
     settings.setValue(QLatin1String("volume"), The::audioEngine()->volume());
-
     settings.setValue(QLatin1String("guiLayout"), guiLayout_);
+    settings.setValue(QLatin1String("sessionFile"), sessionFileName_);
 }
 
 /*!
@@ -1097,52 +1120,28 @@ void MainWindow::batchDownload()
     }
 }
 
+void MainWindow::saveSessionAs()
+{
+    bool ok;
+    QString fileName = QInputDialog::getText(this, tr("New Session"),
+                                         trUtf8("Session name:"), QLineEdit::Normal,
+                                         QDir::home().dirName(), &ok);
+    // remove separators, if any
+    fileName.remove('/');
+    fileName.remove('\\');
+
+    if (ok && !fileName.isEmpty()) {
+        // save current session
+        saveSession();
+        // change session name
+        sessionFileName_ = fileName;
+    }
+}
+
 void MainWindow::saveSession()
 {
-    QFile sessionFile(sessionFile_);
-    if(!sessionFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        qDebug() << "GrooveOff ::" << "Unable to write to session file" << sessionFile_;
-        return;
-    }
-
-    QXmlStreamWriter stream(&sessionFile);
-    stream.setAutoFormatting(true);
-    stream.writeStartDocument();
-    stream.writeStartElement( QLatin1String( "playlist" ) );
-
-    for(int i = 0; i < ui_->downloadList->count(); i++) {
-        stream.writeStartElement( QLatin1String( "item" ) );
-        PlaylistItemPtr pi = ((DownloadItem *)ui_->downloadList->itemWidget(ui_->downloadList->item(i)))->playlistItem();
-        for(int j = 0; j< pi->metaObject()->propertyCount(); j++) {
-            if(pi->metaObject()->property(j).isStored(pi.data())) {
-                if(QString(pi->metaObject()->property(j).name()) ==  QLatin1String( "objectName" ) )
-                    continue;
-                if(QString(pi->metaObject()->property(j).name()) ==  QLatin1String( "song" ) ) {
-                    SongPtr song = pi->song();
-                    stream.writeStartElement( QLatin1String( "song_info" ) );
-                    for(int k = 0; k< song->metaObject()->propertyCount(); k++) {
-                        if(song->metaObject()->property(k).isStored(song.data())) {
-                            if(QString(song->metaObject()->property(k).name()) ==  QLatin1String( "objectName" ) )
-                                continue;
-                            if(QString(song->metaObject()->property(k).name()) ==  QLatin1String( "errorString" ) )
-                                continue;
-                            stream.writeTextElement(song->metaObject()->property(k).name(),
-                                                    song->metaObject()->property(k).read(song.data()).toString());
-                        }
-                    }
-                    stream.writeEndElement(); // song_info
-                } else {
-                    stream.writeTextElement(pi->metaObject()->property(j).name(),
-                                            pi->metaObject()->property(j).read(pi.data()).toString());
-                }
-            }
-        }
-        stream.writeEndElement(); // item
-    }
-
-    stream.writeEndElement(); // playlist
-
-    sessionFile.close();
+    The::sessionReaderWriter()->write( sessionFilePath_ + sessionFileName_ + QLatin1String(".xml"),
+                                       ui_->downloadList->playlistItems() );
 }
 
 void MainWindow::loadSession()
@@ -1150,70 +1149,56 @@ void MainWindow::loadSession()
     // disable temporarily AutoScroll
     ui_->downloadList->setAutoScroll(false);
 
-    QFile sessionFile(sessionFile_);
-    if(!sessionFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qDebug() << "GrooveOff ::" << "Unable to read session file" << sessionFile_;
-        return;
-    }
+    // remove old entries
+    ui_->downloadList->abortAllDownloads();
+    ui_->downloadList->removeDownloaded();
+    ui_->downloadList->removeFailedDeletedAborted();
 
-    QList<PlaylistItemPtr> items;
+    QList<PlaylistItemPtr> items = The::sessionReaderWriter()->read(sessionFilePath_ + sessionFileName_ + QLatin1String(".xml"));
 
-    QDomDocument doc( QLatin1String( "mydocument" ) );
-    QString errorStr;
-    int errorLine;
-    int errorColumn;
-    if (!doc.setContent(&sessionFile, true, &errorStr, &errorLine, &errorColumn)) {
-        qDebug() << "GrooveOff ::" << errorStr << errorLine << errorColumn;
-        sessionFile.close();
-        return;
-    }
-    sessionFile.close();
-
-    QDomElement root = doc.documentElement();
-    QDomElement itemEl = root.firstChildElement( QLatin1String( "item" ) );
-    while (!itemEl.isNull()) {
-        PlaylistItemPtr item(new PlaylistItem());
-
-        items.append(item);
-        parsePlaylistItem(itemEl, item);
-        itemEl = itemEl.nextSiblingElement( QLatin1String( "item" ) );
-    }
-
-    for(int i = 0; i < items.count(); i++) {
-        addDownloadItem(items.at(i));
+    foreach(PlaylistItemPtr item, items) {
+        addDownloadItem(item);
     }
 
     ui_->downloadList->setAutoScroll(true);
     ui_->downloadList->reloadPlaylist();
+
+    loadSessions();
 }
 
-void MainWindow::parsePlaylistItem(const QDomElement& element, PlaylistItemPtr item)
+void MainWindow::loadSessions()
 {
-    QVariant var;
-    for(int i=0; i< item->metaObject()->propertyCount(); ++i) {
-        if(item->metaObject()->property(i).isStored(item.data())) {
-            var = element.firstChildElement(QString(item->metaObject()->property(i).name())).text();
-            item->metaObject()->property(i).write(item.data(), var);
-        }
+    foreach(QAction *action, ActionCollection::instance()->getMenu("sessionsMenu")->actions()) {
+        ActionCollection::instance()->getMenu("sessionsMenu")->removeAction(action);
+        delete action;
     }
 
-    QDomElement songEl = element.firstChildElement( QLatin1String( "song_info" ) );
-    parseSong(songEl, item->song());
+    QDir sessionPath(sessionFilePath_);
+    QStringList sessions = sessionPath.entryList(QStringList() << "*.xml", QDir::Files, QDir::Name);
 
-    // Download covers if missing
-    if(loadCovers_ && !QFile::exists(Utility::coversCachePath + item->song()->coverArtFilename())) {
-        cvrMngr_->addItem(item);
+    foreach(QString session, sessions) {
+        QAction *action = new QAction(session.remove(".xml", Qt::CaseInsensitive), ActionCollection::instance()->getMenu("sessionsMenu"));
+        if( session == sessionFileName_ )
+            action->setFont(Utility::font(QFont::Bold));
+        ActionCollection::instance()->getMenu("sessionsMenu")->addAction(action);
+        connect(action, SIGNAL(triggered()),
+                        SLOT(loadSessionFile()));
     }
 }
 
-void MainWindow::parseSong(const QDomElement& element, SongPtr song)
+void MainWindow::loadSessionFile()
 {
-    QVariant var;
-    for(int i=0; i< song->metaObject()->propertyCount(); ++i) {
-        if(song->metaObject()->property(i).isStored(song.data())) {
-            var = element.firstChildElement(QString(song->metaObject()->property(i).name())).text();
-            song->metaObject()->property(i).write(song.data(), var);
-        }
+    QAction *action = (QAction *)QObject::sender();
+    QString fileName = action->text();
+    if(fileName != sessionFileName_ && QFile::exists(sessionFilePath_ + fileName + QLatin1String(".xml"))) {
+        // ask if abort current downloads
+        saveSession();
+        ui_->downloadList->abortAllDownloads();
+        ui_->downloadList->removeDownloaded();
+        ui_->downloadList->removeFailedDeletedAborted();
+        sessionFileName_ = fileName;
+
+        loadSession();
     }
 }
 
@@ -1231,3 +1216,19 @@ void MainWindow::changeEvent( QEvent *event )
     if( event->type() == QEvent::PaletteChange )
         The::paletteHandler()->setPalette( palette() );
 }
+
+void MainWindow::openSessionManager()
+{
+    SessionManager manager(sessionFilePath_);
+    manager.exec();
+    if(!QFile::exists(sessionFilePath_ + sessionFileName_ + QLatin1String(".xml"))) {
+        if(The::audioEngine()->state() == Phonon::PlayingState ||
+            The::audioEngine()->state() == Phonon::PausedState )
+            The::audioEngine()->stop();
+
+        sessionFileName_ = QLatin1String( "default" );
+    }
+
+    loadSession();
+}
+

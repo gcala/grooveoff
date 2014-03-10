@@ -66,6 +66,9 @@ private:
 
 typedef QSharedPointer<PlaylistItem> PlaylistItemPtr;
 
+QDataStream& operator<<( QDataStream& dataStream, const PlaylistItemPtr item );
+QDataStream& operator>>( QDataStream& dataStream, PlaylistItemPtr item ); // deprecated: throw( UserException )
+
 Q_DECLARE_METATYPE( PlaylistItemPtr )
 
 #endif // PLAYLISTITEM_H

@@ -8,6 +8,7 @@
 #endif
 
 #include <QDebug>
+#include <QMetaProperty>
 
 using namespace GrooveShark;
 
@@ -418,9 +419,9 @@ Song::Song ( const QVariant& variant, bool fromPlaylist, QObject* parent ) :
 
 }
 
-Song::Song ( bool fromPlaylist, QObject* parent ) :
-    QObject ( parent ),
-    d ( new SongPrivate ( this, fromPlaylist ) )
+Song::Song ( bool fromPlaylist, QObject* parent )
+    : QObject ( parent )
+    , d ( new SongPrivate ( this, fromPlaylist ) )
 {
 
 }
@@ -655,3 +656,23 @@ QString Song::errorString() const
     return d->errorString();
 }
 
+QDataStream& operator<<( QDataStream& dataStream, const SongPtr song )
+{
+    for(int i=0; i< song->metaObject()->propertyCount(); ++i) {
+        if(song->metaObject()->property(i).isStored(song.data())) {
+            dataStream << song->metaObject()->property(i).read(song.data());
+        }
+    }
+    return dataStream;
+}
+
+QDataStream & operator>>(QDataStream & dataStream, SongPtr song) {
+    QVariant var;
+    for(int i = 0; i < song->metaObject()->propertyCount(); ++i) {
+        if(song->metaObject()->property(i).isStored(song.data())) {
+            dataStream >> var;
+            song->metaObject()->property(i).write(song.data(), var);
+        }
+    }
+    return dataStream;
+}

@@ -43,7 +43,7 @@ class DownloadItem : public QWidget
     Q_OBJECT
 
 public:
-    DownloadItem(const PlaylistItemPtr &playlistItemPtr, QWidget *parent = 0);
+    DownloadItem(const PlaylistItemPtr &playlistItemPtr, QWidget *parent = 0, GrooveOff::Context context = GrooveOff::Download);
     virtual ~DownloadItem();
     QString songFile();
 
@@ -65,8 +65,8 @@ Q_SIGNALS:
     void pauseResumePlaying();
     void stateChangedSignal();
     void play(QString);
-
     void reloadPlaylist();
+    void removeMeFromSession(quint32);
 
 protected:
     virtual void leaveEvent ( QEvent * event );
@@ -88,6 +88,7 @@ private:
     Phonon::State playerState_;
     GrooveShark::DownloaderPtr downloader_;
     bool oneShot_;
+    GrooveOff::Context context_;
 
     void setupUi();
     void setupConnections();

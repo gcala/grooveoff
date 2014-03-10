@@ -101,6 +101,8 @@ ApiRequest::~ApiRequest()
 ApiRequest* ApiRequest::instance()
 {
     if ( !s_instance ) {
+        qRegisterMetaType<SongPtr>("SongPtr");
+        qRegisterMetaTypeStreamOperators<SongPtr>("SongPtr");
         s_instance = new ApiRequest;
     }
 

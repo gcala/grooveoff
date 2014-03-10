@@ -93,3 +93,15 @@ void DownloadList::abortAllDownloads()
     }
 }
 
+QList< PlaylistItemPtr > DownloadList::playlistItems() const
+{
+    QList< PlaylistItemPtr > tracks;
+    for(int i = 0; i < count(); i++) {
+        if(ITEM(i)->downloadState() != GrooveOff::DeletedState)
+            tracks << ITEM(i)->playlistItem();
+    }
+
+    return tracks;
+}
+
+
