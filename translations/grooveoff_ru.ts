@@ -31,7 +31,7 @@
     <message>
         <location filename="../src/grooveoff/aboutdialog.cpp" line="49"/>
         <source>GrooveOff can access the huge Grooveshark database through its &lt;a href=&quot;http://developers.grooveshark.com/docs/public_api/v3/&quot;&gt;public api&lt;/a&gt;.</source>
-        <translation>GrooveOff можетт получить доступ к обширнай базе данных Grooveshark помощью &lt;a href=&quot;http://developers.grooveshark.com/docs/public_api/v3/&quot;&gt;API pública&lt;/a&gt;.</translation>
+        <translation>GrooveOff может получить доступ к обширнай базе данных Grooveshark c помощью &lt;a href=&quot;http://developers.grooveshark.com/docs/public_api/v3/&quot;&gt;API pública&lt;/a&gt;.</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/aboutdialog.cpp" line="50"/>
@@ -75,7 +75,7 @@
     <message>
         <location filename="../src/grooveoff/audioplayer.cpp" line="100"/>
         <source>Stop </source>
-        <translation>Стопr</translation>
+        <translation>Стоп</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/audioplayer.cpp" line="153"/>
@@ -268,7 +268,7 @@
         <location filename="../src/grooveoff/mainwindow.cpp" line="176"/>
         <location filename="../src/grooveoff/mainwindow.cpp" line="177"/>
         <source>Search for songs, artists, genres</source>
-        <translation>Buscar canciones, artistas, géneros</translation>
+        <translation>Search for songs, artists, genres</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/mainwindow.cpp" line="185"/>
@@ -278,7 +278,7 @@
     <message>
         <location filename="../src/grooveoff/mainwindow.cpp" line="188"/>
         <source>Current save folder</source>
-        <translation>Ruta de guardado</translation>
+        <translation>Сохранить в текущий папке</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/mainwindow.cpp" line="172"/>
@@ -391,7 +391,7 @@ Select a valid path</source>
     <message>
         <location filename="../src/grooveoff/mainwindow.cpp" line="162"/>
         <source>Offline Grooveshark.com music</source>
-        <translation>Descarga la música de Grooveshark.com</translation>
+        <translation>Offline Grooveshark.com music</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/mainwindow.cpp" line="263"/>
