@@ -148,6 +148,7 @@ private:
     Spinner *spinner_;
     GuiLayout guiLayout_;
     bool sessionChanged_;
+    bool batchDownload_;
 
     QNetworkAccessManager *nam_;
     GrooveShark::ApiRequest *api_;

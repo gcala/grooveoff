@@ -706,9 +706,11 @@ void MainWindow::addDownloadItem(PlaylistItemPtr playlistItem)
     // Creating path, if needed
     if(!fi.absoluteDir().exists()) {
         if(!fi.absoluteDir().mkpath(fi.absolutePath())) {
-            QMessageBox::information(this, trUtf8("Attention"),
-                                           trUtf8("Can't create destination path:\n\n%1\n\nAborting...").arg(fi.absolutePath()),
-                                           QMessageBox::Ok);
+            if(!batchDownload_) {
+                QMessageBox::information(this, trUtf8("Attention"),
+                                            trUtf8("Can't create destination path:\n\n%1\n\nAborting...").arg(fi.absolutePath()),
+                                            QMessageBox::Ok);
+            }
             return;
         }
     }
@@ -1115,10 +1117,12 @@ void MainWindow::reloadItemsDownloadButtons()
 
 void MainWindow::batchDownload()
 {
+    batchDownload_ = true;
     for(int i = 0; i < ui_->matchList->count(); i++) {
         if(!ui_->matchList->item(i)->isHidden())
             addDownloadItem(((MatchItem *)ui_->matchList->itemWidget(ui_->matchList->item(i)))->playlistItem());
     }
+    batchDownload_ = false;
 }
 
 void MainWindow::saveSessionAs()
