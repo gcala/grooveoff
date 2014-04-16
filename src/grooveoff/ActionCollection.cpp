@@ -141,11 +141,12 @@ QMenuBar* ActionCollection::createMenuBar( QWidget *parent )
     QMenu* fileMenu = new QMenu( trUtf8( "&File" ), menuBar );
     fileMenu->addAction( m_actionCollection[ QLatin1String( "actionNewToken" ) ] );
     fileMenu->addSeparator();
-    fileMenu->addMenu(sessionsMenu);
-    fileMenu->addSeparator();
-    fileMenu->addAction( m_actionCollection[ QLatin1String( "actionSaveSessionAs" ) ] );
-    fileMenu->addAction( m_actionCollection[ QLatin1String( "actionManageSessions" ) ] );
-    fileMenu->addSeparator();
+    // FIXME
+    // fileMenu->addMenu(sessionsMenu);
+    // fileMenu->addSeparator();
+    // fileMenu->addAction( m_actionCollection[ QLatin1String( "actionSaveSessionAs" ) ] );
+    // fileMenu->addAction( m_actionCollection[ QLatin1String( "actionManageSessions" ) ] );
+    // fileMenu->addSeparator();
     fileMenu->addAction( m_actionCollection[ QLatin1String( "actionDonate" ) ] );
     fileMenu->addSeparator();
     fileMenu->addAction( m_actionCollection[ QLatin1String( "actionClose" ) ] );
