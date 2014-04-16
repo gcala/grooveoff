@@ -274,6 +274,9 @@ bool SongPrivate::parse( const QVariant& data )
     if( !v.canConvert( QVariant::String ) )
         qDebug() << "'AlbumName' field is invalid";
     m_albumName = v.toString().replace('/','-');
+    // if AlbumName is empty string
+    if(m_albumName.trimmed().isEmpty())
+        m_albumName = QLatin1String("unknown");
 
     if(!m_fromPlaylist) {
         v = songMap.value( QLatin1String( "ArtistCoverArtFilename" ) );
