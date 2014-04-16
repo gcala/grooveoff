@@ -654,6 +654,11 @@ void MainWindow::downloadRequest(PlaylistItemPtr playlistItem)
                                        trUtf8("The destination folder does not exists.\n"
                                               "Select a valid path"),
                                  QMessageBox::Ok);
+        
+        // if a batch download is in progress show the message above then stop all downloads.
+        if(batchDownload_)
+            stopBatchDownload_ = true;
+        
         return;
     }
 
@@ -663,13 +668,20 @@ void MainWindow::downloadRequest(PlaylistItemPtr playlistItem)
                                        trUtf8("The destination folder is not writable.\n"
                                               "Select a valid path"),
                                  QMessageBox::Ok);
+        
+        // if a batch download is in progress show the message above then stop all downloads.
+        if(batchDownload_)
+            stopBatchDownload_ = true;
+        
         return;
     }
 
     if(isDownloadingQueued(playlistItem->song()->songID())) {
-        QMessageBox::information(this, trUtf8("Attention"),
-                                       trUtf8("The song is already in queue."),
-                                 QMessageBox::Ok);
+        if(!batchDownload_) {
+            QMessageBox::information(this, trUtf8("Attention"),
+                                     trUtf8("The song is already in queue."),
+                                     QMessageBox::Ok);
+        }
         return;
     }
 
@@ -1086,10 +1098,12 @@ bool MainWindow::isDownloadingQueued(const uint &id)
         GrooveOff::DownloadState state = qobject_cast<DownloadItem *>(ui_->downloadList->itemWidget(ui_->downloadList->item(i)))->downloadState();
         if(state != GrooveOff::DeletedState) {
             if(id == qobject_cast<DownloadItem *>(ui_->downloadList->itemWidget(ui_->downloadList->item(i)))->playlistItem()->song()->songID()) {
-                QMessageBox::information(this,
-                                        trUtf8("Download in progress"),
-                                        trUtf8("A file with the same name is already in your download list."),
-                                        QMessageBox::Ok);
+                if(!batchDownload_) {
+                    QMessageBox::information(this,
+                                            trUtf8("Download in progress"),
+                                            trUtf8("A file with the same name is already in your download list."),
+                                            QMessageBox::Ok);
+                }
                 return true;
             }
         }
@@ -1118,11 +1132,15 @@ void MainWindow::reloadItemsDownloadButtons()
 void MainWindow::batchDownload()
 {
     batchDownload_ = true;
+    stopBatchDownload_ = false;
     for(int i = 0; i < ui_->matchList->count(); i++) {
+        if(stopBatchDownload_)
+            break;
         if(!ui_->matchList->item(i)->isHidden())
-            addDownloadItem(((MatchItem *)ui_->matchList->itemWidget(ui_->matchList->item(i)))->playlistItem());
+            downloadRequest(((MatchItem *)ui_->matchList->itemWidget(ui_->matchList->item(i)))->playlistItem());
     }
     batchDownload_ = false;
+    stopBatchDownload_ = true;
 }
 
 void MainWindow::saveSessionAs()

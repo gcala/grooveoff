@@ -149,6 +149,7 @@ private:
     GuiLayout guiLayout_;
     bool sessionChanged_;
     bool batchDownload_;
+    bool stopBatchDownload_;
 
     QNetworkAccessManager *nam_;
     GrooveShark::ApiRequest *api_;
