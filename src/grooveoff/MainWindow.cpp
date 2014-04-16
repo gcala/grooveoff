@@ -200,7 +200,8 @@ MainWindow::MainWindow(QWidget *parent) :
     if(saveSession_)
         loadSession();
 
-    loadSessions();
+    // FIXME
+    // loadSessions();
 
     mpris_ = new Mpris(this);
 }
@@ -1163,7 +1164,8 @@ void MainWindow::loadSession()
     ui_->downloadList->setAutoScroll(true);
     ui_->downloadList->reloadPlaylist();
 
-    loadSessions();
+    // FIXME
+    // loadSessions();
 }
 
 void MainWindow::loadSessions()
