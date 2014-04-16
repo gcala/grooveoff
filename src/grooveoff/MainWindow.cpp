@@ -1158,6 +1158,11 @@ void MainWindow::loadSession()
     QList<PlaylistItemPtr> items = The::sessionReaderWriter()->read(sessionFilePath_ + sessionFileName_ + QLatin1String(".xml"));
 
     foreach(PlaylistItemPtr item, items) {
+        // Decide if show cover arts
+        if(loadCovers_ && !QFile::exists(Utility::coversCachePath + item->song()->coverArtFilename())) {
+            cvrMngr_->addItem(item);
+        }
+        
         addDownloadItem(item);
     }
 
