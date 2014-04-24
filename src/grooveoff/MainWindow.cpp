@@ -661,6 +661,23 @@ void MainWindow::downloadRequest(PlaylistItemPtr playlistItem)
         
         return;
     }
+    
+    // check file existence
+    if(QFile::exists(ui_->pathLine->text() + QDir::separator() + schema + ".mp3")) {
+        if(batchDownload_)
+            return;
+        
+        int ret = QMessageBox::question(this,
+                                        trUtf8("Overwrite File?"),
+                                        trUtf8("A file named \"%1\" already exists. Are you sure you want to overwrite it?").arg(playlistItem->fileName()),
+                                        QMessageBox::Yes | QMessageBox::Cancel,
+                                        QMessageBox::Cancel);
+        if(ret == QMessageBox::Yes) {
+            QFile::remove(ui_->pathLine->text() + QDir::separator() + playlistItem->fileName());
+        } else {
+            return;
+        }
+    }
 
     // check if destination folder is writable
     if(!QFileInfo(ui_->pathLine->text()).isWritable()) {
@@ -685,20 +702,6 @@ void MainWindow::downloadRequest(PlaylistItemPtr playlistItem)
         return;
     }
 
-    // check file existence
-    if(QFile::exists(ui_->pathLine->text() + QDir::separator() + schema + ".mp3")) {
-        int ret = QMessageBox::question(this,
-                                        trUtf8("Overwrite File?"),
-                                        trUtf8("A file named \"%1\" already exists. Are you sure you want to overwrite it?").arg(playlistItem->fileName()),
-                                        QMessageBox::Yes | QMessageBox::Cancel,
-                                        QMessageBox::Cancel);
-        if(ret == QMessageBox::Yes) {
-            QFile::remove(ui_->pathLine->text() + QDir::separator() + playlistItem->fileName());
-        } else {
-            return;
-        }
-    }
-
     playlistItem->setPath(ui_->pathLine->text() + "/");
     playlistItem->setNamingSchema(Utility::namingSchema);
 
@@ -720,8 +723,8 @@ void MainWindow::addDownloadItem(PlaylistItemPtr playlistItem)
         if(!fi.absoluteDir().mkpath(fi.absolutePath())) {
             if(!batchDownload_) {
                 QMessageBox::information(this, trUtf8("Attention"),
-                                            trUtf8("Can't create destination path:\n\n%1\n\nAborting...").arg(fi.absolutePath()),
-                                            QMessageBox::Ok);
+                                         trUtf8("Can't create destination path:\n\n%1\n\nAborting...").arg(fi.absolutePath()),
+                                         QMessageBox::Ok);
             }
             return;
         }
