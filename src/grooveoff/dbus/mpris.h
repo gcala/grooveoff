@@ -16,11 +16,15 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#ifndef MPRIS_H
+#define MPRIS_H
 
-#include "App.h"
-
-int main(int argc, char** argv)
+class Mpris : public QObject
 {
-    App app(argc, argv);
-    return app.exec();
-}
+    Q_OBJECT
+public:
+    Mpris(QObject *parent = 0);
+    ~Mpris();
+};
+
+#endif

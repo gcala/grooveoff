@@ -16,11 +16,26 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#ifndef SESSIONLIST_H
+#define SESSIONLIST_H
 
-#include "App.h"
+#include <QListWidget>
 
-int main(int argc, char** argv)
+class SessionList : public QListWidget
 {
-    App app(argc, argv);
-    return app.exec();
-}
+    Q_OBJECT
+
+public:
+    SessionList(QWidget *parent = 0);
+    virtual ~SessionList();
+
+protected:
+    void dragEnterEvent(QDragEnterEvent *event);
+    void dragMoveEvent(QDragMoveEvent *event);
+    void dropEvent(QDropEvent *event);
+
+Q_SIGNALS:
+    void appendItem(const QByteArray &, const QString &);
+};
+
+#endif // SESSIONLIST_H

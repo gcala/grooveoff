@@ -17,10 +17,38 @@
 */
 
 
-#include "App.h"
+#ifndef PREVIOUSBUTTON_H
+#define PREVIOUSBUTTON_H
 
-int main(int argc, char** argv)
+#include "IconButton.h"
+
+class PreviousButton : public IconButton
 {
-    App app(argc, argv);
-    return app.exec();
-}
+    Q_OBJECT
+public:
+    PreviousButton( QWidget *parent = 0 );
+    void setButtonEnabled(bool);
+
+protected:
+    void enterEvent( QEvent * );
+    void leaveEvent( QEvent * );
+    void mousePressEvent( QMouseEvent * );
+    void mouseReleaseEvent( QMouseEvent * );
+    void reloadContent( const QSize &sz );
+
+private slots:
+    void clicked();
+
+signals:
+    void previousButtonClicked();
+
+private:
+    struct
+    {
+        QImage previous[3];
+    } m_icon;
+
+    bool m_isEnabled;
+};
+
+#endif // PREVIOUSBUTTON_H

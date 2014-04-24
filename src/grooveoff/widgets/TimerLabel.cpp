@@ -17,10 +17,24 @@
 */
 
 
-#include "App.h"
+#include "TimerLabel.h"
 
-int main(int argc, char** argv)
+#include <QPainter>
+
+TimerLabel::TimerLabel(QWidget *parent) :
+    QLabel(parent)
 {
-    App app(argc, argv);
-    return app.exec();
+
 }
+
+TimerLabel::~TimerLabel()
+{
+
+}
+
+void TimerLabel::mousePressEvent( QMouseEvent * event )
+{
+    Q_UNUSED(event)
+    emit clicked();
+}
+

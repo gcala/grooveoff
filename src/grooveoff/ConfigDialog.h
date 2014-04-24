@@ -17,10 +17,38 @@
 */
 
 
-#include "App.h"
+#ifndef CONFIGDIALOG_H
+#define CONFIGDIALOG_H
 
-int main(int argc, char** argv)
-{
-    App app(argc, argv);
-    return app.exec();
+#include <QDialog>
+
+namespace Ui {
+class ConfigDialog;
 }
+
+class ConfigDialog : public QDialog
+{
+    Q_OBJECT
+
+public:
+    explicit ConfigDialog(QWidget *parent = 0);
+
+private Q_SLOTS:
+    void restoreDefaults();
+    void saveSettings();
+    void okClicked();
+    void switchPage(int);
+    void cfgChanged();
+
+private:
+    Ui::ConfigDialog *ui_;
+    QStringList m_tagNames;
+    QStringList m_localizedTagNames;
+    QString m_localizedTimeTagName;
+
+    void setupUi();
+    bool configChanged;
+    void loadSettings();
+};
+
+#endif // CONFIGDIALOG_H

@@ -17,10 +17,36 @@
 */
 
 
-#include "App.h"
+#ifndef PLAYANIMATIONWIDGET_H
+#define PLAYANIMATIONWIDGET_H
 
-int main(int argc, char** argv)
+#include <QWidget>
+#include <QTimer>
+
+class PlayAnimationWidget : public QWidget
 {
-    App app(argc, argv);
-    return app.exec();
-}
+    Q_OBJECT
+public:
+    explicit PlayAnimationWidget(QWidget *parent = 0);
+
+    void startAnimation();
+    void stopAnimation();
+
+signals:
+
+public slots:
+
+protected:
+    void paintEvent(QPaintEvent *event);
+
+private:
+    QTimer timer_;
+    QVector<int> maxHeights_;
+    QVector<int> currentHeights_;
+    QVector<int> ticks_;
+    bool animating_;
+
+    int randomHeight();
+};
+
+#endif // PLAYANIMATIONWIDGET_H

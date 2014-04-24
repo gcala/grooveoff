@@ -17,10 +17,41 @@
 */
 
 
-#include "App.h"
+#ifndef APP_H
+#define APP_H
 
-int main(int argc, char** argv)
+#include "MainWindow.h"
+
+#include <QtSingleApplication>
+#include <QPointer>
+
+class App : public QtSingleApplication
 {
-    App app(argc, argv);
-    return app.exec();
-}
+    Q_OBJECT
+public:
+    App( int & argc, char ** argv);
+    ~App();
+
+    static App *instance() { return static_cast<App*>( qApp ); }
+
+    inline MainWindow *mainWindow() const { return m_mainWindow.data(); }
+
+    // FRIENDS
+    friend class MainWindow; //requires access to applySettings()
+
+Q_SIGNALS:
+    void prepareToQuit();
+    void settingsChanged();
+
+public Q_SLOTS:
+    void applySettings( bool firstTime = false );
+    void slotConfigGrooveOff( const QString& page = QString() );
+    void quit();
+
+private:
+    QPointer<MainWindow>    m_mainWindow;
+};
+
+#define pApp static_cast<App*>(qApp)
+
+#endif // APP_H

@@ -17,10 +17,20 @@
 */
 
 
-#include "App.h"
+#ifndef ELIDEDCOMBOBOX_H
+#define ELIDEDCOMBOBOX_H
 
-int main(int argc, char** argv)
+#include <QComboBox>
+
+
+class ElidedComboBox : public QComboBox
 {
-    App app(argc, argv);
-    return app.exec();
-}
+
+public:
+    explicit ElidedComboBox(QWidget* parent = 0);
+
+protected:
+    virtual void paintEvent(QPaintEvent* e);
+};
+
+#endif // ELIDEDCOMBOBOX_H

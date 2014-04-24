@@ -17,10 +17,33 @@
 */
 
 
-#include "App.h"
+#ifndef COVERDOWNLOADER_H
+#define COVERDOWNLOADER_H
 
-int main(int argc, char** argv)
+#include <QNetworkAccessManager>
+#include <QPixmap>
+
+class CoverDownloader : public QObject
 {
-    App app(argc, argv);
-    return app.exec();
-}
+    Q_OBJECT
+public:
+    explicit CoverDownloader(QString name, QObject *parent = 0);
+    ~CoverDownloader();
+
+    bool isSuccess() { return success_; }
+    QString coverName() { return coverName_; }
+
+Q_SIGNALS:
+    void done();
+
+public Q_SLOTS:
+    void downloadFinished();
+
+private:
+    QString coverName_;
+    bool success_;
+    QNetworkAccessManager qnam_;
+    QNetworkReply *reply_;
+};
+
+#endif // COVERDOWNLOADER_H

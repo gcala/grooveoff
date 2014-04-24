@@ -17,10 +17,21 @@
 */
 
 
-#include "App.h"
+#ifndef ROLES_H
+#define ROLES_H
 
-int main(int argc, char** argv)
+namespace SongRoles
 {
-    App app(argc, argv);
-    return app.exec();
+    enum roles
+    {
+        Title = 100,
+        Album,
+        Artist,
+        Year,
+        Cover,
+        Id,
+        CoverPix
+    };
 }
+
+#endif // ROLES_H

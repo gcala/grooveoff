@@ -17,10 +17,28 @@
 */
 
 
-#include "App.h"
+#include "FilterProxyModel.h"
+#include "Roles.h"
 
-int main(int argc, char** argv)
+FilterProxyModel::FilterProxyModel(QObject* parent): QSortFilterProxyModel(parent)
 {
-    App app(argc, argv);
-    return app.exec();
+
 }
+
+bool FilterProxyModel::filterAcceptsRow(int source_row, const QModelIndex& source_parent) const
+{
+    QModelIndex index = sourceModel()->index(source_row, 0, source_parent);
+
+    return ((artist_ == "All Artists") ? true : (index.data(SongRoles::Artist).toString() == artist_)) &&
+           ((album_  == "All Albums")  ? true : (index.data(SongRoles::Album).toString() == album_));
+
+
+}
+
+void FilterProxyModel::setMatchTerms(const QString& artist, const QString& album)
+{
+    artist_ = artist;
+    album_ = album;
+}
+
+

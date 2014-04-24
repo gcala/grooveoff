@@ -17,10 +17,46 @@
 */
 
 
-#include "App.h"
+#ifndef MATCHITEM_H
+#define MATCHITEM_H
 
-int main(int argc, char** argv)
-{
-    App app(argc, argv);
-    return app.exec();
+#include "PlaylistItem.h"
+
+#include <QWidget>
+
+
+namespace Ui {
+class MatchItem;
 }
+
+class QLabel;
+class QPushButton;
+
+class MatchItem : public QWidget
+{
+    Q_OBJECT
+
+public:
+    MatchItem(const PlaylistItemPtr &playlistItem, QWidget *parent = 0);
+    virtual ~MatchItem();
+
+    const PlaylistItemPtr playlistItem() { return playlistItem_; }
+
+Q_SIGNALS:
+    void download(PlaylistItemPtr);
+
+public Q_SLOTS:
+    void setDownloadIcon();
+
+private Q_SLOTS:
+    void loadCover();
+    void downloadSlot();
+
+private:
+    Ui::MatchItem *ui_;
+    PlaylistItemPtr playlistItem_;
+
+    void setupUi();
+};
+
+#endif // MATCHITEM_H

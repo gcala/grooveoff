@@ -16,11 +16,29 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+// this code was "borrowed" from ktp-kded-integration-module
 
-#include "App.h"
+#ifndef NAMINGSCHEMA_H
+#define NAMINGSCHEMA_H
 
-int main(int argc, char** argv)
+#include <QLineEdit>
+
+class NamingSchema : public QLineEdit    //krazy:exclude=qclasses
 {
-    App app(argc, argv);
-    return app.exec();
-}
+     Q_OBJECT
+
+public:
+    NamingSchema(QWidget *parent = 0);
+    virtual ~NamingSchema();
+
+    void setLocalizedTagNames(QStringList tagNames);
+
+protected:
+    void dropEvent(QDropEvent *event);
+    void mousePressEvent(QMouseEvent *event);
+
+private:
+    QStringList m_localizedTagNames;
+};
+
+#endif // NAMINGSCHEMA_H

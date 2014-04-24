@@ -17,10 +17,36 @@
 */
 
 
-#include "App.h"
+#ifndef TIMERBUTTON_H
+#define TIMERBUTTON_H
 
-int main(int argc, char** argv)
+#include <QPushButton>
+
+
+class TimerButton : public QPushButton
 {
-    App app(argc, argv);
-    return app.exec();
-}
+    Q_OBJECT
+public:
+    explicit TimerButton(QWidget *parent = 0);
+    virtual ~TimerButton();
+
+    bool isCountdownStarted() { return countdownStarted_;}
+
+    void startCountdown();
+    void stopCountdown();
+
+signals:
+    void countdownFinished();
+
+private slots:
+    void decreaseCounter();
+
+private:
+    int counter_;
+    QTimer *timer_;
+    bool countdownStarted_;
+
+    void drawPixmap();
+};
+
+#endif // TIMERBUTTON_H

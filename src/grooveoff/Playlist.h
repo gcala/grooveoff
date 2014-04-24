@@ -17,10 +17,40 @@
 */
 
 
-#include "App.h"
+#ifndef PLAYLIST_H
+#define PLAYLIST_H
 
-int main(int argc, char** argv)
-{
-    App app(argc, argv);
-    return app.exec();
+#include "PlaylistItem.h"
+
+#include <QObject>
+
+class Playlist;
+
+namespace The {
+    Playlist* playlist();
 }
+
+class Playlist : public QObject
+{
+    Q_OBJECT
+public:
+    friend Playlist* The::playlist();
+    ~Playlist();
+
+    void clear();
+    void appendItem(PlaylistItemPtr item);
+    void removeItem(PlaylistItemPtr item);
+    int count() const;
+    PlaylistItemPtr item(int row);
+    int row(PlaylistItemPtr item);
+
+Q_SIGNALS:
+    void playlistChanged();
+
+private:
+    Playlist();
+
+    QList<PlaylistItemPtr> playlist_;
+};
+
+#endif // PLAYLIST_H

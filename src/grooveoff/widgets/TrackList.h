@@ -16,11 +16,25 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#ifndef TRACKLIST_H
+#define TRACKLIST_H
 
-#include "App.h"
+#include <QListWidget>
+#include <QDragEnterEvent>
 
-int main(int argc, char** argv)
+class TrackList : public QListWidget
 {
-    App app(argc, argv);
-    return app.exec();
-}
+    Q_OBJECT
+
+public:
+    TrackList(QWidget *parent = 0);
+    virtual ~TrackList();
+
+protected:
+    void dragEnterEvent(QDragEnterEvent *event);
+    void dragMoveEvent(QDragMoveEvent *event);
+    void mousePressEvent(QMouseEvent *event);
+    QStringList mimeTypes() const;
+};
+
+#endif // TRACKLIST_H

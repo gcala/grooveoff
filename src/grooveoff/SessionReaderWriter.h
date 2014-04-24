@@ -16,11 +16,35 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#ifndef SESSIONPARSER_H
+#define SESSIONPARSER_H
 
-#include "App.h"
+#include "PlaylistItem.h"
 
-int main(int argc, char** argv)
-{
-    App app(argc, argv);
-    return app.exec();
+#include <QObject>
+
+class QDomElement;
+class SessionReaderWriter;
+
+namespace The {
+    SessionReaderWriter* sessionReaderWriter();
 }
+
+class SessionReaderWriter : public QObject
+{
+    Q_OBJECT
+    friend SessionReaderWriter* The::sessionReaderWriter();
+public:
+    ~SessionReaderWriter(){}
+
+    QList<PlaylistItemPtr> read(const QString & file);
+    bool write(const QString &file, QList<PlaylistItemPtr> tracks);
+
+private:
+    SessionReaderWriter( QObject* parent = 0 ) : QObject(parent) {}
+
+    void parsePlaylistItem(const QDomElement& element, PlaylistItemPtr item);
+    void parseSong(const QDomElement& element, GrooveShark::SongPtr song);
+};
+
+#endif // SESSIONPARSER_H

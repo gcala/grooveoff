@@ -17,10 +17,34 @@
 */
 
 
-#include "App.h"
+#ifndef MPRIS1PLUGINROOTADAPTOR_H
+#define MPRIS1PLUGINROOTADAPTOR_H
 
-int main(int argc, char** argv)
+#include <QObject>
+#include <QVariantMap>
+
+struct Version
 {
-    App app(argc, argv);
-    return app.exec();
-}
+    quint16 major;
+    quint16 minor;
+};
+
+Q_DECLARE_METATYPE( Version );
+
+class Mpris1PluginRootAdaptor : public QObject
+{
+    Q_OBJECT
+    Q_CLASSINFO( "D-Bus Interface", "org.freedesktop.MediaPlayer" )
+
+public:
+    Mpris1PluginRootAdaptor( QObject *parent = 0 );
+
+    ~Mpris1PluginRootAdaptor();
+
+public Q_SLOTS:
+    QString Identity();
+    Version MprisVersion();
+    void Quit();
+};
+
+#endif

@@ -17,10 +17,38 @@
 */
 
 
-#include "App.h"
+#ifndef NEXTBUTTON_H
+#define NEXTBUTTON_H
 
-int main(int argc, char** argv)
+#include "IconButton.h"
+
+class NextButton : public IconButton
 {
-    App app(argc, argv);
-    return app.exec();
-}
+    Q_OBJECT
+public:
+    NextButton( QWidget *parent = 0 );
+    void setButtonEnabled(bool);
+
+protected:
+    void enterEvent( QEvent * );
+    void leaveEvent( QEvent * );
+    void mousePressEvent( QMouseEvent * );
+    void mouseReleaseEvent( QMouseEvent * );
+    void reloadContent( const QSize &sz );
+
+private slots:
+    void clicked();
+
+signals:
+    void nextButtonClicked();
+
+private:
+    struct
+    {
+        QImage next[3];
+    } m_icon;
+
+    bool m_isEnabled;
+};
+
+#endif // PREVIOUSBUTTON_H

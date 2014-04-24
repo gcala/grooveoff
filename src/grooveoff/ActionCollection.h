@@ -17,10 +17,36 @@
 */
 
 
-#include "App.h"
+#ifndef ACTIONCOLLECTION_H
+#define ACTIONCOLLECTION_H
 
-int main(int argc, char** argv)
+#include <QObject>
+#include <QHash>
+
+class QMenuBar;
+class QMenu;
+class QAction;
+
+class ActionCollection : public QObject
 {
-    App app(argc, argv);
-    return app.exec();
-}
+public:
+    static ActionCollection* instance();
+
+    ActionCollection( QObject *parent );
+    ~ActionCollection();
+
+    void initActions();
+
+    QMenuBar *createMenuBar( QWidget *parent );
+    QMenu *createCompactMenu( QWidget *parent );
+    QAction* getAction( const QString& name );
+    QMenu* getMenu( const QString& name );
+
+private:
+    static ActionCollection* s_instance;
+
+    QHash< QString, QAction* > m_actionCollection;
+    QHash< QString, QMenu* > m_menuCollection;
+};
+
+#endif // ACTIONCOLLECTION_H

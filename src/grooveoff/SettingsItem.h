@@ -17,10 +17,26 @@
 */
 
 
-#include "App.h"
+#ifndef SETTINGSITEM_H
+#define SETTINGSITEM_H
 
-int main(int argc, char** argv)
-{
-    App app(argc, argv);
-    return app.exec();
+#include <QWidget>
+
+namespace Ui {
+class SettingsItem;
 }
+
+class SettingsItem : public QWidget
+{
+    Q_OBJECT
+
+public:
+    SettingsItem(const QString &name, const QString &icon, QWidget *parent = 0);
+
+private:
+    Ui::SettingsItem *ui_;
+    QString settingName_;
+    QString settingIcon_;
+};
+
+#endif // SETTINGSITEM_H

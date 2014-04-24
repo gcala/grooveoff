@@ -17,10 +17,24 @@
 */
 
 
-#include "App.h"
+#ifndef TIMERLABEL_H
+#define TIMERLABEL_H
 
-int main(int argc, char** argv)
+#include <QLabel>
+
+
+class TimerLabel : public QLabel
 {
-    App app(argc, argv);
-    return app.exec();
-}
+    Q_OBJECT
+public:
+    explicit TimerLabel(QWidget *parent = 0);
+    virtual ~TimerLabel();
+
+signals:
+    void clicked();
+
+protected:
+    void mousePressEvent ( QMouseEvent * event ) ;
+};
+
+#endif // TIMERLABEL_H

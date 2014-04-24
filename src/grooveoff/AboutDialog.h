@@ -17,10 +17,30 @@
 */
 
 
-#include "App.h"
+#ifndef ABOUTDIALOG_H
+#define ABOUTDIALOG_H
 
-int main(int argc, char** argv)
-{
-    App app(argc, argv);
-    return app.exec();
+#include <QDialog>
+
+namespace Ui {
+class AboutDialog;
 }
+
+
+class AboutDialog : public QDialog
+{
+    Q_OBJECT
+
+public:
+    explicit AboutDialog(QWidget *parent = 0);
+    virtual ~AboutDialog();
+
+private Q_SLOTS:
+    void openGplPage();
+    void openDonatePage();
+
+private:
+    Ui::AboutDialog *ui_;
+};
+
+#endif // ABOUTDIALOG_H

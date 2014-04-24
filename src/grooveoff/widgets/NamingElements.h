@@ -16,11 +16,37 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+// this code was "borrowed" from ktp-kded-integration-module
 
-#include "App.h"
 
-int main(int argc, char** argv)
+#ifndef NAMINGELEMENTS_H
+#define NAMINGELEMENTS_H
+
+#include <QListWidget>
+#include <QDragEnterEvent>
+
+class NamingElements : public QListWidget
 {
-    App app(argc, argv);
-    return app.exec();
-}
+     Q_OBJECT
+
+public:
+    NamingElements(QWidget *parent = 0);
+    virtual ~NamingElements();
+
+    void setLocalizedTagNames(QStringList tagNames);
+    void setItemsIcons(QStringList itemsIcons);
+    void setupItems();
+
+protected:
+    void resizeEvent(QResizeEvent *event);
+    void dragEnterEvent(QDragEnterEvent *event);
+    void dragMoveEvent(QDragMoveEvent *event);
+    void mousePressEvent(QMouseEvent *event);
+    QStringList mimeTypes() const;
+
+private:
+    QStringList m_localizedTagNames;
+    QStringList m_itemsIcons;
+};
+
+#endif // NAMINGELEMENTS_H

@@ -17,10 +17,29 @@
 */
 
 
-#include "App.h"
+#ifndef DOWNLOADLIST_H
+#define DOWNLOADLIST_H
 
-int main(int argc, char** argv)
+#include "PlaylistItem.h"
+
+#include <QListWidget>
+#include <phonon/phononnamespace.h>
+
+class DownloadItem;
+
+class DownloadList : public QListWidget
 {
-    App app(argc, argv);
-    return app.exec();
-}
+    Q_OBJECT
+public:
+    explicit DownloadList(QWidget *parent = 0);
+
+    QList<PlaylistItemPtr> playlistItems() const;
+
+public Q_SLOTS:
+    void reloadPlaylist();
+    void removeFailedDeletedAborted();
+    void removeDownloaded();
+    void abortAllDownloads();
+};
+
+#endif // DOWNLOADLIST_H
