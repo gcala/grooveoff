@@ -1,4 +1,6 @@
-set(grooveoff_SRCS widgets/SessionList.cpp widgets/TrackList.cpp SessionReaderWriter.cpp
+set(grooveoff_SRCS widgets/SessionList.cpp
+                   widgets/TrackList.cpp
+                   SessionReaderWriter.cpp
                    App.cpp
                    ActionCollection.cpp
                    AboutDialog.cpp
@@ -21,6 +23,7 @@ set(grooveoff_SRCS widgets/SessionList.cpp widgets/TrackList.cpp SessionReaderWr
                    PaletteHandler.cpp
                    SessionManager.cpp
                    SessionItem.cpp
+                   widgets/ContainedMenuButton.cpp
                    widgets/ElidedComboBox.cpp
                    widgets/PlayAnimationWidget.cpp
                    widgets/QLed.cpp

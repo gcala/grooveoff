@@ -16,12 +16,6 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="QWidget" name="searchWidgets" native="true">
-      <layout class="QVBoxLayout" name="verticalLayout_2">
-       <property name="margin">
-        <number>0</number>
-       </property>
-       <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <property name="leftMargin">
        <number>2</number>
@@ -72,8 +66,21 @@
       <item>
        <widget class="QLed" name="qled" native="true"/>
       </item>
+      <item>
+       <widget class="ContainedMenuButton" name="compactMenuButton">
+        <property name="text">
+         <string>...</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
+    <item>
+     <widget class="QWidget" name="searchWidgets" native="true">
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <property name="margin">
+        <number>0</number>
+       </property>
        <item>
         <layout class="QGridLayout" name="gridLayout">
          <property name="leftMargin">
@@ -228,7 +235,7 @@
      <x>0</x>
      <y>0</y>
      <width>509</width>
-     <height>27</height>
+     <height>24</height>
     </rect>
    </property>
   </widget>
@@ -250,6 +257,11 @@
    <class>DownloadList</class>
    <extends>QListWidget</extends>
    <header location="global">DownloadList.h</header>
+  </customwidget>
+  <customwidget>
+   <class>ContainedMenuButton</class>
+   <extends>QToolButton</extends>
+   <header location="global">widgets/ContainedMenuButton.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

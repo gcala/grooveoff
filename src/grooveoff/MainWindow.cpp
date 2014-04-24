@@ -103,8 +103,8 @@ MainWindow::MainWindow(QWidget *parent) :
     The::paletteHandler()->setPalette( palette() );
     playerWidget = new PlayerWidget(this);
     new ActionCollection(this);
-    setupUi();
     setupMenus();
+    setupUi();
     setupSignals();
     loadSettings();
     statusBar()->addPermanentWidget( playerWidget, 1 );
@@ -296,6 +296,13 @@ void MainWindow::setupUi()
     ui_->splitter->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
 
     playerWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+    
+    ui_->compactMenuButton->setIcon( QIcon::fromTheme( "applications-system" ) );
+    ui_->compactMenuButton->setToolTip( trUtf8( "Main Menu" ) );
+    ui_->compactMenuButton->setMenu( m_compactMainMenu );
+    ui_->compactMenuButton->setToolButtonStyle( Qt::ToolButtonIconOnly );
+    ui_->compactMenuButton->setAutoRaise(true);
+    ui_->compactMenuButton->setIconSize(QSize(24,24));
 }
 
 /*!
@@ -509,9 +516,9 @@ void MainWindow::tokenFinished()
         Utility::token = token_->result();
 
         //statusBar()->showMessage(trUtf8("Connected"), 3000);
-        playerWidget->showMessage(trUtf8("Connected"));
+        playerWidget->showMessage(trUtf8("Connected to\nGrooveshark"));
         ui_->qled->setValue(true);
-        ui_->qled->setToolTip(trUtf8("You're connected to grooveshark!"));
+        ui_->qled->setToolTip(trUtf8("You're connected to Grooveshark!"));
         ui_->matchList->setEnabled(true);
 
         // start download of queued songs from last session
@@ -788,6 +795,9 @@ void MainWindow::setCompactLayout()
     settings.setValue(QLatin1String("splitterOrientation"), ui_->splitter->orientation());
 
     guiLayout_ = Compact;
+    
+    ui_->compactMenuButton->setVisible(false);
+    menuBar()->setVisible(true);
 }
 
 /*!
@@ -821,6 +831,9 @@ void MainWindow::setWideLayout()
     // save choice
     settings.setValue(QLatin1String("splitterOrientation"), ui_->splitter->orientation());
     guiLayout_ = Wide;
+    
+    ui_->compactMenuButton->setVisible(false);
+    menuBar()->setVisible(true);
 }
 
 void MainWindow::setMiniPlayerLayout()
@@ -830,10 +843,13 @@ void MainWindow::setMiniPlayerLayout()
         QSettings settings;
         settings.setIniCodec( "UTF-8" );
         settings.setValue(QLatin1String("windowGeometry"), geometry());
+        settings.setValue(QLatin1String("splitterSizes"), QVariant::fromValue< QList<int> >(ui_->splitter->sizes()));
     }
 
     ui_->splitter->setVisible(false);
     ui_->searchWidgets->setVisible(false);
+    ui_->compactMenuButton->setVisible(true);
+    menuBar()->setVisible(false);
     playerWidget->showElapsedTimerLabel(true);
     setMaximumHeight(40);
     guiLayout_ = Mini;
@@ -934,6 +950,8 @@ void MainWindow::loadSettings()
 
     if(guiLayout_ == Mini)
         setMiniPlayerLayout();
+    else
+        ui_->compactMenuButton->setVisible(false);
 }
 
 /*!
