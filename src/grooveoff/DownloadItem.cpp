@@ -324,6 +324,8 @@ void DownloadItem::stateChanged()
             ui_->openFolderWidget->setVisible(false);
             break;
     }
+    
+    update();
 }
 
 /*!
