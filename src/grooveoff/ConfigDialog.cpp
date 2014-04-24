@@ -267,6 +267,3 @@ void ConfigDialog::loadSettings()
 
     ui_->m_nowPlayingText->setText(namingSchemaText);
 }
-
-
-#include "configdialog.moc"

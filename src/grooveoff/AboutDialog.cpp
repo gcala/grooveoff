@@ -85,6 +85,3 @@ void AboutDialog::openDonatePage()
 {
     QDesktopServices::openUrl(QUrl(QLatin1String("https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=WJNETV7GLTKDG&item_name=") + trUtf8("Donation to Grooveoff's author")));
 }
-
-
-#include "aboutdialog.moc"
