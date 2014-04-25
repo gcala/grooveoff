@@ -41,7 +41,7 @@ public Q_SLOTS:
     void setCover();
 
 private:
-    QHash< QString, QList< PlaylistItemPtr > > coverItems_;
+    QHash< QString, QList< PlaylistItemPtr > > m_coverItems;
 };
 
 #endif // COVERMANAGER_H

@@ -29,19 +29,19 @@
 */
 ConfigDialog::ConfigDialog(QWidget *parent):
     QDialog(parent),
-    ui_(new Ui::ConfigDialog)
+    ui(new Ui::ConfigDialog)
 {
-    ui_->setupUi(this);
+    ui->setupUi(this);
     setupUi();
 
     // be sure that settings opens with general page
-    ui_->stackedWidget->setCurrentIndex(0);
+    ui->stackedWidget->setCurrentIndex(0);
 
     // just started so this flag is false
     configChanged = false;
 
-    ui_->historySize->setMinimum(1);
-    ui_->historySize->setMaximum(10);
+    ui->historySize->setMinimum(1);
+    ui->historySize->setMaximum(10);
 
     // connect all checkboxes to the same slot
     QList<QCheckBox *> checkboxList = this->findChildren<QCheckBox *>();
@@ -57,7 +57,7 @@ ConfigDialog::ConfigDialog(QWidget *parent):
                     SLOT(cfgChanged()));
     }
 
-    connect(ui_->m_nowPlayingText, SIGNAL(textChanged(QString)),
+    connect(ui->m_nowPlayingText, SIGNAL(textChanged(QString)),
                                    SLOT(cfgChanged()));
 
     m_tagNames << QLatin1String("%title") << QLatin1String("%artist") << QLatin1String("%album") << QLatin1String("%track");
@@ -78,21 +78,21 @@ ConfigDialog::ConfigDialog(QWidget *parent):
                << QLatin1String("view-media-playlist") //%album
                << QLatin1String("mixer-cd");           //%track
 
-    ui_->m_tagListWidget->setItemsIcons(itemsIcons);
-    ui_->m_tagListWidget->setLocalizedTagNames(m_localizedTagNames);
-    ui_->m_tagListWidget->setupItems(); //populate the list, load items icons and set list's maximum size
+    ui->m_tagListWidget->setItemsIcons(itemsIcons);
+    ui->m_tagListWidget->setLocalizedTagNames(m_localizedTagNames);
+    ui->m_tagListWidget->setupItems(); //populate the list, load items icons and set list's maximum size
 
-    ui_->m_nowPlayingText->setLocalizedTagNames(m_localizedTagNames);
+    ui->m_nowPlayingText->setLocalizedTagNames(m_localizedTagNames);
 
-    connect(ui_->cancelButton, SIGNAL(clicked()), this, SLOT(close()));
-    connect(ui_->restoreButton, SIGNAL(clicked()), this, SLOT(restoreDefaults()));
-    connect(ui_->applyButton, SIGNAL(clicked()), this, SLOT(saveSettings()));
-    connect(ui_->okButton, SIGNAL(clicked()), this, SLOT(okClicked()));
-    connect(ui_->contentsWidget, SIGNAL(currentRowChanged(int)), this, SLOT(switchPage(int)));
+    connect(ui->cancelButton, SIGNAL(clicked()), this, SLOT(close()));
+    connect(ui->restoreButton, SIGNAL(clicked()), this, SLOT(restoreDefaults()));
+    connect(ui->applyButton, SIGNAL(clicked()), this, SLOT(saveSettings()));
+    connect(ui->okButton, SIGNAL(clicked()), this, SLOT(okClicked()));
+    connect(ui->contentsWidget, SIGNAL(currentRowChanged(int)), this, SLOT(switchPage(int)));
 
     loadSettings();
 
-    ui_->applyButton->setEnabled(false);
+    ui->applyButton->setEnabled(false);
 }
 
 /*!
@@ -101,16 +101,16 @@ ConfigDialog::ConfigDialog(QWidget *parent):
 */
 void ConfigDialog::setupUi()
 {
-    ui_->cancelButton->setIcon(QIcon::fromTheme(QLatin1String("dialog-cancel"), QIcon(QLatin1String(":/resources/dialog-cancel.png"))));
+    ui->cancelButton->setIcon(QIcon::fromTheme(QLatin1String("dialog-cancel"), QIcon(QLatin1String(":/resources/dialog-cancel.png"))));
 
     if(QIcon::hasThemeIcon(QLatin1String("dialog-ok-apply")))
-        ui_->applyButton->setIcon(QIcon::fromTheme(QLatin1String("dialog-ok-apply")));
+        ui->applyButton->setIcon(QIcon::fromTheme(QLatin1String("dialog-ok-apply")));
     else
-        ui_->applyButton->setIcon(QIcon::fromTheme(QLatin1String("dialog-apply"), QIcon(QLatin1String(":/resources/dialog-ok-apply.png"))));
+        ui->applyButton->setIcon(QIcon::fromTheme(QLatin1String("dialog-apply"), QIcon(QLatin1String(":/resources/dialog-ok-apply.png"))));
 
-    ui_->okButton->setIcon(QIcon::fromTheme(QLatin1String("dialog-ok"), QIcon(":/resources/dialog-ok.png")));
+    ui->okButton->setIcon(QIcon::fromTheme(QLatin1String("dialog-ok"), QIcon(":/resources/dialog-ok.png")));
 
-    ui_->restoreButton->setIcon(QIcon::fromTheme(QLatin1String("document-revert"), QIcon(":/resources/document-revert.png")));
+    ui->restoreButton->setIcon(QIcon::fromTheme(QLatin1String("document-revert"), QIcon(":/resources/document-revert.png")));
 
     QString generalString = trUtf8("General");
     QString performanceString = trUtf8("Performance");
@@ -126,32 +126,32 @@ void ConfigDialog::setupUi()
     if(fmText.width(performanceString) > maxWidth)
         maxWidth = fmText.width(performanceString);
 
-    ui_->contentsWidget->setFixedWidth(maxWidth + 20);
+    ui->contentsWidget->setFixedWidth(maxWidth + 20);
 
     SettingsItem *generalItem = new SettingsItem(generalString, "", this); // empty icon name is default for application own icon
     SettingsItem *performanceItem = new SettingsItem(performanceString, QLatin1String("preferences-system-performance"), this);
 
     QListWidgetItem *generalWidget = new QListWidgetItem();
-    ui_->contentsWidget->addItem(generalWidget);
-    ui_->contentsWidget->setItemWidget(generalWidget, generalItem);
+    ui->contentsWidget->addItem(generalWidget);
+    ui->contentsWidget->setItemWidget(generalWidget, generalItem);
     generalWidget->setSizeHint(QSize(maxWidth,80));
 
     QListWidgetItem *performanceWidget = new QListWidgetItem();
-    ui_->contentsWidget->addItem(performanceWidget);
-    ui_->contentsWidget->setItemWidget(performanceWidget, performanceItem);
+    ui->contentsWidget->addItem(performanceWidget);
+    ui->contentsWidget->setItemWidget(performanceWidget, performanceItem);
     performanceWidget->setSizeHint(QSize(maxWidth,80));
 
-    ui_->generalPageIcon->setPixmap(QPixmap(QLatin1String(":/resources/grooveoff.png")));
-    ui_->generalPageIcon->setScaledContents(true);
+    ui->generalPageIcon->setPixmap(QPixmap(QLatin1String(":/resources/grooveoff.png")));
+    ui->generalPageIcon->setScaledContents(true);
 
     if(QIcon::hasThemeIcon(QLatin1String("preferences-system-performance")))
-        ui_->performancePageIcon->setPixmap(QIcon::fromTheme(QLatin1String("preferences-system-performance")).pixmap(22,22));
+        ui->performancePageIcon->setPixmap(QIcon::fromTheme(QLatin1String("preferences-system-performance")).pixmap(22,22));
     else
-        ui_->performancePageIcon->setPixmap(QIcon::fromTheme(QLatin1String("software-update-available"), QIcon(QLatin1String(":/resources/preferences-system-performance.png"))).pixmap(22,22));
+        ui->performancePageIcon->setPixmap(QIcon::fromTheme(QLatin1String("software-update-available"), QIcon(QLatin1String(":/resources/preferences-system-performance.png"))).pixmap(22,22));
 
-    ui_->performancePageIcon->setScaledContents(true);
+    ui->performancePageIcon->setScaledContents(true);
 
-    ui_->contentsWidget->setCurrentItem(generalWidget);
+    ui->contentsWidget->setCurrentItem(generalWidget);
 }
 
 /*!
@@ -161,16 +161,16 @@ void ConfigDialog::setupUi()
 void ConfigDialog::restoreDefaults()
 {
     configChanged = true;
-    ui_->applyButton->setEnabled(true);
-    ui_->saveSearches->setChecked(false);
-    ui_->saveSession->setChecked(false);
-    ui_->historySize->setEnabled(false);
-    ui_->saveDestination->setChecked(false);
-    ui_->label_3->setEnabled(false);
-    ui_->loadCovers->setChecked(true);
-    ui_->numResults->setValue(0);
-    ui_->maxDownloads->setValue(5);
-    ui_->m_nowPlayingText->setText(trUtf8("%1 - %2").arg(QLatin1String("%artist")).arg(QLatin1String("%title")));
+    ui->applyButton->setEnabled(true);
+    ui->saveSearches->setChecked(false);
+    ui->saveSession->setChecked(false);
+    ui->historySize->setEnabled(false);
+    ui->saveDestination->setChecked(false);
+    ui->label_3->setEnabled(false);
+    ui->loadCovers->setChecked(true);
+    ui->numResults->setValue(0);
+    ui->maxDownloads->setValue(5);
+    ui->m_nowPlayingText->setText(trUtf8("%1 - %2").arg(QLatin1String("%artist")).arg(QLatin1String("%title")));
 }
 
 /*!
@@ -180,18 +180,18 @@ void ConfigDialog::restoreDefaults()
 void ConfigDialog::saveSettings()
 {
     configChanged = false;
-    ui_->applyButton->setEnabled(false);
+    ui->applyButton->setEnabled(false);
     QSettings settings;
-    settings.setValue(QLatin1String("saveSearches"), ui_->saveSearches->isChecked());
-    settings.setValue(QLatin1String("saveSession"), ui_->saveSession->isChecked());
-    settings.setValue(QLatin1String("historySize"), ui_->historySize->value());
-    settings.setValue(QLatin1String("loadCovers"), ui_->loadCovers->isChecked());
-    settings.setValue(QLatin1String("numResults"), ui_->numResults->value());
-    settings.setValue(QLatin1String("maxDownloads"), ui_->maxDownloads->value());
-    settings.setValue(QLatin1String("saveDestination"), ui_->saveDestination->isChecked());
+    settings.setValue(QLatin1String("saveSearches"), ui->saveSearches->isChecked());
+    settings.setValue(QLatin1String("saveSession"), ui->saveSession->isChecked());
+    settings.setValue(QLatin1String("historySize"), ui->historySize->value());
+    settings.setValue(QLatin1String("loadCovers"), ui->loadCovers->isChecked());
+    settings.setValue(QLatin1String("numResults"), ui->numResults->value());
+    settings.setValue(QLatin1String("maxDownloads"), ui->maxDownloads->value());
+    settings.setValue(QLatin1String("saveDestination"), ui->saveDestination->isChecked());
 
     //we store a nowPlayingText version with untranslated tag names
-    QString modifiedNamingSchema = ui_->m_nowPlayingText->text();
+    QString modifiedNamingSchema = ui->m_nowPlayingText->text();
     for (int i = 0; i < m_tagNames.size(); i++) {
         modifiedNamingSchema.replace(m_localizedTagNames.at(i), m_tagNames.at(i));
     }
@@ -217,7 +217,7 @@ void ConfigDialog::okClicked()
 */
 void ConfigDialog::switchPage(int page)
 {
-    ui_->stackedWidget->setCurrentIndex(page);
+    ui->stackedWidget->setCurrentIndex(page);
 }
 
 /*!
@@ -227,13 +227,13 @@ void ConfigDialog::switchPage(int page)
 void ConfigDialog::cfgChanged()
 {
     configChanged = true;
-    ui_->applyButton->setEnabled(true);
-    if(ui_->saveSearches->isChecked()) {
-        ui_->historySize->setEnabled(true);
-        ui_->label_3->setEnabled(true);
+    ui->applyButton->setEnabled(true);
+    if(ui->saveSearches->isChecked()) {
+        ui->historySize->setEnabled(true);
+        ui->label_3->setEnabled(true);
     } else {
-        ui_->historySize->setEnabled(false);
-        ui_->label_3->setEnabled(false);
+        ui->historySize->setEnabled(false);
+        ui->label_3->setEnabled(false);
     }
 }
 
@@ -244,17 +244,17 @@ void ConfigDialog::cfgChanged()
 void ConfigDialog::loadSettings()
 {
     QSettings settings;
-    ui_->saveSession->setChecked(settings.value(QLatin1String("saveSession"),false).toBool());
-    ui_->saveSearches->setChecked(settings.value(QLatin1String("saveSearches"),false).toBool());
-    if(!ui_->saveSearches->isChecked()) {
-        ui_->historySize->setEnabled(false);
-        ui_->label_3->setEnabled(false);
+    ui->saveSession->setChecked(settings.value(QLatin1String("saveSession"),false).toBool());
+    ui->saveSearches->setChecked(settings.value(QLatin1String("saveSearches"),false).toBool());
+    if(!ui->saveSearches->isChecked()) {
+        ui->historySize->setEnabled(false);
+        ui->label_3->setEnabled(false);
     }
-    ui_->historySize->setValue(settings.value(QLatin1String("historySize"), 0).toInt());
-    ui_->loadCovers->setChecked(settings.value(QLatin1String("loadCovers"), true).toBool());
-    ui_->numResults->setValue(settings.value(QLatin1String("numResults"), 0).toInt());
-    ui_->maxDownloads->setValue(settings.value(QLatin1String("maxDownloads"), 5).toInt());
-    ui_->saveDestination->setChecked(settings.value(QLatin1String("saveDestination"), false).toBool());
+    ui->historySize->setValue(settings.value(QLatin1String("historySize"), 0).toInt());
+    ui->loadCovers->setChecked(settings.value(QLatin1String("loadCovers"), true).toBool());
+    ui->numResults->setValue(settings.value(QLatin1String("numResults"), 0).toInt());
+    ui->maxDownloads->setValue(settings.value(QLatin1String("maxDownloads"), 5).toInt());
+    ui->saveDestination->setChecked(settings.value(QLatin1String("saveDestination"), false).toBool());
 
     //Naming Schema
     QString namingSchemaText = settings.value(QLatin1String("namingSchema"),
@@ -265,5 +265,5 @@ void ConfigDialog::loadSettings()
         namingSchemaText.replace(m_tagNames.at(i), m_localizedTagNames.at(i));
     }
 
-    ui_->m_nowPlayingText->setText(namingSchemaText);
+    ui->m_nowPlayingText->setText(namingSchemaText);
 }

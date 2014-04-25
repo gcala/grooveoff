@@ -29,16 +29,16 @@ bool FilterProxyModel::filterAcceptsRow(int source_row, const QModelIndex& sourc
 {
     QModelIndex index = sourceModel()->index(source_row, 0, source_parent);
 
-    return ((artist_ == "All Artists") ? true : (index.data(SongRoles::Artist).toString() == artist_)) &&
-           ((album_  == "All Albums")  ? true : (index.data(SongRoles::Album).toString() == album_));
+    return ((m_artist == "All Artists") ? true : (index.data(SongRoles::Artist).toString() == m_artist)) &&
+           ((m_album  == "All Albums")  ? true : (index.data(SongRoles::Album).toString() == m_album));
 
 
 }
 
 void FilterProxyModel::setMatchTerms(const QString& artist, const QString& album)
 {
-    artist_ = artist;
-    album_ = album;
+    m_artist = artist;
+    m_album = album;
 }
 
 

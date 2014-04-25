@@ -41,7 +41,7 @@ private Q_SLOTS:
     void cfgChanged();
 
 private:
-    Ui::ConfigDialog *ui_;
+    Ui::ConfigDialog *ui;
     QStringList m_tagNames;
     QStringList m_localizedTagNames;
     QString m_localizedTimeTagName;

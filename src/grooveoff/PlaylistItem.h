@@ -45,7 +45,7 @@ public:
 
     QString fileName() const;
     void requireCoverReload();
-    bool isPlaying() { return state_ == Phonon::PlayingState; }
+    bool isPlaying() { return m_state == Phonon::PlayingState; }
     void setState(Phonon::State state);
 
     bool operator==(PlaylistItem &) const;
@@ -58,10 +58,10 @@ Q_SIGNALS:
 public Q_SLOTS:
 
 private:
-    Phonon::State state_;
-    GrooveShark::SongPtr song_;
-    QString path_;
-    QString namingSchema_;
+    Phonon::State m_state;
+    GrooveShark::SongPtr m_song;
+    QString m_path;
+    QString m_namingSchema;
 };
 
 typedef QSharedPointer<PlaylistItem> PlaylistItemPtr;

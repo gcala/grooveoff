@@ -13,13 +13,13 @@ SessionItem::SessionItem(const QString &name, int num, QWidget *parent) :
     ui->sessionName->setText(name);
     ui->numTracks->setText(trUtf8("%1 tracks").arg(QString::number(num)));
 
-    deleteButtonEnabled_ = true;
+    m_deleteButtonEnabled = true;
     setAcceptDrops(true);
 
     setupUi();
     setupConnections();
 
-    state_ = GrooveOff::FinishedState;
+    m_state = GrooveOff::FinishedState;
     stateChanged();
 }
 
@@ -55,13 +55,16 @@ void SessionItem::setupUi()
 
 void SessionItem::setupConnections()
 {
-    connect(ui->multiFuncButton, SIGNAL(clicked()), this, SLOT(multiFuncBtnClicked()));
-    connect(ui->multiFuncButton, SIGNAL(countdownFinished()), this, SLOT(removeSession()));
+    connect(ui->multiFuncButton, SIGNAL(clicked()),
+                                 SLOT(multiFuncBtnClicked()));
+    
+    connect(ui->multiFuncButton, SIGNAL(countdownFinished()), 
+                                 SLOT(removeSession()));
 }
 
 void SessionItem::multiFuncBtnClicked()
 {
-    switch(state_) {
+    switch(m_state) {
         case GrooveOff::FinishedState:
             if(!ui->multiFuncButton->isCountdownStarted()) {
                 ui->multiFuncButton->setToolTip(trUtf8("Abort deletion"));
@@ -81,13 +84,13 @@ void SessionItem::multiFuncBtnClicked()
 
 void SessionItem::removeSession()
 {
-    state_ = GrooveOff::DeletedState;
+    m_state = GrooveOff::DeletedState;
     emit remove(sessionName());
 }
 
 void SessionItem::stateChanged()
 {
-    switch(state_) {
+    switch(m_state) {
         case GrooveOff::FinishedState:
             ui->multiFuncWidget->setVisible(false);
             ui->multiFuncButton->setIcon(QIcon::fromTheme(QLatin1String("user-trash"),
@@ -120,9 +123,9 @@ QString SessionItem::sessionName() const
 */
 void SessionItem::enterEvent(QEvent* event)
 {
-    switch(state_) {
+    switch(m_state) {
         case GrooveOff::FinishedState:
-            if(deleteButtonEnabled_)
+            if(m_deleteButtonEnabled)
                 ui->multiFuncWidget->setVisible(true);
             break;
         case GrooveOff::DeletedState:
@@ -142,7 +145,7 @@ void SessionItem::enterEvent(QEvent* event)
 */
 void SessionItem::leaveEvent(QEvent* event)
 {
-    switch(state_) {
+    switch(m_state) {
         case GrooveOff::FinishedState:
             if(!ui->multiFuncButton->isCountdownStarted())
                 ui->multiFuncWidget->setVisible(false);
@@ -160,7 +163,7 @@ void SessionItem::leaveEvent(QEvent* event)
 
 void SessionItem::deleteButtonEnabled(bool ok)
 {
-    deleteButtonEnabled_ = ok;
+    m_deleteButtonEnabled = ok;
 }
 
 void SessionItem::updateNumTrack(int num)

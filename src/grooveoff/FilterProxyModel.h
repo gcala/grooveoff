@@ -35,8 +35,8 @@ protected:
     virtual bool filterAcceptsRow(int source_row, const QModelIndex& source_parent) const;
 
 private:
-    QString artist_;
-    QString album_;
+    QString m_artist;
+    QString m_album;
 };
 
 #endif // FILTERPROXYMODEL_H

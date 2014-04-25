@@ -34,8 +34,8 @@ private Q_SLOTS:
 
 private:
     Ui::SessionItem *ui;
-    GrooveOff::DownloadState state_;
-    bool deleteButtonEnabled_;
+    GrooveOff::DownloadState m_state;
+    bool m_deleteButtonEnabled;
 
     void setupUi();
     void setupConnections();

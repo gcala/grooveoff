@@ -30,8 +30,8 @@ public:
     explicit CoverDownloader(QString name, QObject *parent = 0);
     ~CoverDownloader();
 
-    bool isSuccess() { return success_; }
-    QString coverName() { return coverName_; }
+    bool isSuccess() { return m_success; }
+    QString coverName() { return m_coverName; }
 
 Q_SIGNALS:
     void done();
@@ -40,10 +40,10 @@ public Q_SLOTS:
     void downloadFinished();
 
 private:
-    QString coverName_;
-    bool success_;
-    QNetworkAccessManager qnam_;
-    QNetworkReply *reply_;
+    QString m_coverName;
+    bool m_success;
+    QNetworkAccessManager m_qnam;
+    QNetworkReply *m_reply;
 };
 
 #endif // COVERDOWNLOADER_H

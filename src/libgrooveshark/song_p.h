@@ -75,12 +75,12 @@ private:
     QString m_estimateDuration;
     quint64 m_flags;
     quint32 m_genreID;
-    bool m_isLowBitrateAvailable;
-    bool m_isVerified;
+    bool    m_isLowBitrateAvailable;
+    bool    m_isVerified;
     quint64 m_popularity;
     quint64 m_popularityIndex;
     quint64 m_rawScore;
-    double m_score;
+    double  m_score;
     quint32 m_songID;
     QString m_songName;
     QString m_tsAdded;

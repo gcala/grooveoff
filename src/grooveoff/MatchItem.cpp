@@ -30,15 +30,15 @@ using namespace GrooveShark;
 
 MatchItem::MatchItem(const PlaylistItemPtr &playlistItem, QWidget *parent) :
     QWidget(parent),
-    ui_(new Ui::MatchItem),
-    playlistItem_(playlistItem)
+    ui(new Ui::MatchItem),
+    m_playlistItem(playlistItem)
 {
-    ui_->setupUi(this);
+    ui->setupUi(this);
     setupUi();
 
-    connect(ui_->downloadButton, SIGNAL(clicked()), SLOT(downloadSlot()));
-    connect(playlistItem_.data(), SIGNAL(reloadCover()), this, SLOT(loadCover()));
-    connect(playlistItem_.data(), SIGNAL(reloadIcon()), this, SLOT(setDownloadIcon()));
+    connect(ui->downloadButton, SIGNAL(clicked()), SLOT(downloadSlot()));
+    connect(m_playlistItem.data(), SIGNAL(reloadCover()), this, SLOT(loadCover()));
+    connect(m_playlistItem.data(), SIGNAL(reloadIcon()), this, SLOT(setDownloadIcon()));
 }
 
 MatchItem::~MatchItem()
@@ -47,67 +47,67 @@ MatchItem::~MatchItem()
 
 void MatchItem::setupUi()
 {
-    ui_->coverLabel->setScaledContents(true);
-    ui_->coverLabel->setFixedSize(QSize(Utility::coverSize,Utility::coverSize));
+    ui->coverLabel->setScaledContents(true);
+    ui->coverLabel->setFixedSize(QSize(Utility::coverSize,Utility::coverSize));
 
     loadCover();
 
-    ui_->coverLabel->setToolTip(playlistItem_->song()->songName() + " - " + playlistItem_->song()->artistName());
+    ui->coverLabel->setToolTip(m_playlistItem->song()->songName() + " - " + m_playlistItem->song()->artistName());
 
     QGraphicsDropShadowEffect *coverShadow = new QGraphicsDropShadowEffect(this);
     coverShadow->setBlurRadius(10.0);
     coverShadow->setColor(palette().color(QPalette::Shadow));
     coverShadow->setOffset(0.0);
 
-    ui_->coverLabel->setGraphicsEffect(coverShadow);
+    ui->coverLabel->setGraphicsEffect(coverShadow);
 
-    ui_->titleLabel->setFont(Utility::font(QFont::Bold));
-    ui_->titleLabel->setText(playlistItem_->song()->songName());
-    ui_->titleLabel->setToolTip(playlistItem_->song()->songName());
-    ui_->titleLabel->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred); // fix hidden label
+    ui->titleLabel->setFont(Utility::font(QFont::Bold));
+    ui->titleLabel->setText(m_playlistItem->song()->songName());
+    ui->titleLabel->setToolTip(m_playlistItem->song()->songName());
+    ui->titleLabel->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred); // fix hidden label
 
-    ui_->artist_albumLabel->setText(playlistItem_->song()->artistName() + " - " + playlistItem_->song()->albumName());
-    ui_->artist_albumLabel->setToolTip(playlistItem_->song()->songName());
-    ui_->artist_albumLabel->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred); // fix hidden label
+    ui->artist_albumLabel->setText(m_playlistItem->song()->artistName() + " - " + m_playlistItem->song()->albumName());
+    ui->artist_albumLabel->setToolTip(m_playlistItem->song()->songName());
+    ui->artist_albumLabel->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred); // fix hidden label
 
-    ui_->downloadButton->setFixedSize(QSize(Utility::buttonSize,Utility::buttonSize));
-    ui_->downloadButton->setIconSize(QSize(16,16));
+    ui->downloadButton->setFixedSize(QSize(Utility::buttonSize,Utility::buttonSize));
+    ui->downloadButton->setIconSize(QSize(16,16));
 
     setDownloadIcon();
 }
 
 void MatchItem::loadCover()
 {
-    if(!playlistItem_->song()->coverArtFilename().isEmpty()
-        && QFile::exists(Utility::coversCachePath + playlistItem_->song()->coverArtFilename())
-        && playlistItem_->song()->coverArtFilename() != "0")
-        ui_->coverLabel->setPixmap(QPixmap(Utility::coversCachePath + playlistItem_->song()->coverArtFilename()));
+    if(!m_playlistItem->song()->coverArtFilename().isEmpty()
+        && QFile::exists(Utility::coversCachePath + m_playlistItem->song()->coverArtFilename())
+        && m_playlistItem->song()->coverArtFilename() != "0")
+        ui->coverLabel->setPixmap(QPixmap(Utility::coversCachePath + m_playlistItem->song()->coverArtFilename()));
     else
-        ui_->coverLabel->setPixmap(QIcon::fromTheme(QLatin1String("media-optical"),
+        ui->coverLabel->setPixmap(QIcon::fromTheme(QLatin1String("media-optical"),
                                    QIcon(QLatin1String(":/resources/media-optical.png"))).pixmap(Utility::coverSize));
 }
 
 void MatchItem::downloadSlot()
 {
-    emit download(playlistItem_);
+    emit download(m_playlistItem);
 }
 
 void MatchItem::setDownloadIcon()
 {
     QString schema = Utility::namingSchema;
-    schema.replace(QLatin1String("%title"), playlistItem_->song()->songName(), Qt::CaseInsensitive);
-    schema.replace(QLatin1String("%artist"), playlistItem_->song()->artistName(), Qt::CaseInsensitive);
-    schema.replace(QLatin1String("%album"), playlistItem_->song()->albumName(), Qt::CaseInsensitive);
-    schema.replace(QLatin1String("%track"), QString::number(playlistItem_->song()->trackNum()), Qt::CaseInsensitive);
+    schema.replace(QLatin1String("%title"), m_playlistItem->song()->songName(), Qt::CaseInsensitive);
+    schema.replace(QLatin1String("%artist"), m_playlistItem->song()->artistName(), Qt::CaseInsensitive);
+    schema.replace(QLatin1String("%album"), m_playlistItem->song()->albumName(), Qt::CaseInsensitive);
+    schema.replace(QLatin1String("%track"), QString::number(m_playlistItem->song()->trackNum()), Qt::CaseInsensitive);
 
     if(QFile::exists(Utility::destinationPath + QDir::separator() + schema + ".mp3")) {
-        ui_->downloadButton->setIcon(QIcon::fromTheme(QLatin1String("view-refresh"),
+        ui->downloadButton->setIcon(QIcon::fromTheme(QLatin1String("view-refresh"),
                                      QIcon(QLatin1String(":/resources/view-refresh.png"))));
     } else {
         if(QIcon::hasThemeIcon(QLatin1String("download")))
-            ui_->downloadButton->setIcon(QIcon::fromTheme(QLatin1String("download")));
+            ui->downloadButton->setIcon(QIcon::fromTheme(QLatin1String("download")));
         else
-            ui_->downloadButton->setIcon(QIcon::fromTheme(QLatin1String("document-save"),
+            ui->downloadButton->setIcon(QIcon::fromTheme(QLatin1String("document-save"),
                                          QIcon(QLatin1String(":/resources/download.png"))));
     }
 }

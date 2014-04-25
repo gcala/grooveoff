@@ -40,31 +40,31 @@ Playlist::~Playlist()
 
 void Playlist::appendItem(PlaylistItemPtr item)
 {
-    playlist_.append(item);
+    m_playlist.append(item);
     emit playlistChanged();
 }
 
 void Playlist::clear()
 {
-    playlist_.clear();
+    m_playlist.clear();
 }
 
 int Playlist::count() const
 {
-    return playlist_.count();
+    return m_playlist.count();
 }
 
 PlaylistItemPtr Playlist::item(int row)
 {
-    return playlist_.at(row);
+    return m_playlist.at(row);
 }
 
 int Playlist::row(PlaylistItemPtr item)
 {
     int index = 0;
     bool found = false;
-    for(; index < playlist_.count(); index++) {
-        if(item == playlist_.at(index)) {
+    for(; index < m_playlist.count(); index++) {
+        if(item == m_playlist.at(index)) {
             found = true;
             break;
         }
@@ -78,9 +78,9 @@ int Playlist::row(PlaylistItemPtr item)
 
 void Playlist::removeItem(PlaylistItemPtr item)
 {
-    for(int i = 0; i < playlist_.count(); i++) {
-        if(playlist_.at(i) == item) {
-            playlist_.takeAt(i);
+    for(int i = 0; i < m_playlist.count(); i++) {
+        if(m_playlist.at(i) == item) {
+            m_playlist.takeAt(i);
             break;
         }
     }

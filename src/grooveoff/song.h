@@ -34,20 +34,20 @@ public:
     explicit Song ( QObject* parent = 0 );
     ~Song();
 
-    void setTitle(const QString &title) {title_ = title;}
-    void setAlbum(const QString &album) {album_ = album;}
-    void setArtist(const QString &artist) {artist_ = artist;}
-    void setYear(const QString &year) {year_ = year;}
-    void setId(const QString &id) {id_ = id;}
+    void setTitle(const QString &title) {m_title = title;}
+    void setAlbum(const QString &album) {m_album = album;}
+    void setArtist(const QString &artist) {m_artist = artist;}
+    void setYear(const QString &year) {m_year = year;}
+    void setId(const QString &id) {m_id = id;}
     void setCoverName(const QString &cover);
 
-    QString title()       const { return title_; }
-    QString album()       const { return album_; }
-    QString artist()      const { return artist_; }
-    QString year()        const { return year_; }
-    QString id()          const { return id_; }
-    QString coverName()   const { return coverName_; }
-    QPixmap coverPixmap() const { return coverPixmap_; }
+    QString title()       const { return m_title; }
+    QString album()       const { return m_album; }
+    QString artist()      const { return m_artist; }
+    QString year()        const { return m_year; }
+    QString id()          const { return m_id; }
+    QString coverName()   const { return m_coverName; }
+    QPixmap coverPixmap() const { return m_coverPixmap; }
 
 signals:
     void trigRepaint();
@@ -56,15 +56,15 @@ public slots:
     void onFinished(QNetworkReply*);
 
 private:
-    QString title_;
-    QString album_;
-    QString artist_;
-    QString year_;
-    QString id_;
-    QString coverName_;
-    QPixmap coverPixmap_;
-    QNetworkAccessManager *qnam_;
-    QNetworkReply *reply_;
+    QString m_title;
+    QString m_album;
+    QString m_artist;
+    QString m_year;
+    QString m_id;
+    QString m_coverName;
+    QPixmap m_coverPixmap;
+    QNetworkAccessManager *m_qnam;
+    QNetworkReply *m_reply;
 };
 
 #endif // SONG_H

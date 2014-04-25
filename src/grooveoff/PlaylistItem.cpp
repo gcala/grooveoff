@@ -32,14 +32,14 @@
 using namespace GrooveShark;
 
 PlaylistItem::PlaylistItem ( const SongPtr &song ) :
-    song_(song)
+    m_song(song)
 {
-    state_ = Phonon::StoppedState;
+    m_state = Phonon::StoppedState;
 }
 
 PlaylistItem::PlaylistItem()
 {
-    song_ = SongPtr(new Song());
+    m_song = SongPtr(new Song());
 }
 
 
@@ -52,7 +52,7 @@ PlaylistItem::~PlaylistItem()
 
 bool PlaylistItem::operator==(PlaylistItem& right) const
 {
-    return song_->songID() == right.song()->songID();
+    return m_song->songID() == right.song()->songID();
 }
 
 void PlaylistItem::requireCoverReload()
@@ -62,7 +62,7 @@ void PlaylistItem::requireCoverReload()
 
 QString PlaylistItem::path() const
 {
-    if(path_.isEmpty()) {
+    if(m_path.isEmpty()) {
         qWarning() << "GrooveOff ::" << "path is empty";
         // returning standard music path
 #if QT_VERSION >= QT_VERSION_CHECK( 5, 0, 0 )
@@ -71,61 +71,61 @@ QString PlaylistItem::path() const
         return QDesktopServices::storageLocation(QDesktopServices::MusicLocation);
 #endif
     }
-    return path_;
+    return m_path;
 }
 
 void PlaylistItem::setPath(const QString& path)
 {
-    path_ = path;
+    m_path = path;
 }
 
 QString PlaylistItem::namingSchema() const
 {
-    if(namingSchema_.isEmpty()) {
+    if(m_namingSchema.isEmpty()) {
         qWarning() << "GrooveOff ::" << "naming schema is empty";
         // returning standard naming schema
         return QLatin1String( "%artist - %title" );
     }
 
-    return namingSchema_;
+    return m_namingSchema;
 }
 
 void PlaylistItem::setNamingSchema(const QString& schema)
 {
-    namingSchema_ = schema;
+    m_namingSchema = schema;
 }
 
 SongPtr PlaylistItem::song()
 {
-    return song_;
+    return m_song;
 }
 
 void PlaylistItem::setSong(SongPtr song)
 {
-    song_ = song;
+    m_song = song;
 }
 
 QString PlaylistItem::fileName() const
 {
-    QString fileName = namingSchema_;
+    QString fileName = m_namingSchema;
 
-    if(fileName.isEmpty()) { // namingSchema_ is erroneously empty
+    if(fileName.isEmpty()) { // m_namingSchema is erroneously empty
         qWarning() << "naming schema is empty";
         fileName = "%artist - %title";
     }
 
-    fileName.replace(QLatin1String("%title"), song_->songName(), Qt::CaseInsensitive);
-    fileName.replace(QLatin1String("%artist"), song_->artistName(), Qt::CaseInsensitive);
-    fileName.replace(QLatin1String("%album"), song_->albumName(), Qt::CaseInsensitive);
-    fileName.replace(QLatin1String("%track"), QString::number(song_->trackNum()), Qt::CaseInsensitive);
+    fileName.replace(QLatin1String("%title"), m_song->songName(), Qt::CaseInsensitive);
+    fileName.replace(QLatin1String("%artist"), m_song->artistName(), Qt::CaseInsensitive);
+    fileName.replace(QLatin1String("%album"), m_song->albumName(), Qt::CaseInsensitive);
+    fileName.replace(QLatin1String("%track"), QString::number(m_song->trackNum()), Qt::CaseInsensitive);
 
     return fileName + ".mp3";
 }
 
 void PlaylistItem::setState(Phonon::State state)
 {
-    state_ = state;
-    emit stateChanged(state_);
+    m_state = state;
+    emit stateChanged(m_state);
 }
 
 QDataStream& operator<<( QDataStream& dataStream, const PlaylistItemPtr item )

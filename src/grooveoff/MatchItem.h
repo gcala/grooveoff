@@ -40,7 +40,7 @@ public:
     MatchItem(const PlaylistItemPtr &playlistItem, QWidget *parent = 0);
     virtual ~MatchItem();
 
-    const PlaylistItemPtr playlistItem() { return playlistItem_; }
+    const PlaylistItemPtr playlistItem() { return m_playlistItem; }
 
 Q_SIGNALS:
     void download(PlaylistItemPtr);
@@ -53,8 +53,8 @@ private Q_SLOTS:
     void downloadSlot();
 
 private:
-    Ui::MatchItem *ui_;
-    PlaylistItemPtr playlistItem_;
+    Ui::MatchItem *ui;
+    PlaylistItemPtr m_playlistItem;
 
     void setupUi();
 };

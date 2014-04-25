@@ -39,21 +39,21 @@
 */
 PlayerWidget::PlayerWidget(QWidget *parent) :
     QWidget(parent),
-    ui_(new Ui::PlayerWidget)
+    ui(new Ui::PlayerWidget)
 {
-    ui_->setupUi(this);
+    ui->setupUi(this);
     setupUi();
 
-    timer_ = new QTimer(this);
-    connect(timer_, SIGNAL(timeout()), this, SLOT(switchPage()));
+    m_timer = new QTimer(this);
+    connect(m_timer, SIGNAL(timeout()), this, SLOT(switchPage()));
 
     // Supply with the MediaObject object seekSlider should control
-    ui_->seekSlider->setMediaObject(The::audioEngine()->mediaObject());
+    ui->seekSlider->setMediaObject(The::audioEngine()->mediaObject());
 
-    playedRemoved = false;
+    m_playedRemoved = false;
 
-    connect( ui_->timeLabel, SIGNAL(clicked()),
-                             SLOT(toggleTimeLabel()));
+    connect( ui->timeLabel, SIGNAL(clicked()),
+                            SLOT(toggleTimeLabel()));
 
     connect( The::audioEngine(), SIGNAL(seeked(qint64, bool)),
                                  SLOT(tick(qint64, bool)));
@@ -68,7 +68,7 @@ PlayerWidget::PlayerWidget(QWidget *parent) :
                                  SLOT(removedPlayingTrack()));
 
     connect( The::audioEngine(), SIGNAL(volumeChanged(int)),
-             ui_->volume,        SLOT(setValue(int)) );
+             ui->volume,         SLOT(setValue(int)) );
 
     connect( The::audioEngine(), SIGNAL(muteStateChanged(bool)),
                                  SLOT(muteStateChanged(bool)) );
@@ -76,10 +76,10 @@ PlayerWidget::PlayerWidget(QWidget *parent) :
     connect( The::playlist(), SIGNAL(playlistChanged()),
                               SLOT(reloadPreviousNextButtons()));
 
-    connect( ui_->volume,        SIGNAL(valueChanged(int)),
+    connect( ui->volume,         SIGNAL(valueChanged(int)),
              The::audioEngine(), SLOT(setVolume(int)) );
 
-    connect( ui_->volume,        SIGNAL(muteToggled(bool)),
+    connect( ui->volume,         SIGNAL(muteToggled(bool)),
              The::audioEngine(), SLOT(setMuted(bool)) );
 }
 
@@ -102,49 +102,49 @@ void PlayerWidget::setupUi()
     coverShadow->setColor(palette().color(QPalette::Highlight));
     coverShadow->setOffset(0.0);
 
-    ui_->coverLabel->setWindowFlags(Qt::FramelessWindowHint);
-    ui_->coverLabel->setAttribute(Qt::WA_TranslucentBackground);
-    ui_->coverLabel->setGraphicsEffect(coverShadow);
+    ui->coverLabel->setWindowFlags(Qt::FramelessWindowHint);
+    ui->coverLabel->setAttribute(Qt::WA_TranslucentBackground);
+    ui->coverLabel->setGraphicsEffect(coverShadow);
 
-    ui_->coverLabel->setScaledContents(true);
-    ui_->titleLabel->setFont(Utility::font(QFont::Bold));
-    ui_->album_authorLabel->setFont(Utility::font(QFont::Bold));
-    ui_->stackedWidget->setBackgroundRole(QPalette::AlternateBase);
-    ui_->messageLabel->setFont(Utility::font(QFont::Bold,1));
+    ui->coverLabel->setScaledContents(true);
+    ui->titleLabel->setFont(Utility::font(QFont::Bold));
+    ui->album_authorLabel->setFont(Utility::font(QFont::Bold));
+    ui->stackedWidget->setBackgroundRole(QPalette::AlternateBase);
+    ui->messageLabel->setFont(Utility::font(QFont::Bold,1));
 
-    ui_->previousButton->setButtonEnabled(false);
+    ui->previousButton->setButtonEnabled(false);
 
-    connect(ui_->previousButton, SIGNAL(previousButtonClicked()),
-                                 SLOT(playPrevious()));
+    connect(ui->previousButton, SIGNAL(previousButtonClicked()),
+                                SLOT(playPrevious()));
 
-    ui_->playPauseButton->setButtonEnabled(false);
-    ui_->playPauseButton->setPlaying(false);
+    ui->playPauseButton->setButtonEnabled(false);
+    ui->playPauseButton->setPlaying(false);
 
-    connect(ui_->playPauseButton, SIGNAL(playButtonClicked()),
-                                  SLOT(pauseResumePlaying()));
+    connect(ui->playPauseButton, SIGNAL(playButtonClicked()),
+                                 SLOT(pauseResumePlaying()));
 
-    ui_->nextButton->setButtonEnabled(false);
-    connect(ui_->nextButton, SIGNAL(nextButtonClicked()),
-                             SLOT(playNext()));
+    ui->nextButton->setButtonEnabled(false);
+    connect(ui->nextButton, SIGNAL(nextButtonClicked()),
+                            SLOT(playNext()));
 
-    ui_->timeLabel->setText( QLatin1String( "00:00" ) );
-    ui_->timeLabel->setMinimumSize(QSize(50,0));
-    ui_->timeLabel->setFont(Utility::monoFont());
+    ui->timeLabel->setText( QLatin1String( "00:00" ) );
+    ui->timeLabel->setMinimumSize(QSize(50,0));
+    ui->timeLabel->setFont(Utility::monoFont());
 
-    ui_->elapsedTimeLabel->setText( QLatin1String( "00:00") );
-    ui_->elapsedTimeLabel->setMinimumSize(QSize(50,0));
-    ui_->elapsedTimeLabel->setFont(Utility::monoFont());
+    ui->elapsedTimeLabel->setText( QLatin1String( "00:00") );
+    ui->elapsedTimeLabel->setMinimumSize(QSize(50,0));
+    ui->elapsedTimeLabel->setFont(Utility::monoFont());
 
-    ui_->volume->setFixedSize(QSize(48,48));
-    ui_->volume->setValue(50);
+    ui->volume->setFixedSize(QSize(48,48));
+    ui->volume->setValue(50);
 
-    ui_->bitrateLabel->setToolTip(trUtf8("Bit Rate"));
-    ui_->samplerateLabel->setToolTip(trUtf8("Sample Rate"));
-//     ui_->channelsLabel->setToolTip();
+    ui->bitrateLabel->setToolTip(trUtf8("Bit Rate"));
+    ui->samplerateLabel->setToolTip(trUtf8("Sample Rate"));
+//     ui->channelsLabel->setToolTip();
 
-    ui_->bitrateLabel->setFont(Utility::font(QFont::Bold,-3));
-    ui_->samplerateLabel->setFont(Utility::font(QFont::Bold,-3));
-    ui_->channelsLabel->setFont(Utility::font(QFont::Bold,-3));
+    ui->bitrateLabel->setFont(Utility::font(QFont::Bold,-3));
+    ui->samplerateLabel->setFont(Utility::font(QFont::Bold,-3));
+    ui->channelsLabel->setFont(Utility::font(QFont::Bold,-3));
 }
 
 /*!
@@ -154,7 +154,7 @@ void PlayerWidget::setupUi()
 */
 void PlayerWidget::showElapsedTimerLabel(bool ok)
 {
-    ui_->elapsedTimeLabel->setVisible(ok);
+    ui->elapsedTimeLabel->setVisible(ok);
 }
 
 /*!
@@ -167,31 +167,31 @@ void PlayerWidget::stateChanged(Phonon::State state)
 {
     switch (state) {
     case Phonon::ErrorState:
-        ui_->stackedWidget->setCurrentIndex(0);
-        ui_->playPauseButton->setPlaying(false);
+        ui->stackedWidget->setCurrentIndex(0);
+        ui->playPauseButton->setPlaying(false);
         break;
     case Phonon::PlayingState:
-        playedRemoved = false;
-        ui_->stackedWidget->setCurrentIndex(1);
-        ui_->playPauseButton->setButtonEnabled(true);
-        ui_->playPauseButton->setPlaying(true);
+        m_playedRemoved = false;
+        ui->stackedWidget->setCurrentIndex(1);
+        ui->playPauseButton->setButtonEnabled(true);
+        ui->playPauseButton->setPlaying(true);
         break;
     case Phonon::StoppedState:
-        if(playedRemoved)
-            ui_->stackedWidget->setCurrentIndex(0);
+        if(m_playedRemoved)
+            ui->stackedWidget->setCurrentIndex(0);
         else
-            ui_->stackedWidget->setCurrentIndex(1);
-        if(playedRemoved) {
+            ui->stackedWidget->setCurrentIndex(1);
+        if(m_playedRemoved) {
             if(!The::playlist()->count())
-                ui_->playPauseButton->setButtonEnabled(false);
+                ui->playPauseButton->setButtonEnabled(false);
         }
-        ui_->playPauseButton->setPlaying(false);
-        ui_->timeLabel->setText( QLatin1String( "00:00" ) );
-        ui_->elapsedTimeLabel->setText( QLatin1String( "00:00" ) );
+        ui->playPauseButton->setPlaying(false);
+        ui->timeLabel->setText( QLatin1String( "00:00" ) );
+        ui->elapsedTimeLabel->setText( QLatin1String( "00:00" ) );
         break;
     case Phonon::PausedState:
-        ui_->stackedWidget->setCurrentIndex(1);
-        ui_->playPauseButton->setPlaying(false);
+        ui->stackedWidget->setCurrentIndex(1);
+        ui->playPauseButton->setPlaying(false);
         break;
     default:
         /* do nothing */
@@ -213,16 +213,16 @@ void PlayerWidget::tick(qint64 elapsedTime, bool userSeek)
 
     quint64 remainingTime = The::audioEngine()->remainingTime();
 
-    if(ui_->elapsedTimeLabel->isVisible()) {
-        ui_->elapsedTimeLabel->setText(QTime(0, (elapsedTime / 60000) % 60, (elapsedTime / 1000) % 60).toString("mm:ss"));
-        ui_->timeLabel->setText("-" + QTime(0, (remainingTime / 60000) % 60, (remainingTime / 1000) % 60).toString("mm:ss"));
+    if(ui->elapsedTimeLabel->isVisible()) {
+        ui->elapsedTimeLabel->setText(QTime(0, (elapsedTime / 60000) % 60, (elapsedTime / 1000) % 60).toString("mm:ss"));
+        ui->timeLabel->setText("-" + QTime(0, (remainingTime / 60000) % 60, (remainingTime / 1000) % 60).toString("mm:ss"));
     } else {
-        switch(timerState) {
+        switch(m_timerState) {
             case GrooveOff::ElapsedState:
-                ui_->timeLabel->setText(QTime(0, (elapsedTime / 60000) % 60, (elapsedTime / 1000) % 60).toString("mm:ss"));
+                ui->timeLabel->setText(QTime(0, (elapsedTime / 60000) % 60, (elapsedTime / 1000) % 60).toString("mm:ss"));
                 break;
             case GrooveOff::RemainingState:
-                ui_->timeLabel->setText("-" + QTime(0, (remainingTime / 60000) % 60, (remainingTime / 1000) % 60).toString("mm:ss"));
+                ui->timeLabel->setText("-" + QTime(0, (remainingTime / 60000) % 60, (remainingTime / 1000) % 60).toString("mm:ss"));
                 break;
         }
     }
@@ -234,7 +234,7 @@ void PlayerWidget::tick(qint64 elapsedTime, bool userSeek)
 */
 void PlayerWidget::pauseResumePlaying()
 {
-    playedRemoved = false;
+    m_playedRemoved = false;
     if(The::audioEngine()->currentTrack())
         The::audioEngine()->playPause();
     else {
@@ -245,17 +245,17 @@ void PlayerWidget::pauseResumePlaying()
 
 void PlayerWidget::toggleTimeLabel()
 {
-    timerState = (GrooveOff::TimerState)!timerState;
+    m_timerState = (GrooveOff::TimerState)!m_timerState;
 }
 
 void PlayerWidget::showMessage(const QString& message)
 {
     if(The::audioEngine()->state() == Phonon::PlayingState || The::audioEngine()->state() == Phonon::PausedState) {
-        timer_->setSingleShot(true);
-        timer_->start(3000);
+        m_timer->setSingleShot(true);
+        m_timer->start(3000);
     }
-    ui_->stackedWidget->setCurrentIndex(0);
-    ui_->messageLabel->setText(message);
+    ui->stackedWidget->setCurrentIndex(0);
+    ui->messageLabel->setText(message);
 }
 
 void PlayerWidget::sourceChanged()
@@ -267,18 +267,18 @@ void PlayerWidget::sourceChanged()
     QString album = track->song()->albumName();
     QString coverName = track->song()->coverArtFilename();
 
-    ui_->titleLabel->setText(title);
-    ui_->titleLabel->setToolTip(title);
+    ui->titleLabel->setText(title);
+    ui->titleLabel->setToolTip(title);
 
-    ui_->album_authorLabel->setText(artist + " - " + album);
+    ui->album_authorLabel->setText(artist + " - " + album);
 
     if(!coverName.isEmpty()
         && QFile::exists(Utility::coversCachePath + coverName)
         && coverName != "0")
-        ui_->coverLabel->setPixmap(QPixmap(Utility::coversCachePath + coverName));
+        ui->coverLabel->setPixmap(QPixmap(Utility::coversCachePath + coverName));
     else
-        ui_->coverLabel->setPixmap(QIcon::fromTheme(QLatin1String("media-optical"),
-                                   QIcon(QLatin1String(":/resources/media-optical.png"))).pixmap(ui_->coverLabel->size()));
+        ui->coverLabel->setPixmap(QIcon::fromTheme(QLatin1String("media-optical"),
+                                   QIcon(QLatin1String(":/resources/media-optical.png"))).pixmap(ui->coverLabel->size()));
 
     // Audio Properties
     TagLib::FileRef f(QString(track->path() + track->fileName()).toLatin1(), true, TagLib::AudioProperties::Average);
@@ -291,9 +291,9 @@ void PlayerWidget::sourceChanged()
     int channels =  f.audioProperties()->channels();
     int sampleRate =  f.audioProperties()->sampleRate(); // in Hz
 
-    ui_->bitrateLabel->setText(QString::number(bitrate) + QLatin1String(" kb/s"));
-    ui_->samplerateLabel->setText(QString::number(sampleRate) + QLatin1String(" Hz"));
-    ui_->channelsLabel->setText(channels >= 2 ? QLatin1String("STEREO") : QLatin1String("MONO"));
+    ui->bitrateLabel->setText(QString::number(bitrate) + QLatin1String(" kb/s"));
+    ui->samplerateLabel->setText(QString::number(sampleRate) + QLatin1String(" Hz"));
+    ui->channelsLabel->setText(channels >= 2 ? QLatin1String("STEREO") : QLatin1String("MONO"));
 }
 
 void PlayerWidget::playNext()
@@ -309,40 +309,40 @@ void PlayerWidget::playPrevious()
 void PlayerWidget::reloadPreviousNextButtons()
 {
     if(The::playlist()->count() == 0)
-        ui_->stackedWidget->setCurrentIndex(0);
+        ui->stackedWidget->setCurrentIndex(0);
     else {
-        ui_->playPauseButton->setButtonEnabled(true);
+        ui->playPauseButton->setButtonEnabled(true);
         if(The::audioEngine()->canGoNext()) {
             int currentRow = The::playlist()->row(The::audioEngine()->currentTrack());
-            ui_->nextButton->setToolTip(The::playlist()->item(currentRow + 1)->song()->songName());
+            ui->nextButton->setToolTip(The::playlist()->item(currentRow + 1)->song()->songName());
         } else {
-            ui_->nextButton->setToolTip("");
+            ui->nextButton->setToolTip("");
         }
 
         if(The::audioEngine()->canGoPrevious()) {
             int currentRow = The::playlist()->row(The::audioEngine()->currentTrack());
-            ui_->previousButton->setToolTip(The::playlist()->item(currentRow - 1)->song()->songName());
+            ui->previousButton->setToolTip(The::playlist()->item(currentRow - 1)->song()->songName());
         } else {
-            ui_->previousButton->setToolTip("");
+            ui->previousButton->setToolTip("");
         }
 
-        ui_->nextButton->setButtonEnabled(The::audioEngine()->canGoNext());
-        ui_->previousButton->setButtonEnabled(The::audioEngine()->canGoPrevious());
+        ui->nextButton->setButtonEnabled(The::audioEngine()->canGoNext());
+        ui->previousButton->setButtonEnabled(The::audioEngine()->canGoPrevious());
     }
 }
 
 void PlayerWidget::removedPlayingTrack()
 {
-    playedRemoved = true;
+    m_playedRemoved = true;
 }
 
 void PlayerWidget::switchPage()
 {
-    ui_->stackedWidget->setCurrentIndex(1);
+    ui->stackedWidget->setCurrentIndex(1);
 }
 
 void PlayerWidget::muteStateChanged(bool mute)
 {
-    ui_->volume->setMuted(mute);
+    ui->volume->setMuted(mute);
 }
 

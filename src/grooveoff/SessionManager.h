@@ -49,11 +49,11 @@ private Q_SLOTS:
 
 private:
     Ui::SessionManager *ui;
-    const QString sessionsPath_;
+    const QString m_sessionsPath;
     QHash< QString, QList<PlaylistItemPtr> > m_trackCollection;
     QHash< QString, bool > m_changesFlag;
-    QString currentSessionName_;
-    QList<PlaylistItemPtr> currentTracklist_;
+    QString m_currentSessionName;
+    QList<PlaylistItemPtr> m_currentTracklist;
 
     void loadSessionFiles();
     void generateTrackList(const QString &sessionName);

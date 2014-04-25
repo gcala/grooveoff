@@ -123,45 +123,45 @@ private Q_SLOTS:
     void openSessionManager();
 
 private:
-    Ui::MainWindow *ui_;
-    QNetworkConfigurationManager *qncm_;
-    QList<QPair<QString, QStringList> > artistsAlbumsContainer_;
-    MyJar *jar_;
-    int currentJob_;
-    int row_;
-    QString currentSongID_;
-    QStringList searchList_;
-    int searchSize_;
-    int maxResults_;
-    int maxDownloads_;
-    bool saveSession_;
-    QString sessionFileName_;
-    QString sessionFilePath_;
-    bool showHistory_;
-    bool saveDestination_;
-    bool loadCovers_;
-    bool searchInProgress_;
-    int parallelDownloadsCount_;
-    QList<DownloadItem *> queue_;
-    PlayerWidget *playerWidget;
-    CoverManager *cvrMngr_;
-    Spinner *spinner_;
-    GuiLayout guiLayout_;
-    bool sessionChanged_;
-    bool batchDownload_;
-    bool stopBatchDownload_;
+    Ui::MainWindow *ui;
+    QNetworkConfigurationManager *m_qncm;
+    QList<QPair<QString, QStringList> > m_artistsAlbumsContainer;
+    MyJar *m_jar;
+    int m_currentJob;
+    int m_row;
+    QString m_currentSongID;
+    QStringList m_searchList;
+    int m_searchSize;
+    int m_maxResults;
+    int m_maxDownloads;
+    bool m_saveSession;
+    QString m_sessionFileName;
+    QString m_sessionFilePath;
+    bool m_showHistory;
+    bool m_saveDestination;
+    bool m_loadCovers;
+    bool m_searchInProgress;
+    int m_parallelDownloadsCount;
+    QList<DownloadItem *> m_queue;
+    PlayerWidget *m_playerWidget;
+    CoverManager *m_cvrMngr;
+    Spinner *m_spinner;
+    GuiLayout m_guiLayout;
+    bool m_sessionChanged;
+    bool m_batchDownload;
+    bool m_stopBatchDownload;
 
-    QNetworkAccessManager *nam_;
-    GrooveShark::ApiRequest *api_;
-    GrooveShark::TokenPtr token_;
-    GrooveShark::SongListPtr songList_;
+    QNetworkAccessManager *m_nam;
+    GrooveShark::ApiRequest *m_api;
+    GrooveShark::TokenPtr m_token;
+    GrooveShark::SongListPtr m_songList;
 
     // Menus and menu actions: Accounts menu
     QMenuBar    *m_menuBar;
     QAction     *m_compactMenuAction;
     QMenu       *m_compactMainMenu;
 
-    Mpris *mpris_;
+    Mpris *m_mpris;
 
     static QPointer<MainWindow> s_instance;
 

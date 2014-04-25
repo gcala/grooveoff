@@ -28,21 +28,21 @@
 */
 SettingsItem::SettingsItem(const QString &name, const QString &icon, QWidget *parent) :
     QWidget(parent),
-    ui_(new Ui::SettingsItem),
-    settingName_(name),
-    settingIcon_(icon)
+    ui(new Ui::SettingsItem),
+    m_settingName(name),
+    m_settingIcon(icon)
 {
-    ui_->setupUi(this);
-    if(settingIcon_.isEmpty()) {
-        ui_->settingIconLabel->setPixmap(QPixmap(QLatin1String(":/resources/grooveoff.png")));
-        ui_->settingIconLabel->setScaledContents(true);
+    ui->setupUi(this);
+    if(m_settingIcon.isEmpty()) {
+        ui->settingIconLabel->setPixmap(QPixmap(QLatin1String(":/resources/grooveoff.png")));
+        ui->settingIconLabel->setScaledContents(true);
     }
-    else if(QIcon::hasThemeIcon(settingIcon_))
-        ui_->settingIconLabel->setPixmap(QIcon::fromTheme(settingIcon_).pixmap(48,48));
+    else if(QIcon::hasThemeIcon(m_settingIcon))
+        ui->settingIconLabel->setPixmap(QIcon::fromTheme(m_settingIcon).pixmap(48,48));
     else
-        ui_->settingIconLabel->setPixmap(QIcon::fromTheme(QLatin1String("software-update-available"), QIcon(QLatin1String(":/resources/" + settingIcon_.toLatin1() + ".png"))).pixmap(48,48));
+        ui->settingIconLabel->setPixmap(QIcon::fromTheme(QLatin1String("software-update-available"), QIcon(QLatin1String(":/resources/" + m_settingIcon.toLatin1() + ".png"))).pixmap(48,48));
 
-    ui_->settingNameLabel->setText(settingName_);
+    ui->settingNameLabel->setText(m_settingName);
 }
 
 

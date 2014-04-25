@@ -44,8 +44,8 @@ public:
 
     void showElapsedTimerLabel(bool);
 
-    GrooveOff::TimerState getTimerState() { return timerState; }
-    void setTimerState(GrooveOff::TimerState state) { timerState = state; }
+    GrooveOff::TimerState getTimerState() const { return m_timerState; }
+    void setTimerState(GrooveOff::TimerState state) { m_timerState = state; }
 
     void showMessage(const QString &message);
 
@@ -65,10 +65,10 @@ private Q_SLOTS:
     void muteStateChanged( bool mute );
 
 private:
-    Ui::PlayerWidget *ui_;
-    GrooveOff::TimerState timerState;
-    bool playedRemoved;
-    QTimer *timer_;
+    Ui::PlayerWidget *ui;
+    GrooveOff::TimerState m_timerState;
+    bool m_playedRemoved;
+    QTimer *m_timer;
 
     //Methods
     void setupUi();

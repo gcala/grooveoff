@@ -40,7 +40,7 @@ private Q_SLOTS:
     void openDonatePage();
 
 private:
-    Ui::AboutDialog *ui_;
+    Ui::AboutDialog *ui;
 };
 
 #endif // ABOUTDIALOG_H

@@ -47,9 +47,9 @@ public:
     virtual ~DownloadItem();
     QString songFile();
 
-    const PlaylistItemPtr playlistItem() { return playlistItem_; }
-    GrooveOff::DownloadState downloadState() { return downloadState_; }
-    void setDownloadState(GrooveOff::DownloadState state) { downloadState_ = state; }
+    const PlaylistItemPtr playlistItem() { return m_playlistItem; }
+    GrooveOff::DownloadState downloadState() { return m_downloadState; }
+    void setDownloadState(GrooveOff::DownloadState state) { m_downloadState = state; }
 
     void startDownload();
     void abortDownload();
@@ -82,13 +82,13 @@ private Q_SLOTS:
     void loadCover();
 
 private:
-    Ui::DownloadItem *ui_;
-    PlaylistItemPtr playlistItem_;
-    GrooveOff::DownloadState downloadState_;
-    Phonon::State playerState_;
-    GrooveShark::DownloaderPtr downloader_;
-    bool oneShot_;
-    GrooveOff::Context context_;
+    Ui::DownloadItem *ui;
+    PlaylistItemPtr m_playlistItem;
+    GrooveOff::DownloadState m_downloadState;
+    Phonon::State m_playerState;
+    GrooveShark::DownloaderPtr m_downloader;
+    bool m_oneShot;
+    GrooveOff::Context m_context;
 
     void setupUi();
     void setupConnections();

@@ -38,12 +38,12 @@ void CoverManager::addItem(const PlaylistItemPtr &playlistItemPtr)
     QString coverArtFilename = playlistItemPtr->song()->coverArtFilename();
     if(coverArtFilename == "0")
         return;
-    if(coverItems_.contains(coverArtFilename)) {
-        coverItems_[coverArtFilename].append(playlistItemPtr);
+    if(m_coverItems.contains(coverArtFilename)) {
+        m_coverItems[coverArtFilename].append(playlistItemPtr);
     } else {
         QList< PlaylistItemPtr > listOfSongsWithSameCover;
         listOfSongsWithSameCover.append(playlistItemPtr);
-        coverItems_.insert(coverArtFilename, listOfSongsWithSameCover);
+        m_coverItems.insert(coverArtFilename, listOfSongsWithSameCover);
         CoverDownloader *downloader = new CoverDownloader(coverArtFilename, this);
         connect(downloader, SIGNAL(done()), this, SLOT(setCover()));
     }
@@ -51,7 +51,7 @@ void CoverManager::addItem(const PlaylistItemPtr &playlistItemPtr)
 
 void CoverManager::clear()
 {
-    coverItems_.clear();
+    m_coverItems.clear();
 }
 
 void CoverManager::setCover()
@@ -59,7 +59,7 @@ void CoverManager::setCover()
     CoverDownloader *coverDownloader = (CoverDownloader *)QObject::sender();
     if(coverDownloader->isSuccess()) {
         QString coverArtFilename = coverDownloader->coverName();
-        foreach (PlaylistItemPtr playlistItem, coverItems_.value(coverArtFilename)) {
+        foreach (PlaylistItemPtr playlistItem, m_coverItems.value(coverArtFilename)) {
             playlistItem.data()->requireCoverReload();
         }
     }

@@ -34,9 +34,9 @@ public:
     SettingsItem(const QString &name, const QString &icon, QWidget *parent = 0);
 
 private:
-    Ui::SettingsItem *ui_;
-    QString settingName_;
-    QString settingIcon_;
+    Ui::SettingsItem *ui;
+    QString m_settingName;
+    QString m_settingIcon;
 };
 
 #endif // SETTINGSITEM_H

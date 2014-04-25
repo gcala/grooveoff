@@ -50,7 +50,7 @@ Q_SIGNALS:
 private:
     Playlist();
 
-    QList<PlaylistItemPtr> playlist_;
+    QList<PlaylistItemPtr> m_playlist;
 };
 
 #endif // PLAYLIST_H

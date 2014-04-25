@@ -64,7 +64,7 @@ public:
     void seek( int ms ); // for compatibility with seekbar in audiocontrols
     void playItem(PlaylistItemPtr track);
     void removingTrack(PlaylistItemPtr track);
-    Phonon::MediaObject * mediaObject() { return mediaObject_; }
+    Phonon::MediaObject * mediaObject() { return m_mediaObject; }
     bool isSeekable() const;
 
     /**
@@ -144,12 +144,12 @@ private Q_SLOTS:
 private:
     AudioEngine();
 
-    PlaylistItemPtr currentTrack_;
-    PlaylistItemPtr oldTrack_;
-    Phonon::State state_;
+    PlaylistItemPtr m_currentTrack;
+    PlaylistItemPtr m_oldTrack;
+    Phonon::State m_state;
 
-    Phonon::MediaObject* mediaObject_;
-    Phonon::AudioOutput* audioOutput_;
+    Phonon::MediaObject* m_mediaObject;
+    Phonon::AudioOutput* m_audioOutput;
 
     int m_volume;
 };

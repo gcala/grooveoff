@@ -33,8 +33,10 @@
 Song::Song ( QObject* parent ) :
     QObject(parent)
 {
-    qnam_ = new QNetworkAccessManager(this);
-    connect(qnam_, SIGNAL(finished(QNetworkReply*)), this, SLOT(onFinished(QNetworkReply*)));
+    m_qnam = new QNetworkAccessManager(this);
+    
+    connect(m_qnam, SIGNAL(finished(QNetworkReply*)), 
+                    SLOT(onFinished(QNetworkReply*)));
 }
 
 /*!
@@ -42,7 +44,7 @@ Song::Song ( QObject* parent ) :
 */
 Song::~Song()
 {
-    qnam_->deleteLater();
+    m_qnam->deleteLater();
 }
 
 /*!
@@ -52,26 +54,26 @@ Song::~Song()
 */
 void Song::setCoverName(const QString &cover)
 {
-    coverName_ = cover;
+    m_coverName = cover;
 
     // 'NoCoverArt' is a custom name used to tell to use a default pixmap
-    if(coverName_ == QLatin1String("NoCoverArt")) {
-        if (!QPixmapCache::find(coverName_, &coverPixmap_)) {
-            coverPixmap_ = QIcon::fromTheme(QLatin1String("media-optical"), QIcon(QLatin1String(":/resources/media-optical.png"))).pixmap(40);
-            coverPixmap_ = coverPixmap_.scaledToWidth(40, Qt::SmoothTransformation);
-            QPixmapCache::insert(QLatin1String("NoCoverArt"), coverPixmap_);
+    if(m_coverName == QLatin1String("NoCoverArt")) {
+        if (!QPixmapCache::find(m_coverName, &m_coverPixmap)) {
+            m_coverPixmap = QIcon::fromTheme(QLatin1String("media-optical"), QIcon(QLatin1String(":/resources/media-optical.png"))).pixmap(40);
+            m_coverPixmap = m_coverPixmap.scaledToWidth(40, Qt::SmoothTransformation);
+            QPixmapCache::insert(QLatin1String("NoCoverArt"), m_coverPixmap);
         }
 
         return;
     }
 
     // first of all search PixmapCache for current cover name and use it if found
-    if (!QPixmapCache::find(coverName_, &coverPixmap_)) {
+    if (!QPixmapCache::find(m_coverName, &m_coverPixmap)) {
         //...not found; download it!
         QNetworkRequest request;
-        request.setUrl(QUrl(QString("http://images.gs-cdn.net/static/albums/40_%1").arg(coverName_)));
+        request.setUrl(QUrl(QString("http://images.gs-cdn.net/static/albums/40_%1").arg(m_coverName)));
         request.setHeader(QNetworkRequest::ContentTypeHeader, QLatin1String("application/x-www-form-urlencoded"));
-        qnam_->get(request);
+        m_qnam->get(request);
     }
 }
 
@@ -86,20 +88,18 @@ void Song::onFinished(QNetworkReply *reply)
 
     case QNetworkReply::NoError:
         // if no error
-        if (!QPixmapCache::find(coverName_, &coverPixmap_)) {
-            coverPixmap_.loadFromData(reply->readAll());
-            QPixmapCache::insert(coverName_, coverPixmap_);
+        if (!QPixmapCache::find(m_coverName, &m_coverPixmap)) {
+            m_coverPixmap.loadFromData(reply->readAll());
+            QPixmapCache::insert(m_coverName, m_coverPixmap);
         }
         break;
 
     default:
         // id reply returned error...
-        qDebug() << "GrooveOff ::" << "Error downloading cover" << coverName_ << ":: " << reply->errorString();
+        qDebug() << "GrooveOff ::" << "Error downloading cover" << m_coverName << ":: " << reply->errorString();
         // use standard cover
-        coverPixmap_ = QIcon::fromTheme(QLatin1String("media-optical"), QIcon(QLatin1String(":/resources/media-optical.png"))).pixmap(40);
+        m_coverPixmap = QIcon::fromTheme(QLatin1String("media-optical"), QIcon(QLatin1String(":/resources/media-optical.png"))).pixmap(40);
     }
 
     emit trigRepaint();
 }
-
-#include "song.moc"

@@ -43,32 +43,32 @@ using namespace GrooveShark;
 */
 DownloadItem::DownloadItem(const PlaylistItemPtr &playlistItemPtr, QWidget *parent, GrooveOff::Context context)
     : QWidget(parent)
-    , ui_(new Ui::DownloadItem)
-    , playlistItem_(playlistItemPtr)
-    , oneShot_(true)
-    , context_(context)
+    , ui(new Ui::DownloadItem)
+    , m_playlistItem(playlistItemPtr)
+    , m_oneShot(true)
+    , m_context(context)
 {
-    ui_->setupUi(this);
-    connect(playlistItem_.data(), SIGNAL(reloadCover()), this, SLOT(loadCover()));
-    connect(playlistItem_.data(), SIGNAL(stateChanged(Phonon::State)), this, SLOT(setPlayerState(Phonon::State)));
+    ui->setupUi(this);
+    connect(m_playlistItem.data(), SIGNAL(reloadCover()), this, SLOT(loadCover()));
+    connect(m_playlistItem.data(), SIGNAL(stateChanged(Phonon::State)), this, SLOT(setPlayerState(Phonon::State)));
 
     setupUi();
 
     setupConnections();
 
-    if(context_ == GrooveOff::Track) {
-        downloadState_ = GrooveOff::FinishedState;
+    if(m_context == GrooveOff::Track) {
+        m_downloadState = GrooveOff::FinishedState;
     } else {
-        if(QFile::exists(playlistItem_->path() + playlistItem_->fileName())) {
+        if(QFile::exists(m_playlistItem->path() + m_playlistItem->fileName())) {
             downloadFinished(true);
         }
         else {
-            downloadState_ = GrooveOff::QueuedState;
-            // qDebug() << "GrooveOff ::" << "Queued download of" << playlistItem_->song()->songName();
+            m_downloadState = GrooveOff::QueuedState;
+            // qDebug() << "GrooveOff ::" << "Queued download of" << m_playlistItem->song()->songName();
         }
     }
 
-    playerState_ = Phonon::StoppedState;
+    m_playerState = Phonon::StoppedState;
     stateChanged();
 }
 
@@ -77,20 +77,20 @@ DownloadItem::DownloadItem(const PlaylistItemPtr &playlistItemPtr, QWidget *pare
 */
 DownloadItem::~DownloadItem()
 {
-    if(ui_->multiFuncButton->isCountdownStarted()) {
-        ui_->multiFuncButton->stopCountdown();
-        if(context_ == GrooveOff::Track)
-            emit removeMeFromSession(playlistItem_->song()->songID());
+    if(ui->multiFuncButton->isCountdownStarted()) {
+        ui->multiFuncButton->stopCountdown();
+        if(m_context == GrooveOff::Track)
+            emit removeMeFromSession(m_playlistItem->song()->songID());
         else
             removeSong();
     }
 
-    if(downloadState_ == GrooveOff::DownloadingState) {
-        downloader_->stopDownload();
+    if(m_downloadState == GrooveOff::DownloadingState) {
+        m_downloader->stopDownload();
     }
 
-    if(context_ == GrooveOff::Download)
-        removeEmptyFolder(QFileInfo(playlistItem_->path() + playlistItem_->fileName()).absoluteDir());
+    if(m_context == GrooveOff::Download)
+        removeEmptyFolder(QFileInfo(m_playlistItem->path() + m_playlistItem->fileName()).absoluteDir());
 }
 
 /*!
@@ -99,61 +99,61 @@ DownloadItem::~DownloadItem()
 */
 void DownloadItem::setupUi()
 {
-    ui_->coverLabel->setScaledContents(true);
-    ui_->coverLabel->setFixedSize(QSize(Utility::coverSize,Utility::coverSize));
+    ui->coverLabel->setScaledContents(true);
+    ui->coverLabel->setFixedSize(QSize(Utility::coverSize,Utility::coverSize));
     loadCover();
 
-    ui_->coverLabel->setToolTip(playlistItem_->fileName());
+    ui->coverLabel->setToolTip(m_playlistItem->fileName());
 
     QGraphicsDropShadowEffect *coverShadow = new QGraphicsDropShadowEffect(this);
     coverShadow->setBlurRadius(10.0);
     coverShadow->setColor(palette().color(QPalette::Shadow));
     coverShadow->setOffset(0.0);
 
-    ui_->coverLabel->setGraphicsEffect(coverShadow);
+    ui->coverLabel->setGraphicsEffect(coverShadow);
 
-    ui_->titleLabel->setFont(Utility::font(QFont::Bold));
-    ui_->titleLabel->setText(playlistItem_->song()->songName());
-    ui_->titleLabel->setToolTip(playlistItem_->song()->songName());
-    ui_->titleLabel->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred); // fix hidden label
+    ui->titleLabel->setFont(Utility::font(QFont::Bold));
+    ui->titleLabel->setText(m_playlistItem->song()->songName());
+    ui->titleLabel->setToolTip(m_playlistItem->song()->songName());
+    ui->titleLabel->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred); // fix hidden label
 
-    ui_->artist_albumLabel->setText(playlistItem_->song()->artistName() + " - " + playlistItem_->song()->albumName());
-    ui_->artist_albumLabel->setToolTip(playlistItem_->song()->songName());
-    ui_->artist_albumLabel->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred); // fix hidden label
+    ui->artist_albumLabel->setText(m_playlistItem->song()->artistName() + " - " + m_playlistItem->song()->albumName());
+    ui->artist_albumLabel->setToolTip(m_playlistItem->song()->songName());
+    ui->artist_albumLabel->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred); // fix hidden label
 
-    ui_->multiFuncButton->setFixedSize(QSize(Utility::buttonSize,Utility::buttonSize));
+    ui->multiFuncButton->setFixedSize(QSize(Utility::buttonSize,Utility::buttonSize));
 
-    if(context_ == GrooveOff::Track) {
-        ui_->playWidget->setVisible(false);
-        ui_->progressBar->setVisible(false);
+    if(m_context == GrooveOff::Track) {
+        ui->playWidget->setVisible(false);
+        ui->progressBar->setVisible(false);
     } else {
-        ui_->playButton->setButtonEnabled(false);
-        ui_->playButton->setPlaying(false);
+        ui->playButton->setButtonEnabled(false);
+        ui->playButton->setPlaying(false);
 
-        ui_->barsWidget->setFixedSize(QSize(Utility::buttonSize,Utility::buttonSize));
+        ui->barsWidget->setFixedSize(QSize(Utility::buttonSize,Utility::buttonSize));
 
-        ui_->progressBar->setMinimum(0);
-        ui_->progressBar->setValue(0);
-        ui_->progressBar->setFixedWidth(100);
-        ui_->progressBar->setFixedHeight(22);
+        ui->progressBar->setMinimum(0);
+        ui->progressBar->setValue(0);
+        ui->progressBar->setFixedWidth(100);
+        ui->progressBar->setFixedHeight(22);
     }
 
     // seems that gtk DEs use different default values than Qt...
-    ui_->mainLayout->setContentsMargins(4,4,4,4);
-    ui_->multiFuncLayout->setContentsMargins(0,4,0,4);
-    ui_->infoIconLayout->setContentsMargins(0,4,0,4);
-    ui_->infoMessageLayout->setContentsMargins(0,4,0,4);
-    ui_->openFolderLayout->setContentsMargins(0,4,0,4);
-    ui_->progressLayout->setContentsMargins(0,4,0,4);
-    ui_->songWidgetLayout->setContentsMargins(1,1,0,2);
-    ui_->songWidgetLayout->setHorizontalSpacing(5);
-    ui_->infoIcon->setFixedSize(QSize(Utility::buttonSize,Utility::buttonSize));
-    ui_->multiFuncButton->setIconSize(QSize(16,16));
-    ui_->openFolderButton->setIconSize(QSize(16,16));
-    ui_->openFolderButton->setIcon(QIcon::fromTheme(QLatin1String("folder-open")));
-    ui_->openFolderButton->setToolTip(trUtf8("Open folder"));
-    ui_->openFolderButton->setFixedSize(QSize(Utility::buttonSize,Utility::buttonSize));
-    ui_->playButton->setFixedSize(QSize(16,16));
+    ui->mainLayout->setContentsMargins(4,4,4,4);
+    ui->multiFuncLayout->setContentsMargins(0,4,0,4);
+    ui->infoIconLayout->setContentsMargins(0,4,0,4);
+    ui->infoMessageLayout->setContentsMargins(0,4,0,4);
+    ui->openFolderLayout->setContentsMargins(0,4,0,4);
+    ui->progressLayout->setContentsMargins(0,4,0,4);
+    ui->songWidgetLayout->setContentsMargins(1,1,0,2);
+    ui->songWidgetLayout->setHorizontalSpacing(5);
+    ui->infoIcon->setFixedSize(QSize(Utility::buttonSize,Utility::buttonSize));
+    ui->multiFuncButton->setIconSize(QSize(16,16));
+    ui->openFolderButton->setIconSize(QSize(16,16));
+    ui->openFolderButton->setIcon(QIcon::fromTheme(QLatin1String("folder-open")));
+    ui->openFolderButton->setToolTip(trUtf8("Open folder"));
+    ui->openFolderButton->setFixedSize(QSize(Utility::buttonSize,Utility::buttonSize));
+    ui->playButton->setFixedSize(QSize(16,16));
 }
 
 /*!
@@ -162,13 +162,13 @@ void DownloadItem::setupUi()
 */
 void DownloadItem::setupConnections()
 {
-    if(context_ == GrooveOff::Download) {
-        connect(ui_->playButton, SIGNAL(playButtonClicked()), this, SLOT(playSong()));
-        connect(ui_->openFolderButton, SIGNAL(clicked()), this, SLOT(openFolder()));
+    if(m_context == GrooveOff::Download) {
+        connect(ui->playButton, SIGNAL(playButtonClicked()), this, SLOT(playSong()));
+        connect(ui->openFolderButton, SIGNAL(clicked()), this, SLOT(openFolder()));
     }
 
-    connect(ui_->multiFuncButton, SIGNAL(clicked()), this, SLOT(multiFuncBtnClicked()));
-    connect(ui_->multiFuncButton, SIGNAL(countdownFinished()), this, SLOT(removeSong()));
+    connect(ui->multiFuncButton, SIGNAL(clicked()), this, SLOT(multiFuncBtnClicked()));
+    connect(ui->multiFuncButton, SIGNAL(countdownFinished()), this, SLOT(removeSong()));
 }
 
 /*!
@@ -200,128 +200,128 @@ void DownloadItem::stateChanged()
      */
 
 
-    switch(downloadState_) {
+    switch(m_downloadState) {
         case GrooveOff::QueuedState:
-            ui_->multiFuncWidget->setVisible(false);
-            ui_->multiFuncButton->setIcon(QIcon::fromTheme(QLatin1String("dialog-cancel"), QIcon(QLatin1String(":/resources/dialog-cancel.png"))));
-            ui_->multiFuncButton->setToolTip(trUtf8("Remove from queue"));
-            ui_->animationWidget->setVisible(false);
-            ui_->barsWidget->stopAnimation();
-            ui_->playWidget->setVisible(false);
-            ui_->progressWidget->setVisible(false);
-            ui_->openFolderWidget->setVisible(false);
+            ui->multiFuncWidget->setVisible(false);
+            ui->multiFuncButton->setIcon(QIcon::fromTheme(QLatin1String("dialog-cancel"), QIcon(QLatin1String(":/resources/dialog-cancel.png"))));
+            ui->multiFuncButton->setToolTip(trUtf8("Remove from queue"));
+            ui->animationWidget->setVisible(false);
+            ui->barsWidget->stopAnimation();
+            ui->playWidget->setVisible(false);
+            ui->progressWidget->setVisible(false);
+            ui->openFolderWidget->setVisible(false);
             if(QIcon::hasThemeIcon(QLatin1String("download-later")))
-                ui_->infoIcon->setPixmap(QIcon::fromTheme(QLatin1String("download-later")).pixmap(16,16));
+                ui->infoIcon->setPixmap(QIcon::fromTheme(QLatin1String("download-later")).pixmap(16,16));
             else
-                ui_->infoIcon->setPixmap(QIcon::fromTheme(QLatin1String("appointment-soon"),
+                ui->infoIcon->setPixmap(QIcon::fromTheme(QLatin1String("appointment-soon"),
                                          QIcon(QLatin1String(":/resources/download-later.png"))).pixmap(16,16));
-            ui_->infoIconWidget->setVisible(true);
-            ui_->infoMessageWidget->setVisible(false);
-            ui_->infoMessage->setText(trUtf8("Queued"));
+            ui->infoIconWidget->setVisible(true);
+            ui->infoMessageWidget->setVisible(false);
+            ui->infoMessage->setText(trUtf8("Queued"));
             break;
         case GrooveOff::DownloadingState:
-            ui_->multiFuncWidget->setVisible(true);
-            ui_->multiFuncButton->setIcon(QIcon::fromTheme(QLatin1String("process-stop"),
+            ui->multiFuncWidget->setVisible(true);
+            ui->multiFuncButton->setIcon(QIcon::fromTheme(QLatin1String("process-stop"),
                                           QIcon(QLatin1String(":/resources/process-stop.png"))));
-            ui_->multiFuncButton->setToolTip(trUtf8("Stop download"));
-            if(playerState_ == Phonon::StoppedState) {
-                ui_->animationWidget->setVisible(false);
-                ui_->barsWidget->stopAnimation();
-                ui_->playWidget->setVisible(true);
-            } else if(playerState_ == Phonon::PlayingState) {
-                ui_->playWidget->setVisible(false);
-                ui_->animationWidget->setVisible(true);
-                ui_->barsWidget->startAnimation();
+            ui->multiFuncButton->setToolTip(trUtf8("Stop download"));
+            if(m_playerState == Phonon::StoppedState) {
+                ui->animationWidget->setVisible(false);
+                ui->barsWidget->stopAnimation();
+                ui->playWidget->setVisible(true);
+            } else if(m_playerState == Phonon::PlayingState) {
+                ui->playWidget->setVisible(false);
+                ui->animationWidget->setVisible(true);
+                ui->barsWidget->startAnimation();
             } else {
-                ui_->playWidget->setVisible(false);
-                ui_->animationWidget->setVisible(true);
-                ui_->barsWidget->stopAnimation();
+                ui->playWidget->setVisible(false);
+                ui->animationWidget->setVisible(true);
+                ui->barsWidget->stopAnimation();
             }
-            ui_->progressWidget->setVisible(true);
-            ui_->infoIconWidget->setVisible(false);
-            ui_->infoMessageWidget->setVisible(false);
-            ui_->openFolderWidget->setVisible(false);
+            ui->progressWidget->setVisible(true);
+            ui->infoIconWidget->setVisible(false);
+            ui->infoMessageWidget->setVisible(false);
+            ui->openFolderWidget->setVisible(false);
             break;
         case GrooveOff::FinishedState:
-            if(context_ == GrooveOff::Track) {
-                ui_->playWidget->setVisible(false);
-                ui_->animationWidget->setVisible(false);
+            if(m_context == GrooveOff::Track) {
+                ui->playWidget->setVisible(false);
+                ui->animationWidget->setVisible(false);
             } else {
-                ui_->playButton->setButtonEnabled(true);
-                if(playerState_ == Phonon::StoppedState) {
-                    ui_->playWidget->setVisible(true);
-                    ui_->animationWidget->setVisible(false);
-                    ui_->barsWidget->stopAnimation();
-                } else if(playerState_ == Phonon::PlayingState) {
-                    ui_->playWidget->setVisible(false);
-                    ui_->animationWidget->setVisible(true);
-                    ui_->barsWidget->startAnimation();
+                ui->playButton->setButtonEnabled(true);
+                if(m_playerState == Phonon::StoppedState) {
+                    ui->playWidget->setVisible(true);
+                    ui->animationWidget->setVisible(false);
+                    ui->barsWidget->stopAnimation();
+                } else if(m_playerState == Phonon::PlayingState) {
+                    ui->playWidget->setVisible(false);
+                    ui->animationWidget->setVisible(true);
+                    ui->barsWidget->startAnimation();
                 } else {
-                    ui_->playWidget->setVisible(false);
-                    ui_->animationWidget->setVisible(true);
-                    ui_->barsWidget->stopAnimation();
+                    ui->playWidget->setVisible(false);
+                    ui->animationWidget->setVisible(true);
+                    ui->barsWidget->stopAnimation();
                 }
             }
-            ui_->multiFuncWidget->setVisible(false);
-            ui_->multiFuncButton->setIcon(QIcon::fromTheme(QLatin1String("user-trash"),
+            ui->multiFuncWidget->setVisible(false);
+            ui->multiFuncButton->setIcon(QIcon::fromTheme(QLatin1String("user-trash"),
                                           QIcon(QLatin1String(":/resources/user-trash.png"))));
-            if(context_ == GrooveOff::Track)
-                ui_->multiFuncButton->setToolTip(trUtf8("Delete from Session"));
+            if(m_context == GrooveOff::Track)
+                ui->multiFuncButton->setToolTip(trUtf8("Delete from Session"));
             else
-                ui_->multiFuncButton->setToolTip(trUtf8("Delete song"));
-            ui_->progressWidget->setVisible(false);
-            ui_->infoIconWidget->setVisible(false);
-            ui_->infoMessageWidget->setVisible(false);
-            ui_->openFolderWidget->setVisible(false);
+                ui->multiFuncButton->setToolTip(trUtf8("Delete song"));
+            ui->progressWidget->setVisible(false);
+            ui->infoIconWidget->setVisible(false);
+            ui->infoMessageWidget->setVisible(false);
+            ui->openFolderWidget->setVisible(false);
             break;
         case GrooveOff::AbortedState:
-            ui_->playWidget->setVisible(false);
-            ui_->animationWidget->setVisible(false);
-            ui_->barsWidget->stopAnimation();
-            ui_->progressWidget->setVisible(false);
+            ui->playWidget->setVisible(false);
+            ui->animationWidget->setVisible(false);
+            ui->barsWidget->stopAnimation();
+            ui->progressWidget->setVisible(false);
             if(QIcon::hasThemeIcon(QLatin1String("task-reject")))
-                ui_->infoIcon->setPixmap(QIcon::fromTheme(QLatin1String("task-reject")).pixmap(16,16));
+                ui->infoIcon->setPixmap(QIcon::fromTheme(QLatin1String("task-reject")).pixmap(16,16));
             else
-                ui_->infoIcon->setPixmap(QIcon::fromTheme(QLatin1String("emblem-unreadable"),
+                ui->infoIcon->setPixmap(QIcon::fromTheme(QLatin1String("emblem-unreadable"),
                                          QIcon(QLatin1String(":/resources/task-reject.png"))).pixmap(16,16));
-            ui_->infoIconWidget->setVisible(true);
-            ui_->infoMessageWidget->setVisible(false);
-            ui_->infoMessage->setText(trUtf8("Aborted"));
-            ui_->multiFuncWidget->setVisible(false);
-            ui_->multiFuncButton->setIcon(QIcon::fromTheme(QLatin1String("view-refresh"),
+            ui->infoIconWidget->setVisible(true);
+            ui->infoMessageWidget->setVisible(false);
+            ui->infoMessage->setText(trUtf8("Aborted"));
+            ui->multiFuncWidget->setVisible(false);
+            ui->multiFuncButton->setIcon(QIcon::fromTheme(QLatin1String("view-refresh"),
                                           QIcon(QLatin1String(":/resources/view-refresh.png"))));
-            ui_->multiFuncButton->setToolTip(trUtf8("Redownload selected"));
-            ui_->openFolderWidget->setVisible(false);
+            ui->multiFuncButton->setToolTip(trUtf8("Redownload selected"));
+            ui->openFolderWidget->setVisible(false);
             break;
         case GrooveOff::DeletedState:
-            ui_->multiFuncWidget->setVisible(false);
-            ui_->playWidget->setVisible(false);
-            ui_->animationWidget->setVisible(false);
-            ui_->barsWidget->stopAnimation();
-            ui_->progressWidget->setVisible(false);
-            ui_->infoIcon->setPixmap(QIcon::fromTheme(QLatin1String("user-trash-full"),
+            ui->multiFuncWidget->setVisible(false);
+            ui->playWidget->setVisible(false);
+            ui->animationWidget->setVisible(false);
+            ui->barsWidget->stopAnimation();
+            ui->progressWidget->setVisible(false);
+            ui->infoIcon->setPixmap(QIcon::fromTheme(QLatin1String("user-trash-full"),
                                      QIcon(QLatin1String(":/resources/user-trash-full.png"))).pixmap(16,16));
-            ui_->infoIconWidget->setVisible(true);
-            ui_->infoMessageWidget->setVisible(false);
-            ui_->infoMessage->setText(trUtf8("Deleted"));
-            ui_->openFolderWidget->setVisible(false);
+            ui->infoIconWidget->setVisible(true);
+            ui->infoMessageWidget->setVisible(false);
+            ui->infoMessage->setText(trUtf8("Deleted"));
+            ui->openFolderWidget->setVisible(false);
             emit reloadPlaylist();
             break;
         default:
-            ui_->playWidget->setVisible(false);
-            ui_->animationWidget->setVisible(false);
-            ui_->barsWidget->stopAnimation();
-            ui_->progressWidget->setVisible(false);
-            ui_->infoIcon->setPixmap(QIcon::fromTheme(QLatin1String("dialog-warning"),
+            ui->playWidget->setVisible(false);
+            ui->animationWidget->setVisible(false);
+            ui->barsWidget->stopAnimation();
+            ui->progressWidget->setVisible(false);
+            ui->infoIcon->setPixmap(QIcon::fromTheme(QLatin1String("dialog-warning"),
                                      QIcon(QLatin1String(":/resources/dialog-warning.png"))).pixmap(16,16));
-            ui_->infoIconWidget->setVisible(true);
-            ui_->infoMessageWidget->setVisible(false);
-            ui_->infoMessage->setText(trUtf8("Network or Server error"));
-            ui_->multiFuncWidget->setVisible(false);
-            ui_->multiFuncButton->setIcon(QIcon::fromTheme(QLatin1String("view-refresh"),
+            ui->infoIconWidget->setVisible(true);
+            ui->infoMessageWidget->setVisible(false);
+            ui->infoMessage->setText(trUtf8("Network or Server error"));
+            ui->multiFuncWidget->setVisible(false);
+            ui->multiFuncButton->setIcon(QIcon::fromTheme(QLatin1String("view-refresh"),
                                           QIcon(QLatin1String(":/resources/view-refresh.png"))));
-            ui_->multiFuncButton->setToolTip(trUtf8("Redownload selected"));
-            ui_->openFolderWidget->setVisible(false);
+            ui->multiFuncButton->setToolTip(trUtf8("Redownload selected"));
+            ui->openFolderWidget->setVisible(false);
             break;
     }
     
@@ -334,21 +334,21 @@ void DownloadItem::stateChanged()
 */
 void DownloadItem::startDownload()
 {
-    oneShot_ = true;
-    downloadState_ = GrooveOff::DownloadingState;
+    m_oneShot = true;
+    m_downloadState = GrooveOff::DownloadingState;
     stateChanged();
-    downloader_ = ApiRequest::instance()->downloadSong(playlistItem_->path(),
-                                                       playlistItem_->fileName(),
-                                                       playlistItem_->song()->songID(),
+    m_downloader = ApiRequest::instance()->downloadSong(m_playlistItem->path(),
+                                                       m_playlistItem->fileName(),
+                                                       m_playlistItem->song()->songID(),
                                                        Utility::token);
 
-    connect(downloader_.data(), SIGNAL(progress(qint64,qint64)),
+    connect(m_downloader.data(), SIGNAL(progress(qint64,qint64)),
             this, SLOT(setProgress(qint64,qint64)));
 
-    connect(downloader_.data(), SIGNAL(downloadCompleted(bool)),
+    connect(m_downloader.data(), SIGNAL(downloadCompleted(bool)),
             this, SLOT(downloadFinished(bool)));
 
-//    qDebug() << "GrooveOff ::" << "Started download of" << playlistItem_->song()->songName();
+//    qDebug() << "GrooveOff ::" << "Started download of" << m_playlistItem->song()->songName();
 }
 
 /*!
@@ -360,13 +360,13 @@ void DownloadItem::downloadFinished(bool ok)
 {
     //...and show others if download was successful
     if(ok) {
-        downloadState_ = GrooveOff::FinishedState;
-//        qDebug() << "GrooveOff ::" << "Finished download of" << playlistItem_->song()->songName();
+        m_downloadState = GrooveOff::FinishedState;
+//        qDebug() << "GrooveOff ::" << "Finished download of" << m_playlistItem->song()->songName();
         emit reloadPlaylist();
     } else {
-        removeEmptyFolder(QFileInfo(playlistItem_->path() + playlistItem_->fileName()).absoluteDir());
-        downloadState_ = GrooveOff::ErrorState;
-        qDebug() << "GrooveOff :: Error downloading" << playlistItem_->song()->songName() << "::" << downloader_->errorString();
+        removeEmptyFolder(QFileInfo(m_playlistItem->path() + m_playlistItem->fileName()).absoluteDir());
+        m_downloadState = GrooveOff::ErrorState;
+        qDebug() << "GrooveOff :: Error downloading" << m_playlistItem->song()->songName() << "::" << m_downloader->errorString();
     }
 
     stateChanged();
@@ -384,17 +384,17 @@ void DownloadItem::downloadFinished(bool ok)
 */
 void DownloadItem::setProgress(const qint64 &bytesReceived, const qint64 &bytesTotal)
 {
-    if(oneShot_) {
+    if(m_oneShot) {
         if( The::mainWindow() )
             The::mainWindow()->reloadItemsDownloadButtons();
-        oneShot_ = false;
+        m_oneShot = false;
     }
     // enable play button if downloaded at least 1MiB
     if(bytesReceived > 1024*1024)
-        ui_->playButton->setButtonEnabled(true);
+        ui->playButton->setButtonEnabled(true);
 
-    ui_->progressBar->setValue(bytesReceived);
-    ui_->progressBar->setMaximum(bytesTotal);
+    ui->progressBar->setValue(bytesReceived);
+    ui->progressBar->setMaximum(bytesTotal);
 }
 
 /*!
@@ -403,7 +403,7 @@ void DownloadItem::setProgress(const qint64 &bytesReceived, const qint64 &bytesT
 */
 void DownloadItem::playSong()
 {
-    The::audioEngine()->playItem(playlistItem_);
+    The::audioEngine()->playItem(m_playlistItem);
 }
 
 /*!
@@ -412,42 +412,42 @@ void DownloadItem::playSong()
 */
 void DownloadItem::multiFuncBtnClicked()
 {
-    switch(downloadState_) {
+    switch(m_downloadState) {
         case GrooveOff::FinishedState:
-            if(context_ == GrooveOff::Download) {
+            if(m_context == GrooveOff::Download) {
                 //check if file exists before starting countdown
                 if(!QFile::exists(songFile())) {
                     qDebug() << "GrooveOff ::"  << songFile() << "not found";
-                    downloadState_ = GrooveOff::DeletedState;
+                    m_downloadState = GrooveOff::DeletedState;
                     stateChanged();
                     return;
                 }
             }
 
-            if(!ui_->multiFuncButton->isCountdownStarted()) {
-                ui_->multiFuncButton->setToolTip(trUtf8("Abort deletion"));
-                ui_->multiFuncButton->startCountdown();
+            if(!ui->multiFuncButton->isCountdownStarted()) {
+                ui->multiFuncButton->setToolTip(trUtf8("Abort deletion"));
+                ui->multiFuncButton->startCountdown();
             } else {
-                ui_->multiFuncButton->setToolTip(trUtf8("Delete this song"));
-                ui_->multiFuncButton->stopCountdown();
-                ui_->multiFuncButton->setIcon(QIcon::fromTheme(QLatin1String("user-trash"),
+                ui->multiFuncButton->setToolTip(trUtf8("Delete this song"));
+                ui->multiFuncButton->stopCountdown();
+                ui->multiFuncButton->setIcon(QIcon::fromTheme(QLatin1String("user-trash"),
                                               QIcon(QLatin1String(":/resources/user-trash.png"))));
             }
             break;
         case GrooveOff::AbortedState:
         case GrooveOff::ErrorState:
-            downloadState_ = GrooveOff::QueuedState;
+            m_downloadState = GrooveOff::QueuedState;
             stateChanged();
             emit addToQueue(this);
             break;
         case GrooveOff::DownloadingState:
-            downloader_->stopDownload();
-            ui_->progressBar->setValue(0);
-            downloadState_ = GrooveOff::AbortedState;
+            m_downloader->stopDownload();
+            ui->progressBar->setValue(0);
+            m_downloadState = GrooveOff::AbortedState;
             stateChanged();
             break;
         case GrooveOff::QueuedState:
-            downloadState_ = GrooveOff::AbortedState;
+            m_downloadState = GrooveOff::AbortedState;
             stateChanged();
             break;
         default:
@@ -458,7 +458,7 @@ void DownloadItem::multiFuncBtnClicked()
 
 bool DownloadItem::operator==(DownloadItem& right) const
 {
-    if(playlistItem_->song()->songID() == right.playlistItem()->song()->songID())
+    if(m_playlistItem->song()->songID() == right.playlistItem()->song()->songID())
         return true;
     return false;
 }
@@ -470,13 +470,13 @@ bool DownloadItem::operator==(DownloadItem& right) const
 */
 void DownloadItem::removeSong()
 {
-    if(context_ == GrooveOff::Track) {
-        emit removeMeFromSession(playlistItem_->song()->songID());
+    if(m_context == GrooveOff::Track) {
+        emit removeMeFromSession(m_playlistItem->song()->songID());
         return;
     }
 
-    The::audioEngine()->removingTrack(playlistItem_);
-    The::playlist()->removeItem(playlistItem_);
+    The::audioEngine()->removingTrack(m_playlistItem);
+    The::playlist()->removeItem(m_playlistItem);
 
     if(QFile::exists(songFile())) {
         if(!QFile::remove(songFile()))
@@ -485,9 +485,9 @@ void DownloadItem::removeSong()
         qDebug() << "GrooveOff ::"  << songFile() << "not found";
     }
 
-    removeEmptyFolder(QFileInfo(playlistItem_->path() + playlistItem_->fileName()).absoluteDir());
+    removeEmptyFolder(QFileInfo(m_playlistItem->path() + m_playlistItem->fileName()).absoluteDir());
 
-    downloadState_ = GrooveOff::DeletedState;
+    m_downloadState = GrooveOff::DeletedState;
 //    qDebug() << "GrooveOff ::" << songFile() << "removed";
     stateChanged();
     if( The::mainWindow() )
@@ -500,7 +500,7 @@ void DownloadItem::removeSong()
 */
 QString DownloadItem::songFile()
 {
-    return playlistItem_->path() + playlistItem_->fileName();
+    return m_playlistItem->path() + m_playlistItem->fileName();
 }
 
 /*!
@@ -509,21 +509,21 @@ QString DownloadItem::songFile()
 */
 void DownloadItem::enterEvent(QEvent* event)
 {
-    switch(downloadState_) {
+    switch(m_downloadState) {
         case GrooveOff::FinishedState:
-            ui_->multiFuncWidget->setVisible(true);
-            if(context_ == GrooveOff::Download)
-                ui_->openFolderWidget->setVisible(true);
+            ui->multiFuncWidget->setVisible(true);
+            if(m_context == GrooveOff::Download)
+                ui->openFolderWidget->setVisible(true);
             break;
         case GrooveOff::DeletedState:
-            ui_->infoMessageWidget->setVisible(true);
+            ui->infoMessageWidget->setVisible(true);
             break;
         case GrooveOff::ErrorState:
         case GrooveOff::AbortedState:
         case GrooveOff::QueuedState:
-            ui_->infoMessageWidget->setVisible(true);
+            ui->infoMessageWidget->setVisible(true);
             if(!Utility::token.isEmpty())
-                ui_->multiFuncWidget->setVisible(true);
+                ui->multiFuncWidget->setVisible(true);
             break;
         default:
             // do nothing
@@ -539,20 +539,20 @@ void DownloadItem::enterEvent(QEvent* event)
 */
 void DownloadItem::leaveEvent(QEvent* event)
 {
-    switch(downloadState_) {
+    switch(m_downloadState) {
         case GrooveOff::FinishedState:
-            if(!ui_->multiFuncButton->isCountdownStarted())
-                ui_->multiFuncWidget->setVisible(false);
-            ui_->openFolderWidget->setVisible(false);
+            if(!ui->multiFuncButton->isCountdownStarted())
+                ui->multiFuncWidget->setVisible(false);
+            ui->openFolderWidget->setVisible(false);
             break;
         case GrooveOff::DeletedState:
-            ui_->infoMessageWidget->setVisible(false);
+            ui->infoMessageWidget->setVisible(false);
             break;
         case GrooveOff::ErrorState:
         case GrooveOff::AbortedState:
         case GrooveOff::QueuedState:
-            ui_->infoMessageWidget->setVisible(false);
-            ui_->multiFuncWidget->setVisible(false);
+            ui->infoMessageWidget->setVisible(false);
+            ui->multiFuncWidget->setVisible(false);
             break;
         default:
             // do nothing
@@ -569,7 +569,7 @@ void DownloadItem::leaveEvent(QEvent* event)
 */
 void DownloadItem::setPlayerState(Phonon::State state)
 {
-    playerState_ = state;
+    m_playerState = state;
     stateChanged();
 }
 
@@ -579,29 +579,29 @@ void DownloadItem::setPlayerState(Phonon::State state)
 */
 void DownloadItem::openFolder()
 {
-    QFileInfo fileInfo(playlistItem_->path() + playlistItem_->fileName());
+    QFileInfo fileInfo(m_playlistItem->path() + m_playlistItem->fileName());
     QDesktopServices::openUrl(QUrl("file://" + fileInfo.absolutePath(), QUrl::TolerantMode));
 }
 
 void DownloadItem::loadCover()
 {
-    if(!playlistItem_->song()->coverArtFilename().isEmpty()
-        && QFile::exists(Utility::coversCachePath + playlistItem_->song()->coverArtFilename())
-        && playlistItem_->song()->coverArtFilename() != "0")
-        ui_->coverLabel->setPixmap(QPixmap(Utility::coversCachePath + playlistItem_->song()->coverArtFilename()));
+    if(!m_playlistItem->song()->coverArtFilename().isEmpty()
+        && QFile::exists(Utility::coversCachePath + m_playlistItem->song()->coverArtFilename())
+        && m_playlistItem->song()->coverArtFilename() != "0")
+        ui->coverLabel->setPixmap(QPixmap(Utility::coversCachePath + m_playlistItem->song()->coverArtFilename()));
     else
-        ui_->coverLabel->setPixmap(QIcon::fromTheme(QLatin1String("media-optical"),
+        ui->coverLabel->setPixmap(QIcon::fromTheme(QLatin1String("media-optical"),
                                    QIcon(QLatin1String(":/resources/media-optical.png"))).pixmap(Utility::coverSize));
 }
 
 void DownloadItem::abortDownload()
 {
-    if(downloadState_ == GrooveOff::DownloadingState) {
-        downloader_->stopDownload();
-        ui_->progressBar->setValue(0);
+    if(m_downloadState == GrooveOff::DownloadingState) {
+        m_downloader->stopDownload();
+        ui->progressBar->setValue(0);
     }
 
-    downloadState_ = GrooveOff::AbortedState;
+    m_downloadState = GrooveOff::AbortedState;
     stateChanged();
 
     // FIXME: seems that file remove is slower than this call
@@ -609,7 +609,7 @@ void DownloadItem::abortDownload()
     if( The::mainWindow() )
         The::mainWindow()->reloadItemsDownloadButtons();
 
-    removeEmptyFolder(QFileInfo(playlistItem_->path() + playlistItem_->fileName()).absoluteDir());
+    removeEmptyFolder(QFileInfo(m_playlistItem->path() + m_playlistItem->fileName()).absoluteDir());
 }
 
 void DownloadItem::removeEmptyFolder(QDir folder)
