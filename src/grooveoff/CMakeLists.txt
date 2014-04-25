@@ -111,7 +111,7 @@ target_link_libraries(grooveoff
                       ${Qt5Xml_LIBRARIES}
                       ${Qt5DBus_LIBRARIES}
                       ${PHONON4QT5_LIBRARY}
-                      ${TAGLIB_LIBRARIES})
+                      ${TAGLIB_LIBRARY})
 endif( Qt5Core_DIR )
 if( NOT Qt5Core_DIR )
 target_link_libraries(grooveoff
@@ -124,7 +124,7 @@ target_link_libraries(grooveoff
                       ${QT_QTDBUS_LIBRARY}
                       ${QJSON_LIBRARY}
                       ${PHONON_LIBRARY}
-                      ${TAGLIB_LIBRARIES})
+                      ${TAGLIB_LIBRARY})
 endif( NOT Qt5Core_DIR )
 
 install(TARGETS grooveoff RUNTIME DESTINATION bin)
