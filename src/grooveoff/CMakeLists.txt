@@ -128,8 +128,12 @@ target_link_libraries(grooveoff
 endif( NOT Qt5Core_DIR )
 
 install(TARGETS grooveoff RUNTIME DESTINATION bin)
-install(FILES ${grooveoff_I18N} DESTINATION share/grooveoff/translations/)
-install(FILES ${CMAKE_SOURCE_DIR}/grooveoff.desktop DESTINATION share/applications )
+install(FILES ${grooveoff_I18N} 
+        DESTINATION share/grooveoff/translations/)
+install(FILES ${CMAKE_SOURCE_DIR}/grooveoff.desktop 
+        DESTINATION share/applications )
+install(FILES ${CMAKE_SOURCE_DIR}/resources/default-theme-clean.svg
+        DESTINATION share/apps/grooveoff/resources )
 install(FILES ${CMAKE_SOURCE_DIR}/resources/grooveoff.png
         DESTINATION share/icons/hicolor/128x128/apps/)
 install(FILES ${CMAKE_SOURCE_DIR}/resources/grooveoff-16.png
