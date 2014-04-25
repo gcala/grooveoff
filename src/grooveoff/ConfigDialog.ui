@@ -29,7 +29,7 @@
      <item>
       <widget class="QStackedWidget" name="stackedWidget">
        <property name="currentIndex">
-        <number>0</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="generalSettingsPage">
         <layout class="QVBoxLayout" name="verticalLayout_7">
@@ -262,6 +262,16 @@
              <widget class="QCheckBox" name="loadCovers">
               <property name="text">
                <string>Load covers</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="emptyCache">
+              <property name="styleSheet">
+               <string notr="true">margin-left: 16px;</string>
+              </property>
+              <property name="text">
+               <string>Empty covers cache on exit</string>
               </property>
              </widget>
             </item>

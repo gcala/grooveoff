@@ -140,6 +140,7 @@ private:
     bool m_showHistory;
     bool m_saveDestination;
     bool m_loadCovers;
+    bool m_emptyCache;
     bool m_searchInProgress;
     int m_parallelDownloadsCount;
     QList<DownloadItem *> m_queue;

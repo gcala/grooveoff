@@ -58,7 +58,7 @@ ConfigDialog::ConfigDialog(QWidget *parent):
     }
 
     connect(ui->m_nowPlayingText, SIGNAL(textChanged(QString)),
-                                   SLOT(cfgChanged()));
+                                  SLOT(cfgChanged()));
 
     m_tagNames << QLatin1String("%title") << QLatin1String("%artist") << QLatin1String("%album") << QLatin1String("%track");
     // xgettext: no-c-format
@@ -84,11 +84,20 @@ ConfigDialog::ConfigDialog(QWidget *parent):
 
     ui->m_nowPlayingText->setLocalizedTagNames(m_localizedTagNames);
 
-    connect(ui->cancelButton, SIGNAL(clicked()), this, SLOT(close()));
-    connect(ui->restoreButton, SIGNAL(clicked()), this, SLOT(restoreDefaults()));
-    connect(ui->applyButton, SIGNAL(clicked()), this, SLOT(saveSettings()));
-    connect(ui->okButton, SIGNAL(clicked()), this, SLOT(okClicked()));
-    connect(ui->contentsWidget, SIGNAL(currentRowChanged(int)), this, SLOT(switchPage(int)));
+    connect(ui->cancelButton, SIGNAL(clicked()),
+                              SLOT(close()));
+    
+    connect(ui->restoreButton, SIGNAL(clicked()),
+                               SLOT(restoreDefaults()));
+    
+    connect(ui->applyButton, SIGNAL(clicked()),
+                             SLOT(saveSettings()));
+    
+    connect(ui->okButton, SIGNAL(clicked()),
+                          SLOT(okClicked()));
+    
+    connect(ui->contentsWidget, SIGNAL(currentRowChanged(int)),
+                                SLOT(switchPage(int)));
 
     loadSettings();
 
@@ -168,6 +177,7 @@ void ConfigDialog::restoreDefaults()
     ui->saveDestination->setChecked(false);
     ui->label_3->setEnabled(false);
     ui->loadCovers->setChecked(true);
+    ui->emptyCache->setChecked(false);
     ui->numResults->setValue(0);
     ui->maxDownloads->setValue(5);
     ui->m_nowPlayingText->setText(trUtf8("%1 - %2").arg(QLatin1String("%artist")).arg(QLatin1String("%title")));
@@ -186,6 +196,10 @@ void ConfigDialog::saveSettings()
     settings.setValue(QLatin1String("saveSession"), ui->saveSession->isChecked());
     settings.setValue(QLatin1String("historySize"), ui->historySize->value());
     settings.setValue(QLatin1String("loadCovers"), ui->loadCovers->isChecked());
+    if(ui->loadCovers->isChecked())
+        settings.setValue(QLatin1String("emptyCache"), ui->emptyCache->isChecked());
+    else
+        settings.setValue(QLatin1String("emptyCache"), true);
     settings.setValue(QLatin1String("numResults"), ui->numResults->value());
     settings.setValue(QLatin1String("maxDownloads"), ui->maxDownloads->value());
     settings.setValue(QLatin1String("saveDestination"), ui->saveDestination->isChecked());
@@ -235,6 +249,8 @@ void ConfigDialog::cfgChanged()
         ui->historySize->setEnabled(false);
         ui->label_3->setEnabled(false);
     }
+    
+    ui->emptyCache->setEnabled(ui->loadCovers->isChecked());
 }
 
 /*!
@@ -252,6 +268,11 @@ void ConfigDialog::loadSettings()
     }
     ui->historySize->setValue(settings.value(QLatin1String("historySize"), 0).toInt());
     ui->loadCovers->setChecked(settings.value(QLatin1String("loadCovers"), true).toBool());
+    if(ui->loadCovers->isChecked()) {
+        ui->emptyCache->setEnabled(true);
+        ui->emptyCache->setChecked(settings.value(QLatin1String("emptyCache"), false).toBool());
+    } else
+        ui->emptyCache->setEnabled(false);
     ui->numResults->setValue(settings.value(QLatin1String("numResults"), 0).toInt());
     ui->maxDownloads->setValue(settings.value(QLatin1String("maxDownloads"), 5).toInt());
     ui->saveDestination->setChecked(settings.value(QLatin1String("saveDestination"), false).toBool());

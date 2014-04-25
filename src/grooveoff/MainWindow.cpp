@@ -220,6 +220,15 @@ MainWindow::~MainWindow()
 
     if(m_saveSession)
         saveSession();
+    
+    if(m_emptyCache) {
+        QDir coversPath(Utility::coversCachePath);
+        QStringList covers = coversPath.entryList(QStringList() << "*.jpg" << "*.png", QDir::Files, QDir::Name);
+
+        foreach(QString cover, covers) {
+            QFile::remove(Utility::coversCachePath + QDir::separator() + cover);
+        }
+    }
 
     saveSettings();
 
@@ -934,6 +943,10 @@ void MainWindow::loadSettings()
     m_showHistory     = settings.value(QLatin1String("saveSearches"), false).toBool();
     m_maxResults      = settings.value(QLatin1String("numResults"), 0).toInt();
     m_loadCovers      = settings.value(QLatin1String("loadCovers"), true).toBool();
+    if(m_loadCovers)
+        m_emptyCache = settings.value(QLatin1String("emptyCache"), false).toBool();
+    else
+        m_emptyCache = true;
     m_maxDownloads    = settings.value(QLatin1String("maxDownloads"), 5).toInt();
     m_saveDestination = settings.value(QLatin1String("saveDestination"), false).toBool();
     m_guiLayout       = (GuiLayout)settings.value(QLatin1String("guiLayout"), Compact).toInt();
