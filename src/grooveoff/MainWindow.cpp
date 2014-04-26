@@ -297,7 +297,8 @@ void MainWindow::setupUi()
     ui->combosContainer->setVisible(false);
 
     ui->batchDownloadButton->setToolTip(trUtf8("Download all tracks"));
-    ui->batchDownloadButton->setIcon(QIcon::fromTheme(QLatin1String("kget")));
+    ui->batchDownloadButton->setIcon(QIcon::fromTheme(QLatin1String("download"),
+                                     QIcon::fromTheme(QLatin1String("document-save"), QIcon(QLatin1String(":/resources/download.png"))))); 
     ui->batchDownloadButton->setIconSize(QSize(16,16));
     ui->batchDownloadButton->setFixedHeight(fontHeight > 25 ? fontHeight : 25);
 
