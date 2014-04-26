@@ -939,7 +939,7 @@ void MainWindow::loadSettings()
     QSettings settings;
     settings.setIniCodec( "UTF-8" );
 
-    m_saveSession     = settings.value(QLatin1String("saveSession"), false).toBool();
+    m_saveSession     = settings.value(QLatin1String("saveSession"), true).toBool();
     m_showHistory     = settings.value(QLatin1String("saveSearches"), false).toBool();
     m_maxResults      = settings.value(QLatin1String("numResults"), 0).toInt();
     m_loadCovers      = settings.value(QLatin1String("loadCovers"), true).toBool();
@@ -948,7 +948,7 @@ void MainWindow::loadSettings()
     else
         m_emptyCache = true;
     m_maxDownloads    = settings.value(QLatin1String("maxDownloads"), 5).toInt();
-    m_saveDestination = settings.value(QLatin1String("saveDestination"), false).toBool();
+    m_saveDestination = settings.value(QLatin1String("saveDestination"), true).toBool();
     m_guiLayout       = (GuiLayout)settings.value(QLatin1String("guiLayout"), Compact).toInt();
     m_sessionFileName = settings.value(QLatin1String("sessionFile"), QLatin1String("default")).toString();
 
@@ -974,7 +974,7 @@ void MainWindow::loadSettings()
 
     //Naming Schema
     Utility::namingSchema = settings.value(QLatin1String("namingSchema"),
-                                        trUtf8("%1 - %2").arg(QLatin1String("%artist")).arg(QLatin1String("%title"))).toString();
+                                        QLatin1String("%artist/%album/%track - %title")).toString();
 
     if(m_guiLayout == Mini)
         setMiniPlayerLayout();

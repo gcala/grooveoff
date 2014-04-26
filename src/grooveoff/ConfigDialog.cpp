@@ -172,15 +172,15 @@ void ConfigDialog::restoreDefaults()
     configChanged = true;
     ui->applyButton->setEnabled(true);
     ui->saveSearches->setChecked(false);
-    ui->saveSession->setChecked(false);
+    ui->saveSession->setChecked(true);
     ui->historySize->setEnabled(false);
-    ui->saveDestination->setChecked(false);
+    ui->saveDestination->setChecked(true);
     ui->label_3->setEnabled(false);
     ui->loadCovers->setChecked(true);
     ui->emptyCache->setChecked(false);
     ui->numResults->setValue(0);
     ui->maxDownloads->setValue(5);
-    ui->m_nowPlayingText->setText(trUtf8("%1 - %2").arg(QLatin1String("%artist")).arg(QLatin1String("%title")));
+    ui->m_nowPlayingText->setText(QLatin1String("%artist/%album/%track - %title"));
 }
 
 /*!
@@ -260,7 +260,7 @@ void ConfigDialog::cfgChanged()
 void ConfigDialog::loadSettings()
 {
     QSettings settings;
-    ui->saveSession->setChecked(settings.value(QLatin1String("saveSession"),false).toBool());
+    ui->saveSession->setChecked(settings.value(QLatin1String("saveSession"),true).toBool());
     ui->saveSearches->setChecked(settings.value(QLatin1String("saveSearches"),false).toBool());
     if(!ui->saveSearches->isChecked()) {
         ui->historySize->setEnabled(false);
@@ -275,11 +275,11 @@ void ConfigDialog::loadSettings()
         ui->emptyCache->setEnabled(false);
     ui->numResults->setValue(settings.value(QLatin1String("numResults"), 0).toInt());
     ui->maxDownloads->setValue(settings.value(QLatin1String("maxDownloads"), 5).toInt());
-    ui->saveDestination->setChecked(settings.value(QLatin1String("saveDestination"), false).toBool());
+    ui->saveDestination->setChecked(settings.value(QLatin1String("saveDestination"), true).toBool());
 
     //Naming Schema
     QString namingSchemaText = settings.value(QLatin1String("namingSchema"),
-                                              trUtf8("%1 - %2").arg(QLatin1String("%artist")).arg(QLatin1String("%title"))).toString();
+                                              QLatin1String("%artist/%album/%track - %title")).toString();
 
     //in namingSchemaText tag names aren't localized, here they're replaced with the localized ones
     for (int i = 0; i < m_tagNames.size(); i++) {
