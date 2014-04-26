@@ -291,8 +291,7 @@ void MainWindow::setupUi()
     ui->browseButton->setIconSize(QSize(16,16));
     ui->browseButton->setFixedHeight(fontHeight > 25 ? fontHeight : 25);
 
-    ui->spinnerWidget->setMinimumSize(QSize(fontHeight > 30 ? fontHeight : 30,
-                                         fontHeight > 30 ? fontHeight : 30));
+    ui->spinnerWidget->setFixedHeight(fontHeight > 25 ? fontHeight : 25);
     ui->spinnerWidget->setVisible(false);
 
     ui->combosContainer->setVisible(false);
