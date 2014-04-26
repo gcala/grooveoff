@@ -163,12 +163,18 @@ void DownloadItem::setupUi()
 void DownloadItem::setupConnections()
 {
     if(m_context == GrooveOff::Download) {
-        connect(ui->playButton, SIGNAL(playButtonClicked()), this, SLOT(playSong()));
-        connect(ui->openFolderButton, SIGNAL(clicked()), this, SLOT(openFolder()));
+        connect(ui->playButton, SIGNAL(playButtonClicked()), 
+                                SLOT(playSong()));
+        
+        connect(ui->openFolderButton, SIGNAL(clicked()), 
+                                      SLOT(openFolder()));
     }
 
-    connect(ui->multiFuncButton, SIGNAL(clicked()), this, SLOT(multiFuncBtnClicked()));
-    connect(ui->multiFuncButton, SIGNAL(countdownFinished()), this, SLOT(removeSong()));
+    connect(ui->multiFuncButton, SIGNAL(clicked()), 
+                                 SLOT(multiFuncBtnClicked()));
+    
+    connect(ui->multiFuncButton, SIGNAL(countdownFinished()), 
+                                 SLOT(removeSong()));
 }
 
 /*!
@@ -616,6 +622,18 @@ void DownloadItem::removeEmptyFolder(QDir folder)
 {
     if(!folder.exists())
         return;
+    
+#if QT_VERSION >= QT_VERSION_CHECK( 5, 0, 0 )
+    if(folder.path() == QStandardPaths::writableLocation(QStandardPaths::MusicLocation) ||
+       folder.path() == Utility::destinationPath
+    )
+        return;
+#else
+    if(folder.path() == QDesktopServices::storageLocation(QDesktopServices::MusicLocation) ||
+       folder.path() == Utility::destinationPath
+    )
+        return;
+#endif
 
     if(folder.entryList(QDir::NoDotAndDotDot).count() == 0) {
         folder.rmdir(folder.path());

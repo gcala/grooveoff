@@ -974,7 +974,7 @@ void MainWindow::loadSettings()
 
     //Naming Schema
     Utility::namingSchema = settings.value(QLatin1String("namingSchema"),
-                                        QLatin1String("%artist/%album/%track - %title")).toString();
+                                           QLatin1String("%artist/%album/%track - %title")).toString();
 
     if(m_guiLayout == Mini)
         setMiniPlayerLayout();

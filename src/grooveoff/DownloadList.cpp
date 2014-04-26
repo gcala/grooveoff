@@ -31,7 +31,7 @@ DownloadList::DownloadList(QWidget *parent) :
     QListWidget(parent)
 {
     connect(model(), SIGNAL(layoutChanged()),
-            this, SLOT(reloadPlaylist()));
+                     SLOT(reloadPlaylist()));
 }
 
 void DownloadList::reloadPlaylist()
