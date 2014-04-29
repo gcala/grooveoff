@@ -95,6 +95,7 @@ public:
 
 protected:
     virtual void changeEvent( QEvent *event );
+    virtual void resizeEvent( QResizeEvent *event );
 
 private Q_SLOTS:
     void selectFolder();
@@ -142,6 +143,7 @@ private:
     bool m_loadCovers;
     bool m_emptyCache;
     bool m_searchInProgress;
+    bool m_saveAborted;
     int m_parallelDownloadsCount;
     QList<DownloadItem *> m_queue;
     PlayerWidget *m_playerWidget;

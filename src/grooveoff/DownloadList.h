@@ -37,9 +37,10 @@ public:
 
 public Q_SLOTS:
     void reloadPlaylist();
-    void removeFailedDeletedAborted();
+    void removeFailedAborted();
     void removeDownloaded();
     void abortAllDownloads();
+    void removeItem(DownloadItem *item);
 };
 
 #endif // DOWNLOADLIST_H

@@ -178,6 +178,7 @@ void ConfigDialog::restoreDefaults()
     ui->label_3->setEnabled(false);
     ui->loadCovers->setChecked(true);
     ui->emptyCache->setChecked(false);
+    ui->saveAborted->setChecked(false);
     ui->numResults->setValue(0);
     ui->maxDownloads->setValue(5);
     ui->m_nowPlayingText->setText(QLatin1String("%artist/%album/%track - %title"));
@@ -194,6 +195,10 @@ void ConfigDialog::saveSettings()
     QSettings settings;
     settings.setValue(QLatin1String("saveSearches"), ui->saveSearches->isChecked());
     settings.setValue(QLatin1String("saveSession"), ui->saveSession->isChecked());
+    if(ui->saveSession->isChecked())
+        settings.setValue(QLatin1String("saveAborted"), ui->saveAborted->isChecked());
+    else
+        settings.setValue(QLatin1String("saveAborted"), false);
     settings.setValue(QLatin1String("historySize"), ui->historySize->value());
     settings.setValue(QLatin1String("loadCovers"), ui->loadCovers->isChecked());
     if(ui->loadCovers->isChecked())
@@ -251,6 +256,7 @@ void ConfigDialog::cfgChanged()
     }
     
     ui->emptyCache->setEnabled(ui->loadCovers->isChecked());
+    ui->saveAborted->setEnabled(ui->saveSession->isChecked());
 }
 
 /*!
@@ -261,6 +267,11 @@ void ConfigDialog::loadSettings()
 {
     QSettings settings;
     ui->saveSession->setChecked(settings.value(QLatin1String("saveSession"),true).toBool());
+    if(ui->saveSession->isChecked()) {
+        ui->saveAborted->setEnabled(true);
+        ui->saveAborted->setChecked(settings.value(QLatin1String("saveAborted"), false).toBool());
+    } else
+        ui->saveAborted->setEnabled(false);
     ui->saveSearches->setChecked(settings.value(QLatin1String("saveSearches"),false).toBool());
     if(!ui->saveSearches->isChecked()) {
         ui->historySize->setEnabled(false);

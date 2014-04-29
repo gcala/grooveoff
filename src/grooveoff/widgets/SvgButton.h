@@ -17,17 +17,22 @@
 */
 
 
-#ifndef PREVIOUSBUTTON_H
-#define PREVIOUSBUTTON_H
+#ifndef BUTTONFACTORY_H
+#define BUTTONFACTORY_H
 
 #include "IconButton.h"
 
-class PreviousButton : public IconButton
+class SvgButton : public IconButton
 {
     Q_OBJECT
 public:
-    PreviousButton( QWidget *parent = 0 );
+    SvgButton( QWidget *parent = 0 );
     void setButtonEnabled(bool);
+    
+    inline bool playing() const { return m_isPlaying; }
+    void setPlaying( bool playing );
+    
+    void setExists( bool ok );
 
 protected:
     void enterEvent( QEvent * );
@@ -40,15 +45,19 @@ private slots:
     void clicked();
 
 signals:
-    void previousButtonClicked();
+    void buttonClicked();
 
 private:
     struct
     {
-        QImage previous[3];
+        QImage play[3], pause[2], next[3], previous[3], search[3], browse[2], batch[2], download[2], redownload[2], stop[2], trash[2], remove[2], clock[2], aborted[2], warning[2];
     } m_icon;
 
     bool m_isEnabled;
+    bool m_isPlaying;
+    bool m_fileExists;
+    
+    QImage icon();
 };
 
-#endif // PREVIOUSBUTTON_H
+#endif // BUTTONFACTORY_H

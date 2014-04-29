@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>572</width>
+    <width>793</width>
     <height>55</height>
    </rect>
   </property>
@@ -14,9 +14,6 @@
    <string/>
   </property>
   <layout class="QHBoxLayout" name="mainLayout">
-   <property name="spacing">
-    <number>0</number>
-   </property>
    <item>
     <widget class="QWidget" name="songWidget" native="true">
      <layout class="QGridLayout" name="songWidgetLayout">
@@ -125,14 +122,7 @@
        <number>0</number>
       </property>
       <item row="0" column="0">
-       <widget class="QLabel" name="infoIcon">
-        <property name="text">
-         <string/>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
+       <widget class="SvgButton" name="infoIcon" native="true"/>
       </item>
      </layout>
     </widget>
@@ -184,20 +174,13 @@
        <number>0</number>
       </property>
       <item row="0" column="0">
-       <widget class="QPushButton" name="openFolderButton">
-        <property name="text">
-         <string/>
-        </property>
-        <property name="flat">
-         <bool>true</bool>
-        </property>
-       </widget>
+       <widget class="SvgButton" name="openFolderButton" native="true"/>
       </item>
      </layout>
     </widget>
    </item>
    <item>
-    <widget class="QWidget" name="multiFuncWidget" native="true">
+    <widget class="QWidget" name="unqueueWidget" native="true">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
        <horstretch>0</horstretch>
@@ -216,7 +199,7 @@
        <height>30</height>
       </size>
      </property>
-     <layout class="QGridLayout" name="multiFuncLayout">
+     <layout class="QGridLayout" name="unqueueLayout">
       <property name="leftMargin">
        <number>0</number>
       </property>
@@ -224,7 +207,139 @@
        <number>0</number>
       </property>
       <item row="0" column="0">
-       <widget class="TimerButton" name="multiFuncButton">
+       <widget class="SvgButton" name="unqueueButton" native="true"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QWidget" name="stopWidget" native="true">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>30</width>
+       <height>30</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>30</width>
+       <height>30</height>
+      </size>
+     </property>
+     <layout class="QGridLayout" name="stopLayout">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <item row="0" column="0">
+       <widget class="SvgButton" name="stopButton" native="true"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QWidget" name="deleteWidget" native="true">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>30</width>
+       <height>30</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>30</width>
+       <height>30</height>
+      </size>
+     </property>
+     <layout class="QGridLayout" name="deleteLayout">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <item row="0" column="0">
+       <widget class="SvgButton" name="deleteButton" native="true"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QWidget" name="queueWidget" native="true">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>30</width>
+       <height>30</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>30</width>
+       <height>30</height>
+      </size>
+     </property>
+     <layout class="QGridLayout" name="queueLayout">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <item row="0" column="0">
+       <widget class="SvgButton" name="queueButton" native="true"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QWidget" name="timerWidget" native="true">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>30</width>
+       <height>30</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>30</width>
+       <height>30</height>
+      </size>
+     </property>
+     <layout class="QGridLayout" name="timerLayout">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <item row="0" column="0">
+       <widget class="TimerButton" name="timerButton">
         <property name="text">
          <string/>
         </property>
@@ -258,7 +373,7 @@
      </property>
      <layout class="QGridLayout" name="gridLayout_3">
       <item row="0" column="0">
-       <widget class="PlayPauseButton" name="playButton" native="true"/>
+       <widget class="SvgButton" name="playButton" native="true"/>
       </item>
      </layout>
     </widget>
@@ -297,6 +412,18 @@
     </widget>
    </item>
   </layout>
+  <zorder>songWidget</zorder>
+  <zorder>progressWidget</zorder>
+  <zorder>infoIconWidget</zorder>
+  <zorder>infoMessageWidget</zorder>
+  <zorder>openFolderWidget</zorder>
+  <zorder>timerWidget</zorder>
+  <zorder>playWidget</zorder>
+  <zorder>animationWidget</zorder>
+  <zorder>unqueueWidget</zorder>
+  <zorder>stopWidget</zorder>
+  <zorder>deleteWidget</zorder>
+  <zorder>queueWidget</zorder>
  </widget>
  <customwidgets>
   <customwidget>
@@ -316,9 +443,9 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>PlayPauseButton</class>
+   <class>SvgButton</class>
    <extends>QWidget</extends>
-   <header>widgets/PlayPauseButton.h</header>
+   <header location="global">widgets/SvgButton.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

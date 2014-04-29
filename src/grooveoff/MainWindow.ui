@@ -102,9 +102,12 @@
          <item row="0" column="2">
           <layout class="QHBoxLayout" name="horizontalLayout_2">
            <item>
-            <widget class="QPushButton" name="searchButton">
-             <property name="text">
-              <string/>
+            <widget class="SvgButton" name="searchButton" native="true">
+             <property name="minimumSize">
+              <size>
+               <width>16</width>
+               <height>16</height>
+              </size>
              </property>
             </widget>
            </item>
@@ -124,9 +127,12 @@
           <widget class="QLineEdit" name="pathLine"/>
          </item>
          <item row="1" column="2">
-          <widget class="QPushButton" name="browseButton">
-           <property name="text">
-            <string/>
+          <widget class="SvgButton" name="browseButton" native="true">
+           <property name="minimumSize">
+            <size>
+             <width>16</width>
+             <height>16</height>
+            </size>
            </property>
           </widget>
          </item>
@@ -202,9 +208,12 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="batchDownloadButton">
-            <property name="text">
-             <string/>
+           <widget class="SvgButton" name="batchDownloadButton" native="true">
+            <property name="minimumSize">
+             <size>
+              <width>16</width>
+              <height>16</height>
+             </size>
             </property>
            </widget>
           </item>
@@ -262,6 +271,12 @@
    <class>ContainedMenuButton</class>
    <extends>QToolButton</extends>
    <header location="global">widgets/ContainedMenuButton.h</header>
+  </customwidget>
+  <customwidget>
+   <class>SvgButton</class>
+   <extends>QWidget</extends>
+   <header location="global">widgets/SvgButton.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>

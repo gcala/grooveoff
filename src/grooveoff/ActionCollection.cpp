@@ -110,7 +110,7 @@ void ActionCollection::initActions()
 
     QAction *actionRemoveFailed = new QAction(QIcon::fromTheme(QLatin1String("edit-delete"),
                                       QIcon(QLatin1String(":/resources/edit-delete.png"))),
-                                      trUtf8("&Remove deleted/failed transfers"), this);
+                                      trUtf8("&Remove canceled/failed transfers"), this);
     m_actionCollection[ QLatin1String( "actionRemoveFailed" ) ] = actionRemoveFailed;
 
     QAction *actionClearDownloadList = new QAction(QIcon::fromTheme(QLatin1String("edit-clear"),

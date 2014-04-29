@@ -36,7 +36,7 @@ MatchItem::MatchItem(const PlaylistItemPtr &playlistItem, QWidget *parent) :
     ui->setupUi(this);
     setupUi();
 
-    connect(ui->downloadButton, SIGNAL(clicked()), SLOT(downloadSlot()));
+    connect(ui->downloadButton, SIGNAL(buttonClicked()), SLOT(downloadSlot()));
     connect(m_playlistItem.data(), SIGNAL(reloadCover()), this, SLOT(loadCover()));
     connect(m_playlistItem.data(), SIGNAL(reloadIcon()), this, SLOT(setDownloadIcon()));
 }
@@ -70,8 +70,8 @@ void MatchItem::setupUi()
     ui->artist_albumLabel->setToolTip(m_playlistItem->song()->songName());
     ui->artist_albumLabel->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred); // fix hidden label
 
+    ui->downloadButton->setType(IconButton::Download);
     ui->downloadButton->setFixedSize(QSize(Utility::buttonSize,Utility::buttonSize));
-    ui->downloadButton->setIconSize(QSize(16,16));
 
     setDownloadIcon();
 }
@@ -84,7 +84,7 @@ void MatchItem::loadCover()
         ui->coverLabel->setPixmap(QPixmap(Utility::coversCachePath + m_playlistItem->song()->coverArtFilename()));
     else
         ui->coverLabel->setPixmap(QIcon::fromTheme(QLatin1String("media-optical"),
-                                   QIcon(QLatin1String(":/resources/media-optical.png"))).pixmap(Utility::coverSize));
+                                  QIcon(QLatin1String(":/resources/media-optical.png"))).pixmap(Utility::coverSize));
 }
 
 void MatchItem::downloadSlot()
@@ -99,16 +99,7 @@ void MatchItem::setDownloadIcon()
     schema.replace(QLatin1String("%artist"), m_playlistItem->song()->artistName(), Qt::CaseInsensitive);
     schema.replace(QLatin1String("%album"), m_playlistItem->song()->albumName(), Qt::CaseInsensitive);
     schema.replace(QLatin1String("%track"), QString::number(m_playlistItem->song()->trackNum()), Qt::CaseInsensitive);
-
-    if(QFile::exists(Utility::destinationPath + QDir::separator() + schema + ".mp3")) {
-        ui->downloadButton->setIcon(QIcon::fromTheme(QLatin1String("view-refresh"),
-                                     QIcon(QLatin1String(":/resources/view-refresh.png"))));
-    } else {
-        if(QIcon::hasThemeIcon(QLatin1String("download")))
-            ui->downloadButton->setIcon(QIcon::fromTheme(QLatin1String("download")));
-        else
-            ui->downloadButton->setIcon(QIcon::fromTheme(QLatin1String("document-save"),
-                                         QIcon(QLatin1String(":/resources/download.png"))));
-    }
+    
+    ui->downloadButton->setExists(QFile::exists(Utility::destinationPath + QDir::separator() + schema + ".mp3"));
 }
 

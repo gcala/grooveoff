@@ -264,126 +264,148 @@ bool SongPrivate::parse( const QVariant& data )
         m_errorString = songMap.value("fault").toMap().value("message").toString();
         return false;
     }
+    
+    QVariant v = songMap.value( QLatin1String( "SongID" ) );
+    if( !v.canConvert( QVariant::UInt ) ) {
+        m_errorString = QLatin1String("Missing SongID");
+        return false;
+    }
+    m_songID = v.toUInt();
 
-    QVariant v = songMap.value( QLatin1String( "AlbumID" ) );
+    v = songMap.value( QLatin1String( "AlbumID" ) );
     if( !v.canConvert( QVariant::UInt ) )
-        qDebug() << "'AlbumID' field is invalid";
-    m_albumID = v.toUInt();
+        m_albumID = 0;
+    else
+        m_albumID = v.toUInt();
 
     v = songMap.value( QLatin1String( "AlbumName" ) );
     if( !v.canConvert( QVariant::String ) )
-        qDebug() << "'AlbumName' field is invalid";
-    m_albumName = v.toString().replace('/','-');
-    // if AlbumName is empty string
-    if(m_albumName.trimmed().isEmpty())
         m_albumName = QLatin1String("unknown");
+    else {
+        m_albumName = v.toString().replace('/','-');
+        // if AlbumName is an empty string
+        if(m_albumName.trimmed().isEmpty())
+            m_albumName = QLatin1String("unknown");
+    }
 
     if(!m_fromPlaylist) {
         v = songMap.value( QLatin1String( "ArtistCoverArtFilename" ) );
         if( !v.canConvert( QVariant::String ) )
-            qDebug() << "'ArtistCoverArtFilename' field is invalid";
-        m_artistCoverArtFilename = v.toString();
+            m_artistCoverArtFilename = QString();
+        else
+            m_artistCoverArtFilename = v.toString();
     }
 
     v = songMap.value( QLatin1String( "ArtistID" ) );
     if( !v.canConvert( QVariant::UInt ) )
-        qDebug() << "'ArtistID' field is invalid";
-    m_artistID = v.toUInt();
+        m_artistID = 0;
+    else
+        m_artistID = v.toUInt();
 
     v = songMap.value( QLatin1String( "ArtistName" ) );
     if( !v.canConvert( QVariant::String ) )
-        qDebug() << "'ArtistName' field is invalid";
-    m_artistName = v.toString().replace('/','-');
+        m_artistName = QString();
+    else
+        m_artistName = v.toString().replace('/','-');
 
     if(!m_fromPlaylist) {
         v = songMap.value( QLatin1String( "AvgDuration" ) );
         if( !v.canConvert( QVariant::String ) )
-            qDebug() << "'AvgDuration' field is invalid";
-        m_avgDuration = v.toString();
+            m_avgDuration = QString();
+        else
+            m_avgDuration = v.toString();
     }
 
     v = songMap.value( QLatin1String( "AvgRating" ) );
     if( !v.canConvert( QVariant::String ) )
-        qDebug() << "'AvgRating' field is invalid";
-    m_avgRating = v.toString();
+        m_avgRating = QString();
+    else
+        m_avgRating = v.toString();
 
     v = songMap.value( QLatin1String( "CoverArtFilename" ) );
     if( !v.canConvert( QVariant::String ) )
-        qDebug() << "'CoverArtFilename' field is invalid";
-    m_coverArtFilename = v.toString();
+        m_coverArtFilename = QString();
+    else
+        m_coverArtFilename = v.toString();
 
     v = songMap.value( QLatin1String( "EstimateDuration" ) );
     if( !v.canConvert( QVariant::String ) )
-        qDebug() << "'EstimateDuration' field is invalid";
-    m_estimateDuration = v.toString();
+        m_coverArtFilename = QString();
+    else
+        m_estimateDuration = v.toString();
 
     v = songMap.value( QLatin1String( "Flags" ) );
     if( !v.canConvert( QVariant::ULongLong ) )
-        qDebug() << "'Flags' field is invalid";
+        m_flags = 0;
     m_flags = v.toULongLong();
 
     v = songMap.value( QLatin1String( "IsLowBitrateAvailable" ) );
     if( !v.canConvert( QVariant::Bool ) )
-        qDebug() << "'IsLowBitrateAvailable' field is invalid";
-    m_isLowBitrateAvailable = v.toBool();
+        m_isLowBitrateAvailable = false;
+    else
+        m_isLowBitrateAvailable = v.toBool();
 
     v = songMap.value( QLatin1String( "IsVerified" ) );
     if( !v.canConvert( QVariant::Bool ) )
-        qDebug() << "'IsVerified' field is invalid";
-    m_isVerified = v.toBool();
+        m_isVerified = false;
+    else
+        m_isVerified = v.toBool();
 
     v = songMap.value( QLatin1String( "Popularity" ) );
     if( !v.canConvert( QVariant::ULongLong ) )
-        qDebug() << "'Popularity' field is invalid";
-    m_popularity = v.toULongLong();
+        m_popularity = 0;
+    else
+        m_popularity = v.toULongLong();
 
     if(!m_fromPlaylist) {
         v = songMap.value( QLatin1String( "PopularityIndex" ) );
         if( !v.canConvert( QVariant::ULongLong ) )
-            qDebug() << "'PopularityIndex' field is invalid";
-        m_popularityIndex = v.toULongLong();
+            m_popularityIndex = 0;
+        else
+            m_popularityIndex = v.toULongLong();
     }
 
     if(!m_fromPlaylist) {
         v = songMap.value( QLatin1String( "RawScore" ) );
         if( !v.canConvert( QVariant::ULongLong ) )
-            qDebug() << "'RawScore' field is invalid";
-        m_rawScore = v.toULongLong();
+            m_rawScore = 0;
+        else
+            m_rawScore = v.toULongLong();
     }
 
     if(!m_fromPlaylist) {
         v = songMap.value( QLatin1String( "Score" ) );
         if( !v.canConvert( QVariant::Double ) )
-            qDebug() << "'Score' field is invalid";
-        m_score = v.toDouble();
+            m_score = 0;
+        else
+            m_score = v.toDouble();
     }
-
-    v = songMap.value( QLatin1String( "SongID" ) );
-    if( !v.canConvert( QVariant::UInt ) )
-        qDebug() << "'SongID' field is invalid";
-    m_songID = v.toUInt();
 
     v = songMap.value( QLatin1String( m_fromPlaylist ? "Name" : "SongName" ) );
     if( !v.canConvert( QVariant::String ) )
-        qDebug() << "'SongName' field is invalid";
-    m_songName = v.toString().replace('/','-');
+        m_songName = QString();
+    else
+        m_songName = v.toString().replace('/','-');
 
     if(!m_fromPlaylist) {
         v = songMap.value( QLatin1String( "TSAdded" ) );
         if( !v.canConvert( QVariant::String ) )
-            qDebug() << "'TSAdded' field is invalid";
-        m_tsAdded = v.toString();
+            m_tsAdded = QString();
+        else
+            m_tsAdded = v.toString();
     }
 
     v = songMap.value( QLatin1String( "TrackNum" ) );
     if( !v.canConvert( QVariant::UInt ) )
-        qDebug() << "'TrackNum' field is invalid";
-    m_trackNum = v.toUInt();
+        m_trackNum = 0;
+    else
+        m_trackNum = v.toUInt();
 
     v = songMap.value( QLatin1String( "Year" ) );
     if( !v.canConvert( QVariant::UInt ) )
-        qDebug() << "'Year' field is invalid";
-    m_year = v.toUInt();
+        m_year = 0;
+    else
+        m_year = v.toUInt();
 
     return true;
 }

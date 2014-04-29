@@ -112,19 +112,23 @@ void PlayerWidget::setupUi()
     ui->stackedWidget->setBackgroundRole(QPalette::AlternateBase);
     ui->messageLabel->setFont(Utility::font(QFont::Bold,1));
 
+    ui->previousButton->setType(IconButton::Previous);
     ui->previousButton->setButtonEnabled(false);
 
-    connect(ui->previousButton, SIGNAL(previousButtonClicked()),
+    connect(ui->previousButton, SIGNAL(buttonClicked()),
                                 SLOT(playPrevious()));
 
+    ui->playPauseButton->setType(IconButton::PlayPause);
     ui->playPauseButton->setButtonEnabled(false);
     ui->playPauseButton->setPlaying(false);
 
-    connect(ui->playPauseButton, SIGNAL(playButtonClicked()),
+    connect(ui->playPauseButton, SIGNAL(buttonClicked()),
                                  SLOT(pauseResumePlaying()));
 
+    ui->nextButton->setType(IconButton::Next);
     ui->nextButton->setButtonEnabled(false);
-    connect(ui->nextButton, SIGNAL(nextButtonClicked()),
+    
+    connect(ui->nextButton, SIGNAL(buttonClicked()),
                             SLOT(playNext()));
 
     ui->timeLabel->setText( QLatin1String( "00:00" ) );

@@ -23,8 +23,10 @@
 #include <QTimerEvent>
 #include <QToolBar>
 
-IconButton::IconButton( QWidget *parent ) : QWidget( parent )
+IconButton::IconButton( QWidget *parent )
+    : QWidget( parent )
     , m_isClick( false )
+    , m_type( PlayPause )
 {
     m_anim.step = 0;
     m_anim.timer = 0;
@@ -157,5 +159,16 @@ void IconButton::updateIconBuffer()
                                        m_anim.steps - m_anim.step, m_anim.step );
 
     m_buffer.pixmap = QPixmap::fromImage( m_buffer.image );
+}
+
+void IconButton::setType(const Type type)
+{
+    m_type = type;
+    repaint();
+}
+
+IconButton::Type IconButton::type() const
+{
+    return m_type;
 }
 

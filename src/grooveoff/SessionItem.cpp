@@ -84,7 +84,7 @@ void SessionItem::multiFuncBtnClicked()
 
 void SessionItem::removeSession()
 {
-    m_state = GrooveOff::DeletedState;
+//    m_state = GrooveOff::DeletedState;
     emit remove(sessionName());
 }
 
@@ -100,14 +100,14 @@ void SessionItem::stateChanged()
             ui->infoIconWidget->setVisible(false);
             ui->infoMessageWidget->setVisible(false);
             break;
-        case GrooveOff::DeletedState:
-            ui->multiFuncWidget->setVisible(false);
-            ui->infoIcon->setPixmap(QIcon::fromTheme(QLatin1String("user-trash-full"),
-                                     QIcon(QLatin1String(":/resources/user-trash-full.png"))).pixmap(16,16));
-            ui->infoIconWidget->setVisible(true);
-            ui->infoMessageWidget->setVisible(false);
-            ui->infoMessage->setText(trUtf8("Deleted"));
-            break;
+//         case GrooveOff::DeletedState:
+//             ui->multiFuncWidget->setVisible(false);
+//             ui->infoIcon->setPixmap(QIcon::fromTheme(QLatin1String("user-trash-full"),
+//                                      QIcon(QLatin1String(":/resources/user-trash-full.png"))).pixmap(16,16));
+//             ui->infoIconWidget->setVisible(true);
+//             ui->infoMessageWidget->setVisible(false);
+//             ui->infoMessage->setText(trUtf8("Deleted"));
+//             break;
     }
 }
 
@@ -128,9 +128,9 @@ void SessionItem::enterEvent(QEvent* event)
             if(m_deleteButtonEnabled)
                 ui->multiFuncWidget->setVisible(true);
             break;
-        case GrooveOff::DeletedState:
-            ui->infoMessageWidget->setVisible(true);
-            break;
+//         case GrooveOff::DeletedState:
+//             ui->infoMessageWidget->setVisible(true);
+//             break;
         default:
             // do nothing
             break;
@@ -150,9 +150,9 @@ void SessionItem::leaveEvent(QEvent* event)
             if(!ui->multiFuncButton->isCountdownStarted())
                 ui->multiFuncWidget->setVisible(false);
             break;
-        case GrooveOff::DeletedState:
-            ui->infoMessageWidget->setVisible(false);
-            break;
+//         case GrooveOff::DeletedState:
+//             ui->infoMessageWidget->setVisible(false);
+//             break;
         default:
             // do nothing
             break;

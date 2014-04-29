@@ -100,7 +100,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->setupUi(this);
     s_instance = this;
-    The::paletteHandler()->setPalette( palette() );
     m_playerWidget = new PlayerWidget(this);
     new ActionCollection(this);
     setupMenus();
@@ -267,11 +266,10 @@ void MainWindow::setupUi()
     ui->searchLine->setFixedHeight(fontHeight > 24 ? fontHeight : 24);
     ui->searchLine->setToolTip(trUtf8("Search for songs, artists, genres, playlists"));
     ui->searchLine->setPlaceholderText(trUtf8("Search for songs, artists, genres, playlists"));
-
-    ui->searchButton->setIcon(QIcon::fromTheme(QLatin1String("system-search")));
-    ui->searchButton->setIconSize(QSize(16,16));
-    ui->searchButton->setFixedHeight(fontHeight > 25 ? fontHeight : 25);
-    ui->searchButton->setEnabled(false);
+    
+    ui->searchButton->setType(IconButton::Search);
+//    ui->searchButton->setFixedHeight(fontHeight > 25 ? fontHeight : 25);
+    ui->searchButton->setButtonEnabled(false);
     ui->searchButton->setToolTip(trUtf8("Start search"));
 
     ui->label4->setText(trUtf8("Save in:"));
@@ -286,21 +284,18 @@ void MainWindow::setupUi()
     completer->setModel(new QDirModel(completer));
     ui->pathLine->setCompleter(completer);
 
+    ui->browseButton->setType(IconButton::Browse);
+//    ui->browseButton->setFixedHeight(fontHeight > 25 ? fontHeight : 25);
     ui->browseButton->setToolTip(trUtf8("Select save foder"));
-    ui->browseButton->setIcon(QIcon::fromTheme(QLatin1String("folder-open")));
-    ui->browseButton->setIconSize(QSize(16,16));
-    ui->browseButton->setFixedHeight(fontHeight > 25 ? fontHeight : 25);
 
     ui->spinnerWidget->setFixedHeight(fontHeight > 25 ? fontHeight : 25);
     ui->spinnerWidget->setVisible(false);
 
     ui->combosContainer->setVisible(false);
 
+    ui->batchDownloadButton->setType(IconButton::Batch);
     ui->batchDownloadButton->setToolTip(trUtf8("Download all tracks"));
-    ui->batchDownloadButton->setIcon(QIcon::fromTheme(QLatin1String("download"),
-                                     QIcon::fromTheme(QLatin1String("document-save"), QIcon(QLatin1String(":/resources/download.png"))))); 
-    ui->batchDownloadButton->setIconSize(QSize(16,16));
-    ui->batchDownloadButton->setFixedHeight(fontHeight > 25 ? fontHeight : 25);
+//    ui->batchDownloadButton->setFixedHeight(fontHeight > 25 ? fontHeight : 25);
 
     ui->matchesMessage->setFont(Utility::font(QFont::Bold));
 
@@ -358,7 +353,7 @@ void MainWindow::setupSignals()
             ui->downloadList,                       SLOT(abortAllDownloads()));
 
     connect(ac->getAction( "actionRemoveFailed" ), SIGNAL(triggered(bool)),
-            ui->downloadList,                      SLOT(removeFailedDeletedAborted()));
+            ui->downloadList,                      SLOT(removeFailedAborted()));
 
     connect(ac->getAction( "actionClearDownloadList" ), SIGNAL(triggered(bool)),
             ui->downloadList,                           SLOT(removeDownloaded()));
@@ -377,10 +372,10 @@ void MainWindow::setupSignals()
 
 
     // gui widgets
-    connect(ui->searchButton, SIGNAL(clicked(bool)),
+    connect(ui->searchButton, SIGNAL(buttonClicked()),
                               SLOT(beginSearch()));
     
-    connect(ui->browseButton, SIGNAL(clicked(bool)),
+    connect(ui->browseButton, SIGNAL(buttonClicked()),
                               SLOT(selectFolder()));
     
     connect(ui->searchLine, SIGNAL(returnPressed()),
@@ -392,7 +387,7 @@ void MainWindow::setupSignals()
     connect(ui->albumsCB, SIGNAL(activated(int)),
                           SLOT(albumChanged()));
     
-    connect(ui->batchDownloadButton, SIGNAL(clicked()),
+    connect(ui->batchDownloadButton, SIGNAL(buttonClicked()),
                                      SLOT(batchDownload()));
     
     connect(ui->pathLine, SIGNAL(textChanged(QString)),
@@ -456,6 +451,7 @@ void MainWindow::beginSearch()
     m_searchInProgress = true;
 
     // some ui setups
+//     ui->searchButton->setVisible(false);
     ui->searchButton->setVisible(false);
 
     ui->spinnerWidget->setVisible(true);
@@ -525,7 +521,7 @@ void MainWindow::tokenFinished()
 {
     // the application is now free to perform a search
     m_searchInProgress = false;
-    ui->searchButton->setEnabled(true);
+    ui->searchButton->setButtonEnabled(true);
 
     if(!m_token->result().isEmpty()) {
         ui->searchLine->setStyleSheet( QLatin1String( "" ) );
@@ -665,6 +661,15 @@ void MainWindow::searchError()
 
 void MainWindow::downloadRequest(PlaylistItemPtr playlistItem)
 {
+    if(isDownloadingQueued(playlistItem->song()->songID())) {
+        if(!m_batchDownload) {
+            QMessageBox::information(this, trUtf8("Attention"),
+                                     trUtf8("The song is already in queue."),
+                                     QMessageBox::Ok);
+        }
+        return;
+    }
+    
     // at this point playlistItem doesn't contain own naming schema
     QString schema = Utility::namingSchema;
     schema.replace(QLatin1String("%title"), playlistItem->song()->songName(), Qt::CaseInsensitive);
@@ -699,7 +704,7 @@ void MainWindow::downloadRequest(PlaylistItemPtr playlistItem)
                                         QMessageBox::Yes | QMessageBox::Cancel,
                                         QMessageBox::Cancel);
         if(ret == QMessageBox::Yes) {
-            QFile::remove(ui->pathLine->text() + QDir::separator() + playlistItem->fileName());
+            QFile::remove(ui->pathLine->text() + QDir::separator() + schema + ".mp3");
         } else {
             return;
         }
@@ -716,15 +721,6 @@ void MainWindow::downloadRequest(PlaylistItemPtr playlistItem)
         if(m_batchDownload)
             m_stopBatchDownload = true;
         
-        return;
-    }
-
-    if(isDownloadingQueued(playlistItem->song()->songID())) {
-        if(!m_batchDownload) {
-            QMessageBox::information(this, trUtf8("Attention"),
-                                     trUtf8("The song is already in queue."),
-                                     QMessageBox::Ok);
-        }
         return;
     }
 
@@ -762,6 +758,9 @@ void MainWindow::addDownloadItem(PlaylistItemPtr playlistItem)
 
     connect(item,             SIGNAL(reloadPlaylist()),
             ui->downloadList, SLOT(reloadPlaylist()));
+    
+    connect(item,             SIGNAL(removeMe(DownloadItem*)), 
+            ui->downloadList, SLOT(removeItem(DownloadItem*)));
     
     connect(item, SIGNAL(downloadFinished()), 
                   SLOT(freeDownloadSlot()));
@@ -913,7 +912,7 @@ void MainWindow::onlineStateChanged(bool isOnline) {
     } else {
         //statusBar()->showMessage(trUtf8("Offline"),0);
         m_playerWidget->showMessage(trUtf8("Offline"));
-        ui->searchButton->setEnabled(false);
+        ui->searchButton->setButtonEnabled(false);
         ui->qled->setValue(false);
         ui->matchList->setEnabled(false);
     }
@@ -940,6 +939,10 @@ void MainWindow::loadSettings()
     settings.setIniCodec( "UTF-8" );
 
     m_saveSession     = settings.value(QLatin1String("saveSession"), true).toBool();
+    if(m_saveSession)
+        m_saveAborted = settings.value(QLatin1String("saveAborted"), false).toBool();
+    else
+        m_saveAborted = true;
     m_showHistory     = settings.value(QLatin1String("saveSearches"), false).toBool();
     m_maxResults      = settings.value(QLatin1String("numResults"), 0).toInt();
     m_loadCovers      = settings.value(QLatin1String("loadCovers"), true).toBool();
@@ -1144,17 +1147,8 @@ bool MainWindow::isDownloadingQueued(const uint &id)
 {
     // check if file is currently downloading
     for(int i = 0; i < ui->downloadList->count(); i++) {
-        GrooveOff::DownloadState state = qobject_cast<DownloadItem *>(ui->downloadList->itemWidget(ui->downloadList->item(i)))->downloadState();
-        if(state != GrooveOff::DeletedState) {
-            if(id == qobject_cast<DownloadItem *>(ui->downloadList->itemWidget(ui->downloadList->item(i)))->playlistItem()->song()->songID()) {
-                if(!m_batchDownload) {
-                    QMessageBox::information(this,
-                                            trUtf8("Download in progress"),
-                                            trUtf8("A file with the same name is already in your download list."),
-                                            QMessageBox::Ok);
-                }
-                return true;
-            }
+        if(id == qobject_cast<DownloadItem *>(ui->downloadList->itemWidget(ui->downloadList->item(i)))->playlistItem()->song()->songID()) {
+            return true;
         }
     }
     return false;
@@ -1212,6 +1206,10 @@ void MainWindow::saveSessionAs()
 
 void MainWindow::saveSession()
 {
+    if(!m_saveAborted) {
+        ui->downloadList->removeFailedAborted();
+    }
+    
     The::sessionReaderWriter()->write( m_sessionFilePath + m_sessionFileName + QLatin1String(".xml"),
                                        ui->downloadList->playlistItems() );
 }
@@ -1224,7 +1222,7 @@ void MainWindow::loadSession()
     // remove old entries
     ui->downloadList->abortAllDownloads();
     ui->downloadList->removeDownloaded();
-    ui->downloadList->removeFailedDeletedAborted();
+    ui->downloadList->removeFailedAborted();
 
     QList<PlaylistItemPtr> items = The::sessionReaderWriter()->read(m_sessionFilePath + m_sessionFileName + QLatin1String(".xml"));
 
@@ -1274,7 +1272,7 @@ void MainWindow::loadSessionFile()
         saveSession();
         ui->downloadList->abortAllDownloads();
         ui->downloadList->removeDownloaded();
-        ui->downloadList->removeFailedDeletedAborted();
+        ui->downloadList->removeFailedAborted();
         m_sessionFileName = fileName;
 
         loadSession();
@@ -1284,6 +1282,7 @@ void MainWindow::loadSessionFile()
 void MainWindow::restoreSearch()
 {
     m_searchInProgress = false;
+//     ui->searchButton->setVisible(true);
     ui->searchButton->setVisible(true);
 
     ui->spinnerWidget->setVisible(false);
@@ -1309,5 +1308,14 @@ void MainWindow::openSessionManager()
     }
 
     loadSession();
+}
+
+void MainWindow::resizeEvent( QResizeEvent *event )
+{
+    ui->searchButton->setFixedSize(QSize(ui->pathLine->height(), ui->pathLine->height()));
+    ui->browseButton->setFixedSize(QSize(ui->pathLine->height(), ui->pathLine->height()));
+    ui->batchDownloadButton->setFixedSize(QSize(ui->pathLine->height(), ui->pathLine->height()));
+    ui->spinnerWidget->setFixedSize(QSize(ui->pathLine->height(), ui->pathLine->height()));
+    QWidget::resizeEvent(event);
 }
 

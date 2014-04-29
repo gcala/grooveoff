@@ -49,12 +49,11 @@ void DownloadList::reloadPlaylist()
   \brief removeFailedDeletedAborted : remove failed/deleted/aborted items from download list
   \return void
 */
-void DownloadList::removeFailedDeletedAborted()
+void DownloadList::removeFailedAborted()
 {
     for(int i = count() - 1; i >= 0; i--) {
         GrooveOff::DownloadState state = ITEM(i)->downloadState();
         if(state == GrooveOff::AbortedState ||
-           state == GrooveOff::DeletedState ||
            state == GrooveOff::ErrorState ) {
             QListWidgetItem *item = takeItem(i);
             removeItemWidget(item);
@@ -97,11 +96,25 @@ QList< PlaylistItemPtr > DownloadList::playlistItems() const
 {
     QList< PlaylistItemPtr > tracks;
     for(int i = 0; i < count(); i++) {
-        if(ITEM(i)->downloadState() != GrooveOff::DeletedState)
+//        if(ITEM(i)->downloadState() != GrooveOff::DeletedState)
             tracks << ITEM(i)->playlistItem();
     }
 
     return tracks;
 }
+
+void DownloadList::removeItem(DownloadItem* downItem)
+{
+    The::audioEngine()->removingTrack(downItem->playlistItem());
+    
+    for(int i = 0; i < count(); i++) {
+        if(ITEM(i) == downItem) {
+            QListWidgetItem *it = takeItem(i);
+            removeItemWidget(it);
+            delete it;
+        }
+    }
+}
+
 
 

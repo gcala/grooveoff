@@ -26,9 +26,12 @@ class IconButton : public QWidget
     Q_OBJECT
 
 public:
+    enum Type { Previous = 0, Next, PlayPause, Search, Browse, Trash, Batch, Download, Remove, Stop, Redownload, Clock, Aborted, Warning };
     IconButton( QWidget *parent = 0 );
     virtual QSize sizeHint() const;
     void setIcon( const QImage &img, int steps = 0 );
+    void setType( const Type type );
+    Type type() const;
 
 signals:
     void clicked();
@@ -67,6 +70,7 @@ private:
     } m_buffer;
 
     QImage m_icon, m_oldIcon;
+    Type m_type;
 };
 
 

@@ -51,10 +51,6 @@ namespace GrooveOff {
           */
          AbortedState,
          /**
-          * Song was deleted
-          */
-         DeletedState,
-         /**
           * Something goes wrong during download
           */
          ErrorState

@@ -25,6 +25,7 @@
 #include <../libgrooveshark/downloader.h>
 
 #include <QWidget>
+#include <qlistwidget.h>
 #include <QVariantMap>
 #include <phonon/MediaObject>
 
@@ -67,6 +68,7 @@ Q_SIGNALS:
     void play(QString);
     void reloadPlaylist();
     void removeMeFromSession(quint32);
+    void removeMe(DownloadItem *);
 
 protected:
     virtual void leaveEvent ( QEvent * event );
@@ -76,10 +78,14 @@ private Q_SLOTS:
     void downloadFinished(bool ok);
     void setProgress(const qint64 &bytesReceived, const qint64 &bytesTotal);
     void playSong();
-    void multiFuncBtnClicked();
+    void timerButtonClicked();
     void removeSong();
     void openFolder();
     void loadCover();
+    void stopDownload();
+    void deleteItem();
+    void unqueueItem();
+    void queueItem();
 
 private:
     Ui::DownloadItem *ui;

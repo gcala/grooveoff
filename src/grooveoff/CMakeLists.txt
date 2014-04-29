@@ -1,6 +1,4 @@
-set(grooveoff_SRCS widgets/SessionList.cpp
-                   widgets/TrackList.cpp
-                   SessionReaderWriter.cpp
+set(grooveoff_SRCS SessionReaderWriter.cpp
                    App.cpp
                    ActionCollection.cpp
                    AboutDialog.cpp
@@ -23,6 +21,7 @@ set(grooveoff_SRCS widgets/SessionList.cpp
                    PaletteHandler.cpp
                    SessionManager.cpp
                    SessionItem.cpp
+                   widgets/SvgButton.cpp
                    widgets/ContainedMenuButton.cpp
                    widgets/ElidedComboBox.cpp
                    widgets/PlayAnimationWidget.cpp
@@ -38,6 +37,8 @@ set(grooveoff_SRCS widgets/SessionList.cpp
                    widgets/NextButton.cpp
                    widgets/PreviousButton.cpp
                    widgets/Spinner.cpp
+                   widgets/SessionList.cpp
+                   widgets/TrackList.cpp
                    dbus/mpris.cpp
                    dbus/mpris1/Mpris1PluginRootAdaptor.cpp
                    dbus/mpris1/Mpris1PluginPlayerAdaptor.cpp

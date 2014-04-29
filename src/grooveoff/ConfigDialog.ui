@@ -29,7 +29,7 @@
      <item>
       <widget class="QStackedWidget" name="stackedWidget">
        <property name="currentIndex">
-        <number>1</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="generalSettingsPage">
         <layout class="QVBoxLayout" name="verticalLayout_7">
@@ -87,7 +87,17 @@
             <item>
              <widget class="QCheckBox" name="saveSession">
               <property name="text">
-               <string>Save session on exit and restore it on next boot</string>
+               <string>Save and restore session</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="saveAborted">
+              <property name="styleSheet">
+               <string notr="true">margin-left: 16px;</string>
+              </property>
+              <property name="text">
+               <string>Save also failed/aborted</string>
               </property>
              </widget>
             </item>

@@ -33,8 +33,15 @@
 #include <qmath.h>
 #include <QtDebug>
 
-Spinner::Spinner(QWidget *parent) : QWidget(parent), m_step(0), m_fadeStep(0), m_timer(0),
-                                    m_startTimer(0), m_textCols(0), m_type(Sun), m_geometryDirty(false)
+Spinner::Spinner(QWidget *parent)
+    : QWidget(parent)
+    , m_step(0)
+    , m_fadeStep(0)
+    , m_timer(0)
+    , m_startTimer(0)
+    , m_textCols(0)
+    , m_type(Sun)
+    , m_geometryDirty(false)
 {
     updateAncestors();
     hide();

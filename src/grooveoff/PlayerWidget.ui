@@ -26,7 +26,7 @@
       <number>0</number>
      </property>
      <item>
-      <widget class="PreviousButton" name="previousButton" native="true">
+      <widget class="SvgButton" name="previousButton" native="true">
        <property name="minimumSize">
         <size>
          <width>32</width>
@@ -42,7 +42,7 @@
       </widget>
      </item>
      <item>
-      <widget class="PlayPauseButton" name="playPauseButton" native="true">
+      <widget class="SvgButton" name="playPauseButton" native="true">
        <property name="minimumSize">
         <size>
          <width>48</width>
@@ -58,7 +58,7 @@
       </widget>
      </item>
      <item>
-      <widget class="NextButton" name="nextButton" native="true">
+      <widget class="SvgButton" name="nextButton" native="true">
        <property name="minimumSize">
         <size>
          <width>32</width>
@@ -300,21 +300,9 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>PlayPauseButton</class>
+   <class>SvgButton</class>
    <extends>QWidget</extends>
-   <header location="global">widgets/PlayPauseButton.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>NextButton</class>
-   <extends>QWidget</extends>
-   <header location="global">widgets/NextButton.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>PreviousButton</class>
-   <extends>QWidget</extends>
-   <header location="global">widgets/PreviousButton.h</header>
+   <header location="global">widgets/SvgButton.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
