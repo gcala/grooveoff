@@ -180,12 +180,12 @@ Phonon::State AudioEngine::state() const
 
 qint64 AudioEngine::currentTime() const
 {
-    m_mediaObject->currentTime();
+    return m_mediaObject->currentTime();
 }
 
 qint64 AudioEngine::currentTrackTotalTime() const
 {
-    m_mediaObject->totalTime();
+    return m_mediaObject->totalTime();
 }
 
 PlaylistItemPtr AudioEngine::currentTrack() const
