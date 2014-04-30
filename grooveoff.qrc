@@ -35,5 +35,8 @@
         <file>resources/dialog-warning.png</file>
         <file>resources/task-reject.png</file>
         <file>resources/dialog-error.png</file>
+        <file>resources/view-media-artist.png</file>
+        <file>resources/view-media-lyrics.png</file>
+        <file>resources/view-media-playlist.png</file>
     </qresource>
 </RCC>

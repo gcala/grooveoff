@@ -40,7 +40,10 @@ SettingsItem::SettingsItem(const QString &name, const QString &icon, QWidget *pa
     else if(QIcon::hasThemeIcon(m_settingIcon))
         ui->settingIconLabel->setPixmap(QIcon::fromTheme(m_settingIcon).pixmap(48,48));
     else
-        ui->settingIconLabel->setPixmap(QIcon::fromTheme(QLatin1String("software-update-available"), QIcon(QLatin1String(":/resources/" + m_settingIcon.toLatin1() + ".png"))).pixmap(48,48));
+        ui->settingIconLabel->setPixmap(QIcon::fromTheme(QLatin1String("software-update-available"), QIcon(QLatin1String(":/resources/" + m_settingIcon.toAscii() + ".png"))).pixmap(48,48));
+
+    // fix small icons in gnome
+    ui->settingIconLabel->setScaledContents(true);
 
     ui->settingNameLabel->setText(m_settingName);
 }

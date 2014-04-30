@@ -467,6 +467,8 @@ void MainWindow::beginSearch()
     ui->albumsCB->clear();
     ui->albumsCB->addItem(trUtf8("All Albums"));
     m_artistsAlbumsContainer.clear();
+    
+    ui->matchesMessage->setText(trUtf8("Querying..."));
 
     m_songList = m_api->songs(ui->searchLine->text(), Utility::token);
 

@@ -76,7 +76,7 @@ ConfigDialog::ConfigDialog(QWidget *parent):
     itemsIcons << QLatin1String("view-media-lyrics")   //%title
                << QLatin1String("view-media-artist")   //%artist
                << QLatin1String("view-media-playlist") //%album
-               << QLatin1String("mixer-cd");           //%track
+               << QLatin1String("media-optical");      //%track
 
     ui->m_tagListWidget->setItemsIcons(itemsIcons);
     ui->m_tagListWidget->setLocalizedTagNames(m_localizedTagNames);
@@ -128,7 +128,7 @@ void ConfigDialog::setupUi()
     boldFont.setBold(true);
     QFontMetrics fmText(boldFont);
 
-    // avoid that strings translation deform gui
+    // avoid that strings translation deforms gui
     int maxWidth = 0;
     if(fmText.width(generalString) > maxWidth)
         maxWidth = fmText.width(generalString);
