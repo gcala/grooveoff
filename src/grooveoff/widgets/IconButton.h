@@ -27,7 +27,8 @@ class IconButton : public QWidget
     Q_OBJECT
 
 public:
-    enum Type { Previous = 0, 
+    enum Type { Empty = 0,
+                Previous, 
                 Next, 
                 PlayPause, 
                 Search, 

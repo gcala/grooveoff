@@ -26,7 +26,7 @@
 IconButton::IconButton( QWidget *parent )
     : QWidget( parent )
     , m_isClick( false )
-    , m_type( PlayPause )
+    , m_type( Empty )
 {
     m_anim.step = 0;
     m_anim.timer = 0;
