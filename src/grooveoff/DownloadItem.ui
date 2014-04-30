@@ -371,7 +371,13 @@
        <height>30</height>
       </size>
      </property>
-     <layout class="QGridLayout" name="gridLayout_3">
+     <layout class="QGridLayout" name="playLayout">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
       <item row="0" column="0">
        <widget class="SvgButton" name="playButton" native="true"/>
       </item>
@@ -392,13 +398,7 @@
        <height>30</height>
       </size>
      </property>
-     <property name="sizeIncrement">
-      <size>
-       <width>30</width>
-       <height>30</height>
-      </size>
-     </property>
-     <layout class="QGridLayout" name="gridLayout">
+     <layout class="QGridLayout" name="animationLayout">
       <property name="leftMargin">
        <number>0</number>
       </property>

@@ -120,10 +120,7 @@ void DownloadItem::setupUi()
     ui->artist_albumLabel->setText(m_playlistItem->song()->artistName() + " - " + m_playlistItem->song()->albumName());
     ui->artist_albumLabel->setToolTip(m_playlistItem->song()->songName());
     ui->artist_albumLabel->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred); // fix hidden label
-
-    ui->timerButton->setFixedSize(QSize(Utility::buttonSize,Utility::buttonSize));
-
-    ui->playButton->setType(IconButton::PlayPause);
+    
     if(m_context == GrooveOff::Track) {
         ui->playWidget->setVisible(false);
         ui->progressBar->setVisible(false);
@@ -131,37 +128,43 @@ void DownloadItem::setupUi()
         ui->playButton->setButtonEnabled(false);
         ui->playButton->setPlaying(false);
 
-        ui->barsWidget->setFixedSize(QSize(Utility::buttonSize,Utility::buttonSize));
-
         ui->progressBar->setMinimum(0);
         ui->progressBar->setValue(0);
         ui->progressBar->setFixedWidth(100);
         ui->progressBar->setFixedHeight(22);
     }
     
+    ui->playButton->setType(IconButton::PlayPause);
+    
     ui->unqueueButton->setType(IconButton::Remove);
-    ui->unqueueButton->setFixedSize(QSize(Utility::buttonSize,Utility::buttonSize));
     ui->unqueueButton->setToolTip(trUtf8("Remove track from queue"));
     
     ui->stopButton->setType(IconButton::Stop);
-    ui->stopButton->setFixedSize(QSize(Utility::buttonSize,Utility::buttonSize));
     ui->stopButton->setToolTip(trUtf8("Stop track download"));
     
     ui->deleteButton->setType(IconButton::Trash);
-    ui->deleteButton->setFixedSize(QSize(Utility::buttonSize,Utility::buttonSize));
     ui->deleteButton->setToolTip(trUtf8("Delete track from disk"));
     
     ui->queueButton->setType(IconButton::Redownload);
-    ui->queueButton->setFixedSize(QSize(Utility::buttonSize,Utility::buttonSize));
     ui->queueButton->setToolTip(trUtf8("Redownload track"));
     
     ui->openFolderButton->setType(IconButton::Browse);
-    ui->openFolderButton->setFixedSize(QSize(Utility::buttonSize,Utility::buttonSize));
     ui->openFolderButton->setToolTip(trUtf8("Open folder"));
     
     ui->infoIcon->setType(IconButton::Clock);
+    
+    ui->timerButton->setFixedSize(QSize(Utility::buttonSize,Utility::buttonSize));
+    ui->barsWidget->setFixedSize(QSize(Utility::buttonSize,Utility::buttonSize));
+    ui->unqueueButton->setFixedSize(QSize(Utility::buttonSize,Utility::buttonSize));
+    ui->stopButton->setFixedSize(QSize(Utility::buttonSize,Utility::buttonSize));
+    ui->deleteButton->setFixedSize(QSize(Utility::buttonSize,Utility::buttonSize));
+    ui->queueButton->setFixedSize(QSize(Utility::buttonSize,Utility::buttonSize));
+    ui->openFolderButton->setFixedSize(QSize(Utility::buttonSize,Utility::buttonSize));
+    ui->infoIcon->setFixedSize(QSize(Utility::buttonSize,Utility::buttonSize));
+    ui->playButton->setFixedSize(QSize(Utility::buttonSize,Utility::buttonSize));
 
     // seems that gtk DEs use different default values than Qt...
+    ui->animationLayout->setContentsMargins(0,4,0,4);
     ui->mainLayout->setContentsMargins(4,4,4,4);
     ui->timerLayout->setContentsMargins(0,4,0,4);
     ui->infoIconLayout->setContentsMargins(0,4,0,4);
@@ -172,11 +175,9 @@ void DownloadItem::setupUi()
     ui->deleteLayout->setContentsMargins(0,4,0,4);
     ui->queueLayout->setContentsMargins(0,4,0,4);
     ui->unqueueLayout->setContentsMargins(0,4,0,4);
+    ui->playLayout->setContentsMargins(0,4,0,4);
     ui->songWidgetLayout->setContentsMargins(1,1,0,2);
     ui->songWidgetLayout->setHorizontalSpacing(5);
-    ui->infoIcon->setFixedSize(QSize(Utility::buttonSize,Utility::buttonSize));
-    ui->timerButton->setIconSize(QSize(16,16));
-    ui->playButton->setFixedSize(QSize(Utility::buttonSize,Utility::buttonSize));
 }
 
 /*!

@@ -254,9 +254,6 @@ void MainWindow::setupUi()
 //    statusBar()->showMessage(trUtf8("Connecting...", 0));
     m_playerWidget->showMessage(trUtf8("Connecting..."));
 
-    // Led
-    ui->qled->setFixedSize(QSize(24,24));
-
     QFontMetrics fmSystemFont(Utility::font(QFont::Bold));
     int fontHeight = fmSystemFont.height();
 
@@ -271,6 +268,10 @@ void MainWindow::setupUi()
 //    ui->searchButton->setFixedHeight(fontHeight > 25 ? fontHeight : 25);
     ui->searchButton->setButtonEnabled(false);
     ui->searchButton->setToolTip(trUtf8("Start search"));
+    
+    ui->compactMenuButton->setType(IconButton::Settings);
+    ui->compactMenuButton->setToolTip(trUtf8("Main menu"));
+    ui->compactMenuButton->setMenu( m_compactMainMenu );
 
     ui->label4->setText(trUtf8("Save in:"));
     ui->label4->setBuddy(ui->pathLine);
@@ -285,7 +286,6 @@ void MainWindow::setupUi()
     ui->pathLine->setCompleter(completer);
 
     ui->browseButton->setType(IconButton::Browse);
-//    ui->browseButton->setFixedHeight(fontHeight > 25 ? fontHeight : 25);
     ui->browseButton->setToolTip(trUtf8("Select save foder"));
 
     ui->spinnerWidget->setFixedHeight(fontHeight > 25 ? fontHeight : 25);
@@ -295,7 +295,6 @@ void MainWindow::setupUi()
 
     ui->batchDownloadButton->setType(IconButton::Batch);
     ui->batchDownloadButton->setToolTip(trUtf8("Download all tracks"));
-//    ui->batchDownloadButton->setFixedHeight(fontHeight > 25 ? fontHeight : 25);
 
     ui->matchesMessage->setFont(Utility::font(QFont::Bold));
 
@@ -303,12 +302,7 @@ void MainWindow::setupUi()
 
     m_playerWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
     
-    ui->compactMenuButton->setIcon( QIcon::fromTheme( "applications-system" ) );
-    ui->compactMenuButton->setToolTip( trUtf8( "Main Menu" ) );
-    ui->compactMenuButton->setMenu( m_compactMainMenu );
-    ui->compactMenuButton->setToolButtonStyle( Qt::ToolButtonIconOnly );
-    ui->compactMenuButton->setAutoRaise(true);
-    ui->compactMenuButton->setIconSize(QSize(24,24));
+    ui->svgLed->setType(IconButton::Offline);
 }
 
 /*!
@@ -501,7 +495,7 @@ void MainWindow::getToken()
     m_jar->clear();
 
     // some ui setups
-    ui->qled->setValue(false);
+    ui->svgLed->setType(IconButton::Offline);
     //statusBar()->showMessage(trUtf8("Connecting..."), 0);
     m_playerWidget->showMessage(trUtf8("Connecting..."));
 
@@ -530,8 +524,8 @@ void MainWindow::tokenFinished()
 
         //statusBar()->showMessage(trUtf8("Connected"), 3000);
         m_playerWidget->showMessage(trUtf8("Connected to\nGrooveshark"));
-        ui->qled->setValue(true);
-        ui->qled->setToolTip(trUtf8("You're connected to Grooveshark!"));
+        ui->svgLed->setToolTip(trUtf8("You're connected to Grooveshark!"));
+        ui->svgLed->setType(IconButton::Online);
         ui->matchList->setEnabled(true);
 
         // start download of queued songs from last session
@@ -913,7 +907,7 @@ void MainWindow::onlineStateChanged(bool isOnline) {
         //statusBar()->showMessage(trUtf8("Offline"),0);
         m_playerWidget->showMessage(trUtf8("Offline"));
         ui->searchButton->setButtonEnabled(false);
-        ui->qled->setValue(false);
+        ui->svgLed->setType(IconButton::Offline);
         ui->matchList->setEnabled(false);
     }
 }
@@ -1282,7 +1276,6 @@ void MainWindow::loadSessionFile()
 void MainWindow::restoreSearch()
 {
     m_searchInProgress = false;
-//     ui->searchButton->setVisible(true);
     ui->searchButton->setVisible(true);
 
     ui->spinnerWidget->setVisible(false);
@@ -1312,7 +1305,9 @@ void MainWindow::openSessionManager()
 
 void MainWindow::resizeEvent( QResizeEvent *event )
 {
+    ui->svgLed->setFixedSize(QSize(ui->pathLine->height(), ui->pathLine->height()));
     ui->searchButton->setFixedSize(QSize(ui->pathLine->height(), ui->pathLine->height()));
+    ui->compactMenuButton->setFixedSize(QSize(ui->pathLine->height(), ui->pathLine->height()));
     ui->browseButton->setFixedSize(QSize(ui->pathLine->height(), ui->pathLine->height()));
     ui->batchDownloadButton->setFixedSize(QSize(ui->pathLine->height(), ui->pathLine->height()));
     ui->spinnerWidget->setFixedSize(QSize(ui->pathLine->height(), ui->pathLine->height()));

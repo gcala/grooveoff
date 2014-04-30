@@ -58,6 +58,13 @@ void IconButton::setIcon( const QImage &img, int steps )
 
 void IconButton::mousePressEvent( QMouseEvent *me )
 {
+    if( m_type == Settings )
+    {
+        QPoint myPos = mapToGlobal( rect().bottomRight() );
+        myPos.rx() -= m_menu->sizeHint().width();
+        m_menu->popup( myPos );
+    }
+    
     me->accept();
     m_isClick = true;
 }
@@ -164,11 +171,22 @@ void IconButton::updateIconBuffer()
 void IconButton::setType(const Type type)
 {
     m_type = type;
-    repaint();
+    reloadContent( size() );
 }
 
 IconButton::Type IconButton::type() const
 {
     return m_type;
 }
+
+QMenu* IconButton::menu() const
+{
+    return m_menu;
+}
+
+void IconButton::setMenu(QMenu* menu)
+{
+    m_menu = menu;
+}
+
 

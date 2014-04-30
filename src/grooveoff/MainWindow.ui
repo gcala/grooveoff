@@ -21,7 +21,7 @@
        <number>2</number>
       </property>
       <property name="rightMargin">
-       <number>2</number>
+       <number>0</number>
       </property>
       <item>
        <widget class="QLabel" name="label0">
@@ -64,12 +64,22 @@
        </spacer>
       </item>
       <item>
-       <widget class="QLed" name="qled" native="true"/>
+       <widget class="SvgButton" name="svgLed" native="true">
+        <property name="minimumSize">
+         <size>
+          <width>30</width>
+          <height>30</height>
+         </size>
+        </property>
+       </widget>
       </item>
       <item>
-       <widget class="ContainedMenuButton" name="compactMenuButton">
-        <property name="text">
-         <string>...</string>
+       <widget class="SvgButton" name="compactMenuButton" native="true">
+        <property name="minimumSize">
+         <size>
+          <width>30</width>
+          <height>30</height>
+         </size>
         </property>
        </widget>
       </item>
@@ -252,12 +262,6 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>QLed</class>
-   <extends>QWidget</extends>
-   <header location="global">widgets/QLed.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>ElidedComboBox</class>
    <extends>QComboBox</extends>
    <header location="global">widgets/ElidedComboBox.h</header>
@@ -266,11 +270,6 @@
    <class>DownloadList</class>
    <extends>QListWidget</extends>
    <header location="global">DownloadList.h</header>
-  </customwidget>
-  <customwidget>
-   <class>ContainedMenuButton</class>
-   <extends>QToolButton</extends>
-   <header location="global">widgets/ContainedMenuButton.h</header>
   </customwidget>
   <customwidget>
    <class>SvgButton</class>

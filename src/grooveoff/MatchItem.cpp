@@ -74,6 +74,9 @@ void MatchItem::setupUi()
     ui->downloadButton->setFixedSize(QSize(Utility::buttonSize,Utility::buttonSize));
 
     setDownloadIcon();
+    
+    ui->mainLayout->setContentsMargins(4,4,4,4);
+    ui->downloadLayout->setContentsMargins(0,4,0,4);
 }
 
 void MatchItem::loadCover()

@@ -50,7 +50,24 @@ signals:
 private:
     struct
     {
-        QImage play[3], pause[2], next[3], previous[3], search[3], browse[2], batch[2], download[2], redownload[2], stop[2], trash[2], remove[2], clock[2], aborted[2], warning[2];
+        QImage play[3];
+        QImage pause[2];
+        QImage next[3];
+        QImage previous[3];
+        QImage search[3];
+        QImage browse[2];
+        QImage batch[2];
+        QImage download[2];
+        QImage redownload[2];
+        QImage stop[2];
+        QImage trash[2];
+        QImage remove[2];
+        QImage clock[2];
+        QImage aborted[2];
+        QImage warning[2];
+        QImage settings[2];
+        QImage offline[2];
+        QImage online[2];
     } m_icon;
 
     bool m_isEnabled;

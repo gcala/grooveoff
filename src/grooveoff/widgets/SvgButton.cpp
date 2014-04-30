@@ -102,6 +102,12 @@ void SvgButton::reloadContent( const QSize &sz )
     m_icon.aborted[1] = The::svgHandler()->renderSvg( "Aborted_active", width, height, "Aborted_active" ).toImage();
     m_icon.warning[0] = The::svgHandler()->renderSvg( "Warning", width, height, "Warning" ).toImage();
     m_icon.warning[1] = The::svgHandler()->renderSvg( "Warning_active", width, height, "Warning_active" ).toImage();
+    m_icon.settings[0] = The::svgHandler()->renderSvg( "Settings", width, height, "Settings" ).toImage();
+    m_icon.settings[1] = The::svgHandler()->renderSvg( "Settings_active", width, height, "Settings_active" ).toImage();
+    m_icon.offline[0] = The::svgHandler()->renderSvg( "Offline", width, height, "Offline" ).toImage();
+    m_icon.offline[1] = The::svgHandler()->renderSvg( "Offline", width, height, "Offline" ).toImage();
+    m_icon.online[0] = The::svgHandler()->renderSvg( "Online", width, height, "Online" ).toImage();
+    m_icon.online[1] = The::svgHandler()->renderSvg( "Online", width, height, "Online" ).toImage();
 
     // mirroring icons if layout direction is right-to-left
     if( layoutDirection() == Qt::RightToLeft )
@@ -123,6 +129,7 @@ void SvgButton::reloadContent( const QSize &sz )
             m_icon.clock[i] = m_icon.clock[i].mirrored( true, false );
             m_icon.aborted[i] = m_icon.aborted[i].mirrored( true, false );
             m_icon.warning[i] = m_icon.warning[i].mirrored( true, false );
+            m_icon.settings[i] = m_icon.settings[i].mirrored( true, false );
         }
     }
 
@@ -181,6 +188,12 @@ QImage SvgButton::icon()
             return m_icon.aborted[underMouse()];
         case Warning:
             return m_icon.warning[underMouse()];
+        case Settings:
+            return m_icon.settings[underMouse()];
+        case Online:
+            return m_icon.online[underMouse()];
+        case Offline:
+            return m_icon.offline[underMouse()];
         case PlayPause:
             if(m_isPlaying)
                 return m_icon.pause[underMouse()];

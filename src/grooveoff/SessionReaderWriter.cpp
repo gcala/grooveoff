@@ -23,6 +23,7 @@
 #include <QDomDocument>
 #include <QMetaProperty>
 #include <QXmlStreamWriter>
+#include <QDir>
 #include <QDebug>
 
 using namespace GrooveShark;
@@ -101,8 +102,20 @@ void SessionReaderWriter::parseSong(const QDomElement& element, GrooveShark::Son
 bool SessionReaderWriter::write(const QString& file, QList< PlaylistItemPtr > tracks)
 {
     QFile sessionFile(file);
-    if(sessionFile.exists())
-        sessionFile.remove();
+    if(sessionFile.exists()) {
+        if(!sessionFile.remove()) {
+            qDebug() << "SessionReaderWriter ::" << "Unable to remove old session file" << sessionFile.fileName();
+            return false;
+        }
+    }
+    
+    QFileInfo fi(file);
+    
+    if(!QDir().mkpath(fi.absolutePath())) {
+        qDebug() << "SessionReaderWriter ::" << "Cannot create session path" << fi.absolutePath();
+        return false;
+    }
+    
     if(!sessionFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
         qDebug() << "SessionReaderWriter ::" << "Unable to write to session file" << sessionFile.fileName();
         return false;
@@ -145,6 +158,7 @@ bool SessionReaderWriter::write(const QString& file, QList< PlaylistItemPtr > tr
     stream.writeEndElement(); // playlist
 
     sessionFile.close();
+    return true;
 }
 
 

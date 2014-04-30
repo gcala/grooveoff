@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QHBoxLayout" name="horizontalLayout">
+  <layout class="QHBoxLayout" name="mainLayout">
    <item>
     <widget class="QLabel" name="coverLabel">
      <property name="minimumSize">
@@ -78,7 +78,7 @@
        <height>30</height>
       </size>
      </property>
-     <layout class="QGridLayout" name="gridLayout">
+     <layout class="QGridLayout" name="downloadLayout">
       <property name="leftMargin">
        <number>0</number>
       </property>
