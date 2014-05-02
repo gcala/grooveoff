@@ -22,10 +22,8 @@ set(grooveoff_SRCS SessionReaderWriter.cpp
                    SessionManager.cpp
                    SessionItem.cpp
                    widgets/SvgButton.cpp
-                   widgets/ContainedMenuButton.cpp
                    widgets/ElidedComboBox.cpp
                    widgets/PlayAnimationWidget.cpp
-                   widgets/QLed.cpp
                    widgets/ElidedLabel.cpp
                    widgets/TimerButton.cpp
                    widgets/TimerLabel.cpp
