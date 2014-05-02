@@ -29,6 +29,8 @@
 #include <QStyleOptionSlider>
 #include <QWriteLocker>
 
+#define SHARE_PATH "/../share/apps/grooveoff"
+
 namespace The {
     static SvgHandler* s_SvgHandler_instance = 0;
 
@@ -43,7 +45,7 @@ namespace The {
 
 SvgHandler::SvgHandler( QObject* parent )
     : QObject( parent )
-    , m_themeFile(  QLatin1String( "/usr/share/apps/grooveoff/resources/default-theme-clean.svg" ) )
+    , m_themeFile(  QCoreApplication::applicationDirPath() + QLatin1String( SHARE_PATH "/resources/default-theme.svg" ) )
 {
     connect( The::paletteHandler(), SIGNAL(newPalette(QPalette)), this, SLOT(discardCache()) );
 }

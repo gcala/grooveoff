@@ -19947,7 +19947,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -22460,7 +22460,9 @@
     </g>
     <g
        id="Settings"
-       transform="translate(-857.01342,873.98398)">
+       transform="translate(-857.01342,873.98398)"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90">
       <path
          sodipodi:type="arc"
          style="fill:url(#linearGradient7079-2);fill-opacity:1;stroke:url(#linearGradient7081-0);stroke-width:1.23364747"
@@ -22490,7 +22492,9 @@
     </g>
     <g
        id="Settings_active"
-       transform="translate(-857.01342,873.98398)">
+       transform="translate(-857.01342,873.98398)"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90">
       <path
          sodipodi:type="arc"
          style="fill:url(#linearGradient7089-9);fill-opacity:1;stroke:url(#linearGradient7091-07);stroke-width:1.23364747"
