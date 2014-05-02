@@ -20,7 +20,6 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
 #include "PlayerWidget.h"
-#include "widgets/QLed.h"
 #include "DownloadItem.h"
 #include "Roles.h"
 #include "ConfigDialog.h"
