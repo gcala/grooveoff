@@ -60,17 +60,17 @@ void ActionCollection::initActions()
     actionDonate->setToolTip(trUtf8("Donate with PayPal"));
     m_actionCollection[ QLatin1String( "actionDonate" ) ] = actionDonate;
 
-    QAction *actionManageSessions = new QAction(QIcon::fromTheme(QLatin1String("edit-rename"),
-                                QIcon(QLatin1String(":/resources/edit-rename.png"))),
-                                trUtf8("&Manage Sessions"), this);
-    actionManageSessions->setToolTip(trUtf8("Open Session Manager"));
-    m_actionCollection[ QLatin1String( "actionManageSessions" ) ] = actionManageSessions;
+//     QAction *actionManageSessions = new QAction(QIcon::fromTheme(QLatin1String("edit-rename"),
+//                                 QIcon(QLatin1String(":/resources/edit-rename.png"))),
+//                                 trUtf8("&Manage Sessions"), this);
+//     actionManageSessions->setToolTip(trUtf8("Open Session Manager"));
+//     m_actionCollection[ QLatin1String( "actionManageSessions" ) ] = actionManageSessions;
 
-    QAction *actionSaveSessionAs = new QAction(QIcon::fromTheme(QLatin1String("document-save-as"),
-                                QIcon(QLatin1String(":/resources/document-save-as.png"))),
-                                trUtf8("&Save Session As..."), this);
-    actionSaveSessionAs->setToolTip(trUtf8("Save Session As..."));
-    m_actionCollection[ QLatin1String( "actionSaveSessionAs" ) ] = actionSaveSessionAs;
+//     QAction *actionSaveSessionAs = new QAction(QIcon::fromTheme(QLatin1String("document-save-as"),
+//                                 QIcon(QLatin1String(":/resources/document-save-as.png"))),
+//                                 trUtf8("&Save Session As..."), this);
+//     actionSaveSessionAs->setToolTip(trUtf8("Save Session As..."));
+//     m_actionCollection[ QLatin1String( "actionSaveSessionAs" ) ] = actionSaveSessionAs;
 
     QAction *actionConfigure = new QAction(trUtf8("&Configure GrooveOff..."), this);
     if(QIcon::hasThemeIcon(QLatin1String("configure")))
@@ -110,13 +110,13 @@ void ActionCollection::initActions()
 
     QAction *actionRemoveFailed = new QAction(QIcon::fromTheme(QLatin1String("edit-delete"),
                                       QIcon(QLatin1String(":/resources/edit-delete.png"))),
-                                      trUtf8("&Remove canceled/failed transfers"), this);
+                                      trUtf8("&Remove canceled/failed downloads"), this);
     m_actionCollection[ QLatin1String( "actionRemoveFailed" ) ] = actionRemoveFailed;
 
     QAction *actionClearDownloadList = new QAction(QIcon::fromTheme(QLatin1String("edit-clear"),
                                            QIcon(QLatin1String(":/resources/edit-clear"))),
                                            trUtf8("Clear finished"), this);
-    actionClearDownloadList->setToolTip(trUtf8("Removes all finished transfers and leaves all files on disk"));
+    actionClearDownloadList->setToolTip(trUtf8("Removes all finished downloads preserving files on disk"));
     m_actionCollection[ QLatin1String( "actionClearDownloadList" ) ] = actionClearDownloadList;
 
     QAction *actionAbout = new QAction(QIcon::fromTheme(QLatin1String("help-about"),
@@ -135,8 +135,8 @@ QMenuBar* ActionCollection::createMenuBar( QWidget *parent )
 {
     QMenuBar* menuBar = new QMenuBar( parent );
 
-    QMenu* sessionsMenu = new QMenu( trUtf8( "&Load Session" ), menuBar );
-    m_menuCollection[ QLatin1String( "sessionsMenu" ) ] = sessionsMenu;
+//     QMenu* sessionsMenu = new QMenu( trUtf8( "&Load Session" ), menuBar );
+//     m_menuCollection[ QLatin1String( "sessionsMenu" ) ] = sessionsMenu;
 
     QMenu* fileMenu = new QMenu( trUtf8( "&File" ), menuBar );
     fileMenu->addAction( m_actionCollection[ QLatin1String( "actionNewToken" ) ] );

@@ -11,13 +11,13 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>SessionManager</string>
+   <string notr="true">SessionManager</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_3">
    <item>
     <widget class="QLabel" name="label_3">
      <property name="text">
-      <string>From here you can delete single session/track, rearrange tracks inside a session or copy tracks in other sessions.</string>
+      <string notr="true">From here you can delete single session/track, rearrange tracks inside a session or copy tracks in other sessions.</string>
      </property>
      <property name="wordWrap">
       <bool>true</bool>
@@ -40,7 +40,7 @@
        <item>
         <widget class="QLabel" name="label">
          <property name="text">
-          <string>Sessions:</string>
+          <string notr="true">Sessions:</string>
          </property>
         </widget>
        </item>
@@ -61,7 +61,7 @@
        <item>
         <widget class="QLabel" name="label_2">
          <property name="text">
-          <string>Tracks</string>
+          <string notr="true">Tracks</string>
          </property>
         </widget>
        </item>
@@ -97,7 +97,7 @@
      <item>
       <widget class="QPushButton" name="closeButton">
        <property name="text">
-        <string>&amp;Close</string>
+        <string notr="true">&amp;Close</string>
        </property>
       </widget>
      </item>

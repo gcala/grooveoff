@@ -228,7 +228,7 @@
              <item>
               <widget class="ElidedLabel" name="bitrateLabel">
                <property name="text">
-                <string>TextLabel</string>
+                <string/>
                </property>
                <property name="alignment">
                 <set>Qt::AlignCenter</set>
@@ -238,7 +238,7 @@
              <item>
               <widget class="ElidedLabel" name="samplerateLabel">
                <property name="text">
-                <string>TextLabel</string>
+                <string/>
                </property>
                <property name="alignment">
                 <set>Qt::AlignCenter</set>
@@ -248,7 +248,7 @@
              <item>
               <widget class="ElidedLabel" name="channelsLabel">
                <property name="text">
-                <string>TextLabel</string>
+                <string/>
                </property>
                <property name="alignment">
                 <set>Qt::AlignCenter</set>

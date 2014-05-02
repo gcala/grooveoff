@@ -32,7 +32,7 @@ SessionManager::SessionManager(const QString &path, QWidget *parent) :
     m_sessionsPath(path)
 {
     ui->setupUi(this);
-    setWindowTitle(QLatin1String("GrooveOff - ") + trUtf8("Session Manager"));
+//     setWindowTitle(QLatin1String("GrooveOff - ") + trUtf8("Session Manager"));
     loadSessionFiles();
     connect(ui->sessionsList, SIGNAL(appendItem(const QByteArray &, const QString &)),
                               SLOT(addTrack(const QByteArray &, const QString &))

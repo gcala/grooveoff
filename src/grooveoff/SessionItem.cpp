@@ -11,7 +11,7 @@ SessionItem::SessionItem(const QString &name, int num, QWidget *parent) :
 {
     ui->setupUi(this);
     ui->sessionName->setText(name);
-    ui->numTracks->setText(trUtf8("%1 tracks").arg(QString::number(num)));
+//     ui->numTracks->setText(trUtf8("%1 tracks").arg(QString::number(num)));
 
     m_deleteButtonEnabled = true;
     setAcceptDrops(true);
@@ -67,10 +67,10 @@ void SessionItem::multiFuncBtnClicked()
     switch(m_state) {
         case GrooveOff::FinishedState:
             if(!ui->multiFuncButton->isCountdownStarted()) {
-                ui->multiFuncButton->setToolTip(trUtf8("Abort deletion"));
+//                 ui->multiFuncButton->setToolTip(trUtf8("Abort deletion"));
                 ui->multiFuncButton->startCountdown();
             } else {
-                ui->multiFuncButton->setToolTip(trUtf8("Delete this Session"));
+//                 ui->multiFuncButton->setToolTip(trUtf8("Delete this Session"));
                 ui->multiFuncButton->stopCountdown();
                 ui->multiFuncButton->setIcon(QIcon::fromTheme(QLatin1String("user-trash"),
                                               QIcon(QLatin1String(":/resources/user-trash.png"))));
@@ -96,7 +96,7 @@ void SessionItem::stateChanged()
             ui->multiFuncButton->setIcon(QIcon::fromTheme(QLatin1String("user-trash"),
                                           QIcon(QLatin1String(":/resources/user-trash.png"))));
 
-            ui->multiFuncButton->setToolTip(trUtf8("Delete Session"));
+//             ui->multiFuncButton->setToolTip(trUtf8("Delete Session"));
             ui->infoIconWidget->setVisible(false);
             ui->infoMessageWidget->setVisible(false);
             break;
@@ -168,5 +168,5 @@ void SessionItem::deleteButtonEnabled(bool ok)
 
 void SessionItem::updateNumTrack(int num)
 {
-    ui->numTracks->setText(trUtf8("%1 tracks").arg(QString::number(num)));
+//     ui->numTracks->setText(trUtf8("%1 tracks").arg(QString::number(num)));
 }

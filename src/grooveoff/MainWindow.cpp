@@ -738,7 +738,7 @@ void MainWindow::addDownloadItem(PlaylistItemPtr playlistItem)
         if(!fi.absoluteDir().mkpath(fi.absolutePath())) {
             if(!m_batchDownload) {
                 QMessageBox::information(this, trUtf8("Attention"),
-                                         trUtf8("Can't create destination path:\n\n%1\n\nAborting...").arg(fi.absolutePath()),
+                                         trUtf8("Can't create destination path:") + QLatin1String("\n\n") + fi.absolutePath() + QLatin1String("\n\n") + trUtf8("Aborting..."),
                                          QMessageBox::Ok);
             }
             return;
@@ -1181,20 +1181,20 @@ void MainWindow::batchDownload()
 
 void MainWindow::saveSessionAs()
 {
-    bool ok;
-    QString fileName = QInputDialog::getText(this, tr("New Session"),
-                                         trUtf8("Session name:"), QLineEdit::Normal,
-                                         QDir::home().dirName(), &ok);
-    // remove separators, if any
-    fileName.remove('/');
-    fileName.remove('\\');
-
-    if (ok && !fileName.isEmpty()) {
-        // save current session
-        saveSession();
-        // change session name
-        m_sessionFileName = fileName;
-    }
+//     bool ok;
+//     QString fileName = QInputDialog::getText(this, tr("New Session"),
+//                                          trUtf8("Session name:"), QLineEdit::Normal,
+//                                          QDir::home().dirName(), &ok);
+//     // remove separators, if any
+//     fileName.remove('/');
+//     fileName.remove('\\');
+// 
+//     if (ok && !fileName.isEmpty()) {
+//         // save current session
+//         saveSession();
+//         // change session name
+//         m_sessionFileName = fileName;
+//     }
 }
 
 void MainWindow::saveSession()
