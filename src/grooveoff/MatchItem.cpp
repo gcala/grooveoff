@@ -55,7 +55,7 @@ void MatchItem::setupUi()
     ui->coverLabel->setToolTip(m_playlistItem->song()->songName() + " - " + m_playlistItem->song()->artistName());
 
     QGraphicsDropShadowEffect *coverShadow = new QGraphicsDropShadowEffect(this);
-    coverShadow->setBlurRadius(10.0);
+    coverShadow->setBlurRadius(15.0);
     coverShadow->setColor(palette().color(QPalette::Shadow));
     coverShadow->setOffset(0.0);
 
@@ -77,6 +77,10 @@ void MatchItem::setupUi()
     
     ui->mainLayout->setContentsMargins(4,4,4,4);
     ui->downloadLayout->setContentsMargins(0,4,0,4);
+    
+    // Enable shadows
+    ui->titleLabel->enableShadow(true);
+    ui->artist_albumLabel->enableShadow(true);
 }
 
 void MatchItem::loadCover()

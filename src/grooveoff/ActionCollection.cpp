@@ -115,7 +115,7 @@ void ActionCollection::initActions()
 
     QAction *actionClearDownloadList = new QAction(QIcon::fromTheme(QLatin1String("edit-clear"),
                                            QIcon(QLatin1String(":/resources/edit-clear"))),
-                                           trUtf8("Remove all finished"), this);
+                                           trUtf8("Clear finished"), this);
     actionClearDownloadList->setToolTip(trUtf8("Removes all finished transfers and leaves all files on disk"));
     m_actionCollection[ QLatin1String( "actionClearDownloadList" ) ] = actionClearDownloadList;
 

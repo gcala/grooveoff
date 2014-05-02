@@ -106,7 +106,7 @@ void DownloadItem::setupUi()
     ui->coverLabel->setToolTip(m_playlistItem->fileName());
 
     QGraphicsDropShadowEffect *coverShadow = new QGraphicsDropShadowEffect(this);
-    coverShadow->setBlurRadius(10.0);
+    coverShadow->setBlurRadius(15.0);
     coverShadow->setColor(palette().color(QPalette::Shadow));
     coverShadow->setOffset(0.0);
 
@@ -120,6 +120,10 @@ void DownloadItem::setupUi()
     ui->artist_albumLabel->setText(m_playlistItem->song()->artistName() + " - " + m_playlistItem->song()->albumName());
     ui->artist_albumLabel->setToolTip(m_playlistItem->song()->songName());
     ui->artist_albumLabel->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred); // fix hidden label
+    
+    //set shadow
+    ui->titleLabel->enableShadow(true);
+    ui->artist_albumLabel->enableShadow(true);
     
     if(m_context == GrooveOff::Track) {
         ui->playWidget->setVisible(false);
@@ -135,6 +139,7 @@ void DownloadItem::setupUi()
     }
     
     ui->playButton->setType(IconButton::PlayPause);
+    ui->playButton->setToolTip(trUtf8("Play"));
     
     ui->unqueueButton->setType(IconButton::Remove);
     ui->unqueueButton->setToolTip(trUtf8("Remove track from queue"));

@@ -25,6 +25,8 @@
 
 #include <QLabel>
 
+class QGraphicsDropShadowEffect;
+
 
 class ElidedLabel : public QLabel
 {
@@ -37,27 +39,32 @@ public:
 
     //! Set the elide mode used for displaying text.
     void setElideMode(Qt::TextElideMode elideMode) {
-        elideMode_ = elideMode;
+        m_elideMode = elideMode;
         updateGeometry();
     }
 
     //! Get the elide mode currently used to display text.
-    Qt::TextElideMode elideMode() const { return elideMode_; }
+    Qt::TextElideMode elideMode() const { return m_elideMode; }
 
     // QLabel overrides
     void setText(const QString &);
+    
+    // set shadow flag
+    void enableShadow(bool ok);
 
 protected:
     virtual void paintEvent(QPaintEvent* );
     virtual void resizeEvent(QResizeEvent* );
+    virtual void changeEvent ( QEvent * event );
 
     //! Cache the elided text so as to not recompute it every paint event
     void cacheElidedText(int w);
 
 private:
-    Qt::TextElideMode elideMode_;
-    QString cachedElidedText_;
-    QString cachedElidedText;
+    Qt::TextElideMode m_elideMode;
+    QString m_cachedElidedText;
+    bool m_drawShadow;
+    QGraphicsDropShadowEffect *m_shadowEffect;
 };
 
 #endif // ELIDEDLABEL_H

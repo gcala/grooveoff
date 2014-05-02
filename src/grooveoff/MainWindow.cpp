@@ -251,7 +251,6 @@ void MainWindow::setupUi()
     ui->label1->setFont(Utility::font(QFont::Bold, 2));
     ui->label2->setText(trUtf8("Offline Grooveshark.com music"));
 
-//    statusBar()->showMessage(trUtf8("Connecting...", 0));
     m_playerWidget->showMessage(trUtf8("Connecting..."));
 
     QFontMetrics fmSystemFont(Utility::font(QFont::Bold));
@@ -265,7 +264,6 @@ void MainWindow::setupUi()
     ui->searchLine->setPlaceholderText(trUtf8("Search for songs, artists, genres, playlists"));
     
     ui->searchButton->setType(IconButton::Search);
-//    ui->searchButton->setFixedHeight(fontHeight > 25 ? fontHeight : 25);
     ui->searchButton->setButtonEnabled(false);
     ui->searchButton->setToolTip(trUtf8("Start search"));
     
@@ -286,7 +284,7 @@ void MainWindow::setupUi()
     ui->pathLine->setCompleter(completer);
 
     ui->browseButton->setType(IconButton::Browse);
-    ui->browseButton->setToolTip(trUtf8("Select save foder"));
+    ui->browseButton->setToolTip(trUtf8("Select save folder"));
 
     ui->spinnerWidget->setFixedHeight(fontHeight > 25 ? fontHeight : 25);
     ui->spinnerWidget->setVisible(false);
@@ -660,7 +658,7 @@ void MainWindow::downloadRequest(PlaylistItemPtr playlistItem)
     if(isDownloadingQueued(playlistItem->song()->songID())) {
         if(!m_batchDownload) {
             QMessageBox::information(this, trUtf8("Attention"),
-                                     trUtf8("The song is already in queue."),
+                                     trUtf8("This song is already in queue."),
                                      QMessageBox::Ok);
         }
         return;

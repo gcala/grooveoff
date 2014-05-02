@@ -23,28 +23,27 @@
 #include <QResizeEvent>
 #include <QGraphicsDropShadowEffect>
 
-ElidedLabel::ElidedLabel(QWidget* parent, Qt::WindowFlags f):
-    QLabel(parent, f),
-    elideMode_(Qt::ElideRight)
-{
-    setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
-//     QGraphicsDropShadowEffect *shadow = new QGraphicsDropShadowEffect(this);
-//     shadow->setBlurRadius(20.0);
-//     shadow->setColor(palette().color(QPalette::Highlight));
-//     shadow->setOffset(0.0);
-//     setGraphicsEffect(shadow);
-}
-
-ElidedLabel::ElidedLabel(const QString& text, QWidget* parent, Qt::WindowFlags f):
-    QLabel(text, parent, f),
-    elideMode_(Qt::ElideRight)
+ElidedLabel::ElidedLabel(QWidget* parent, Qt::WindowFlags f)
+    : QLabel(parent, f)
+    , m_elideMode(Qt::ElideRight)
+    , m_drawShadow(false)
+    , m_shadowEffect(0)
 {
     setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
 }
 
-ElidedLabel::ElidedLabel(const QString& text, Qt::TextElideMode elideMode, QWidget* parent, Qt::WindowFlags f) :
-    QLabel(text, parent, f),
-    elideMode_(elideMode)
+ElidedLabel::ElidedLabel(const QString& text, QWidget* parent, Qt::WindowFlags f)
+    : QLabel(text, parent, f)
+    , m_elideMode(Qt::ElideRight)
+    , m_drawShadow(false)
+{
+    setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
+}
+
+ElidedLabel::ElidedLabel(const QString& text, Qt::TextElideMode elideMode, QWidget* parent, Qt::WindowFlags f)
+    : QLabel(text, parent, f)
+    , m_elideMode(elideMode)
+    , m_drawShadow(false)
 {
     setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
 }
@@ -54,16 +53,20 @@ void ElidedLabel::setText(const QString& text)
     QLabel::setText(text);
     cacheElidedText(geometry().width());
     setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
+    if(m_drawShadow) {
+        setVisible(false);
+        setVisible(true);
+    }
 }
 
 void ElidedLabel::cacheElidedText(int w)
 {
-    cachedElidedText_ = fontMetrics().elidedText(text(), elideMode_, w, Qt::TextShowMnemonic);
+    m_cachedElidedText = fontMetrics().elidedText(text(), m_elideMode, w, Qt::TextShowMnemonic);
 }
 
 void ElidedLabel::paintEvent(QPaintEvent* e)
 {
-    if(elideMode_ == Qt::ElideNone) {
+    if(m_elideMode == Qt::ElideNone) {
         QLabel::paintEvent(e);
     } else {
         QPainter p(this);
@@ -71,7 +74,7 @@ void ElidedLabel::paintEvent(QPaintEvent* e)
                    geometry().width(),
                    geometry().height(),
                    alignment(),
-                   cachedElidedText_);
+                   m_cachedElidedText);
     }
 }
 
@@ -81,3 +84,25 @@ void ElidedLabel::resizeEvent(QResizeEvent* e)
     cacheElidedText(e->size().width());
 }
 
+void ElidedLabel::enableShadow(bool ok)
+{
+    m_drawShadow = ok;
+    if(!m_shadowEffect) {
+        m_shadowEffect = new QGraphicsDropShadowEffect(this);
+        m_shadowEffect->setBlurRadius(15.0);
+        m_shadowEffect->setColor(palette().color(QPalette::Shadow));
+        m_shadowEffect->setOffset(0.0);
+        setGraphicsEffect(m_shadowEffect);
+    }
+}
+
+void ElidedLabel::changeEvent(QEvent* event)
+{
+    if(m_shadowEffect) {
+        if(event->type() == QEvent::PaletteChange) {
+            m_shadowEffect->setColor(palette().color(QPalette::Shadow));
+        }
+    }
+    
+    QLabel::changeEvent(event);
+}

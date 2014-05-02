@@ -33,6 +33,7 @@ class PlayerWidget;
 
 class QLabel;
 class QPushButton;
+class QGraphicsDropShadowEffect;
 
 class PlayerWidget : public QWidget
 {
@@ -52,6 +53,9 @@ public:
 public Q_SLOTS:
     void pauseResumePlaying();
     void reloadPreviousNextButtons();
+    
+protected:
+    virtual void changeEvent ( QEvent * event );
 
 private Q_SLOTS:
     void tick(qint64 elapsedTime, bool userSeek);
@@ -69,6 +73,7 @@ private:
     GrooveOff::TimerState m_timerState;
     bool m_playedRemoved;
     QTimer *m_timer;
+    QGraphicsDropShadowEffect *m_coverShadow;
 
     //Methods
     void setupUi();

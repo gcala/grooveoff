@@ -137,7 +137,7 @@
                  </sizepolicy>
                 </property>
                 <property name="text">
-                 <string>History dimension:</string>
+                 <string>History size:</string>
                 </property>
                </widget>
               </item>
@@ -340,7 +340,7 @@
             <item>
              <widget class="QLabel" name="label_5">
               <property name="text">
-               <string>(0 is unlimited results)</string>
+               <string>(0 means unlimited results)</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignCenter</set>

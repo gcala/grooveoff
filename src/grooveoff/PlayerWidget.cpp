@@ -49,6 +49,7 @@ PlayerWidget::PlayerWidget(QWidget *parent) :
 
     // Supply with the MediaObject object seekSlider should control
     ui->seekSlider->setMediaObject(The::audioEngine()->mediaObject());
+    ui->seekSlider->setMinimumWidth(130);
 
     m_playedRemoved = false;
 
@@ -97,19 +98,19 @@ PlayerWidget::~PlayerWidget()
 */
 void PlayerWidget::setupUi()
 {
-    QGraphicsDropShadowEffect *coverShadow = new QGraphicsDropShadowEffect(this);
-    coverShadow->setBlurRadius(10.0);
-    coverShadow->setColor(palette().color(QPalette::Highlight));
-    coverShadow->setOffset(0.0);
+    m_coverShadow = new QGraphicsDropShadowEffect(this);
+    m_coverShadow->setBlurRadius(15.0);
+    m_coverShadow->setColor(palette().color(QPalette::Shadow));
+    m_coverShadow->setOffset(0.0);
 
     ui->coverLabel->setWindowFlags(Qt::FramelessWindowHint);
     ui->coverLabel->setAttribute(Qt::WA_TranslucentBackground);
-    ui->coverLabel->setGraphicsEffect(coverShadow);
+    ui->coverLabel->setGraphicsEffect(m_coverShadow);
 
     ui->coverLabel->setScaledContents(true);
     ui->titleLabel->setFont(Utility::font(QFont::Bold));
     ui->album_authorLabel->setFont(Utility::font(QFont::Bold));
-    ui->stackedWidget->setBackgroundRole(QPalette::AlternateBase);
+    ui->stackedWidget->setBackgroundRole(QPalette::Midlight);
     ui->messageLabel->setFont(Utility::font(QFont::Bold,1));
 
     ui->previousButton->setType(IconButton::Previous);
@@ -144,11 +145,25 @@ void PlayerWidget::setupUi()
 
     ui->bitrateLabel->setToolTip(trUtf8("Bit Rate"));
     ui->samplerateLabel->setToolTip(trUtf8("Sample Rate"));
-//     ui->channelsLabel->setToolTip();
 
     ui->bitrateLabel->setFont(Utility::font(QFont::Bold,-3));
     ui->samplerateLabel->setFont(Utility::font(QFont::Bold,-3));
+    
     ui->channelsLabel->setFont(Utility::font(QFont::Bold,-3));
+    
+    //Enable shadow
+    ui->messageLabel->enableShadow(true);
+    ui->titleLabel->enableShadow(true);
+    ui->album_authorLabel->enableShadow(true);
+    ui->bitrateLabel->enableShadow(true);
+    ui->samplerateLabel->enableShadow(true);
+    ui->channelsLabel->enableShadow(true);
+    ui->bitrateLabel->setMinimumWidth(50);
+    ui->samplerateLabel->setMinimumWidth(50);
+    ui->channelsLabel->setMinimumWidth(50);
+    ui->bitrateLabel->setElideMode(Qt::ElideNone);
+    ui->samplerateLabel->setElideMode(Qt::ElideNone);
+    ui->channelsLabel->setElideMode(Qt::ElideNone);
 }
 
 /*!
@@ -275,6 +290,7 @@ void PlayerWidget::sourceChanged()
     ui->titleLabel->setToolTip(title);
 
     ui->album_authorLabel->setText(artist + " - " + album);
+    ui->album_authorLabel->setToolTip(artist + " - " + album);
 
     if(!coverName.isEmpty()
         && QFile::exists(Utility::coversCachePath + coverName)
@@ -349,4 +365,14 @@ void PlayerWidget::muteStateChanged(bool mute)
 {
     ui->volume->setMuted(mute);
 }
+
+void PlayerWidget::changeEvent(QEvent* event)
+{
+    if(event->type() == QEvent::PaletteChange) {
+        m_coverShadow->setColor(palette().color(QPalette::Highlight));
+    }
+    
+    QWidget::changeEvent(event);
+}
+
 

@@ -83,6 +83,12 @@
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>89</height>
+      </size>
+     </property>
      <property name="frameShape">
       <enum>QFrame::StyledPanel</enum>
      </property>
@@ -110,7 +116,7 @@
         <widget class="QWidget" name="statusMessagePage">
          <layout class="QGridLayout" name="gridLayout_2">
           <item row="0" column="0">
-           <widget class="QLabel" name="messageLabel">
+           <widget class="ElidedLabel" name="messageLabel">
             <property name="text">
              <string/>
             </property>
@@ -220,7 +226,7 @@
               </spacer>
              </item>
              <item>
-              <widget class="QLabel" name="bitrateLabel">
+              <widget class="ElidedLabel" name="bitrateLabel">
                <property name="text">
                 <string>TextLabel</string>
                </property>
@@ -230,7 +236,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QLabel" name="samplerateLabel">
+              <widget class="ElidedLabel" name="samplerateLabel">
                <property name="text">
                 <string>TextLabel</string>
                </property>
@@ -240,7 +246,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QLabel" name="channelsLabel">
+              <widget class="ElidedLabel" name="channelsLabel">
                <property name="text">
                 <string>TextLabel</string>
                </property>
