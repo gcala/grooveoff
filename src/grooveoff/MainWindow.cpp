@@ -352,11 +352,11 @@ void MainWindow::setupSignals()
     connect(ac->getAction( "actionAbout" ), SIGNAL(triggered()),
                                             SLOT(about()));
 
-    connect(ac->getAction( "actionSaveSessionAs" ), SIGNAL(triggered()),
-                                                    SLOT(saveSessionAs()));
-
-    connect(ac->getAction( "actionManageSessions" ), SIGNAL(triggered()),
-                                                     SLOT(openSessionManager()));
+//     connect(ac->getAction( "actionSaveSessionAs" ), SIGNAL(triggered()),
+//                                                     SLOT(saveSessionAs()));
+// 
+//     connect(ac->getAction( "actionManageSessions" ), SIGNAL(triggered()),
+//                                                      SLOT(openSessionManager()));
 
     connect(ac->getAction( "actionQtAbout" ), SIGNAL(triggered()),
             qApp,                             SLOT(aboutQt()));
