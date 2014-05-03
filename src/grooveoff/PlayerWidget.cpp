@@ -194,6 +194,7 @@ void PlayerWidget::stateChanged(Phonon::State state)
         ui->stackedWidget->setCurrentIndex(1);
         ui->playPauseButton->setButtonEnabled(true);
         ui->playPauseButton->setPlaying(true);
+        ui->playPauseButton->setToolTip(trUtf8("Pause"));
         break;
     case Phonon::StoppedState:
         if(m_playedRemoved)
@@ -201,8 +202,10 @@ void PlayerWidget::stateChanged(Phonon::State state)
         else
             ui->stackedWidget->setCurrentIndex(1);
         if(m_playedRemoved) {
-            if(!The::playlist()->count())
+            if(!The::playlist()->count()) {
                 ui->playPauseButton->setButtonEnabled(false);
+                ui->playPauseButton->setToolTip("");
+            }
         }
         ui->playPauseButton->setPlaying(false);
         ui->timeLabel->setText( QLatin1String( "00:00" ) );
@@ -332,6 +335,7 @@ void PlayerWidget::reloadPreviousNextButtons()
         ui->stackedWidget->setCurrentIndex(0);
     else {
         ui->playPauseButton->setButtonEnabled(true);
+        ui->playPauseButton->setToolTip(trUtf8("Play"));
         if(The::audioEngine()->canGoNext()) {
             int currentRow = The::playlist()->row(The::audioEngine()->currentTrack());
             ui->nextButton->setToolTip(The::playlist()->item(currentRow + 1)->song()->songName());

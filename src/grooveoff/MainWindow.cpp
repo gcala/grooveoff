@@ -83,7 +83,9 @@ Q_DECLARE_METATYPE(QList<int>)
 QPointer<MainWindow> MainWindow::s_instance;
 
 namespace The {
-    MainWindow* mainWindow() { return MainWindow::s_instance.data(); }
+    MainWindow* mainWindow() {
+        return MainWindow::s_instance.data();
+    }
 }
 
 /*!
@@ -100,7 +102,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     s_instance = this;
     m_playerWidget = new PlayerWidget(this);
-    new ActionCollection(this);
+//    new ActionCollection(this);
+
     setupMenus();
     setupUi();
     setupSignals();
@@ -141,14 +144,14 @@ MainWindow::MainWindow(QWidget *parent) :
     setWindowTitle(QString::fromLatin1( "GrooveOff %1" ).arg( GROOVEOFF_VERSION ));
 
     if(m_guiLayout == Mini) {
-        ActionCollection::instance()->getAction( QLatin1String( "miniPlayer" ) )->setChecked(true);
+        The::actionCollection()->getAction( QLatin1String( "miniPlayer" ) )->setChecked(true);
         m_playerWidget->showElapsedTimerLabel(true);
     } else if(ui->splitter->orientation() == Qt::Vertical) {
-        ActionCollection::instance()->getAction( QLatin1String( "actionCompact" ) )->setChecked(true);
+        The::actionCollection()->getAction( QLatin1String( "actionCompact" ) )->setChecked(true);
         m_playerWidget->showElapsedTimerLabel(false);
     }
     else {
-        ActionCollection::instance()->getAction( QLatin1String( "actionWide" ) )->setChecked(true);
+        The::actionCollection()->getAction( QLatin1String( "actionWide" ) )->setChecked(true);
         m_playerWidget->showElapsedTimerLabel(true);
     }
 
@@ -309,15 +312,15 @@ void MainWindow::setupUi()
 void MainWindow::setupMenus()
 {
     // Always create a menubar, but only create a compactMenu on Windows and X11
-    m_menuBar = ActionCollection::instance()->createMenuBar( this );
+    m_menuBar = The::actionCollection()->createMenuBar( this );
     setMenuBar( m_menuBar );
-    m_compactMainMenu = ActionCollection::instance()->createCompactMenu( this );
+    m_compactMainMenu = The::actionCollection()->createCompactMenu( this );
 }
 
 void MainWindow::setupSignals()
 {
     // <Menu Items>
-    ActionCollection *ac = ActionCollection::instance();
+    ActionCollection *ac = The::actionCollection();
 
     connect(ac->getAction( "actionClose" ), SIGNAL(triggered()),
                                             SLOT(close()));
@@ -1237,8 +1240,8 @@ void MainWindow::loadSession()
 
 void MainWindow::loadSessions()
 {
-    foreach(QAction *action, ActionCollection::instance()->getMenu("sessionsMenu")->actions()) {
-        ActionCollection::instance()->getMenu("sessionsMenu")->removeAction(action);
+    foreach(QAction *action, The::actionCollection()->getMenu("sessionsMenu")->actions()) {
+        The::actionCollection()->getMenu("sessionsMenu")->removeAction(action);
         delete action;
     }
 
@@ -1246,10 +1249,10 @@ void MainWindow::loadSessions()
     QStringList sessions = sessionPath.entryList(QStringList() << "*.xml", QDir::Files, QDir::Name);
 
     foreach(QString session, sessions) {
-        QAction *action = new QAction(session.remove(".xml", Qt::CaseInsensitive), ActionCollection::instance()->getMenu("sessionsMenu"));
+        QAction *action = new QAction(session.remove(".xml", Qt::CaseInsensitive), The::actionCollection()->getMenu("sessionsMenu"));
         if( session == m_sessionFileName )
             action->setFont(Utility::font(QFont::Bold));
-        ActionCollection::instance()->getMenu("sessionsMenu")->addAction(action);
+        The::actionCollection()->getMenu("sessionsMenu")->addAction(action);
         
         connect(action, SIGNAL(triggered()),
                         SLOT(loadSessionFile()));

@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.0" language="eu">
+<TS version="2.0" language="ru_RU">
 <context>
     <name>AboutDialog</name>
     <message>
         <location filename="../src/grooveoff/AboutDialog.ui" line="14"/>
         <source>About GrooveOff</source>
-        <translation>GrooveOff-i buruz</translation>
+        <translation>О GrooveOff</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/AboutDialog.ui" line="192"/>
         <source>Close</source>
-        <translation>Itxi</translation>
+        <translation>Закрыть</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/AboutDialog.cpp" line="44"/>
@@ -21,42 +21,42 @@
     <message>
         <location filename="../src/grooveoff/AboutDialog.cpp" line="45"/>
         <source>Version </source>
-        <translation>Bertsioa</translation>
+        <translation>Версия </translation>
     </message>
     <message>
         <location filename="../src/grooveoff/AboutDialog.cpp" line="48"/>
         <source>Offline Grooveshark.com music.</source>
-        <translation>Gooveshark.com-en musika lineaz kanpo</translation>
+        <translation>Offline Grooveshark.com music.</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/AboutDialog.cpp" line="49"/>
         <source>GrooveOff can access the huge Grooveshark database through its &lt;a href=&quot;http://developers.grooveshark.com/docs/public_api/v3/&quot;&gt;public api&lt;/a&gt;.</source>
-        <translation>GrooveOff-ek Grooveshark-en datu-base handia erabiltzen du haren api publikoaren  &lt;a href=&quot;http://developers.grooveshark.com/docs/public_api/v3/&quot;&gt; bidez&lt;/a&gt;.</translation>
+        <translation>GrooveOff можетт получить доступ к обширнай базе данных Grooveshark помощью &lt;a href=&quot;http://developers.grooveshark.com/docs/public_api/v3/&quot;&gt;API pública&lt;/a&gt;.</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/AboutDialog.cpp" line="50"/>
         <source>&lt;b&gt;Author&lt;/b&gt;: </source>
-        <translation>&lt;b&gt;Artista&lt;/b&gt;: </translation>
+        <translation>&lt;b&gt;Автор&lt;/b&gt;:</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/AboutDialog.cpp" line="51"/>
         <source>&lt;b&gt;License&lt;/b&gt;: </source>
-        <translation>&lt;b&gt;Lizentzia&lt;/b&gt;: </translation>
+        <translation>&lt;b&gt;Лицензия&lt;/b&gt;:</translation>
     </message>
     <message utf8="true">
         <location filename="../src/grooveoff/AboutDialog.cpp" line="53"/>
         <source>GrooveOff is not affiliated with Grooveshark™ and has not been reviewed or officially approved by Grooveshark.com. The author is not responsible for any violations this application does to Grooveshark&apos;s TOS. The author is not related to Grooveshark™ in any way! Support the Artists You Like by Buying Their Music.</source>
-        <translation>GrooveOff-ek ez dago Grooveshark™-ekin afiliatua eta Groveshark.com-ek ez du ofizialki berrikusi edo onartu. Egileak ez ditu bere gain hartzen aplikazio honek Grooveshark-en erabilera baldintzen gainean egin ditzakeen urraketak. Egileak ez dauka inolako zerikusirik Grooveshark-ekin. Lagundu ezazu zure gustuko artistak haien musika erosten.</translation>
+        <translation>GrooveOff no esta afiliado con Grooveshark™ y no ha sido revisado u oficialmente aprobado por Grooveshark.com. El autor no es responsable por ninguna violación que esta aplicación haga a las condiciones de servicio de Grooveshark. El autor no está relacionado con Grooveshark™ en ninguna forma. Apoya a los artistas que te gustan comprando su música.</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/AboutDialog.cpp" line="86"/>
         <source>Donation to Grooveoff&apos;s author</source>
-        <translation>Dohaintza egin Grooveoff-en egileari</translation>
+        <translation>Помочь Grooveoff</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/AboutDialog.cpp" line="52"/>
         <source>Disclaimer:</source>
-        <translation>Ezespena:</translation>
+        <translation>Aviso legal:</translation>
     </message>
 </context>
 <context>
@@ -64,27 +64,27 @@
     <message>
         <location filename="../src/grooveoff/ActionCollection.cpp" line="54"/>
         <source>&amp;Exit</source>
-        <translation type="unfinished">&amp;Irten</translation>
+        <translation type="unfinished">&amp;Выход</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/ActionCollection.cpp" line="55"/>
         <source>Close GrooveOff</source>
-        <translation type="unfinished">Itxi GrooveOff</translation>
+        <translation type="unfinished">Закрыть GrooveOff</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/ActionCollection.cpp" line="62"/>
         <source>&amp;Donate</source>
-        <translation type="unfinished">&amp;Dohaintza egin</translation>
+        <translation type="unfinished">&amp;Пожертвовать</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/ActionCollection.cpp" line="63"/>
         <source>Donate with PayPal</source>
-        <translation type="unfinished">Dohaintza egin PayPal bidez</translation>
+        <translation type="unfinished">Donar con Paypal</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/ActionCollection.cpp" line="78"/>
         <source>&amp;Configure GrooveOff...</source>
-        <translation type="unfinished">&amp;Konfiguratu GrooveOff...</translation>
+        <translation type="unfinished">&amp;Настроить GrooveOff...</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/ActionCollection.cpp" line="88"/>
@@ -104,7 +104,7 @@
     <message>
         <location filename="../src/grooveoff/ActionCollection.cpp" line="106"/>
         <source>&amp;Get new token...</source>
-        <translation type="unfinished">&amp;Lortu token berria...</translation>
+        <translation type="unfinished">&amp;Получить новый token...</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/ActionCollection.cpp" line="111"/>
@@ -129,37 +129,37 @@
     <message>
         <location filename="../src/grooveoff/ActionCollection.cpp" line="127"/>
         <source>&amp;About GrooveOff</source>
-        <translation type="unfinished">&amp;GrooveOff-i buruz</translation>
+        <translation type="unfinished">&amp;О GrooveOff</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/ActionCollection.cpp" line="132"/>
         <source>About &amp;Qt</source>
-        <translation type="unfinished">&amp;Qt-ri buruz</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/grooveoff/ActionCollection.cpp" line="144"/>
         <source>&amp;File</source>
-        <translation type="unfinished">&amp;Fitxategia</translation>
+        <translation type="unfinished">&amp;Файл</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/ActionCollection.cpp" line="158"/>
         <source>&amp;Downloads</source>
-        <translation type="unfinished">&amp;Deskargak</translation>
+        <translation type="unfinished">&amp;Загрузка</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/ActionCollection.cpp" line="169"/>
         <source>&amp;View</source>
-        <translation type="unfinished">&amp;Ikusi</translation>
+        <translation type="unfinished">&amp;Просмотр</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/ActionCollection.cpp" line="175"/>
         <source>&amp;Settings</source>
-        <translation type="unfinished">&amp;Hobespenak</translation>
+        <translation type="unfinished">&amp;Настройки</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/ActionCollection.cpp" line="179"/>
         <source>&amp;Help</source>
-        <translation type="unfinished">&amp;Laguntza</translation>
+        <translation type="unfinished">&amp;Помощь</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/ActionCollection.cpp" line="196"/>
@@ -172,13 +172,13 @@
     <message>
         <location filename="../src/grooveoff/ConfigDialog.ui" line="14"/>
         <source>Configure - GrooveOff</source>
-        <translation>Grooveoff konfiguratu</translation>
+        <translation>Настройка - GrooveOff</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/ConfigDialog.ui" line="50"/>
         <location filename="../src/grooveoff/ConfigDialog.cpp" line="124"/>
         <source>General</source>
-        <translation>Orokorra</translation>
+        <translation>Общие</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/ConfigDialog.ui" line="84"/>
@@ -198,12 +198,12 @@
     <message>
         <location filename="../src/grooveoff/ConfigDialog.ui" line="116"/>
         <source>History</source>
-        <translation>Historia</translation>
+        <translation>История</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/ConfigDialog.ui" line="122"/>
         <source>Save searches history</source>
-        <translation>Gorde bilaketen historia</translation>
+        <translation>Сохранять результаты истории поиска</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/ConfigDialog.ui" line="140"/>
@@ -213,12 +213,12 @@
     <message>
         <location filename="../src/grooveoff/ConfigDialog.ui" line="175"/>
         <source>Destination</source>
-        <translation>Helburua</translation>
+        <translation>Назначение</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/ConfigDialog.ui" line="181"/>
         <source>Save last destination path</source>
-        <translation>Gorde azken helburuaren kokalekuan</translation>
+        <translation>Сохранить последние место назначения</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/ConfigDialog.ui" line="191"/>
@@ -229,17 +229,17 @@
         <location filename="../src/grooveoff/ConfigDialog.ui" line="234"/>
         <location filename="../src/grooveoff/ConfigDialog.cpp" line="125"/>
         <source>Performance</source>
-        <translation>Errendimentua</translation>
+        <translation>Поведение</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/ConfigDialog.ui" line="268"/>
         <source>Covers</source>
-        <translation>Azalak</translation>
+        <translation>Обложки</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/ConfigDialog.ui" line="274"/>
         <source>Load covers</source>
-        <translation>Kargatu azalak</translation>
+        <translation>Загружать обложки</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/ConfigDialog.ui" line="284"/>
@@ -249,12 +249,12 @@
     <message>
         <location filename="../src/grooveoff/ConfigDialog.ui" line="294"/>
         <source>Results</source>
-        <translation>Emaitzak</translation>
+        <translation>Результаты поиска</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/ConfigDialog.ui" line="308"/>
         <source>Limit search results:</source>
-        <translation>Mugatu bilaketen emaitzak:</translation>
+        <translation>Ограничить результаты поиска:</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/ConfigDialog.ui" line="343"/>
@@ -264,32 +264,32 @@
     <message>
         <location filename="../src/grooveoff/ConfigDialog.ui" line="356"/>
         <source>Downloads</source>
-        <translation>Deskargak</translation>
+        <translation>Загрузка</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/ConfigDialog.ui" line="364"/>
         <source>Max simultaneous downloads:</source>
-        <translation>Gehienez batera zenbat deskarga:</translation>
+        <translation>Максимальное количество одновременных загрузок:</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/ConfigDialog.ui" line="426"/>
         <source>Default values</source>
-        <translation>Balio lehenetsiak</translation>
+        <translation>По умолчанию</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/ConfigDialog.ui" line="446"/>
         <source>OK</source>
-        <translation>Ondo</translation>
+        <translation>OK</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/ConfigDialog.ui" line="453"/>
         <source>Apply</source>
-        <translation>Aplikatu</translation>
+        <translation>Приминить</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/ConfigDialog.ui" line="460"/>
         <source>Cancel</source>
-        <translation>Utzi</translation>
+        <translation>Отмена</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/ConfigDialog.cpp" line="65"/>
@@ -322,17 +322,17 @@
     <message>
         <location filename="../src/grooveoff/DownloadItem.cpp" line="142"/>
         <source>Play</source>
-        <translation>Erreproduzitu</translation>
+        <translation>Воспроизвести</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/DownloadItem.cpp" line="157"/>
         <source>Open folder</source>
-        <translation>Ireki karpeta</translation>
+        <translation>Открыть папку</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/DownloadItem.cpp" line="244"/>
         <source>Queued</source>
-        <translation>Ilaran jarrta</translation>
+        <translation>В очереди</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/DownloadItem.cpp" line="145"/>
@@ -357,17 +357,17 @@
     <message>
         <location filename="../src/grooveoff/DownloadItem.cpp" line="320"/>
         <source>Aborted</source>
-        <translation>Geldiarazita</translation>
+        <translation>Отмена</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/DownloadItem.cpp" line="340"/>
         <source>Network or Server error</source>
-        <translation>Sarea edo zerbitzariaren errorea</translation>
+        <translation>Ошибка сети или сервера</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/DownloadItem.cpp" line="463"/>
         <source>Abort deletion</source>
-        <translation>Geldiketa ezabatua</translation>
+        <translation>Прервать удаление</translation>
     </message>
 </context>
 <context>
@@ -381,22 +381,22 @@
         <location filename="../src/grooveoff/MainWindow.cpp" line="256"/>
         <location filename="../src/grooveoff/MainWindow.cpp" line="502"/>
         <source>Connecting...</source>
-        <translation>Konektatzen...</translation>
+        <translation>Подключение...</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/MainWindow.cpp" line="276"/>
         <source>Save in:</source>
-        <translation>Gorde hemen:</translation>
+        <translation>Сохранить в:</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/MainWindow.cpp" line="279"/>
         <source>Current save folder</source>
-        <translation>Gordetzeko karpeta</translation>
+        <translation>Ruta de guardado</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/MainWindow.cpp" line="261"/>
         <source>Search:</source>
-        <translation>Bilatu:</translation>
+        <translation>Поиск:</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/MainWindow.cpp" line="265"/>
@@ -407,7 +407,7 @@
     <message>
         <location filename="../src/grooveoff/MainWindow.cpp" line="270"/>
         <source>Start search</source>
-        <translation>Hasi bilatzen</translation>
+        <translation>Запустить поиск</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/MainWindow.cpp" line="273"/>
@@ -427,18 +427,18 @@
     <message>
         <location filename="../src/grooveoff/MainWindow.cpp" line="398"/>
         <source>Select Directory</source>
-        <translation>Aukeratu direktorioa</translation>
+        <translation>Выбрать директорию</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/MainWindow.cpp" line="466"/>
         <source>All Artists</source>
-        <translation>Artista guztiak</translation>
+        <translation>Все исполнители</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/MainWindow.cpp" line="468"/>
         <location filename="../src/grooveoff/MainWindow.cpp" line="1073"/>
         <source>All Albums</source>
-        <translation>Album guztiak</translation>
+        <translation>Все альбомы</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/MainWindow.cpp" line="471"/>
@@ -471,18 +471,18 @@ Grooveshark</source>
         <location filename="../src/grooveoff/MainWindow.cpp" line="712"/>
         <source>The destination folder is not writable.
 Select a valid path</source>
-        <translation>Ezin da idatzi helburuko karpetan.
-Hautatu baliozko bide-izena</translation>
+        <translation>Целевой каталог не доступен для записи. 
+Выберите другой каталог</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/MainWindow.cpp" line="1027"/>
         <source>Donation to Grooveoff&apos;s author</source>
-        <translation>Grooveoff-en egilearentzako dohaintza</translation>
+        <translation>Пожертвование автору Grooveoff</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/MainWindow.cpp" line="254"/>
         <source>Offline Grooveshark.com music</source>
-        <translation>Gooveshark-en musika lineaz kanpo</translation>
+        <translation>Descarga la música de Grooveshark.com</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/MainWindow.cpp" line="662"/>
@@ -490,33 +490,34 @@ Hautatu baliozko bide-izena</translation>
         <location filename="../src/grooveoff/MainWindow.cpp" line="711"/>
         <location filename="../src/grooveoff/MainWindow.cpp" line="743"/>
         <source>Attention</source>
-        <translation>Kasu</translation>
+        <translation>Внимание</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/MainWindow.cpp" line="681"/>
         <source>The destination folder does not exists.
 Select a valid path</source>
-        <translation>Helburuko karpeta ez da existitzen.
-Hautatu baliozko bide-izena</translation>
+        <translation>Папка назначения не существует. 
+Выберите правильный путь</translation>
     </message>
     <message numerus="yes">
         <location filename="../src/grooveoff/MainWindow.cpp" line="579"/>
         <location filename="../src/grooveoff/MainWindow.cpp" line="1063"/>
         <source>%n song(s) found</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>%n результат</numerusform>
+            <numerusform>%n результаты</numerusform>
             <numerusform></numerusform>
         </translation>
     </message>
     <message>
         <location filename="../src/grooveoff/MainWindow.cpp" line="698"/>
         <source>Overwrite File?</source>
-        <translation>Gainidatzi fitxategia?</translation>
+        <translation>Перзаписать файл?</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/MainWindow.cpp" line="699"/>
         <source>A file named &quot;%1&quot; already exists. Are you sure you want to overwrite it?</source>
-        <translation> &quot;%1&quot;  izena duen fitxategia badago. Seguru zaude gainidatzi nahi duzula?</translation>
+        <translation>Файл с именем &quot;%1&quot; уже существует. Вы уверены, что хотите перезаписать его?</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/MainWindow.cpp" line="744"/>
@@ -531,7 +532,7 @@ Hautatu baliozko bide-izena</translation>
     <message>
         <location filename="../src/grooveoff/MainWindow.cpp" line="910"/>
         <source>Offline</source>
-        <translation>Lineaz kanpo</translation>
+        <translation>Offline</translation>
     </message>
 </context>
 <context>
@@ -572,7 +573,7 @@ Hautatu baliozko bide-izena</translation>
     <message>
         <location filename="../src/grooveoff/PlayerWidget.cpp" line="338"/>
         <source>Play</source>
-        <translation type="unfinished">Erreproduzitu</translation>
+        <translation type="unfinished">Воспроизвести</translation>
     </message>
 </context>
 </TS>

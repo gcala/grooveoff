@@ -24,22 +24,25 @@
 #include <QMenu>
 #include <QAction>
 
-ActionCollection* ActionCollection::s_instance = 0;
-ActionCollection* ActionCollection::instance()
-{
-    return s_instance;
+namespace The {
+    static ActionCollection* s_ActionCollection_instance = 0;
+
+    ActionCollection* actionCollection()
+    {
+        if( !s_ActionCollection_instance )
+            s_ActionCollection_instance = new ActionCollection();
+
+        return s_ActionCollection_instance;
+    }
 }
 
-ActionCollection::ActionCollection( QObject* parent )
-    : QObject( parent )
+ActionCollection::ActionCollection( )
 {
-    s_instance = this;
     initActions();
 }
 
 ActionCollection::~ActionCollection()
 {
-    s_instance = 0;
     foreach( QString key, m_actionCollection.keys() )
         delete m_actionCollection[ key ];
 }

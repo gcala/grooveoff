@@ -27,12 +27,18 @@ class QMenuBar;
 class QMenu;
 class QAction;
 
+class ActionCollection;
+
+namespace The {
+    ActionCollection* actionCollection();
+}
+
 class ActionCollection : public QObject
 {
+    Q_OBJECT
 public:
-    static ActionCollection* instance();
+    friend ActionCollection* The::actionCollection();
 
-    ActionCollection( QObject *parent );
     ~ActionCollection();
 
     void initActions();
@@ -43,7 +49,7 @@ public:
     QMenu* getMenu( const QString& name );
 
 private:
-    static ActionCollection* s_instance;
+    ActionCollection();
 
     QHash< QString, QAction* > m_actionCollection;
     QHash< QString, QMenu* > m_menuCollection;

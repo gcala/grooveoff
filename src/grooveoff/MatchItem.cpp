@@ -106,7 +106,13 @@ void MatchItem::setDownloadIcon()
     schema.replace(QLatin1String("%artist"), m_playlistItem->song()->artistName(), Qt::CaseInsensitive);
     schema.replace(QLatin1String("%album"), m_playlistItem->song()->albumName(), Qt::CaseInsensitive);
     schema.replace(QLatin1String("%track"), QString::number(m_playlistItem->song()->trackNum()), Qt::CaseInsensitive);
-    
-    ui->downloadButton->setExists(QFile::exists(Utility::destinationPath + QDir::separator() + schema + ".mp3"));
+
+    if(QFile::exists(Utility::destinationPath + QDir::separator() + schema + ".mp3")) {
+        ui->downloadButton->setExists(true);
+        ui->downloadButton->setToolTip(trUtf8("Download again"));
+    } else {
+        ui->downloadButton->setExists(false);
+        ui->downloadButton->setToolTip(trUtf8("Download"));
+    }
 }
 
