@@ -75,7 +75,7 @@ void ActionCollection::initActions()
 //     actionSaveSessionAs->setToolTip(trUtf8("Save Session As..."));
 //     m_actionCollection[ QLatin1String( "actionSaveSessionAs" ) ] = actionSaveSessionAs;
 
-    QAction *actionConfigure = new QAction(trUtf8("&Configure GrooveOff..."), this);
+    QAction *actionConfigure = new QAction(trUtf8("Configure &GrooveOff..."), this);
     if(QIcon::hasThemeIcon(QLatin1String("configure")))
         actionConfigure->setIcon(QIcon::fromTheme(QLatin1String("configure")));
     else
@@ -103,7 +103,8 @@ void ActionCollection::initActions()
 
     QAction *actionNewToken = new QAction(QIcon::fromTheme(QLatin1String("emblem-new"),
                                   QIcon(QLatin1String(":/resources/emblem-new.png"))),
-                                  trUtf8("&Get new token..."), this);
+                                  trUtf8("Get &new token..."), this);
+    actionNewToken->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_N));
     m_actionCollection[ QLatin1String( "actionNewToken" ) ] = actionNewToken;
 
     QAction *actionStopDownloads = new QAction(QIcon::fromTheme(QLatin1String("process-stop"),
@@ -118,7 +119,7 @@ void ActionCollection::initActions()
 
     QAction *actionClearDownloadList = new QAction(QIcon::fromTheme(QLatin1String("edit-clear"),
                                            QIcon(QLatin1String(":/resources/edit-clear"))),
-                                           trUtf8("Clear finished"), this);
+                                           trUtf8("Clear &finished"), this);
     actionClearDownloadList->setToolTip(trUtf8("Removes all finished downloads preserving files on disk"));
     m_actionCollection[ QLatin1String( "actionClearDownloadList" ) ] = actionClearDownloadList;
 

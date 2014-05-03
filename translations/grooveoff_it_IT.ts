@@ -82,11 +82,6 @@
         <translation>Dona con PayPal</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="78"/>
-        <source>&amp;Configure GrooveOff...</source>
-        <translation>&amp;Configura GrooveOff...</translation>
-    </message>
-    <message>
         <location filename="../src/grooveoff/ActionCollection.cpp" line="88"/>
         <source>&amp;Compact Layout</source>
         <translation>Disposizione &amp;compatta</translation>
@@ -102,67 +97,72 @@
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="106"/>
-        <source>&amp;Get new token...</source>
-        <translation>&amp;Ottieni nuovo token...</translation>
-    </message>
-    <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="111"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="112"/>
         <source>&amp;Stop all downloads</source>
         <translation>Ferma &amp;tutti gli scaricamenti</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="116"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="117"/>
         <source>&amp;Remove canceled/failed downloads</source>
         <translation>Rimuovi gli scaricamenti &amp;cancellati/falliti</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="122"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="123"/>
         <source>Removes all finished downloads preserving files on disk</source>
         <translation>Rimuove tutti gli scaricamenti terminati preservando i file su disco</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="121"/>
-        <source>Clear finished</source>
-        <translation>Rimuovi terminati</translation>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="78"/>
+        <source>Configure &amp;GrooveOff...</source>
+        <translation>Configura &amp;GrooveOff...</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="127"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="106"/>
+        <source>Get &amp;new token...</source>
+        <translation>Ottieni &amp;nuovo token...</translation>
+    </message>
+    <message>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="122"/>
+        <source>Clear &amp;finished</source>
+        <translation>Elimina &amp;terminati</translation>
+    </message>
+    <message>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="128"/>
         <source>&amp;About GrooveOff</source>
         <translation>&amp;Informazioni su GrooveOff</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="132"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="133"/>
         <source>About &amp;Qt</source>
         <translation>Informazioni su &amp;Qt</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="144"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="145"/>
         <source>&amp;File</source>
         <translation>&amp;File</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="158"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="159"/>
         <source>&amp;Downloads</source>
         <translation>&amp;Scaricamenti</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="169"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="170"/>
         <source>&amp;View</source>
         <translation>&amp;Visualizza</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="175"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="176"/>
         <source>&amp;Settings</source>
         <translation>&amp;Impostazioni</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="179"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="180"/>
         <source>&amp;Help</source>
         <translation>&amp;Aiuto</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="196"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="197"/>
         <source>Main Menu</source>
         <translation>Menu principale</translation>
     </message>
@@ -537,11 +537,6 @@ Selezionare un percorso valido</translation>
 </context>
 <context>
     <name>MatchItem</name>
-    <message>
-        <location filename="../src/grooveoff/MatchItem.ui" line="14"/>
-        <source>Form</source>
-        <translation type="unfinished"></translation>
-    </message>
     <message>
         <location filename="../src/grooveoff/MatchItem.cpp" line="112"/>
         <source>Download again</source>

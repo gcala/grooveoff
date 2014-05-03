@@ -82,11 +82,6 @@
         <translation type="unfinished">Prispieť s PayPal</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="78"/>
-        <source>&amp;Configure GrooveOff...</source>
-        <translation type="unfinished">&amp;Konfigurovať GrooveOff...</translation>
-    </message>
-    <message>
         <location filename="../src/grooveoff/ActionCollection.cpp" line="88"/>
         <source>&amp;Compact Layout</source>
         <translation type="unfinished"></translation>
@@ -102,67 +97,72 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="106"/>
-        <source>&amp;Get new token...</source>
-        <translation type="unfinished">&amp;Získať novú známku...</translation>
-    </message>
-    <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="111"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="112"/>
         <source>&amp;Stop all downloads</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="116"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="117"/>
         <source>&amp;Remove canceled/failed downloads</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="122"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="123"/>
         <source>Removes all finished downloads preserving files on disk</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="121"/>
-        <source>Clear finished</source>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="78"/>
+        <source>Configure &amp;GrooveOff...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="127"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="106"/>
+        <source>Get &amp;new token...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="122"/>
+        <source>Clear &amp;finished</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="128"/>
         <source>&amp;About GrooveOff</source>
         <translation type="unfinished">O progr&amp;ame GrooveOff</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="132"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="133"/>
         <source>About &amp;Qt</source>
         <translation type="unfinished">O &amp;Qt</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="144"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="145"/>
         <source>&amp;File</source>
         <translation type="unfinished">&amp;Súbor</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="158"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="159"/>
         <source>&amp;Downloads</source>
         <translation type="unfinished">&amp;Sťahovania</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="169"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="170"/>
         <source>&amp;View</source>
         <translation type="unfinished">&amp;Zobraziť</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="175"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="176"/>
         <source>&amp;Settings</source>
         <translation type="unfinished">N&amp;astavenia</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="179"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="180"/>
         <source>&amp;Help</source>
         <translation type="unfinished">&amp;Nápoveda</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="196"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="197"/>
         <source>Main Menu</source>
         <translation type="unfinished"></translation>
     </message>
@@ -537,11 +537,6 @@ Vyberte platnú cestu</translation>
 </context>
 <context>
     <name>MatchItem</name>
-    <message>
-        <location filename="../src/grooveoff/MatchItem.ui" line="14"/>
-        <source>Form</source>
-        <translation type="unfinished"></translation>
-    </message>
     <message>
         <location filename="../src/grooveoff/MatchItem.cpp" line="112"/>
         <source>Download again</source>
