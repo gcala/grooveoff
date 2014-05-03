@@ -337,7 +337,7 @@
     <message>
         <location filename="../src/grooveoff/DownloadItem.cpp" line="145"/>
         <source>Remove track from queue</source>
-        <translation>Rimuove la traccia dalla coda</translation>
+        <translation>Rimuovi traccia dalla coda</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/DownloadItem.cpp" line="148"/>
