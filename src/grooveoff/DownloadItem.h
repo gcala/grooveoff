@@ -44,39 +44,47 @@ class DownloadItem : public QWidget
     Q_OBJECT
 
 public:
-    DownloadItem(const PlaylistItemPtr &playlistItemPtr, QWidget *parent = 0, GrooveOff::Context context = GrooveOff::Download);
+    DownloadItem( const PlaylistItemPtr &playlistItemPtr, QWidget *parent = 0, GrooveOff::Context context = GrooveOff::Download );
     virtual ~DownloadItem();
     QString songFile();
 
-    const PlaylistItemPtr playlistItem() { return m_playlistItem; }
-    GrooveOff::DownloadState downloadState() { return m_downloadState; }
-    void setDownloadState(GrooveOff::DownloadState state) { m_downloadState = state; }
+    inline const PlaylistItemPtr playlistItem() {
+        return m_playlistItem;
+    }
+    
+    inline GrooveOff::DownloadState downloadState() {
+        return m_downloadState;
+    }
+    
+    inline void setDownloadState(GrooveOff::DownloadState state) {
+        m_downloadState = state;
+    }
 
     void startDownload();
     void abortDownload();
 
-    bool operator==(DownloadItem &) const;
+    bool operator==( DownloadItem & ) const;
 
 public Q_SLOTS:
-    void setPlayerState(Phonon::State);
+    void setPlayerState( Phonon::State );
 
 Q_SIGNALS:
     void downloadFinished();
-    void addToQueue(DownloadItem *);
+    void addToQueue( DownloadItem * );
     void pauseResumePlaying();
     void stateChangedSignal();
-    void play(QString);
+    void play( QString );
     void reloadPlaylist();
-    void removeMeFromSession(quint32);
-    void removeMe(DownloadItem *);
+    void removeMeFromSession( quint32 );
+    void removeMe( DownloadItem * );
 
 protected:
     virtual void leaveEvent ( QEvent * event );
     virtual void enterEvent ( QEvent * event );
 
 private Q_SLOTS:
-    void downloadFinished(bool ok);
-    void setProgress(const qint64 &bytesReceived, const qint64 &bytesTotal);
+    void downloadFinished( bool ok );
+    void setProgress( const qint64 &bytesReceived, const qint64 &bytesTotal );
     void playSong();
     void timerButtonClicked();
     void removeSong();
@@ -99,7 +107,7 @@ private:
     void setupUi();
     void setupConnections();
     void stateChanged();
-    void removeEmptyFolder(QDir folder);
+    void removeEmptyFolder( QDir folder );
 };
 
 #endif // DOWNLOADITEM_H

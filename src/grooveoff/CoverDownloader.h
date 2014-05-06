@@ -27,11 +27,16 @@ class CoverDownloader : public QObject
 {
     Q_OBJECT
 public:
-    explicit CoverDownloader(QString name, QObject *parent = 0);
+    explicit CoverDownloader( const QString &name, QObject *parent = 0 );
     ~CoverDownloader();
 
-    bool isSuccess() { return m_success; }
-    QString coverName() { return m_coverName; }
+    inline bool isSuccess() {
+        return m_success;
+    }
+    
+    inline QString coverName() {
+        return m_coverName;
+    }
 
 Q_SIGNALS:
     void done();

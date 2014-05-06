@@ -49,8 +49,12 @@ DownloadItem::DownloadItem(const PlaylistItemPtr &playlistItemPtr, QWidget *pare
     , m_context(context)
 {
     ui->setupUi(this);
-    connect(m_playlistItem.data(), SIGNAL(reloadCover()), this, SLOT(loadCover()));
-    connect(m_playlistItem.data(), SIGNAL(stateChanged(Phonon::State)), this, SLOT(setPlayerState(Phonon::State)));
+    connect(m_playlistItem.data(), SIGNAL(reloadCover()), 
+                                   SLOT(loadCover())
+           );
+    connect(m_playlistItem.data(), SIGNAL(stateChanged(Phonon::State)), 
+                                   SLOT(setPlayerState(Phonon::State))
+           );
 
     setupUi();
 
@@ -617,7 +621,8 @@ void DownloadItem::loadCover()
         ui->coverLabel->setPixmap(QPixmap(Utility::coversCachePath + m_playlistItem->song()->coverArtFilename()));
     else
         ui->coverLabel->setPixmap(QIcon::fromTheme(QLatin1String("media-optical"),
-                                   QIcon(QLatin1String(":/resources/media-optical.png"))).pixmap(Utility::coverSize));
+                                                   QIcon(QLatin1String(":/resources/media-optical.png"))
+                                                  ).pixmap( Utility::coverSize ) );
 }
 
 void DownloadItem::abortDownload()

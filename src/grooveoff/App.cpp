@@ -28,62 +28,68 @@
 
 #define SHARE_PATH "/../share/apps/grooveoff"
 
-App::App( int & argc, char ** argv):
-    QtSingleApplication(argc,argv)
+App::App( int & argc, char ** argv ):
+    QtSingleApplication( argc, argv )
 {
 
     if(isRunning())
         return;
 
-    QCoreApplication::setOrganizationName(QLatin1String("gcala"));
-    QCoreApplication::setOrganizationDomain(QLatin1String("gcala.blogger.com"));
-    setApplicationName(QLatin1String("grooveoff"));
+    // set application info
+    QCoreApplication::setOrganizationName( QLatin1String( "gcala" ) );
+    QCoreApplication::setOrganizationDomain( QLatin1String( "gcala.blogger.com" ) );
+    setApplicationName( QLatin1String( "grooveoff" ) );
 
 #if QT_VERSION < QT_VERSION_CHECK( 5, 0, 0 )
-    QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
-    QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
+    // Set the codec to UTF-8
+    QTextCodec::setCodecForLocale( QTextCodec::codecForName( "UTF-8" ) );
+    QTextCodec::setCodecForCStrings( QTextCodec::codecForName( "UTF-8" ) );
 #endif
 
-    QTranslator appTranslator;
-    QTranslator qtTranslator;
-    QStringList uiLanguages;
+    QTranslator appTranslator; // aplication translator
+    QTranslator qtTranslator;  // qt translator
+    QStringList uiLanguages;   // enabled languages
     // uiLanguages crashes on Windows with 4.8.0 release builds
-#if (QT_VERSION >= 0x040801) || (QT_VERSION >= 0x040800 && !defined(Q_OS_WIN))
+#if ( QT_VERSION >= 0x040801 ) || ( QT_VERSION >= 0x040800 && !defined( Q_OS_WIN ) )
     uiLanguages = QLocale::system().uiLanguages();
 #else
     uiLanguages << QLocale::system().name();
 #endif
 
+    // the path to translations
     const QString &appTrPath = QCoreApplication::applicationDirPath()
-            + QLatin1String(SHARE_PATH "/translations");
+            + QLatin1String( SHARE_PATH "/translations" );
 
     foreach (QString locale, uiLanguages) {
 #if (QT_VERSION >= 0x050000)
         locale = QLocale(locale).name();
 #else
-        locale.replace(QLatin1Char('-'), QLatin1Char('_')); // work around QTBUG-25973
+        locale.replace( QLatin1Char( '-' ), QLatin1Char( '_' ) ); // work around QTBUG-25973
 #endif
-        if (appTranslator.load(QLatin1String("grooveoff_") + locale, appTrPath)) {
+        if ( appTranslator.load( QLatin1String( "grooveoff_" ) + locale, appTrPath ) ) {
             installTranslator(&appTranslator);
             
-            const QString &qtTrPath = QLibraryInfo::location(QLibraryInfo::TranslationsPath);
-            const QString &qtTrFile = QLatin1String("qt_") + locale;
+            // the path to qt translations
+            const QString &qtTrPath = QLibraryInfo::location( QLibraryInfo::TranslationsPath );
+            // translation file name
+            const QString &qtTrFile = QLatin1String( "qt_" ) + locale;
             // Binary installer puts Qt tr files into creatorTrPath
-            if (qtTranslator.load(qtTrFile, qtTrPath) || qtTranslator.load(qtTrFile, appTrPath)) {
-                installTranslator(&qtTranslator);
-                setProperty("qtc_locale", locale);
+            if (qtTranslator.load( qtTrFile, qtTrPath ) || qtTranslator.load( qtTrFile, appTrPath ) ) {
+                installTranslator( &qtTranslator );
+                setProperty( "qtc_locale", locale );
             }
             break;
-        } else if (locale == QLatin1String("C") /* overrideLanguage == "English" */) {
+        } else if ( locale == QLatin1String( "C" ) /* overrideLanguage == "English" */) {
             // use built-in
             break;
-        } else if (locale.startsWith(QLatin1String("en")) /* "English" is built-in */) {
+        } else if ( locale.startsWith( QLatin1String( "en" ) ) /* "English" is built-in */) {
             // use built-in
             break;
         }
     }
 
-    setWindowIcon(QIcon(QLatin1String(":/resources/grooveoff.png")));
+    // application icon
+    setWindowIcon( QIcon( QLatin1String( ":/resources/grooveoff.png" ) ) );
 
     // Creating MainWindow
     m_mainWindow = new MainWindow();
@@ -105,19 +111,8 @@ App::~App()
     delete The::actionCollection();
 }
 
-void App::applySettings(bool firstTime)
-{
-
-}
-
 void App::quit()
 {
     emit prepareToQuit();
     QApplication::quit();
 }
-
-void App::slotConfigGrooveOff(const QString& page)
-{
-
-}
-

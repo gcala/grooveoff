@@ -24,28 +24,30 @@
 #include <QFile>
 #include <QDir>
 
-CoverManager::CoverManager(QObject *parent) :
-    QObject(parent)
+CoverManager::CoverManager( QObject *parent )
+    : QObject(parent)
 {
-    if(!QFile::exists(Utility::coversCachePath)) {
-            QDir dir;
-            dir.mkdir(Utility::coversCachePath);
+    if( !QFile::exists( Utility::coversCachePath ) ) {
+        QDir dir;
+        dir.mkdir( Utility::coversCachePath );
     }
 }
 
-void CoverManager::addItem(const PlaylistItemPtr &playlistItemPtr)
+void CoverManager::addItem( const PlaylistItemPtr &playlistItemPtr )
 {
-    QString coverArtFilename = playlistItemPtr->song()->coverArtFilename();
-    if(coverArtFilename == "0")
+    const QString &coverArtFilename = playlistItemPtr->song()->coverArtFilename();
+    if( coverArtFilename == "0" )
         return;
-    if(m_coverItems.contains(coverArtFilename)) {
-        m_coverItems[coverArtFilename].append(playlistItemPtr);
+    if( m_coverItems.contains( coverArtFilename ) ) {
+        m_coverItems[ coverArtFilename ].append( playlistItemPtr );
     } else {
         QList< PlaylistItemPtr > listOfSongsWithSameCover;
-        listOfSongsWithSameCover.append(playlistItemPtr);
-        m_coverItems.insert(coverArtFilename, listOfSongsWithSameCover);
-        CoverDownloader *downloader = new CoverDownloader(coverArtFilename, this);
-        connect(downloader, SIGNAL(done()), this, SLOT(setCover()));
+        listOfSongsWithSameCover.append( playlistItemPtr );
+        m_coverItems.insert( coverArtFilename, listOfSongsWithSameCover );
+        CoverDownloader *downloader = new CoverDownloader( coverArtFilename, this );
+        connect( downloader, SIGNAL( done() ), 
+                             SLOT( setCover() )
+               );
     }
 }
 
@@ -57,9 +59,9 @@ void CoverManager::clear()
 void CoverManager::setCover()
 {
     CoverDownloader *coverDownloader = (CoverDownloader *)QObject::sender();
-    if(coverDownloader->isSuccess()) {
-        QString coverArtFilename = coverDownloader->coverName();
-        foreach (PlaylistItemPtr playlistItem, m_coverItems.value(coverArtFilename)) {
+    if( coverDownloader->isSuccess() ) {
+        const QString &coverArtFilename = coverDownloader->coverName();
+        foreach ( PlaylistItemPtr playlistItem, m_coverItems.value( coverArtFilename ) ) {
             playlistItem.data()->requireCoverReload();
         }
     }

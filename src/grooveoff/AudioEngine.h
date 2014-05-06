@@ -62,9 +62,12 @@ public:
     bool canGoNext();
     void seek( qint64 ms );
     void seek( int ms ); // for compatibility with seekbar in audiocontrols
-    void playItem(PlaylistItemPtr track);
-    void removingTrack(PlaylistItemPtr track);
-    Phonon::MediaObject * mediaObject() { return m_mediaObject; }
+    void playItem(const PlaylistItemPtr &track);
+    void removingTrack(const PlaylistItemPtr &track);
+    inline Phonon::MediaObject * mediaObject() const {
+        return m_mediaObject;
+        
+    }
     bool isSeekable() const;
 
     /**
@@ -83,28 +86,29 @@ public Q_SLOTS:
     void setMuted(bool);
 
 Q_SIGNALS:
-    void loading();
-    void started();
-    void finished();
-    void stopped();
-    void paused();
-    void resumed();
+    /*
+     * Called when audio track changes
+     */
     void sourceChanged();
-    void stopAfterTrackChanged();
+    
+    /*
+     * Called when slider moved to new position
+     */
     void seeked( qint64 ms, bool userSeek );
-    void shuffleModeChanged( bool enabled );
-    void repeatModeChanged();
-    void controlStateChanged();
+    
+    /*
+     * Called when player state changes
+     */
     void stateChanged( Phonon::State );
+    
+    /*
+     * Called when volume changes
+     */
     void volumeChanged( int volume /* in percent */ );
-
-    void timerMilliSeconds( qint64 msElapsed );
-    void timerSeconds( unsigned int secondsElapsed );
-    void timerPercentage( unsigned int percentage );
-
-    void playlistChanged();
-    void currentTrackPlaylistChanged();
-
+    
+    /*
+     * Called when the current playing track is removed 
+     */
     void removedPlayingTrack();
 
     /**
@@ -129,24 +133,24 @@ Q_SIGNALS:
 private Q_SLOTS:
     void timerTriggered( qint64 time );
     void onStateChanged( Phonon::State newState, Phonon::State oldState );
-    void sourceChanged(Phonon::MediaSource);
+    void sourceChanged( Phonon::MediaSource );
     void onFinished();
 
     /**
      * For volume/mute changes from the phonon side
      */
     void onVolumeChanged( qreal volume );
-    void slotMutedChanged( bool );
+    void onMutedChanged( bool );
 
-    void slotSeekableChanged( bool );
-    void slotTrackLengthChanged( qint64 );
+    void onSeekableChanged( bool );
+    void onTrackLengthChanged( qint64 );
 
 private:
     AudioEngine();
 
     PlaylistItemPtr m_currentTrack;
     PlaylistItemPtr m_oldTrack;
-    Phonon::State m_state;
+    Phonon::State   m_state;
 
     Phonon::MediaObject* m_mediaObject;
     Phonon::AudioOutput* m_audioOutput;

@@ -31,14 +31,14 @@ class ConfigDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit ConfigDialog(QWidget *parent = 0);
+    explicit ConfigDialog( QWidget *parent = 0 );
 
 private Q_SLOTS:
     void restoreDefaults();
     void saveSettings();
     void okClicked();
-    void switchPage(int);
-    void cfgChanged();
+    void switchPage( int );
+    void onConfigChanged();
 
 private:
     Ui::ConfigDialog *ui;

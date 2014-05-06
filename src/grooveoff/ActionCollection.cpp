@@ -43,96 +43,142 @@ ActionCollection::ActionCollection( )
 
 ActionCollection::~ActionCollection()
 {
+    // delete all actions before exiting
     foreach( QString key, m_actionCollection.keys() )
         delete m_actionCollection[ key ];
 }
 
 void ActionCollection::initActions()
 {
-    QAction *actionClose = new QAction(QIcon::fromTheme(QLatin1String("application-exit"),
-                               QIcon(QLatin1String(":/resources/application-exit.png"))),
-                               trUtf8("&Exit"), this);
-    actionClose->setToolTip(trUtf8("Close GrooveOff"));
-    actionClose->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Q));
-    m_actionCollection[ QLatin1String( "actionClose" ) ] = actionClose;
-    m_actionCollection[ QLatin1String( "actionClose" ) ]->setMenuRole( QAction::QuitRole );
+    // The "close window" action
+    QAction *actionClose = new QAction( QIcon::fromTheme( QLatin1String("application-exit" ), // theme icon
+                                                          QIcon( QLatin1String( ":/resources/application-exit.png" ) ) // resource icon (fallback)
+                                                        ),
+                                        trUtf8( "&Exit" ), // action text
+                                        this //parent
+                                       );
 
-    QAction *actionDonate = new QAction(QIcon::fromTheme(QLatin1String("help-donate"),
-                                QIcon(QLatin1String(":/resources/help-donate.png"))),
-                                trUtf8("&Donate"), this);
-    actionDonate->setToolTip(trUtf8("Donate with PayPal"));
-    m_actionCollection[ QLatin1String( "actionDonate" ) ] = actionDonate;
+    QAction *actionDonate = new QAction( QIcon::fromTheme( QLatin1String( "help-donate" ),
+                                                           QIcon(QLatin1String( ":/resources/help-donate.png" ) )
+                                                         ),
+                                         trUtf8("&Donate"),
+                                         this
+                                       );    
 
 //     QAction *actionManageSessions = new QAction(QIcon::fromTheme(QLatin1String("edit-rename"),
 //                                 QIcon(QLatin1String(":/resources/edit-rename.png"))),
 //                                 trUtf8("&Manage Sessions"), this);
-//     actionManageSessions->setToolTip(trUtf8("Open Session Manager"));
-//     m_actionCollection[ QLatin1String( "actionManageSessions" ) ] = actionManageSessions;
 
 //     QAction *actionSaveSessionAs = new QAction(QIcon::fromTheme(QLatin1String("document-save-as"),
 //                                 QIcon(QLatin1String(":/resources/document-save-as.png"))),
 //                                 trUtf8("&Save Session As..."), this);
-//     actionSaveSessionAs->setToolTip(trUtf8("Save Session As..."));
+
+    QAction *actionConfigure = new QAction( trUtf8( "Configure &GrooveOff..." ), this );
+    actionConfigure->setIcon( QIcon::fromTheme( QLatin1String( "configure" ),
+                                                QIcon::fromTheme(QLatin1String( "gconf-editor" ),
+                                                                 QIcon(QLatin1String(":/resources/configure.png" ) )
+                                                                )
+                                              )
+                            );
+
+    QAction *actionCompact = new QAction( QIcon::fromTheme( QLatin1String( "view-split-top-bottom" ),
+                                                            QIcon(QLatin1String( ":/resources/view-split-top-bottom.png" ) )
+                                                          ),
+                                          trUtf8( "&Compact Layout" ),
+                                          this
+                                        );
+    actionCompact->setCheckable( true );
+
+    QAction *actionWide = new QAction( QIcon::fromTheme( QLatin1String( "view-split-left-right" ),
+                                                         QIcon( QLatin1String( ":/resources/view-split-left-right" ) )
+                                                       ),
+                                       trUtf8( "&Wide Layout" ),
+                                       this
+                                     );
+    actionWide->setCheckable( true );
+
+    QAction *miniPlayer = new QAction( QIcon::fromTheme( QLatin1String( "view-split-left-right" ),
+                                                         QIcon( QLatin1String( ":/resources/view-split-left-right" ) )
+                                                       ),
+                                       trUtf8( "&Mini Player" ), 
+                                       this
+                                     );
+    miniPlayer->setCheckable( true );
+
+    QAction *actionNewToken = new QAction( QIcon::fromTheme( QLatin1String( "emblem-new" ),
+                                                             QIcon( QLatin1String( ":/resources/emblem-new.png" ) )
+                                                           ),
+                                           trUtf8( "Get &new token..." ),
+                                           this
+                                         );
+
+    QAction *actionStopDownloads = new QAction( QIcon::fromTheme( QLatin1String( "process-stop" ),
+                                                                  QIcon( QLatin1String( ":/resources/process-stop.png" ) )
+                                                                ),
+                                                trUtf8( "&Stop all downloads" ), 
+                                                this
+                                              );
+
+    QAction *actionRemoveFailed = new QAction( QIcon::fromTheme( QLatin1String( "edit-delete" ),
+                                                                 QIcon( QLatin1String( ":/resources/edit-delete.png" ) )
+                                                               ),
+                                               trUtf8( "&Remove canceled/failed downloads" ), 
+                                               this
+                                             );
+
+    QAction *actionClearDownloadList = new QAction( QIcon::fromTheme( QLatin1String( "edit-clear" ),
+                                                                      QIcon( QLatin1String( ":/resources/edit-clear" ) )
+                                                                    ),
+                                                    trUtf8( "Clear &finished" ),
+                                                    this
+                                                  );
+    
+    QAction *actionAbout = new QAction( QIcon::fromTheme( QLatin1String( "help-about" ),
+                                                          QIcon( QLatin1String( ":/resources/help-about.png" ) )
+                                                        ),
+                                        trUtf8( "&About GrooveOff" ), 
+                                        this
+                                      );
+    
+
+    QAction *actionQtAbout = new QAction( QIcon::fromTheme( QLatin1String( "qtlogo" ),
+                                                            QIcon( QLatin1String( ":/resources/qtlogo.png" ) )
+                                                          ),
+                                          trUtf8( "About &Qt" ), 
+                                          this
+                                        );
+    
+    // append all actions to the collector
+    m_actionCollection[ QLatin1String( "actionClose" ) ] = actionClose;
+    m_actionCollection[ QLatin1String( "actionDonate" ) ] = actionDonate;
+//     m_actionCollection[ QLatin1String( "actionManageSessions" ) ] = actionManageSessions;
 //     m_actionCollection[ QLatin1String( "actionSaveSessionAs" ) ] = actionSaveSessionAs;
-
-    QAction *actionConfigure = new QAction(trUtf8("Configure &GrooveOff..."), this);
-    if(QIcon::hasThemeIcon(QLatin1String("configure")))
-        actionConfigure->setIcon(QIcon::fromTheme(QLatin1String("configure")));
-    else
-        actionConfigure->setIcon(QIcon::fromTheme(QLatin1String("gconf-editor"),
-                                  QIcon(QLatin1String(":/resources/configure.png"))));
     m_actionCollection[ QLatin1String( "actionConfigure" ) ] = actionConfigure;
-
-    QAction *actionCompact = new QAction(QIcon::fromTheme(QLatin1String("view-split-top-bottom"),
-                                 QIcon(QLatin1String(":/resources/view-split-top-bottom.png"))),
-                                 trUtf8("&Compact Layout"), this);
-    actionCompact->setCheckable(true);
     m_actionCollection[ QLatin1String( "actionCompact" ) ] = actionCompact;
-
-    QAction *actionWide = new QAction(QIcon::fromTheme(QLatin1String("view-split-left-right"),
-                              QIcon(QLatin1String(":/resources/view-split-left-right"))),
-                              trUtf8("&Wide Layout"), this);
-    actionWide->setCheckable(true);
     m_actionCollection[ QLatin1String( "actionWide" ) ] = actionWide;
-
-    QAction *miniPlayer = new QAction(QIcon::fromTheme(QLatin1String("view-split-left-right"),
-                              QIcon(QLatin1String(":/resources/view-split-left-right"))),
-                              trUtf8("&Mini Player"), this);
-    miniPlayer->setCheckable(true);
     m_actionCollection[ QLatin1String( "miniPlayer" ) ] = miniPlayer;
-
-    QAction *actionNewToken = new QAction(QIcon::fromTheme(QLatin1String("emblem-new"),
-                                  QIcon(QLatin1String(":/resources/emblem-new.png"))),
-                                  trUtf8("Get &new token..."), this);
-    actionNewToken->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_N));
+    m_actionCollection[ QLatin1String( "miniPlayer" ) ] = miniPlayer;
     m_actionCollection[ QLatin1String( "actionNewToken" ) ] = actionNewToken;
-
-    QAction *actionStopDownloads = new QAction(QIcon::fromTheme(QLatin1String("process-stop"),
-                                      QIcon(QLatin1String(":/resources/process-stop.png"))),
-                                      trUtf8("&Stop all downloads"), this);
     m_actionCollection[ QLatin1String( "actionStopDownloads" ) ] = actionStopDownloads;
-
-    QAction *actionRemoveFailed = new QAction(QIcon::fromTheme(QLatin1String("edit-delete"),
-                                      QIcon(QLatin1String(":/resources/edit-delete.png"))),
-                                      trUtf8("&Remove canceled/failed downloads"), this);
     m_actionCollection[ QLatin1String( "actionRemoveFailed" ) ] = actionRemoveFailed;
-
-    QAction *actionClearDownloadList = new QAction(QIcon::fromTheme(QLatin1String("edit-clear"),
-                                           QIcon(QLatin1String(":/resources/edit-clear"))),
-                                           trUtf8("Clear &finished"), this);
-    actionClearDownloadList->setToolTip(trUtf8("Removes all finished downloads preserving files on disk"));
     m_actionCollection[ QLatin1String( "actionClearDownloadList" ) ] = actionClearDownloadList;
-
-    QAction *actionAbout = new QAction(QIcon::fromTheme(QLatin1String("help-about"),
-                               QIcon(QLatin1String(":/resources/help-about.png"))),
-                               trUtf8("&About GrooveOff"), this);
     m_actionCollection[ QLatin1String( "actionAbout" ) ] = actionAbout;
-
-    QAction *actionQtAbout = new QAction(QIcon::fromTheme(QLatin1String("qtlogo"),
-                                 QIcon(QLatin1String(":/resources/qtlogo.png"))),
-                                 trUtf8("About &Qt"), this);
     m_actionCollection[ QLatin1String( "actionQtAbout" ) ] = actionQtAbout;
+    
+    // set action roles
+    m_actionCollection[ QLatin1String( "actionClose" ) ]->setMenuRole( QAction::QuitRole );
     m_actionCollection[ QLatin1String( "actionQtAbout" ) ]->setMenuRole( QAction::AboutQtRole );
+    
+    // set actions tool tip
+    actionClose->setToolTip( trUtf8( "Close GrooveOff" ) );
+    actionDonate->setToolTip( trUtf8( "Donate with PayPal" ) );
+//     actionManageSessions->setToolTip( trUtf8( "Open Session Manager" ) );
+//     actionSaveSessionAs->setToolTip( trUtf8( "Save Session As..." ) );
+    actionClearDownloadList->setToolTip( trUtf8( "Removes all finished downloads preserving files on disk" ) );
+    
+    // set actions shortcuts
+    actionClose->setShortcut( QKeySequence( Qt::CTRL + Qt::Key_Q ) );
+    actionNewToken->setShortcut( QKeySequence( Qt::CTRL + Qt::Key_N ) );
 }
 
 QMenuBar* ActionCollection::createMenuBar( QWidget *parent )
@@ -191,7 +237,9 @@ QMenuBar* ActionCollection::createMenuBar( QWidget *parent )
     return menuBar;
 }
 
-
+/*!
+ \brief A small menu used with mini player layout
+ */
 QMenu* ActionCollection::createCompactMenu( QWidget *parent )
 {
     QMenu* compactMenu = new QMenu( tr( "Main Menu" ), parent );
@@ -216,12 +264,17 @@ QMenu* ActionCollection::createCompactMenu( QWidget *parent )
     return compactMenu;
 }
 
-
+/*!
+ \brief returns action from its name
+ */
 QAction* ActionCollection::getAction( const QString& name )
 {
     return m_actionCollection.value( name, 0 );
 }
 
+/*!
+ \brief return menu from its name
+ */
 QMenu* ActionCollection::getMenu(const QString& name)
 {
     return m_menuCollection.value( name, 0 );

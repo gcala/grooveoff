@@ -27,15 +27,17 @@
 
 // Cover sizes available: 40 50 70 80 90 120 200 500
 
-CoverDownloader::CoverDownloader(QString name, QObject *parent) :
-    QObject(parent),
-    m_coverName(name)
+CoverDownloader::CoverDownloader(const QString &name, QObject *parent)
+    : QObject(parent)
+    , m_coverName(name)
 {
     QNetworkRequest request;
-    request.setUrl(QUrl(QString("http://images.gs-cdn.net/static/albums/200_%1").arg(m_coverName)));
-    request.setHeader(QNetworkRequest::ContentTypeHeader, QLatin1String("application/x-www-form-urlencoded"));
-    m_reply = m_qnam.get(request);
-    connect(m_reply, SIGNAL(finished()), this, SLOT(downloadFinished()));
+    request.setUrl( QUrl( QString( "http://images.gs-cdn.net/static/albums/200_%1" ).arg( m_coverName ) ) );
+    request.setHeader( QNetworkRequest::ContentTypeHeader, QLatin1String( "application/x-www-form-urlencoded" ) );
+    m_reply = m_qnam.get( request );
+    connect( m_reply, SIGNAL( finished() ), 
+                      SLOT( downloadFinished() )
+           );
 }
 
 CoverDownloader::~CoverDownloader()
@@ -46,14 +48,14 @@ CoverDownloader::~CoverDownloader()
 
 void CoverDownloader::downloadFinished()
 {
-    switch(m_reply->error()) {
+    switch( m_reply->error() ) {
     case QNetworkReply::NoError: {
         // if no error
-        QByteArray data = m_reply->readAll();
+        const QByteArray &data = m_reply->readAll();
         m_success = true;
-        QFile file(Utility::coversCachePath + m_coverName);
-        file.open(QIODevice::WriteOnly);
-        file.write(data);
+        QFile file( Utility::coversCachePath + m_coverName );
+        file.open( QIODevice::WriteOnly );
+        file.write( data );
         file.close();
         break;
     }

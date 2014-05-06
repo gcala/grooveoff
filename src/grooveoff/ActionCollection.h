@@ -38,21 +38,21 @@ class ActionCollection : public QObject
     Q_OBJECT
 public:
     friend ActionCollection* The::actionCollection();
-
+    
     ~ActionCollection();
 
     void initActions();
 
     QMenuBar *createMenuBar( QWidget *parent );
-    QMenu *createCompactMenu( QWidget *parent );
-    QAction* getAction( const QString& name );
-    QMenu* getMenu( const QString& name );
+    QMenu    *createCompactMenu( QWidget *parent );
+    QAction  *getAction( const QString& name );
+    QMenu    *getMenu( const QString& name );
 
 private:
     ActionCollection();
 
     QHash< QString, QAction* > m_actionCollection;
-    QHash< QString, QMenu* > m_menuCollection;
+    QHash< QString, QMenu*   > m_menuCollection;
 };
 
 #endif // ACTIONCOLLECTION_H

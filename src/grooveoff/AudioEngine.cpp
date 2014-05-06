@@ -43,9 +43,9 @@ AudioEngine::AudioEngine()
     m_mediaObject = new Phonon::MediaObject( this );
 
     // The AudioOutput class is used to send data to audio output devices
-    m_audioOutput = new Phonon::AudioOutput(Phonon::MusicCategory, this);
+    m_audioOutput = new Phonon::AudioOutput( Phonon::MusicCategory, this );
 
-    m_mediaObject->setTickInterval(1000);
+    m_mediaObject->setTickInterval( 1000 );
 
     m_state = Phonon::StoppedState;
 
@@ -55,24 +55,32 @@ AudioEngine::AudioEngine()
     Phonon::createPath(m_mediaObject, m_audioOutput);
 
     connect( m_mediaObject, SIGNAL( stateChanged( Phonon::State, Phonon::State ) ),
-                           SLOT( onStateChanged( Phonon::State, Phonon::State ) ) );
+                            SLOT( onStateChanged( Phonon::State, Phonon::State ) )
+           );
     connect( m_mediaObject, SIGNAL( tick( qint64 ) ),
-                           SLOT( timerTriggered( qint64 ) ) );
+                            SLOT( timerTriggered( qint64 ) )
+           );
     connect( m_mediaObject, SIGNAL( finished() ),
-                           SLOT( onFinished() ) );
-    connect( m_mediaObject, SIGNAL(currentSourceChanged(Phonon::MediaSource)),
-                           SLOT(sourceChanged(Phonon::MediaSource)));
+                            SLOT( onFinished() )
+           );
+    connect( m_mediaObject, SIGNAL( currentSourceChanged( Phonon::MediaSource ) ),
+                            SLOT( sourceChanged( Phonon::MediaSource ) )
+           );
     connect( m_audioOutput, SIGNAL( volumeChanged( qreal ) ),
-                           SLOT( onVolumeChanged( qreal ) ) );
-    connect( m_audioOutput, SIGNAL(mutedChanged(bool)),
-                           SLOT(slotMutedChanged(bool)) );
+                            SLOT( onVolumeChanged( qreal ) )
+           );
+    connect( m_audioOutput, SIGNAL( mutedChanged( bool ) ),
+                            SLOT( onMutedChanged( bool ) )
+           );
     connect( m_mediaObject, SIGNAL( seekableChanged( bool ) ),
-                           SLOT( slotSeekableChanged( bool ) ) );
+                            SLOT( onSeekableChanged( bool ) )
+           );
     connect( m_mediaObject, SIGNAL( totalTimeChanged( qint64 ) ),
-                           SLOT( slotTrackLengthChanged( qint64 ) ) );
+                            SLOT( onTrackLengthChanged( qint64 ) )
+           );
 
     // Read the volume from phonon
-    m_volume = qBound<qreal>( 0, qRound(m_audioOutput->volume()*100), 100 );
+    m_volume = qBound<qreal>( 0, qRound( m_audioOutput->volume() * 100 ), 100 );
 
     setVolume( 50 );
 }
@@ -88,28 +96,28 @@ void AudioEngine::timerTriggered( qint64 time )
 
 void AudioEngine::onFinished()
 {
-    m_currentTrack->setState(Phonon::StoppedState);
+    m_currentTrack->setState( Phonon::StoppedState );
     next();
 }
 
-void AudioEngine::playItem(PlaylistItemPtr track)
+void AudioEngine::playItem( const PlaylistItemPtr &track)
 {
-    if(m_currentTrack)
-        m_currentTrack->setState(Phonon::StoppedState);
+    if( m_currentTrack )
+        m_currentTrack->setState( Phonon::StoppedState );
 
     m_currentTrack = track;
     m_oldTrack = track;
-    m_mediaObject->setCurrentSource(QUrl::fromLocalFile(m_currentTrack->path() + QDir::separator() + m_currentTrack->fileName()));
+    m_mediaObject->setCurrentSource( QUrl::fromLocalFile( m_currentTrack->path() + QDir::separator() + m_currentTrack->fileName() ) );
     play();
 }
 
-void AudioEngine::onStateChanged(Phonon::State newState, Phonon::State oldState)
+void AudioEngine::onStateChanged( Phonon::State newState, Phonon::State oldState )
 {
-    Q_UNUSED(oldState)
+    Q_UNUSED( oldState )
 
     if ( newState == Phonon::ErrorState )
     {
-        if (m_mediaObject->errorType() == Phonon::FatalError) {
+        if ( m_mediaObject->errorType() == Phonon::FatalError ) {
             qDebug() << "GrooveOff :: "  << "Fatal Error: " << m_mediaObject->errorString();
         } else {
             qDebug() << "GrooveOff :: "  << "Error: " << m_mediaObject->errorString();
@@ -120,40 +128,37 @@ void AudioEngine::onStateChanged(Phonon::State newState, Phonon::State oldState)
 
     m_state = newState;
 
-    emit stateChanged(newState);
+    emit stateChanged( newState );
 }
 
 void AudioEngine::playPause()
 {
-    if ( isPlaying() )
-        pause();
-    else
-        play();
+    isPlaying() ? pause() : play();
 }
 
 void AudioEngine::pause()
 {
     m_mediaObject->pause();
-    m_currentTrack->setState(Phonon::PausedState);
+    m_currentTrack->setState( Phonon::PausedState );
 }
 
 void AudioEngine::play()
 {
-    if(m_mediaObject->currentSource().url().isEmpty()) {
-        if(The::playlist()->count() > 0) {
-            playItem(The::playlist()->item(0));
+    if( m_mediaObject->currentSource().url().isEmpty() ) {
+        if( The::playlist()->count() > 0 ) {
+            playItem( The::playlist()->item( 0 ) );
             return;
         }
     }
     m_mediaObject->play();
-    m_currentTrack->setState(Phonon::PlayingState);
+    m_currentTrack->setState( Phonon::PlayingState );
 }
 
-void AudioEngine::stop(Phonon::ErrorType errorCode)
+void AudioEngine::stop( Phonon::ErrorType errorCode )
 {
-    if(m_state == Phonon::PlayingState || m_state == Phonon::PausedState) {
+    if( m_state == Phonon::PlayingState || m_state == Phonon::PausedState ) {
         m_mediaObject->stop();
-        m_currentTrack->setState(Phonon::StoppedState);
+        m_currentTrack->setState( Phonon::StoppedState );
     }
 }
 
@@ -193,7 +198,7 @@ PlaylistItemPtr AudioEngine::currentTrack() const
     return m_currentTrack;
 }
 
-void AudioEngine::sourceChanged(Phonon::MediaSource)
+void AudioEngine::sourceChanged( Phonon::MediaSource )
 {
     emit sourceChanged();
 }
@@ -205,10 +210,10 @@ qint64 AudioEngine::remainingTime() const
 
 bool AudioEngine::canGoNext()
 {
-    if(m_oldTrack) {
-        int currentIndex = The::playlist()->row(m_oldTrack);
-        if(currentIndex >= 0) {
-            if(currentIndex < (The::playlist()->count() - 1))
+    if( m_oldTrack ) {
+        int currentIndex = The::playlist()->row( m_oldTrack );
+        if( currentIndex >= 0 ) {
+            if( currentIndex < ( The::playlist()->count() - 1 ) )
                 return true;
         }
     }
@@ -218,9 +223,9 @@ bool AudioEngine::canGoNext()
 
 bool AudioEngine::canGoPrevious()
 {
-    if(m_oldTrack) {
-        int currentIndex = The::playlist()->row(m_oldTrack);
-        if(currentIndex > 0)
+    if( m_oldTrack ) {
+        int currentIndex = The::playlist()->row( m_oldTrack );
+        if( currentIndex > 0 )
             return true;
     }
 
@@ -229,35 +234,35 @@ bool AudioEngine::canGoPrevious()
 
 void AudioEngine::next()
 {
-    if(canGoNext()) {
-        PlaylistItemPtr track = The::playlist()->item(The::playlist()->row(m_oldTrack) + 1);
-        if(m_currentTrack)
-            m_currentTrack->setState(Phonon::StoppedState);
+    if( canGoNext() ) {
+        PlaylistItemPtr track = The::playlist()->item( The::playlist()->row( m_oldTrack ) + 1 );
+        if( m_currentTrack )
+            m_currentTrack->setState( Phonon::StoppedState );
 
         m_currentTrack = track;
         m_oldTrack = track;
-        m_mediaObject->setCurrentSource(QUrl::fromLocalFile(m_currentTrack->path() + QDir::separator() + m_currentTrack->fileName()));
+        m_mediaObject->setCurrentSource( QUrl::fromLocalFile( m_currentTrack->path() + QDir::separator() + m_currentTrack->fileName() ) );
         play();
     }
 }
 
 void AudioEngine::previous()
 {
-    if(canGoPrevious()) {
-        PlaylistItemPtr track = The::playlist()->item(The::playlist()->row(m_currentTrack) - 1);
-        if(m_currentTrack)
-            m_currentTrack->setState(Phonon::StoppedState);
+    if( canGoPrevious() ) {
+        PlaylistItemPtr track = The::playlist()->item( The::playlist()->row( m_currentTrack ) - 1 );
+        if( m_currentTrack )
+            m_currentTrack->setState( Phonon::StoppedState );
 
         m_currentTrack = track;
         m_oldTrack = track;
-        m_mediaObject->setCurrentSource(QUrl::fromLocalFile(m_currentTrack->path() + QDir::separator() + m_currentTrack->fileName()));
+        m_mediaObject->setCurrentSource( QUrl::fromLocalFile( m_currentTrack->path() + QDir::separator() + m_currentTrack->fileName() ) );
         play();
     }
 }
 
-void AudioEngine::removingTrack(PlaylistItemPtr track)
+void AudioEngine::removingTrack( const PlaylistItemPtr &track )
 {
-    if(m_currentTrack == track) {
+    if( m_currentTrack == track ) {
         emit removedPlayingTrack();
         m_mediaObject->stop();
         m_currentTrack = PlaylistItemPtr();
@@ -286,9 +291,9 @@ AudioEngine::seek( int ms )
     seek( (qint64) ms );
 }
 
-void AudioEngine::setMuted(bool mute)
+void AudioEngine::setMuted( bool mute )
 {
-    m_audioOutput->setMuted(mute);
+    m_audioOutput->setMuted( mute );
     if( !isMuted() )
         setVolume( m_volume );
     emit muteStateChanged( mute );
@@ -309,13 +314,13 @@ void AudioEngine::setVolume( int percentage )
 
 void AudioEngine::onVolumeChanged( qreal volume )
 {
-    int percent = qBound<qreal>( 0, qRound(volume * 100), 100 );
+    int percent = qBound<qreal>( 0, qRound( volume * 100 ), 100 );
     if ( m_volume != percent )
         emit volumeChanged( percent );
     m_volume = percent;
 }
 
-void AudioEngine::slotMutedChanged(bool mute)
+void AudioEngine::onMutedChanged( bool mute )
 {
     emit muteStateChanged( mute );
 }
@@ -337,12 +342,12 @@ bool AudioEngine::isSeekable() const
     return false;
 }
 
-void AudioEngine::slotSeekableChanged( bool seekable )
+void AudioEngine::onSeekableChanged( bool seekable )
 {
     emit seekableChanged( seekable );
 }
 
-void AudioEngine::slotTrackLengthChanged( qint64 milliseconds )
+void AudioEngine::onTrackLengthChanged( qint64 milliseconds )
 {
     emit trackLengthChanged( milliseconds );
 }

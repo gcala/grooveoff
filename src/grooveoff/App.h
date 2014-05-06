@@ -32,20 +32,21 @@ public:
     App( int & argc, char ** argv);
     ~App();
 
-    static App *instance() { return static_cast<App*>( qApp ); }
+    static App *instance() {
+        return static_cast<App*>( qApp );
+    }
 
-    inline MainWindow *mainWindow() const { return m_mainWindow.data(); }
+    inline MainWindow *mainWindow() const {
+        return m_mainWindow.data();
+    }
 
     // FRIENDS
-    friend class MainWindow; //requires access to applySettings()
+    friend class MainWindow;
 
 Q_SIGNALS:
     void prepareToQuit();
-    void settingsChanged();
 
 public Q_SLOTS:
-    void applySettings( bool firstTime = false );
-    void slotConfigGrooveOff( const QString& page = QString() );
     void quit();
 
 private:
