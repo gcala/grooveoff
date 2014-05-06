@@ -19,7 +19,7 @@
 #include "SessionList.h"
 
 #include <QDropEvent>
-#include <QDebug>
+#include <QMimeData>
 
 SessionList::SessionList(QWidget *parent)
 : QListWidget(parent)

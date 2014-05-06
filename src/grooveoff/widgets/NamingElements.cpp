@@ -59,7 +59,7 @@ void NamingElements::setupItems()
         tagName = tagName.right(tagName.size() - 1); //cut the '%' character
         tagName = tagName.left(1).toUpper() + tagName.mid(1); //capitalize tag name    
 
-        QListWidgetItem *newItem = new QListWidgetItem(QIcon::fromTheme(m_itemsIcons.at(i), QIcon(QLatin1String(":/resources/" + m_itemsIcons.at(i).toAscii() + ".png"))), tagName);
+        QListWidgetItem *newItem = new QListWidgetItem(QIcon::fromTheme(m_itemsIcons.at(i), QIcon(QLatin1String(":/resources/" + m_itemsIcons.at(i).toLatin1() + ".png"))), tagName);
         addItem(newItem);
     }
 }

@@ -79,6 +79,11 @@ void SessionReaderWriter::parsePlaylistItem(const QDomElement& element, Playlist
     QVariant var;
     for(int i=0; i< item->metaObject()->propertyCount(); ++i) {
         if(item->metaObject()->property(i).isStored(item.data())) {
+            // without this check a crash happens when compiled with qt5
+            // "song" is the property's name containg a Song object
+            if(QString(item->metaObject()->property(i).typeName()) == "song")
+                continue;
+            
             var = element.firstChildElement(QString(item->metaObject()->property(i).name())).text();
             item->metaObject()->property(i).write(item.data(), var);
         }
