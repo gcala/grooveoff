@@ -14,47 +14,47 @@
         <translation>Κλείσιμο</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/AboutDialog.cpp" line="44"/>
+        <location filename="../src/grooveoff/AboutDialog.cpp" line="55"/>
         <source>GrooveOff</source>
         <translation>GrooveOff</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/AboutDialog.cpp" line="45"/>
+        <location filename="../src/grooveoff/AboutDialog.cpp" line="57"/>
         <source>Version </source>
         <translation>Έκδοση </translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/AboutDialog.cpp" line="48"/>
+        <location filename="../src/grooveoff/AboutDialog.cpp" line="61"/>
         <source>Offline Grooveshark.com music.</source>
         <translation>Μουσική εκτός σύνδεσης από το Grooveshark.com.</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/AboutDialog.cpp" line="49"/>
+        <location filename="../src/grooveoff/AboutDialog.cpp" line="62"/>
         <source>GrooveOff can access the huge Grooveshark database through its &lt;a href=&quot;http://developers.grooveshark.com/docs/public_api/v3/&quot;&gt;public api&lt;/a&gt;.</source>
         <translation>Το GrooveOff μπορεί να έχει πρόσβαση στην τεράστια βάση δεδομένων του Grooveshark μέσω του δημοσίου του &lt;a href=&quot;http://developers.grooveshark.com/docs/public_api/v3/&quot;&gt; api&lt;/a&gt;.</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/AboutDialog.cpp" line="50"/>
+        <location filename="../src/grooveoff/AboutDialog.cpp" line="63"/>
         <source>&lt;b&gt;Author&lt;/b&gt;: </source>
         <translation>&lt;b&gt;Συγγραφέας&lt;/b&gt;: </translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/AboutDialog.cpp" line="51"/>
+        <location filename="../src/grooveoff/AboutDialog.cpp" line="64"/>
         <source>&lt;b&gt;License&lt;/b&gt;: </source>
         <translation>&lt;b&gt;Άδεια χρήσης&lt;/b&gt;: </translation>
     </message>
     <message utf8="true">
-        <location filename="../src/grooveoff/AboutDialog.cpp" line="53"/>
+        <location filename="../src/grooveoff/AboutDialog.cpp" line="66"/>
         <source>GrooveOff is not affiliated with Grooveshark™ and has not been reviewed or officially approved by Grooveshark.com. The author is not responsible for any violations this application does to Grooveshark&apos;s TOS. The author is not related to Grooveshark™ in any way! Support the Artists You Like by Buying Their Music.</source>
         <translation>Το GrooveOff δεν έχει καμία σύνδεση με το Grooveshark™ και δεν έχει αναθεωρηθεί ή εγκριθεί επίσημα από το Grooveshark.com. Ο συγγραφέας δεν είναι υπεύθυνος για οποιαδήποτε παραβίαση κάνει αυτή η εφαρμογή στους όρους παροχής υπηρεσιών του Grooveshark. Ο συγγραφέας δεν έχει καμία σχέση με κανέναν τρόπο με το Grooveshark™ ! Υποστηρίξτε τους αγαπημένους σας καλλιτέχνες αγοράζοντας τη μουσική τους.</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/AboutDialog.cpp" line="86"/>
+        <location filename="../src/grooveoff/AboutDialog.cpp" line="104"/>
         <source>Donation to Grooveoff&apos;s author</source>
         <translation>Κάντε μια δωρεά στον συγγραφέα του Grooveoff</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/AboutDialog.cpp" line="52"/>
+        <location filename="../src/grooveoff/AboutDialog.cpp" line="65"/>
         <source>Disclaimer:</source>
         <translation>Αποποίηση ευθύνης:</translation>
     </message>
@@ -62,109 +62,109 @@
 <context>
     <name>ActionCollection</name>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="54"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="57"/>
         <source>&amp;Exit</source>
-        <translation type="unfinished">&amp;Έξοδος</translation>
+        <translation>&amp;Έξοδος</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="55"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="173"/>
         <source>Close GrooveOff</source>
-        <translation type="unfinished">Κλείσιμο του GrooveOff</translation>
+        <translation>Τερματισμός του GrooveOff </translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="62"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="64"/>
         <source>&amp;Donate</source>
-        <translation type="unfinished">&amp;Δωρεά</translation>
+        <translation>&amp;Δωρεά</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="63"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="174"/>
         <source>Donate with PayPal</source>
-        <translation type="unfinished">Δωρεά μέσω PayPal</translation>
+        <translation>Δωρεά μέσω PayPal</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="88"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="87"/>
         <source>&amp;Compact Layout</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Συμπαγής διάταξη</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="94"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="95"/>
         <source>&amp;Wide Layout</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Ευρεία διάταξη</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="100"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="103"/>
         <source>&amp;Mini Player</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Μικροαναπαραγωγέας</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="112"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="118"/>
         <source>&amp;Stop all downloads</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Διακοπή όλων των λήψεων</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="117"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="125"/>
         <source>&amp;Remove canceled/failed downloads</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Αφαίρεση των ακυρωμένων/αποτυχημένων λήψεων</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="123"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="177"/>
         <source>Removes all finished downloads preserving files on disk</source>
-        <translation type="unfinished"></translation>
+        <translation>Αφαίρεση όλων των ολοκληρωμένων λήψεων διατηρώντας τα αρχεία στο δίσκο</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="78"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="76"/>
         <source>Configure &amp;GrooveOff...</source>
-        <translation type="unfinished"></translation>
+        <translation>Διαμόρφωση του &amp;GrooveOff...</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="106"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="111"/>
         <source>Get &amp;new token...</source>
-        <translation type="unfinished"></translation>
+        <translation>Λήψη &amp;νέου εισιτηρίου...</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="122"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="132"/>
         <source>Clear &amp;finished</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Καθαρισμός των ολοκληρωμένων</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="128"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="139"/>
         <source>&amp;About GrooveOff</source>
-        <translation type="unfinished">&amp;Σχετικά με το GrooveOff</translation>
+        <translation>&amp;Σχετικά με το GrooveOff</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="133"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="147"/>
         <source>About &amp;Qt</source>
-        <translation type="unfinished">Σχετικά με την &amp;Qt</translation>
+        <translation>Σχετικά με την &amp;Qt</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="145"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="191"/>
         <source>&amp;File</source>
-        <translation type="unfinished">&amp;Αρχείο</translation>
+        <translation>&amp;Αρχείο</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="159"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="205"/>
         <source>&amp;Downloads</source>
-        <translation type="unfinished">&amp;Λήψεις</translation>
+        <translation>&amp;Λήψεις</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="170"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="216"/>
         <source>&amp;View</source>
-        <translation type="unfinished">&amp;Προβολή</translation>
+        <translation>Π&amp;ροβολή</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="176"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="222"/>
         <source>&amp;Settings</source>
-        <translation type="unfinished">&amp;Ρυθμίσεις</translation>
+        <translation>Ρ&amp;υθμίσεις</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="180"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="226"/>
         <source>&amp;Help</source>
-        <translation type="unfinished">&amp;Βοήθεια</translation>
+        <translation>&amp;Βοήθεια</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="197"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="245"/>
         <source>Main Menu</source>
-        <translation type="unfinished"></translation>
+        <translation>Κύριο μενού</translation>
     </message>
 </context>
 <context>
@@ -176,24 +176,24 @@
     </message>
     <message>
         <location filename="../src/grooveoff/ConfigDialog.ui" line="50"/>
-        <location filename="../src/grooveoff/ConfigDialog.cpp" line="124"/>
+        <location filename="../src/grooveoff/ConfigDialog.cpp" line="146"/>
         <source>General</source>
         <translation>Γενικά</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/ConfigDialog.ui" line="84"/>
         <source>Session</source>
-        <translation type="unfinished"></translation>
+        <translation>Συνεδρία</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/ConfigDialog.ui" line="90"/>
         <source>Save and restore session</source>
-        <translation type="unfinished"></translation>
+        <translation>Αποθήκευση και επαναφορά συνεδρίας</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/ConfigDialog.ui" line="100"/>
         <source>Save also failed/aborted</source>
-        <translation type="unfinished"></translation>
+        <translation>Αποθήκευση επίσης των αποτυχημένων/ακυρωμένων</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/ConfigDialog.ui" line="116"/>
@@ -208,7 +208,7 @@
     <message>
         <location filename="../src/grooveoff/ConfigDialog.ui" line="140"/>
         <source>History size:</source>
-        <translation type="unfinished"></translation>
+        <translation>Μέγεθος ιστορικού:</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/ConfigDialog.ui" line="175"/>
@@ -223,11 +223,11 @@
     <message>
         <location filename="../src/grooveoff/ConfigDialog.ui" line="191"/>
         <source>Naming pattern</source>
-        <translation type="unfinished"></translation>
+        <translation>Ονομασία σχηματομορφής</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/ConfigDialog.ui" line="234"/>
-        <location filename="../src/grooveoff/ConfigDialog.cpp" line="125"/>
+        <location filename="../src/grooveoff/ConfigDialog.cpp" line="147"/>
         <source>Performance</source>
         <translation>Απόδοση</translation>
     </message>
@@ -244,7 +244,7 @@
     <message>
         <location filename="../src/grooveoff/ConfigDialog.ui" line="284"/>
         <source>Empty covers cache on exit</source>
-        <translation type="unfinished"></translation>
+        <translation>Άδειασμα της λανθάνουσας μνήμης εξώφυλλων κατά την έξοδο</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/ConfigDialog.ui" line="294"/>
@@ -259,7 +259,7 @@
     <message>
         <location filename="../src/grooveoff/ConfigDialog.ui" line="343"/>
         <source>(0 means unlimited results)</source>
-        <translation type="unfinished"></translation>
+        <translation>(0 για απεριόριστα αποτελέσματα)</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/ConfigDialog.ui" line="356"/>
@@ -292,80 +292,80 @@
         <translation>Ακύρωση</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ConfigDialog.cpp" line="65"/>
-        <source>%title</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/grooveoff/ConfigDialog.cpp" line="67"/>
-        <source>%artist</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/grooveoff/ConfigDialog.cpp" line="69"/>
-        <source>%album</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../src/grooveoff/ConfigDialog.cpp" line="71"/>
-        <source>%track</source>
-        <translation type="unfinished"></translation>
+        <source>%title</source>
+        <translation>%τίτλος</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/ConfigDialog.cpp" line="73"/>
+        <source>%artist</source>
+        <translation>%καλλιτέχνης</translation>
+    </message>
+    <message>
+        <location filename="../src/grooveoff/ConfigDialog.cpp" line="75"/>
+        <source>%album</source>
+        <translation>%άλμπουμ</translation>
+    </message>
+    <message>
+        <location filename="../src/grooveoff/ConfigDialog.cpp" line="77"/>
+        <source>%track</source>
+        <translation>%κομμάτι</translation>
+    </message>
+    <message>
+        <location filename="../src/grooveoff/ConfigDialog.cpp" line="79"/>
         <source>%time</source>
-        <translation type="unfinished"></translation>
+        <translation>%διάρκεια</translation>
     </message>
 </context>
 <context>
     <name>DownloadItem</name>
     <message>
-        <location filename="../src/grooveoff/DownloadItem.cpp" line="142"/>
+        <location filename="../src/grooveoff/DownloadItem.cpp" line="146"/>
         <source>Play</source>
         <translation>Αναπαραγωγή</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/DownloadItem.cpp" line="157"/>
+        <location filename="../src/grooveoff/DownloadItem.cpp" line="161"/>
         <source>Open folder</source>
         <translation>Άνοιγμα φακέλου</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/DownloadItem.cpp" line="244"/>
+        <location filename="../src/grooveoff/DownloadItem.cpp" line="248"/>
         <source>Queued</source>
         <translation>Σε αναμονή</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/DownloadItem.cpp" line="145"/>
+        <location filename="../src/grooveoff/DownloadItem.cpp" line="149"/>
         <source>Remove track from queue</source>
-        <translation type="unfinished"></translation>
+        <translation>Αφαίρεση του κομματιού από τη σειρά αναμονής</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/DownloadItem.cpp" line="148"/>
+        <location filename="../src/grooveoff/DownloadItem.cpp" line="152"/>
         <source>Stop track download</source>
-        <translation type="unfinished"></translation>
+        <translation>Διακοπή λήψης του κομματιού</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/DownloadItem.cpp" line="151"/>
+        <location filename="../src/grooveoff/DownloadItem.cpp" line="155"/>
         <source>Delete track from disk</source>
-        <translation type="unfinished"></translation>
+        <translation>Διαγραφή του κομματιού από τον δίσκο</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/DownloadItem.cpp" line="154"/>
+        <location filename="../src/grooveoff/DownloadItem.cpp" line="158"/>
         <source>Redownload track</source>
-        <translation type="unfinished"></translation>
+        <translation>Λήψη ξανά του κομματιού</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/DownloadItem.cpp" line="320"/>
+        <location filename="../src/grooveoff/DownloadItem.cpp" line="324"/>
         <source>Aborted</source>
         <translation>Εγκαταλείφθηκε</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/DownloadItem.cpp" line="340"/>
+        <location filename="../src/grooveoff/DownloadItem.cpp" line="344"/>
         <source>Network or Server error</source>
         <translation>Σφάλμα δικτύου ή του εξυπηρετητή</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/DownloadItem.cpp" line="463"/>
+        <location filename="../src/grooveoff/DownloadItem.cpp" line="467"/>
         <source>Abort deletion</source>
         <translation>Εγκατάλειψη διαγραφής</translation>
     </message>
@@ -402,7 +402,7 @@
         <location filename="../src/grooveoff/MainWindow.cpp" line="265"/>
         <location filename="../src/grooveoff/MainWindow.cpp" line="266"/>
         <source>Search for songs, artists, genres, playlists</source>
-        <translation type="unfinished"></translation>
+        <translation>Αναζήτηση για τραγούδι, καλλιτέχνη, είδος, λίστες αναπαραγωγής</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/MainWindow.cpp" line="270"/>
@@ -412,17 +412,17 @@
     <message>
         <location filename="../src/grooveoff/MainWindow.cpp" line="273"/>
         <source>Main menu</source>
-        <translation type="unfinished"></translation>
+        <translation>Κύριο μενού</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/MainWindow.cpp" line="289"/>
         <source>Select save folder</source>
-        <translation type="unfinished"></translation>
+        <translation>Επιλογή φακέλου αποθήκευσης</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/MainWindow.cpp" line="297"/>
         <source>Download all tracks</source>
-        <translation type="unfinished"></translation>
+        <translation>Λήψη όλων των κομματιών</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/MainWindow.cpp" line="398"/>
@@ -443,29 +443,30 @@
     <message>
         <location filename="../src/grooveoff/MainWindow.cpp" line="471"/>
         <source>Querying...</source>
-        <translation type="unfinished"></translation>
+        <translation>Εξέταση...</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/MainWindow.cpp" line="528"/>
         <source>Connected to
 Grooveshark</source>
-        <translation type="unfinished"></translation>
+        <translation>Σε σύνδεση με το
+Grooveshark</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/MainWindow.cpp" line="529"/>
         <source>You&apos;re connected to Grooveshark!</source>
-        <translation type="unfinished"></translation>
+        <translation>Έχετε συνδεθεί στο Grooveshark!</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/MainWindow.cpp" line="537"/>
         <location filename="../src/grooveoff/MainWindow.cpp" line="545"/>
         <source>Connection error!!</source>
-        <translation type="unfinished"></translation>
+        <translation>Σφάλμα σύνδεσης!!</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/MainWindow.cpp" line="663"/>
         <source>This song is already in queue.</source>
-        <translation type="unfinished"></translation>
+        <translation>Αυτό το τραγούδι βρίσκεται ήδη στη σειρά αναμονής.</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/MainWindow.cpp" line="712"/>
@@ -521,12 +522,12 @@ Select a valid path</source>
     <message>
         <location filename="../src/grooveoff/MainWindow.cpp" line="744"/>
         <source>Can&apos;t create destination path:</source>
-        <translation type="unfinished"></translation>
+        <translation>Αδύνατη η δημιουργία της διαδρομής προορισμού:</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/MainWindow.cpp" line="744"/>
         <source>Aborting...</source>
-        <translation type="unfinished"></translation>
+        <translation>Εγκατάλειψη...</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/MainWindow.cpp" line="910"/>
@@ -539,12 +540,12 @@ Select a valid path</source>
     <message>
         <location filename="../src/grooveoff/MatchItem.cpp" line="112"/>
         <source>Download again</source>
-        <translation type="unfinished"></translation>
+        <translation>Λήψη ξανά</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/MatchItem.cpp" line="115"/>
         <source>Download</source>
-        <translation type="unfinished"></translation>
+        <translation>Λήψη</translation>
     </message>
 </context>
 <context>
@@ -552,22 +553,22 @@ Select a valid path</source>
     <message>
         <location filename="../src/grooveoff/PlayerWidget.cpp" line="146"/>
         <source>Bit Rate</source>
-        <translation type="unfinished"></translation>
+        <translation>Ρυθμός bit</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/PlayerWidget.cpp" line="147"/>
         <source>Sample Rate</source>
-        <translation type="unfinished"></translation>
+        <translation>Ρυθμός δειγματοληψίας </translation>
     </message>
     <message>
         <location filename="../src/grooveoff/PlayerWidget.cpp" line="197"/>
         <source>Pause</source>
-        <translation type="unfinished"></translation>
+        <translation>Παύση</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/PlayerWidget.cpp" line="338"/>
         <source>Play</source>
-        <translation type="unfinished">Αναπαραγωγή</translation>
+        <translation>Αναπαραγωγή</translation>
     </message>
 </context>
 </TS>

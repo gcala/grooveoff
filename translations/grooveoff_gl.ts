@@ -1,4 +1,6 @@
-<?xml version="1.0" ?><!DOCTYPE TS><TS language="gl" version="2.0">
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.0" language="gl">
 <context>
     <name>AboutDialog</name>
     <message>
@@ -12,47 +14,47 @@
         <translation>Pechar</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/AboutDialog.cpp" line="44"/>
+        <location filename="../src/grooveoff/AboutDialog.cpp" line="55"/>
         <source>GrooveOff</source>
         <translation>GrooveOff</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/AboutDialog.cpp" line="45"/>
+        <location filename="../src/grooveoff/AboutDialog.cpp" line="57"/>
         <source>Version </source>
         <translation>Versión</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/AboutDialog.cpp" line="48"/>
+        <location filename="../src/grooveoff/AboutDialog.cpp" line="61"/>
         <source>Offline Grooveshark.com music.</source>
         <translation>Música sen conexión desde Grooveshark.com</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/AboutDialog.cpp" line="49"/>
+        <location filename="../src/grooveoff/AboutDialog.cpp" line="62"/>
         <source>GrooveOff can access the huge Grooveshark database through its &lt;a href=&quot;http://developers.grooveshark.com/docs/public_api/v3/&quot;&gt;public api&lt;/a&gt;.</source>
         <translation>GrooveOff pode acceder á enorme base de datos de Grooveshark usando a súa &lt;a href=&quot;http://developers.grooveshark.com/docs/public_api/v3/&quot;&gt;api pública&lt;/a&gt;.</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/AboutDialog.cpp" line="50"/>
+        <location filename="../src/grooveoff/AboutDialog.cpp" line="63"/>
         <source>&lt;b&gt;Author&lt;/b&gt;: </source>
         <translation>&lt;b&gt;Autor&lt;/b&gt;: </translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/AboutDialog.cpp" line="51"/>
+        <location filename="../src/grooveoff/AboutDialog.cpp" line="64"/>
         <source>&lt;b&gt;License&lt;/b&gt;: </source>
         <translation>&lt;b&gt;Licenza&lt;/b&gt;: </translation>
     </message>
     <message utf8="true">
-        <location filename="../src/grooveoff/AboutDialog.cpp" line="53"/>
+        <location filename="../src/grooveoff/AboutDialog.cpp" line="66"/>
         <source>GrooveOff is not affiliated with Grooveshark™ and has not been reviewed or officially approved by Grooveshark.com. The author is not responsible for any violations this application does to Grooveshark&apos;s TOS. The author is not related to Grooveshark™ in any way! Support the Artists You Like by Buying Their Music.</source>
         <translation>GrooveOff non está asociado con Grooveshark™ e non foi nin revisada nin aprobada oficialmente por eles. O autor non é responsábel de ningunha infracción que se faga con este aplicativo aos Termos do Servizo de Grooveshark. O autor non está relacionado con Grooveshark™ de ningún xeito. Apoia os artistas que che gustan mercando a súa música.</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/AboutDialog.cpp" line="86"/>
+        <location filename="../src/grooveoff/AboutDialog.cpp" line="104"/>
         <source>Donation to Grooveoff&apos;s author</source>
         <translation>Doazón ao creador de Grooveoff</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/AboutDialog.cpp" line="52"/>
+        <location filename="../src/grooveoff/AboutDialog.cpp" line="65"/>
         <source>Disclaimer:</source>
         <translation>Responsabilidade:</translation>
     </message>
@@ -60,107 +62,107 @@
 <context>
     <name>ActionCollection</name>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="54"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="57"/>
         <source>&amp;Exit</source>
         <translation>&amp;Saír</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="55"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="173"/>
         <source>Close GrooveOff</source>
         <translation>Pechar GrooveOff</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="62"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="64"/>
         <source>&amp;Donate</source>
         <translation>&amp;Doar</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="63"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="174"/>
         <source>Donate with PayPal</source>
         <translation>Doar con PayPal</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="88"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="87"/>
         <source>&amp;Compact Layout</source>
         <translation>Disposición &amp;compacta</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="94"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="95"/>
         <source>&amp;Wide Layout</source>
         <translation>&amp;Disposición ampla</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="100"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="103"/>
         <source>&amp;Mini Player</source>
         <translation>&amp;Minireprodutor</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="112"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="118"/>
         <source>&amp;Stop all downloads</source>
         <translation>&amp;Deter todas as descargas</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="117"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="125"/>
         <source>&amp;Remove canceled/failed downloads</source>
         <translation>%Retirar descargas canceladas ou fallidas</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="123"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="177"/>
         <source>Removes all finished downloads preserving files on disk</source>
         <translation>Retira todas as descargas rematadas preservando os ficheiros no disco</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="78"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="76"/>
         <source>Configure &amp;GrooveOff...</source>
         <translation>&amp;Configurar GrooveOff...</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="106"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="111"/>
         <source>Get &amp;new token...</source>
         <translation>&amp;Obter un token novo...</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="122"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="132"/>
         <source>Clear &amp;finished</source>
         <translation>Borrar &amp;rematadas</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="128"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="139"/>
         <source>&amp;About GrooveOff</source>
         <translation>&amp;Sobre GrooveOff</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="133"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="147"/>
         <source>About &amp;Qt</source>
         <translation>Sobre &amp;QT</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="145"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="191"/>
         <source>&amp;File</source>
         <translation>&amp;Ficheiro</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="159"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="205"/>
         <source>&amp;Downloads</source>
         <translation>&amp;Descargas</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="170"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="216"/>
         <source>&amp;View</source>
         <translation>&amp;Ver</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="176"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="222"/>
         <source>&amp;Settings</source>
         <translation>&amp;Axustes</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="180"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="226"/>
         <source>&amp;Help</source>
         <translation>&amp;Axuda</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="197"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="245"/>
         <source>Main Menu</source>
         <translation>Menú principal</translation>
     </message>
@@ -174,7 +176,7 @@
     </message>
     <message>
         <location filename="../src/grooveoff/ConfigDialog.ui" line="50"/>
-        <location filename="../src/grooveoff/ConfigDialog.cpp" line="124"/>
+        <location filename="../src/grooveoff/ConfigDialog.cpp" line="146"/>
         <source>General</source>
         <translation>Xeral</translation>
     </message>
@@ -225,7 +227,7 @@
     </message>
     <message>
         <location filename="../src/grooveoff/ConfigDialog.ui" line="234"/>
-        <location filename="../src/grooveoff/ConfigDialog.cpp" line="125"/>
+        <location filename="../src/grooveoff/ConfigDialog.cpp" line="147"/>
         <source>Performance</source>
         <translation>Rendemento</translation>
     </message>
@@ -290,27 +292,27 @@
         <translation>Cancelar</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ConfigDialog.cpp" line="65"/>
+        <location filename="../src/grooveoff/ConfigDialog.cpp" line="71"/>
         <source>%title</source>
         <translation>%título</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ConfigDialog.cpp" line="67"/>
+        <location filename="../src/grooveoff/ConfigDialog.cpp" line="73"/>
         <source>%artist</source>
         <translation>%artista</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ConfigDialog.cpp" line="69"/>
+        <location filename="../src/grooveoff/ConfigDialog.cpp" line="75"/>
         <source>%album</source>
         <translation>%álbum</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ConfigDialog.cpp" line="71"/>
+        <location filename="../src/grooveoff/ConfigDialog.cpp" line="77"/>
         <source>%track</source>
         <translation>%pista</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ConfigDialog.cpp" line="73"/>
+        <location filename="../src/grooveoff/ConfigDialog.cpp" line="79"/>
         <source>%time</source>
         <translation>%duración</translation>
     </message>
@@ -318,52 +320,52 @@
 <context>
     <name>DownloadItem</name>
     <message>
-        <location filename="../src/grooveoff/DownloadItem.cpp" line="142"/>
+        <location filename="../src/grooveoff/DownloadItem.cpp" line="146"/>
         <source>Play</source>
         <translation>Reproducir</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/DownloadItem.cpp" line="157"/>
+        <location filename="../src/grooveoff/DownloadItem.cpp" line="161"/>
         <source>Open folder</source>
         <translation>Abrir cartafol</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/DownloadItem.cpp" line="244"/>
+        <location filename="../src/grooveoff/DownloadItem.cpp" line="248"/>
         <source>Queued</source>
         <translation>Na cola</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/DownloadItem.cpp" line="145"/>
+        <location filename="../src/grooveoff/DownloadItem.cpp" line="149"/>
         <source>Remove track from queue</source>
         <translation>Retirar a pista da cola</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/DownloadItem.cpp" line="148"/>
+        <location filename="../src/grooveoff/DownloadItem.cpp" line="152"/>
         <source>Stop track download</source>
         <translation>Deter a descarga da pista</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/DownloadItem.cpp" line="151"/>
+        <location filename="../src/grooveoff/DownloadItem.cpp" line="155"/>
         <source>Delete track from disk</source>
         <translation>Eliminar a pista do disco</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/DownloadItem.cpp" line="154"/>
+        <location filename="../src/grooveoff/DownloadItem.cpp" line="158"/>
         <source>Redownload track</source>
         <translation>Descargar a pista de novo</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/DownloadItem.cpp" line="320"/>
+        <location filename="../src/grooveoff/DownloadItem.cpp" line="324"/>
         <source>Aborted</source>
         <translation>Cancelado</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/DownloadItem.cpp" line="340"/>
+        <location filename="../src/grooveoff/DownloadItem.cpp" line="344"/>
         <source>Network or Server error</source>
         <translation>Erro de rede ou servidor</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/DownloadItem.cpp" line="463"/>
+        <location filename="../src/grooveoff/DownloadItem.cpp" line="467"/>
         <source>Abort deletion</source>
         <translation>Cancelar a eliminación</translation>
     </message>
@@ -502,7 +504,10 @@ Selecciona un camiño válido</translation>
         <location filename="../src/grooveoff/MainWindow.cpp" line="579"/>
         <location filename="../src/grooveoff/MainWindow.cpp" line="1063"/>
         <source>%n song(s) found</source>
-        <translation><numerusform>Encontráronse %n canción(s)</numerusform><numerusform>Encontráronse %n canción(s)</numerusform></translation>
+        <translation>
+            <numerusform>Encontráronse %n canción(s)</numerusform>
+            <numerusform>Encontráronse %n canción(s)</numerusform>
+        </translation>
     </message>
     <message>
         <location filename="../src/grooveoff/MainWindow.cpp" line="698"/>
