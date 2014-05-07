@@ -237,14 +237,14 @@ void PlayerWidget::tick(qint64 elapsedTime, bool userSeek)
 
     if(ui->elapsedTimeLabel->isVisible()) {
         ui->elapsedTimeLabel->setText(QTime(0, (elapsedTime / 60000) % 60, (elapsedTime / 1000) % 60).toString("mm:ss"));
-        ui->timeLabel->setText("-" + QTime(0, (remainingTime / 60000) % 60, (remainingTime / 1000) % 60).toString("mm:ss"));
+        ui->timeLabel->setText('-' + QTime(0, (remainingTime / 60000) % 60, (remainingTime / 1000) % 60).toString("mm:ss"));
     } else {
         switch(m_timerState) {
             case GrooveOff::ElapsedState:
                 ui->timeLabel->setText(QTime(0, (elapsedTime / 60000) % 60, (elapsedTime / 1000) % 60).toString("mm:ss"));
                 break;
             case GrooveOff::RemainingState:
-                ui->timeLabel->setText("-" + QTime(0, (remainingTime / 60000) % 60, (remainingTime / 1000) % 60).toString("mm:ss"));
+                ui->timeLabel->setText('-' + QTime(0, (remainingTime / 60000) % 60, (remainingTime / 1000) % 60).toString("mm:ss"));
                 break;
         }
     }

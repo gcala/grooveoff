@@ -55,12 +55,12 @@ ConfigDialog::ConfigDialog( QWidget *parent )
     QList< QSpinBox * > spinboxList = this->findChildren< QSpinBox * >();
     foreach( QSpinBox *sb, spinboxList ) {
         connect( sb, SIGNAL( valueChanged( int ) ),
-                     SLOT( cfgChanged() )
+                     SLOT( onConfigChanged() )
                );
     }
 
     connect( ui->m_nowPlayingText, SIGNAL( textChanged( QString ) ),
-                                   SLOT( cfgChanged() )
+                                   SLOT( onConfigChanged() )
            );
 
     m_tagNames << QLatin1String( "%title" ) 

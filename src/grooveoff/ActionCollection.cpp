@@ -22,7 +22,6 @@
 #include <QAction>
 #include <QMenuBar>
 #include <QMenu>
-#include <QAction>
 
 namespace The {
     static ActionCollection* s_ActionCollection_instance = 0;
@@ -44,7 +43,7 @@ ActionCollection::ActionCollection( )
 ActionCollection::~ActionCollection()
 {
     // delete all actions before exiting
-    foreach( QString key, m_actionCollection.keys() )
+    foreach( const QString &key, m_actionCollection.keys() )
         delete m_actionCollection[ key ];
 }
 

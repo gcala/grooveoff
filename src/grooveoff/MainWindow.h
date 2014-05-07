@@ -29,7 +29,6 @@
 #include <QPointer>
 #include <QMainWindow>
 #include <QNetworkCookie>
-#include <QNetworkCookieJar>
 #include <QNetworkConfigurationManager>
 #include <phonon/phononnamespace.h>
 
@@ -56,13 +55,6 @@ namespace Ui {
 class MainWindow;
 }
 
-class MyJar : public QNetworkCookieJar
-{
-public:
-    QList<QNetworkCookie> getAllCookies() { return allCookies(); }
-    void clear() { setAllCookies(QList<QNetworkCookie>());}
-};
-
 class MainWindow;
 
 namespace The {
@@ -88,7 +80,7 @@ public:
         Mini = 2
     };
 
-    explicit MainWindow(QWidget *parent = 0);
+    explicit MainWindow( QWidget *parent = 0 );
     virtual ~MainWindow();
 
     void reloadItemsDownloadButtons();
@@ -99,7 +91,7 @@ protected:
 
 private Q_SLOTS:
     void selectFolder();
-    void downloadRequest(PlaylistItemPtr playlistItem);
+    void downloadRequest( PlaylistItemPtr playlistItem );
     void getToken();
     void tokenFinished();
     void tokenError();
@@ -111,12 +103,12 @@ private Q_SLOTS:
     void setMiniPlayerLayout();
     void about();
     void configure();
-    void onlineStateChanged(bool isOnline);
+    void onlineStateChanged( bool isOnline );
     void donate();
     void artistChanged();
     void albumChanged();
     void freeDownloadSlot();
-    void addItemToQueue(DownloadItem *);
+    void addItemToQueue( DownloadItem * );
     void batchDownload();
     void changeDestinationPath();
     void saveSessionAs();
@@ -125,48 +117,46 @@ private Q_SLOTS:
 
 private:
     Ui::MainWindow *ui;
-    QNetworkConfigurationManager *m_qncm;
-    QList<QPair<QString, QStringList> > m_artistsAlbumsContainer;
-    MyJar *m_jar;
-    int m_currentJob;
-    int m_row;
-    QString m_currentSongID;
-    QStringList m_searchList;
-    int m_searchSize;
-    int m_maxResults;
-    int m_maxDownloads;
-    bool m_saveSession;
-    QString m_sessionFileName;
-    QString m_sessionFilePath;
-    bool m_showHistory;
-    bool m_saveDestination;
-    bool m_loadCovers;
-    bool m_emptyCache;
-    bool m_searchInProgress;
-    bool m_saveAborted;
-    int m_parallelDownloadsCount;
-    QList<DownloadItem *> m_queue;
+    
+    // widgets
     PlayerWidget *m_playerWidget;
-    CoverManager *m_cvrMngr;
-    Spinner *m_spinner;
-    GuiLayout m_guiLayout;
-    bool m_sessionChanged;
-    bool m_batchDownload;
-    bool m_stopBatchDownload;
+    CoverManager *m_coverManager;
+    Spinner      *m_spinner;
+    
+    QNetworkConfigurationManager *m_qncm; // used to monitor internet connection status
+    QList<QPair<QString, QStringList> > m_artistsAlbumsContainer; // the pair is: artist - artist's albums
+    QString m_sessionFilePath; // contains the session file path (depends on qt internals)
+    int m_parallelDownloadsCount; // holds how many downloads are running
+    QList< DownloadItem * > m_queue; // download queue
+    
+    bool m_searchInProgress;  // true if search button is clicked
+    bool m_batchDownload;     // true if "download all" button is clicked
+                              // when true all warnings (qmessagebox) are suppressed and a default action is performed
+    bool m_stopBatchDownload; // flag to exit from batch download (avoids adding items to download queue) if a serious error happens
 
-    QNetworkAccessManager *m_nam;
+    // libgrooveshark
     GrooveShark::ApiRequest *m_api;
     GrooveShark::TokenPtr m_token;
     GrooveShark::SongListPtr m_songList;
 
     // Menus and menu actions: Accounts menu
     QMenuBar    *m_menuBar;
-    QAction     *m_compactMenuAction;
     QMenu       *m_compactMainMenu;
-
-    Mpris *m_mpris;
-
-    static QPointer<MainWindow> s_instance;
+    
+    // settings
+    bool m_saveSession;
+    bool m_saveAborted;
+    bool m_showHistory;
+    bool m_emptyCache;
+    bool m_loadCovers;
+    bool m_saveDestination;
+    int m_maxResults;
+    int m_maxDownloads;
+    int m_searchSize;
+    QString m_sessionFileName;
+    QStringList m_searchList;
+    GuiLayout m_guiLayout;
+    
 
     // Methods
     void setupUi();
@@ -178,12 +168,16 @@ private:
     void unqueue();
     void applyFilter();
     void restoreSearch();
-    bool isDownloadingQueued(const uint &);
+    bool isItemQueued( const uint & );
     int visibleItemsCount();
     void loadSession();
     void loadSessions();
     void saveSession();
-    void addDownloadItem(PlaylistItemPtr playlistItem);
+    void addDownloadItem( const PlaylistItemPtr &playlistItem );
+    
+    Mpris *m_mpris;
+
+    static QPointer< MainWindow > s_instance;
 };
 
 Q_DECLARE_METATYPE( MainWindow::GuiLayout )

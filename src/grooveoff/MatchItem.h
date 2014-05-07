@@ -37,13 +37,15 @@ class MatchItem : public QWidget
     Q_OBJECT
 
 public:
-    MatchItem(const PlaylistItemPtr &playlistItem, QWidget *parent = 0);
+    explicit MatchItem( const PlaylistItemPtr &playlistItem, QWidget *parent = 0 );
     virtual ~MatchItem();
 
-    const PlaylistItemPtr playlistItem() { return m_playlistItem; }
+    inline const PlaylistItemPtr playlistItem() {
+        return m_playlistItem;
+    }
 
 Q_SIGNALS:
-    void download(PlaylistItemPtr);
+    void download( PlaylistItemPtr );
 
 public Q_SLOTS:
     void setDownloadIcon();

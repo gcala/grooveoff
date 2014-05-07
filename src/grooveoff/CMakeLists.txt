@@ -8,7 +8,6 @@ set(grooveoff_SRCS SessionReaderWriter.cpp
                    CoverManager.cpp
                    DownloadItem.cpp
                    DownloadList.cpp
-                   FilterProxyModel.cpp
                    MainWindow.cpp
                    PlayerWidget.cpp
                    Playlist.cpp

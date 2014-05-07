@@ -46,7 +46,7 @@ App::App( int & argc, char ** argv ):
     QTextCodec::setCodecForCStrings( QTextCodec::codecForName( "UTF-8" ) );
 #endif
 
-    QTranslator appTranslator; // aplication translator
+    QTranslator appTranslator; // application translator
     QTranslator qtTranslator;  // qt translator
     QStringList uiLanguages;   // enabled languages
     // uiLanguages crashes on Windows with 4.8.0 release builds

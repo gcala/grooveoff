@@ -1,11 +1,11 @@
 /*
     GrooveOff - Offline Grooveshark.com music
-    Copyright (C) 2013-2014  Giuseppe Calà <jiveaxe@gmail.com>
+    Copyright ( C ) 2013-2014  Giuseppe Calà <jiveaxe@gmail.com>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+    ( at your option ) any later version.
 
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -25,22 +25,22 @@
 
 #include <QDir>
 
-#define ITEM(x)  ((DownloadItem *)itemWidget(item(x)))
+#define ITEM( x )  ( (DownloadItem * )itemWidget( item( x ) ) )
 
-DownloadList::DownloadList(QWidget *parent) :
-    QListWidget(parent)
+DownloadList::DownloadList( QWidget *parent ) :
+    QListWidget( parent )
 {
-    connect(model(), SIGNAL(layoutChanged()),
-                     SLOT(reloadPlaylist()));
+    connect( model(), SIGNAL( layoutChanged() ),
+                     SLOT( reloadPlaylist() ) );
 }
 
 void DownloadList::reloadPlaylist()
 {
     The::playlist()->clear();
 
-    for(int i = 0; i < count(); i++) {
-        if(ITEM(i)->downloadState() == GrooveOff::FinishedState) {
-            The::playlist()->appendItem(ITEM(i)->playlistItem());
+    for( int i = 0; i < count(); i++ ) {
+        if( ITEM( i )->downloadState() == GrooveOff::FinishedState ) {
+            The::playlist()->appendItem( ITEM( i )->playlistItem() );
         }
     }
 }
@@ -51,12 +51,11 @@ void DownloadList::reloadPlaylist()
 */
 void DownloadList::removeFailedAborted()
 {
-    for(int i = count() - 1; i >= 0; i--) {
-        GrooveOff::DownloadState state = ITEM(i)->downloadState();
-        if(state == GrooveOff::AbortedState ||
-           state == GrooveOff::ErrorState ) {
-            QListWidgetItem *item = takeItem(i);
-            removeItemWidget(item);
+    for( int i = count() - 1; i >= 0; i-- ) {
+        GrooveOff::DownloadState state = ITEM( i )->downloadState();
+        if( state == GrooveOff::AbortedState || state == GrooveOff::ErrorState ) {
+            QListWidgetItem *item = takeItem( i );
+            removeItemWidget( item );
             delete item;
         }
     }
@@ -69,12 +68,12 @@ void DownloadList::removeFailedAborted()
 void DownloadList::removeDownloaded()
 {
     The::audioEngine()->stop();
-    for(int i = count() - 1; i >= 0; i--) {
-        GrooveOff::DownloadState state = ITEM(i)->downloadState();
-        if(state == GrooveOff::FinishedState) {
-            The::audioEngine()->removingTrack(ITEM(i)->playlistItem());
-            QListWidgetItem *item = takeItem(i);
-            removeItemWidget(item);
+    for( int i = count() - 1; i >= 0; i-- ) {
+        GrooveOff::DownloadState state = ITEM( i )->downloadState();
+        if( state == GrooveOff::FinishedState ) {
+            The::audioEngine()->removingTrack( ITEM( i )->playlistItem() );
+            QListWidgetItem *item = takeItem( i );
+            removeItemWidget( item );
             delete item;
         }
     }
@@ -84,10 +83,10 @@ void DownloadList::removeDownloaded()
 
 void DownloadList::abortAllDownloads()
 {
-    for(int i = count() - 1; i >= 0; i--) {
-        GrooveOff::DownloadState state = ITEM(i)->downloadState();
-        if(state == GrooveOff::DownloadingState || state == GrooveOff::QueuedState) {
-            ITEM(i)->abortDownload();
+    for( int i = count() - 1; i >= 0; i-- ) {
+        GrooveOff::DownloadState state = ITEM( i )->downloadState();
+        if( state == GrooveOff::DownloadingState || state == GrooveOff::QueuedState ) {
+            ITEM( i )->abortDownload();
         }
     }
 }
@@ -95,26 +94,22 @@ void DownloadList::abortAllDownloads()
 QList< PlaylistItemPtr > DownloadList::playlistItems() const
 {
     QList< PlaylistItemPtr > tracks;
-    for(int i = 0; i < count(); i++) {
-//        if(ITEM(i)->downloadState() != GrooveOff::DeletedState)
-            tracks << ITEM(i)->playlistItem();
+    for( int i = 0; i < count(); i++ ) {
+            tracks << ITEM( i )->playlistItem();
     }
 
     return tracks;
 }
 
-void DownloadList::removeItem(DownloadItem* downItem)
+void DownloadList::removeItem( DownloadItem* downItem )
 {
-    The::audioEngine()->removingTrack(downItem->playlistItem());
+    The::audioEngine()->removingTrack( downItem->playlistItem() );
     
-    for(int i = 0; i < count(); i++) {
-        if(ITEM(i) == downItem) {
-            QListWidgetItem *it = takeItem(i);
-            removeItemWidget(it);
+    for( int i = 0; i < count(); i++ ) {
+        if( ITEM( i ) == downItem ) {
+            QListWidgetItem *it = takeItem( i );
+            removeItemWidget( it );
             delete it;
         }
     }
 }
-
-
-

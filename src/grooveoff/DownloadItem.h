@@ -44,7 +44,7 @@ class DownloadItem : public QWidget
     Q_OBJECT
 
 public:
-    DownloadItem( const PlaylistItemPtr &playlistItemPtr, QWidget *parent = 0, GrooveOff::Context context = GrooveOff::Download );
+    explicit DownloadItem( const PlaylistItemPtr &playlistItemPtr, QWidget *parent = 0, const GrooveOff::Context &context = GrooveOff::Download );
     virtual ~DownloadItem();
     QString songFile();
 
@@ -85,7 +85,7 @@ protected:
 private Q_SLOTS:
     void downloadFinished( bool ok );
     void setProgress( const qint64 &bytesReceived, const qint64 &bytesTotal );
-    void playSong();
+    void playSong() const;
     void timerButtonClicked();
     void removeSong();
     void openFolder();

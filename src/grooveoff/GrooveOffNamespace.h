@@ -102,9 +102,9 @@ namespace GrooveOff {
 
 #include <QtCore/QMetaType>
 
-Q_DECLARE_METATYPE(GrooveOff::Context)
-Q_DECLARE_METATYPE(GrooveOff::DownloadState)
-Q_DECLARE_METATYPE(GrooveOff::NetworkJob)
+Q_DECLARE_METATYPE( GrooveOff::Context )
+Q_DECLARE_METATYPE( GrooveOff::DownloadState )
+Q_DECLARE_METATYPE( GrooveOff::NetworkJob )
 
 QT_END_HEADER
 

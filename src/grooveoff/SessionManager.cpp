@@ -41,7 +41,7 @@ SessionManager::SessionManager(const QString &path, QWidget *parent) :
 
 SessionManager::~SessionManager()
 {
-    foreach(QString sessionName, m_changesFlag.keys()) {
+    foreach(const QString &sessionName, m_changesFlag.keys()) {
         if(m_changesFlag[sessionName]) {
             The::sessionReaderWriter()->write(m_sessionsPath + sessionName + ".xml", m_trackCollection[sessionName]);
         }
