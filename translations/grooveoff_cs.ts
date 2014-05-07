@@ -62,107 +62,107 @@
 <context>
     <name>ActionCollection</name>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="57"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="56"/>
         <source>&amp;Exit</source>
         <translation>&amp;Ukončit</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="173"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="172"/>
         <source>Close GrooveOff</source>
         <translation>Zavřít GrooveOff</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="64"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="63"/>
         <source>&amp;Donate</source>
         <translation>&amp;Darovat</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="174"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="173"/>
         <source>Donate with PayPal</source>
         <translation>Darovat pomocí PayPal</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="87"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="86"/>
         <source>&amp;Compact Layout</source>
         <translation>&amp;Celistvé rozvržení</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="95"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="94"/>
         <source>&amp;Wide Layout</source>
         <translation>&amp;Velké rozvržení</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="103"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="102"/>
         <source>&amp;Mini Player</source>
         <translation>&amp;Malý přehrávač</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="118"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="117"/>
         <source>&amp;Stop all downloads</source>
         <translation>&amp;Zastavit všechna stahování</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="125"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="124"/>
         <source>&amp;Remove canceled/failed downloads</source>
         <translation>Odst&amp;ranit smazaná/nepodařená stahování</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="177"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="176"/>
         <source>Removes all finished downloads preserving files on disk</source>
         <translation>Odstraní všechna dokončená stahování. Zachová soubory na disku</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="76"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="75"/>
         <source>Configure &amp;GrooveOff...</source>
         <translation>Nastavit &amp;GrooveOff...</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="111"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="110"/>
         <source>Get &amp;new token...</source>
         <translation>&amp;Získat novou známku...</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="132"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="131"/>
         <source>Clear &amp;finished</source>
         <translation>Vyprázdnit &amp;dokončené</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="139"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="138"/>
         <source>&amp;About GrooveOff</source>
         <translation>O progr&amp;amu GrooveOff</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="147"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="146"/>
         <source>About &amp;Qt</source>
         <translation>O &amp;Qt</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="191"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="190"/>
         <source>&amp;File</source>
         <translation>&amp;Soubor</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="205"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="204"/>
         <source>&amp;Downloads</source>
         <translation>&amp;Stahování</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="216"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="215"/>
         <source>&amp;View</source>
         <translation>&amp;Pohled</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="222"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="221"/>
         <source>&amp;Settings</source>
         <translation>&amp;Nastavení</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="226"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="225"/>
         <source>&amp;Help</source>
         <translation>Nápo&amp;věda</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="245"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="244"/>
         <source>Main Menu</source>
         <translation>Hlavní nabídka</translation>
     </message>
@@ -320,52 +320,52 @@
 <context>
     <name>DownloadItem</name>
     <message>
-        <location filename="../src/grooveoff/DownloadItem.cpp" line="146"/>
+        <location filename="../src/grooveoff/DownloadItem.cpp" line="145"/>
         <source>Play</source>
         <translation>Přehrát</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/DownloadItem.cpp" line="161"/>
+        <location filename="../src/grooveoff/DownloadItem.cpp" line="160"/>
         <source>Open folder</source>
         <translation>Otevřít složku</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/DownloadItem.cpp" line="248"/>
+        <location filename="../src/grooveoff/DownloadItem.cpp" line="255"/>
         <source>Queued</source>
         <translation>Zařazeno</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/DownloadItem.cpp" line="149"/>
+        <location filename="../src/grooveoff/DownloadItem.cpp" line="148"/>
         <source>Remove track from queue</source>
         <translation>Odstranit skladbu z řady</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/DownloadItem.cpp" line="152"/>
+        <location filename="../src/grooveoff/DownloadItem.cpp" line="151"/>
         <source>Stop track download</source>
         <translation>Zastavit stahování skladby</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/DownloadItem.cpp" line="155"/>
+        <location filename="../src/grooveoff/DownloadItem.cpp" line="154"/>
         <source>Delete track from disk</source>
         <translation>Smazat skladbu z disku</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/DownloadItem.cpp" line="158"/>
+        <location filename="../src/grooveoff/DownloadItem.cpp" line="157"/>
         <source>Redownload track</source>
         <translation>Stáhnout skladbu znovu</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/DownloadItem.cpp" line="324"/>
+        <location filename="../src/grooveoff/DownloadItem.cpp" line="334"/>
         <source>Aborted</source>
         <translation>Zrušeno</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/DownloadItem.cpp" line="344"/>
+        <location filename="../src/grooveoff/DownloadItem.cpp" line="355"/>
         <source>Network or Server error</source>
         <translation>Chyba sítě nebo serveru</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/DownloadItem.cpp" line="467"/>
+        <location filename="../src/grooveoff/DownloadItem.cpp" line="479"/>
         <source>Abort deletion</source>
         <translation>Zrušit smazání</translation>
     </message>
@@ -373,165 +373,165 @@
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="251"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="235"/>
         <source>GrooveOff</source>
         <translation>GrooveOff</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="256"/>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="502"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="240"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="484"/>
         <source>Connecting...</source>
         <translation>Připojuje se...</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="276"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="260"/>
         <source>Save in:</source>
         <translation>Uložit v:</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="279"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="263"/>
         <source>Current save folder</source>
         <translation>Nynější ukládací složka</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="261"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="245"/>
         <source>Search:</source>
         <translation>Hledat:</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="265"/>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="266"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="249"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="250"/>
         <source>Search for songs, artists, genres, playlists</source>
         <translation>Hledají se písně, umělci, žánry, seznamy skladeb</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="270"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="254"/>
         <source>Start search</source>
         <translation>Spustit hledání</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="273"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="257"/>
         <source>Main menu</source>
         <translation>Hlavní nabídka</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="289"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="273"/>
         <source>Select save folder</source>
         <translation>Vybrat ukládací složku</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="297"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="281"/>
         <source>Download all tracks</source>
         <translation>Stáhnout všechny skladby</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="398"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="393"/>
         <source>Select Directory</source>
         <translation>Vybrat adresář</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="466"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="453"/>
         <source>All Artists</source>
         <translation>Všichni umělci</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="468"/>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="1073"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="455"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="1011"/>
         <source>All Albums</source>
         <translation>Všechna alba</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="471"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="458"/>
         <source>Querying...</source>
         <translation>Dotazuje se...</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="528"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="512"/>
         <source>Connected to
 Grooveshark</source>
         <translation>Připojeno
 ke Grooveshark!</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="529"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="513"/>
         <source>You&apos;re connected to Grooveshark!</source>
         <translation>Jste připojen ke Grooveshark!</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="537"/>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="545"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="520"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="528"/>
         <source>Connection error!!</source>
         <translation>Chyba připojení!</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="663"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="642"/>
         <source>This song is already in queue.</source>
         <translation>Tato píseň již je v řadě</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="712"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="693"/>
         <source>The destination folder is not writable.
 Select a valid path</source>
         <translation>Cílová složka není zapisovateľný.
 Vyberte platnou cestu</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="1027"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="972"/>
         <source>Donation to Grooveoff&apos;s author</source>
         <translation>Dát dar autorovi GrooveOff</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="254"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="238"/>
         <source>Offline Grooveshark.com music</source>
         <translation>Hudba z Grooveshark.com v režimu bez připojení k internetu</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="662"/>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="680"/>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="711"/>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="743"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="641"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="660"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="692"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="720"/>
         <source>Attention</source>
         <translation>Pozor</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="681"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="661"/>
         <source>The destination folder does not exists.
 Select a valid path</source>
         <translation>Cílová složka neexistuje.
 Vyberte platnou cestu</translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/grooveoff/MainWindow.cpp" line="579"/>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="1063"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="555"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="1004"/>
         <source>%n song(s) found</source>
-        <translation>
+        <translation type="unfinished">
             <numerusform>Nalezena %n píseň</numerusform>
             <numerusform>Nalezeny %n písně</numerusform>
             <numerusform>Nalezeno %n písní</numerusform>
         </translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="698"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="678"/>
         <source>Overwrite File?</source>
         <translation>Přepsat soubor?</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="699"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="679"/>
         <source>A file named &quot;%1&quot; already exists. Are you sure you want to overwrite it?</source>
         <translation>Soubor pojmenovaný &quot;%1&quot; už existuje. Jste si jistý, že ho chcete přepsat?</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="744"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="721"/>
         <source>Can&apos;t create destination path:</source>
         <translation>Nelze vytvořit cestu k cíli:</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="744"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="721"/>
         <source>Aborting...</source>
         <translation>Ruší se...</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="910"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="870"/>
         <source>Offline</source>
         <translation>Nepřipojený</translation>
     </message>
@@ -539,12 +539,12 @@ Vyberte platnou cestu</translation>
 <context>
     <name>MatchItem</name>
     <message>
-        <location filename="../src/grooveoff/MatchItem.cpp" line="112"/>
+        <location filename="../src/grooveoff/MatchItem.cpp" line="121"/>
         <source>Download again</source>
         <translation>Stáhnout znovu</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MatchItem.cpp" line="115"/>
+        <location filename="../src/grooveoff/MatchItem.cpp" line="124"/>
         <source>Download</source>
         <translation>Stáhnout</translation>
     </message>
