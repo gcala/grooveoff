@@ -1001,7 +1001,7 @@ void MainWindow::applyFilter()
         }
     }
 
-    ui->matchesMessage->setText( trUtf8( "%n song( s ) found", "", visibleItemsCount() ) );
+    ui->matchesMessage->setText( trUtf8( "%n song(s) found", "", visibleItemsCount() ) );
 }
 
 // selecting an artist name in combobox triggers this routine
