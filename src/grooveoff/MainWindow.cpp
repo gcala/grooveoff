@@ -552,7 +552,7 @@ void MainWindow::searchFinished()
     QStringList artists;
     QStringList albums;
 
-    ui->matchesMessage->setText( trUtf8( "%n song( s ) found", "", count ) );
+    ui->matchesMessage->setText( trUtf8( "%n song(s) found", "", count ) );
 
     for( int i = 0; i < count; i++ ) {
         PlaylistItemPtr playlistItem( new PlaylistItem( m_songList->list().at( i ) ) );
