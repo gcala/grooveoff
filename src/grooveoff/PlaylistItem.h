@@ -37,22 +37,24 @@ public:
     ~PlaylistItem();
 
     QString path() const;
-    void setPath(const QString& path);
+    void setPath( const QString& path );
     GrooveShark::SongPtr song();
-    void setSong(GrooveShark::SongPtr song);
+    void setSong( const GrooveShark::SongPtr &song );
     QString namingSchema() const;
-    void setNamingSchema(const QString& schema);
+    void setNamingSchema( const QString& schema );
 
     QString fileName() const;
     void requireCoverReload();
-    bool isPlaying() { return m_state == Phonon::PlayingState; }
-    void setState(Phonon::State state);
+    void setState( const Phonon::State &state );
+    
+    inline bool isPlaying() {
+        return m_state == Phonon::PlayingState;
+    }
 
-    bool operator==(PlaylistItem &) const;
+    bool operator==( PlaylistItem & ) const;
 
 Q_SIGNALS:
     void reloadCover();
-    void reloadIcon();
     void stateChanged(Phonon::State);
 
 public Q_SLOTS:

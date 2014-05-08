@@ -40,9 +40,9 @@ namespace The {
     }
 }
 
-QList< PlaylistItemPtr > SessionReaderWriter::read(const QString& file)
+QList< PlaylistItemPtr > SessionReaderWriter::read( const QString& file )
 {
-    QFile sessionFile(file);
+    QFile sessionFile( file );
     if(!sessionFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
         qDebug() << "SessionReaderWriter ::" << "Unable to read session file" << sessionFile.fileName();
         return QList< PlaylistItemPtr >();
@@ -54,7 +54,7 @@ QList< PlaylistItemPtr > SessionReaderWriter::read(const QString& file)
     QString errorStr;
     int errorLine;
     int errorColumn;
-    if (!doc.setContent(&sessionFile, true, &errorStr, &errorLine, &errorColumn)) {
+    if ( !doc.setContent( &sessionFile, true, &errorStr, &errorLine, &errorColumn ) ) {
         qDebug() << "SessionReaderWriter ::" << errorStr << errorLine << errorColumn;
         sessionFile.close();
         return QList< PlaylistItemPtr >();
@@ -64,96 +64,98 @@ QList< PlaylistItemPtr > SessionReaderWriter::read(const QString& file)
     QDomElement root = doc.documentElement();
     QDomElement itemEl = root.firstChildElement( QLatin1String( "item" ) );
     while (!itemEl.isNull()) {
-        PlaylistItemPtr item(new PlaylistItem());
+        PlaylistItemPtr item( new PlaylistItem() );
 
-        items.append(item);
-        parsePlaylistItem(itemEl, item);
+        items.append( item );
+        parsePlaylistItem( itemEl, item );
         itemEl = itemEl.nextSiblingElement( QLatin1String( "item" ) );
     }
 
     return items;
 }
 
-void SessionReaderWriter::parsePlaylistItem(const QDomElement& element, PlaylistItemPtr item)
+void SessionReaderWriter::parsePlaylistItem( const QDomElement& element, PlaylistItemPtr item )
 {
     QVariant var;
-    for(int i=0; i< item->metaObject()->propertyCount(); ++i) {
-        if(item->metaObject()->property(i).isStored(item.data())) {
+    for( int i=0; i< item->metaObject()->propertyCount(); ++i ) {
+        if( item->metaObject()->property(i).isStored( item.data() ) ) {
             // without this check a crash happens when compiled with qt5
             // "song" is the property's name containing a Song object
-            if(QString(item->metaObject()->property(i).typeName()) == "song")
+            if( QString( item->metaObject()->property(i).typeName() ) == "song" )
                 continue;
             
-            var = element.firstChildElement(QString(item->metaObject()->property(i).name())).text();
-            item->metaObject()->property(i).write(item.data(), var);
+            var = element.firstChildElement( QString( item->metaObject()->property(i).name() ) ).text();
+            item->metaObject()->property(i).write( item.data(), var );
         }
     }
 
     QDomElement songEl = element.firstChildElement( QLatin1String( "song_info" ) );
-    parseSong(songEl, item->song());
+    parseSong( songEl, item->song() );
 }
 
-void SessionReaderWriter::parseSong(const QDomElement& element, GrooveShark::SongPtr song)
+void SessionReaderWriter::parseSong( const QDomElement& element, GrooveShark::SongPtr song )
 {
     QVariant var;
-    for(int i=0; i< song->metaObject()->propertyCount(); ++i) {
-        if(song->metaObject()->property(i).isStored(song.data())) {
-            var = element.firstChildElement(QString(song->metaObject()->property(i).name())).text();
-            song->metaObject()->property(i).write(song.data(), var);
+    for( int i=0; i< song->metaObject()->propertyCount(); ++i ) {
+        if( song->metaObject()->property(i).isStored( song.data() ) ) {
+            var = element.firstChildElement( QString( song->metaObject()->property(i).name() ) ).text();
+            song->metaObject()->property(i).write( song.data(), var );
         }
     }
 }
 
-bool SessionReaderWriter::write(const QString& file, QList< PlaylistItemPtr > tracks)
+bool SessionReaderWriter::write( const QString& file, QList< PlaylistItemPtr > tracks )
 {
-    QFile sessionFile(file);
-    if(sessionFile.exists()) {
-        if(!sessionFile.remove()) {
+    QFile sessionFile( file );
+    if( sessionFile.exists() ) {
+        if( !sessionFile.remove() ) {
             qDebug() << "SessionReaderWriter ::" << "Unable to remove old session file" << sessionFile.fileName();
             return false;
         }
     }
     
-    QFileInfo fi(file);
+    QFileInfo fi( file );
     
-    if(!QDir().mkpath(fi.absolutePath())) {
+    if( !QDir().mkpath(fi.absolutePath() ) ) {
         qDebug() << "SessionReaderWriter ::" << "Cannot create session path" << fi.absolutePath();
         return false;
     }
     
-    if(!sessionFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
+    if( !sessionFile.open( QIODevice::WriteOnly | QIODevice::Text ) ) {
         qDebug() << "SessionReaderWriter ::" << "Unable to write to session file" << sessionFile.fileName();
         return false;
     }
 
-    QXmlStreamWriter stream(&sessionFile);
-    stream.setAutoFormatting(true);
+    QXmlStreamWriter stream( &sessionFile );
+    stream.setAutoFormatting( true );
     stream.writeStartDocument();
     stream.writeStartElement( QLatin1String( "playlist" ) );
 
-    foreach(PlaylistItemPtr track, tracks) {
+    foreach( const PlaylistItemPtr &track, tracks ) {
         stream.writeStartElement( QLatin1String( "item" ) );
-        for(int j = 0; j< track->metaObject()->propertyCount(); j++) {
-            if(track->metaObject()->property(j).isStored(track.data())) {
-                if(QString(track->metaObject()->property(j).name()) ==  QLatin1String( "objectName" ) )
+        for( int j = 0; j < track->metaObject()->propertyCount(); j++ ) {
+            if( track->metaObject()->property( j ).isStored( track.data() ) ) {
+                if( QString( track->metaObject()->property(j).name() ) ==  QLatin1String( "objectName" ) )
                     continue;
-                if(QString(track->metaObject()->property(j).name()) ==  QLatin1String( "song" ) ) {
-                    SongPtr song = track->song();
+                if( QString( track->metaObject()->property( j ).name() ) ==  QLatin1String( "song" ) ) {
+                    const SongPtr &song = track->song();
                     stream.writeStartElement( QLatin1String( "song_info" ) );
-                    for(int k = 0; k< song->metaObject()->propertyCount(); k++) {
-                        if(song->metaObject()->property(k).isStored(song.data())) {
-                            if(QString(song->metaObject()->property(k).name()) ==  QLatin1String( "objectName" ) )
+                    for( int k = 0; k < song->metaObject()->propertyCount(); k++ ) {
+                        if( song->metaObject()->property( k ).isStored( song.data() ) ) {
+                            if( QString( song->metaObject()->property( k ).name() ) ==  QLatin1String( "objectName" ) )
                                 continue;
-                            if(QString(song->metaObject()->property(k).name()) ==  QLatin1String( "errorString" ) )
+                            if( QString( song->metaObject()->property( k ).name() ) ==  QLatin1String( "errorString" ) )
                                 continue;
-                            stream.writeTextElement(song->metaObject()->property(k).name(),
-                                                    song->metaObject()->property(k).read(song.data()).toString());
+                            stream.writeTextElement( song->metaObject()->property( k ).name(),
+                                                     song->metaObject()->property( k ).read( song.data() ).toString() 
+                                                   );
                         }
                     }
                     stream.writeEndElement(); // song_info
                 } else {
-                    stream.writeTextElement(track->metaObject()->property(j).name(),
-                                            track->metaObject()->property(j).read(track.data()).toString());
+                    stream.writeTextElement( track->metaObject()->property( j ).name(),
+                                             track->metaObject()->property( j ).read( track.data() ).toString() 
+                                           );
                 }
             }
         }

@@ -40,15 +40,20 @@ class PlayerWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit PlayerWidget(QWidget *parent = 0);
+    explicit PlayerWidget( QWidget *parent = 0 );
     virtual ~PlayerWidget();
 
-    void showElapsedTimerLabel(bool);
+    void showElapsedTimerLabel( bool );
 
-    GrooveOff::TimerState getTimerState() const { return m_timerState; }
-    void setTimerState(GrooveOff::TimerState state) { m_timerState = state; }
+    inline GrooveOff::TimerState getTimerState() const { 
+        return m_timerState;
+    }
+    
+    inline void setTimerState( const GrooveOff::TimerState &state ) {
+        m_timerState = state;
+    }
 
-    void showMessage(const QString &message);
+    void showMessage( const QString &message );
 
 public Q_SLOTS:
     void pauseResumePlaying();
@@ -58,15 +63,15 @@ protected:
     virtual void changeEvent ( QEvent * event );
 
 private Q_SLOTS:
-    void tick(qint64 elapsedTime, bool userSeek);
-    void stateChanged(Phonon::State state);
+    void tick( qint64 elapsedTime, bool userSeek );
+    void stateChanged( Phonon::State state );
     void toggleTimeLabel();
     void sourceChanged();
-    void playPrevious();
-    void playNext();
+    void playPrevious() const;
+    void playNext() const;
     void removedPlayingTrack();
-    void switchPage();
-    void muteStateChanged( bool mute );
+    void switchPage() const;
+    void muteStateChanged( bool mute ) const;
 
 private:
     Ui::PlayerWidget *ui;
@@ -77,7 +82,7 @@ private:
 
     //Methods
     void setupUi();
-    void setupActions();
+    void setupConnections();
 };
 
 #endif // PLAYERWIDGET_H

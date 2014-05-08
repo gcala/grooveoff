@@ -38,9 +38,9 @@ Playlist::~Playlist()
 {
 }
 
-void Playlist::appendItem(PlaylistItemPtr item)
+void Playlist::appendItem( const PlaylistItemPtr &item )
 {
-    m_playlist.append(item);
+    m_playlist.append( item );
     emit playlistChanged();
 }
 
@@ -54,12 +54,12 @@ int Playlist::count() const
     return m_playlist.count();
 }
 
-PlaylistItemPtr Playlist::item(int row)
+PlaylistItemPtr Playlist::item( int row ) const
 {
     return m_playlist.at(row);
 }
 
-int Playlist::row(PlaylistItemPtr item)
+int Playlist::row( const PlaylistItemPtr &item )
 {
     int index = 0;
     bool found = false;
@@ -76,7 +76,7 @@ int Playlist::row(PlaylistItemPtr item)
     return index;
 }
 
-void Playlist::removeItem(PlaylistItemPtr item)
+void Playlist::removeItem( const PlaylistItemPtr &item )
 {
     for(int i = 0; i < m_playlist.count(); i++) {
         if(m_playlist.at(i) == item) {

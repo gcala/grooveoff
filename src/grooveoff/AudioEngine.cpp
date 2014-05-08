@@ -54,29 +54,29 @@ AudioEngine::AudioEngine()
     // function, which is part of the Phonon namespace.
     Phonon::createPath(m_mediaObject, m_audioOutput);
 
-    connect( m_mediaObject, SIGNAL( stateChanged( Phonon::State, Phonon::State ) ),
-                            SLOT( onStateChanged( Phonon::State, Phonon::State ) )
+    connect( m_mediaObject, SIGNAL(stateChanged(Phonon::State,Phonon::State)),
+                            SLOT(onStateChanged(Phonon::State,Phonon::State))
            );
-    connect( m_mediaObject, SIGNAL( tick( qint64 ) ),
-                            SLOT( timerTriggered( qint64 ) )
+    connect( m_mediaObject, SIGNAL(tick(qint64)),
+                            SLOT(timerTriggered(qint64))
            );
-    connect( m_mediaObject, SIGNAL( finished() ),
-                            SLOT( onFinished() )
+    connect( m_mediaObject, SIGNAL(finished()),
+                            SLOT(onFinished())
            );
-    connect( m_mediaObject, SIGNAL( currentSourceChanged( Phonon::MediaSource ) ),
-                            SLOT( sourceChanged( Phonon::MediaSource ) )
+    connect( m_mediaObject, SIGNAL(currentSourceChanged(Phonon::MediaSource)),
+                            SLOT(sourceChanged(Phonon::MediaSource))
            );
-    connect( m_audioOutput, SIGNAL( volumeChanged( qreal ) ),
-                            SLOT( onVolumeChanged( qreal ) )
+    connect( m_audioOutput, SIGNAL(volumeChanged(qreal)),
+                            SLOT(onVolumeChanged(qreal))
            );
-    connect( m_audioOutput, SIGNAL( mutedChanged( bool ) ),
-                            SLOT( onMutedChanged( bool ) )
+    connect( m_audioOutput, SIGNAL(mutedChanged(bool)),
+                            SLOT(onMutedChanged(bool))
            );
-    connect( m_mediaObject, SIGNAL( seekableChanged( bool ) ),
-                            SLOT( onSeekableChanged( bool ) )
+    connect( m_mediaObject, SIGNAL(seekableChanged(bool)),
+                            SLOT(onSeekableChanged(bool))
            );
-    connect( m_mediaObject, SIGNAL( totalTimeChanged( qint64 ) ),
-                            SLOT( onTrackLengthChanged( qint64 ) )
+    connect( m_mediaObject, SIGNAL(totalTimeChanged(qint64)),
+                            SLOT(onTrackLengthChanged(qint64))
            );
 
     // Read the volume from phonon

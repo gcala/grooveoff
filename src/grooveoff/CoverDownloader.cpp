@@ -35,8 +35,8 @@ CoverDownloader::CoverDownloader(const QString &name, QObject *parent)
     request.setUrl( QUrl( QString( "http://images.gs-cdn.net/static/albums/200_%1" ).arg( m_coverName ) ) );
     request.setHeader( QNetworkRequest::ContentTypeHeader, QLatin1String( "application/x-www-form-urlencoded" ) );
     m_reply = m_qnam.get( request );
-    connect( m_reply, SIGNAL( finished() ), 
-                      SLOT( downloadFinished() )
+    connect( m_reply, SIGNAL(finished()), 
+                      SLOT(downloadFinished())
            );
 }
 

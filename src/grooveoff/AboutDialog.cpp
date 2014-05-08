@@ -42,8 +42,8 @@ AboutDialog::AboutDialog( QWidget *parent )
                                               ) 
                             );
     
-    connect( ui->closeButton, SIGNAL( clicked() ), 
-                              SLOT( close() )
+    connect( ui->closeButton, SIGNAL(clicked()), 
+                              SLOT(close())
            );
     
     ui->logoLabel->setPixmap( QPixmap( QLatin1String( ":/resources/grooveoff.png" ) ) );
@@ -68,12 +68,12 @@ AboutDialog::AboutDialog( QWidget *parent )
     ui->donateButton->setIcon( QIcon( ":/resources/btn_donate_LG.gif" ) );
     ui->donateButton->setIconSize( QSize( 96,27 ) );
 
-    connect( ui->gpl3Button, SIGNAL( clicked() ), 
-                             SLOT( openGplPage() ) 
+    connect( ui->gpl3Button, SIGNAL(clicked()), 
+                             SLOT(openGplPage()) 
            );
     
-    connect( ui->donateButton, SIGNAL( clicked() ), 
-                               SLOT( openDonatePage() ) 
+    connect( ui->donateButton, SIGNAL(clicked()), 
+                               SLOT(openDonatePage()) 
            );
 
     setMinimumSize( 620,400 );

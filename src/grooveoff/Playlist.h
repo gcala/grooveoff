@@ -38,11 +38,11 @@ public:
     ~Playlist();
 
     void clear();
-    void appendItem(PlaylistItemPtr item);
-    void removeItem(PlaylistItemPtr item);
+    void appendItem( const PlaylistItemPtr &item );
+    void removeItem( const PlaylistItemPtr &item );
     int count() const;
-    PlaylistItemPtr item(int row);
-    int row(PlaylistItemPtr item);
+    PlaylistItemPtr item( int row ) const;
+    int row( const PlaylistItemPtr &item );
 
 Q_SIGNALS:
     void playlistChanged();
@@ -50,7 +50,7 @@ Q_SIGNALS:
 private:
     Playlist();
 
-    QList<PlaylistItemPtr> m_playlist;
+    QList< PlaylistItemPtr > m_playlist;
 };
 
 #endif // PLAYLIST_H

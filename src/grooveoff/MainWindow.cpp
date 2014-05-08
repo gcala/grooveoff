@@ -150,8 +150,8 @@ MainWindow::MainWindow( QWidget *parent )
 
     m_qncm = new QNetworkConfigurationManager( this );
     
-    connect( m_qncm, SIGNAL( onlineStateChanged( bool ) ),
-                     SLOT( onlineStateChanged( bool ) ) 
+    connect( m_qncm, SIGNAL(onlineStateChanged(bool)),
+                     SLOT(onlineStateChanged(bool)) 
            );
     
     if( m_qncm->isOnline() )
@@ -165,7 +165,8 @@ MainWindow::MainWindow( QWidget *parent )
 #if QT_VERSION >= QT_VERSION_CHECK( 5, 0, 0 )
     if( m_saveDestination ) {
         ui->pathLine->setText( settings.value( QLatin1String( "destination" ),
-                               QStandardPaths::writableLocation( QStandardPaths::MusicLocation ) ).toString() );
+                                               QStandardPaths::writableLocation( QStandardPaths::MusicLocation ) 
+                                             ).toString() );
         if( ui->pathLine->text().isEmpty() )
             ui->pathLine->setText( QStandardPaths::writableLocation( QStandardPaths::MusicLocation ) );
     } else {
@@ -174,7 +175,8 @@ MainWindow::MainWindow( QWidget *parent )
 #else
     if( m_saveDestination ) {
         ui->pathLine->setText( settings.value( QLatin1String( "destination" ),
-                               QDesktopServices::storageLocation( QDesktopServices::MusicLocation ) ).toString() );
+                                               QDesktopServices::storageLocation( QDesktopServices::MusicLocation ) 
+                                             ).toString() );
         if( ui->pathLine->text().isEmpty() )
             ui->pathLine->setText( QDesktopServices::storageLocation( QDesktopServices::MusicLocation ) );
     } else {
@@ -185,11 +187,9 @@ MainWindow::MainWindow( QWidget *parent )
     setGeometry( settings.value( QLatin1String( "windowGeometry" ), QRect( 100, 100, 350, 600 ) ).toRect() );
 
 #if QT_VERSION >= QT_VERSION_CHECK( 5, 0, 0 )
-    m_sessionFilePath = QStandardPaths::writableLocation( QStandardPaths::DataLocation )
-                   + QDir::separator();
+    m_sessionFilePath = QStandardPaths::writableLocation( QStandardPaths::DataLocation ) + QDir::separator();
 #else
-    m_sessionFilePath = QDesktopServices::storageLocation( QDesktopServices::DataLocation ).replace( QLatin1String( "/data" ),"" )
-                   + QDir::separator();
+    m_sessionFilePath = QDesktopServices::storageLocation( QDesktopServices::DataLocation ).remove( QLatin1String( "/data" ) ) + QDir::separator();
 #endif
     if( m_saveSession )
         loadSession();
@@ -302,87 +302,87 @@ void MainWindow::setupSignals()
     // <Menu Items>
     ActionCollection *ac = The::actionCollection();
 
-    connect( ac->getAction( "actionClose" ), SIGNAL( triggered() ),
-                                             SLOT( close() ) 
+    connect( ac->getAction( "actionClose" ), SIGNAL(triggered()),
+                                             SLOT(close()) 
            );
 
-    connect( ac->getAction( "actionDonate" ), SIGNAL( triggered() ),
-                                              SLOT( donate() ) 
+    connect( ac->getAction( "actionDonate" ), SIGNAL(triggered()),
+                                              SLOT(donate()) 
            );
 
-    connect( ac->getAction( "actionConfigure" ), SIGNAL( triggered() ),
-                                                 SLOT( configure() ) 
+    connect( ac->getAction( "actionConfigure" ), SIGNAL(triggered()),
+                                                 SLOT(configure()) 
            );
 
-    connect( ac->getAction( "actionCompact" ), SIGNAL( triggered() ),
-                                               SLOT( setCompactLayout() ) 
+    connect( ac->getAction( "actionCompact" ), SIGNAL(triggered()),
+                                               SLOT(setCompactLayout()) 
            );
 
-    connect( ac->getAction( "actionWide" ), SIGNAL( triggered() ),
-                                            SLOT( setWideLayout() ) 
+    connect( ac->getAction( "actionWide" ), SIGNAL(triggered()),
+                                            SLOT(setWideLayout()) 
            );
 
-    connect( ac->getAction( "miniPlayer" ), SIGNAL( triggered() ),
-                                            SLOT( setMiniPlayerLayout() ) 
+    connect( ac->getAction( "miniPlayer" ), SIGNAL(triggered()),
+                                            SLOT(setMiniPlayerLayout()) 
            );
 
-    connect( ac->getAction( "actionNewToken" ), SIGNAL( triggered() ),
-                                                SLOT( getToken() ) 
+    connect( ac->getAction( "actionNewToken" ), SIGNAL(triggered()),
+                                                SLOT(getToken()) 
            );
 
-    connect( ac->getAction( "actionStopDownloads" ), SIGNAL( triggered( bool ) ),
-             ui->downloadList,                       SLOT( abortAllDownloads() ) 
+    connect( ac->getAction( "actionStopDownloads" ), SIGNAL(triggered(bool)),
+             ui->downloadList,                       SLOT(abortAllDownloads()) 
            );
 
-    connect( ac->getAction( "actionRemoveFailed" ), SIGNAL( triggered( bool ) ),
-             ui->downloadList,                      SLOT( removeFailedAborted() ) 
+    connect( ac->getAction( "actionRemoveFailed" ), SIGNAL(triggered(bool)),
+             ui->downloadList,                      SLOT(removeFailedAborted()) 
            );
 
-    connect( ac->getAction( "actionClearDownloadList" ), SIGNAL( triggered( bool ) ),
-             ui->downloadList,                           SLOT( removeDownloaded() ) 
+    connect( ac->getAction( "actionClearDownloadList" ), SIGNAL(triggered(bool)),
+             ui->downloadList,                           SLOT(removeDownloaded()) 
            );
 
-    connect( ac->getAction( "actionAbout" ), SIGNAL( triggered() ),
-                                             SLOT( about() ) 
+    connect( ac->getAction( "actionAbout" ), SIGNAL(triggered()),
+                                             SLOT(about()) 
            );
 
-//     connect( ac->getAction( "actionSaveSessionAs" ), SIGNAL( triggered() ),
-//                                                     SLOT( saveSessionAs() ) );
+//     connect( ac->getAction( "actionSaveSessionAs" ), SIGNAL(triggered()),
+//                                                     SLOT(saveSessionAs()) );
 // 
-//     connect( ac->getAction( "actionManageSessions" ), SIGNAL( triggered() ),
-//                                                      SLOT( openSessionManager() ) );
+//     connect( ac->getAction( "actionManageSessions" ), SIGNAL(triggered()),
+//                                                      SLOT(openSessionManager()) );
 
-    connect( ac->getAction( "actionQtAbout" ), SIGNAL( triggered() ),
-             qApp,                             SLOT( aboutQt() ) );
+    connect( ac->getAction( "actionQtAbout" ), SIGNAL(triggered()),
+             qApp,                             SLOT(aboutQt()) );
 
 
     // gui widgets
-    connect( ui->searchButton, SIGNAL( buttonClicked() ),
-                               SLOT( beginSearch() ) 
+    connect( ui->searchButton, SIGNAL(buttonClicked()),
+                               SLOT(beginSearch()) 
            );
     
-    connect( ui->browseButton, SIGNAL( buttonClicked() ),
-                               SLOT( selectFolder() ) 
+    connect( ui->browseButton, SIGNAL(buttonClicked()),
+                               SLOT(selectFolder()) 
            );
     
-    connect( ui->searchLine, SIGNAL( returnPressed() ),
-                             SLOT( beginSearch() )
+    connect( ui->searchLine, SIGNAL(returnPressed()),
+                             SLOT(beginSearch())
            );
     
-    connect( ui->artistsCB, SIGNAL( activated( int ) ),
-                            SLOT( artistChanged() ) 
+    connect( ui->artistsCB, SIGNAL(activated(int)),
+                            SLOT(artistChanged()) 
            );
     
-    connect( ui->albumsCB, SIGNAL( activated( int ) ),
-                           SLOT( albumChanged() ) 
+    connect( ui->albumsCB, SIGNAL(activated(int)),
+                           SLOT(albumChanged()) 
            );
     
-    connect( ui->batchDownloadButton, SIGNAL( buttonClicked() ),
-                                      SLOT( batchDownload() ) 
+    connect( ui->batchDownloadButton, SIGNAL(buttonClicked()),
+                                      SLOT(batchDownload()) 
            );
     
-    connect( ui->pathLine, SIGNAL( textChanged( QString ) ),
-                           SLOT( changeDestinationPath() ) 
+    connect( ui->pathLine, SIGNAL(textChanged(QString)),
+                           SLOT(changeDestinationPath()) 
            );
 }
 
@@ -459,16 +459,16 @@ void MainWindow::beginSearch()
 
     m_songList = m_api->songs( ui->searchLine->text(), Utility::token );
 
-    connect( m_songList.data(), SIGNAL( finished() ),
-                                SLOT( searchFinished() ) 
+    connect( m_songList.data(), SIGNAL(finished()),
+                                SLOT(searchFinished()) 
            );
 
-    connect( m_songList.data(), SIGNAL( parseError() ),
-                                SLOT( searchError() ) 
+    connect( m_songList.data(), SIGNAL(parseError()),
+                                SLOT(searchError()) 
            );
 
-    connect( m_songList.data(), SIGNAL( requestError( QNetworkReply::NetworkError ) ),
-                                SLOT( searchError() ) 
+    connect( m_songList.data(), SIGNAL(requestError(QNetworkReply::NetworkError)),
+                                SLOT(searchError()) 
            );
 
     // force downloadList repaint to prevent blank items
@@ -485,16 +485,16 @@ void MainWindow::getToken()
 
     m_token = m_api->token();
 
-    connect( m_token.data(), SIGNAL( finished() ),
-                             SLOT( tokenFinished() ) 
+    connect( m_token.data(), SIGNAL(finished()),
+                             SLOT(tokenFinished()) 
            );
 
-    connect( m_token.data(), SIGNAL( parseError() ),
-                             SLOT( tokenError() ) 
+    connect( m_token.data(), SIGNAL(parseError()),
+                             SLOT(tokenError()) 
            );
 
-    connect( m_token.data(), SIGNAL( requestError( QNetworkReply::NetworkError ) ),
-                             SLOT( tokenError() ) 
+    connect( m_token.data(), SIGNAL(requestError(QNetworkReply::NetworkError)),
+                             SLOT(tokenError()) 
            );
 }
 
@@ -569,8 +569,8 @@ void MainWindow::searchFinished()
         ui->matchList->setItemWidget( wItem, matchItem );
         wItem->setSizeHint( QSize( Utility::coverSize + Utility::marginSize * 2,Utility::coverSize + Utility::marginSize * 2 ) );
         
-        connect( matchItem, SIGNAL( download( PlaylistItemPtr ) ),
-                            SLOT( downloadRequest( PlaylistItemPtr ) ) 
+        connect( matchItem, SIGNAL(download(PlaylistItemPtr)),
+                            SLOT(downloadRequest(PlaylistItemPtr)) 
                );
 
         // don't freeze gui inserting items
@@ -728,20 +728,20 @@ void MainWindow::addDownloadItem( const PlaylistItemPtr &playlistItem )
     // build a DownloadItem with all required data
     DownloadItem *item = new DownloadItem( playlistItem, this );
 
-    connect( item,             SIGNAL( reloadPlaylist() ),
-             ui->downloadList, SLOT( reloadPlaylist() ) 
+    connect( item,             SIGNAL(reloadPlaylist()),
+             ui->downloadList, SLOT(reloadPlaylist()) 
            );
     
-    connect( item,             SIGNAL( removeMe( DownloadItem* ) ), 
-             ui->downloadList, SLOT( removeItem( DownloadItem* ) ) 
+    connect( item,             SIGNAL(removeMe(DownloadItem*)), 
+             ui->downloadList, SLOT(removeItem(DownloadItem*)) 
            );
     
-    connect( item, SIGNAL( downloadFinished() ), 
-                   SLOT( freeDownloadSlot() ) 
+    connect( item, SIGNAL(downloadFinished()), 
+                   SLOT(freeDownloadSlot()) 
            );
     
-    connect( item, SIGNAL( addToQueue( DownloadItem* ) ), 
-                   SLOT( addItemToQueue( DownloadItem* ) ) 
+    connect( item, SIGNAL(addToQueue(DownloadItem*)), 
+                   SLOT(addItemToQueue(DownloadItem*)) 
            );
 
     if( !QFile::exists( playlistItem->path() + playlistItem->fileName() ) ) {
@@ -1188,8 +1188,8 @@ void MainWindow::loadSessions()
             action->setFont( Utility::font( QFont::Bold ) );
         The::actionCollection()->getMenu( "sessionsMenu" )->addAction( action );
         
-        connect( action, SIGNAL( triggered() ),
-                        SLOT( loadSessionFile() )
+        connect( action, SIGNAL(triggered()),
+                        SLOT(loadSessionFile())
                );
     }
 }
@@ -1229,16 +1229,19 @@ void MainWindow::changeEvent( QEvent *event )
 
 void MainWindow::openSessionManager()
 {
-    SessionManager manager( m_sessionFilePath );
-    manager.exec();
-    if( !QFile::exists( m_sessionFilePath + m_sessionFileName + QLatin1String( ".xml" ) ) ) {
-        if( The::audioEngine()->state() == Phonon::PlayingState || The::audioEngine()->state() == Phonon::PausedState )
-            The::audioEngine()->stop();
+    QPointer<SessionManager> manager = new SessionManager( m_sessionFilePath, this );
+    if( manager->exec() ) {
+        if( !QFile::exists( m_sessionFilePath + m_sessionFileName + QLatin1String( ".xml" ) ) ) {
+            if( The::audioEngine()->state() == Phonon::PlayingState || The::audioEngine()->state() == Phonon::PausedState )
+                The::audioEngine()->stop();
 
-        m_sessionFileName = QLatin1String( "default" );
+            m_sessionFileName = QLatin1String( "default" );
+        }
+
+        loadSession();
     }
-
-    loadSession();
+    
+    delete manager;
 }
 
 // resize some widgets' height to that of the lineedit

@@ -34,8 +34,8 @@ SessionManager::SessionManager(const QString &path, QWidget *parent) :
     ui->setupUi(this);
 //     setWindowTitle(QLatin1String("GrooveOff - ") + trUtf8("Session Manager"));
     loadSessionFiles();
-    connect(ui->sessionsList, SIGNAL(appendItem(const QByteArray &, const QString &)),
-                              SLOT(addTrack(const QByteArray &, const QString &))
+    connect(ui->sessionsList, SIGNAL(appendItem(QByteArray,QString)),
+                              SLOT(addTrack(QByteArray,QString))
     );
 }
 
@@ -69,8 +69,8 @@ void SessionManager::on_sessionsList_currentRowChanged(int currentRow)
     foreach(PlaylistItemPtr track, tracks) {
         DownloadItem *item = new DownloadItem(track, this, GrooveOff::Track);
         
-        connect( item, SIGNAL( removeMeFromSession(quint32) ),
-                       SLOT( removeTrack(quint32) ));
+        connect( item, SIGNAL(removeMeFromSession(quint32)),
+                       SLOT(removeTrack(quint32)));
         
         QListWidgetItem *wItem = new QListWidgetItem(ui->tracksList);
         wItem->setData(Qt::UserRole, track->song()->songID());
@@ -101,8 +101,8 @@ void SessionManager::loadSessionFiles()
         if( session == QLatin1String( "default" ) )
             sessionItem->deleteButtonEnabled(false);
         else {
-            connect( sessionItem, SIGNAL( remove(const QString &) ),
-                                  SLOT( removeSession(const QString &) )
+            connect( sessionItem, SIGNAL(remove(QString)),
+                                  SLOT(removeSession(QString))
             );
         }
         QListWidgetItem *wItem = new QListWidgetItem;

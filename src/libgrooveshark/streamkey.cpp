@@ -46,10 +46,10 @@ StreamKeyPrivate::StreamKeyPrivate ( StreamKey* qq, uint id, QString token, QObj
 
     m_reply = m_nam->post( request, json );
 
-    QObject::connect ( m_reply, SIGNAL ( finished() ),
-                       this, SLOT ( parseData() ) );
-    QObject::connect ( m_reply, SIGNAL ( error ( QNetworkReply::NetworkError ) ),
-                       this, SLOT ( error ( QNetworkReply::NetworkError ) ) );
+    QObject::connect ( m_reply, SIGNAL (finished()),
+                       this, SLOT (parseData()) );
+    QObject::connect ( m_reply, SIGNAL (error(QNetworkReply::NetworkError)),
+                       this, SLOT (error(QNetworkReply::NetworkError)) );
 }
 
 QString StreamKeyPrivate::streamKey() const

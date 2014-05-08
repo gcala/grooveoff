@@ -17,10 +17,10 @@ TokenPrivate::TokenPrivate ( Token* qq, QNetworkReply* reply, QObject* parent ) 
     q ( qq ),
     m_error ( QNetworkReply::NoError )
 {
-    QObject::connect ( m_reply, SIGNAL ( finished() ),
-                       this, SLOT ( parseData() ) );
-    QObject::connect ( m_reply, SIGNAL ( error ( QNetworkReply::NetworkError ) ),
-                       this, SLOT ( error ( QNetworkReply::NetworkError ) ) );
+    QObject::connect ( m_reply, SIGNAL (finished()),
+                       this, SLOT (parseData()) );
+    QObject::connect ( m_reply, SIGNAL (error(QNetworkReply::NetworkError)),
+                       this, SLOT (error(QNetworkReply::NetworkError)) );
 }
 
 TokenPrivate::TokenPrivate ( Token* qq, const QVariant& variant, QObject* parent ) :

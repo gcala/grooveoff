@@ -57,12 +57,12 @@ Mpris1PluginPlayerAdaptor::Mpris1PluginPlayerAdaptor( QObject *parent )
 {
     qDBusRegisterMetaType< PlayerStatus > ();
     m_engine = The::audioEngine();
-    connect( m_engine, SIGNAL( stateChanged ( Phonon::State ) ),
-                       SLOT( updateCaps() ) );
-    connect( m_engine, SIGNAL( stateChanged ( Phonon::State ) ),
-                       SLOT( updateStatus() ) );
-    connect( m_engine, SIGNAL( sourceChanged() ),
-                       SLOT( updateTrack() ) );
+    connect( m_engine, SIGNAL(stateChanged(Phonon::State)),
+                       SLOT(updateCaps()) );
+    connect( m_engine, SIGNAL(stateChanged(Phonon::State)),
+                       SLOT(updateStatus()) );
+    connect( m_engine, SIGNAL(sourceChanged()),
+                       SLOT(updateTrack()) );
 }
 
 Mpris1PluginPlayerAdaptor::~Mpris1PluginPlayerAdaptor()

@@ -38,18 +38,18 @@ Mpris2PluginPlayerAdaptor::Mpris2PluginPlayerAdaptor( QObject *parent )
     : QDBusAbstractAdaptor( parent )
 {
     m_engine = The::audioEngine();
-    connect( m_engine, SIGNAL( sourceChanged() ),
-                       SLOT( emitPropertiesChanged() ) );
-    connect( m_engine, SIGNAL( stateChanged( Phonon::State ) ),
-                       SLOT( emitPropertiesChanged() ) );
-    connect( m_engine, SIGNAL( volumeChanged( int ) ),
-                       SLOT( emitPropertiesChanged() ) );
-    connect( m_engine, SIGNAL( seeked( qint64,bool ) ),
-                       SLOT( onSeeked( qint64, bool ) ) );
-    connect( m_engine, SIGNAL( seekableChanged( bool ) ),
-                       SLOT( emitPropertiesChanged() ) );
-    connect( The::playlist(), SIGNAL( playlistChanged() ),
-                              SLOT( emitPropertiesChanged() ) );
+    connect( m_engine, SIGNAL(sourceChanged()),
+                       SLOT(emitPropertiesChanged()) );
+    connect( m_engine, SIGNAL(stateChanged(Phonon::State)),
+                       SLOT(emitPropertiesChanged()) );
+    connect( m_engine, SIGNAL(volumeChanged(int)),
+                       SLOT(emitPropertiesChanged()) );
+    connect( m_engine, SIGNAL(seeked(qint64,bool)),
+                       SLOT(onSeeked(qint64,bool)) );
+    connect( m_engine, SIGNAL(seekableChanged(bool)),
+                       SLOT(emitPropertiesChanged()) );
+    connect( The::playlist(), SIGNAL(playlistChanged()),
+                              SLOT(emitPropertiesChanged()) );
     syncProperties();
 }
 

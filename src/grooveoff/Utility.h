@@ -44,14 +44,14 @@ public:
     static QString destinationPath;
     static QString namingSchema;
 
-    static QString elidedText(const QString &text, const Qt::TextElideMode &elideMode, const int &width, const QFont::Weight &weight);
+    static QString elidedText( const QString &text, const Qt::TextElideMode &elideMode, const int &width, const QFont::Weight &weight );
 
-    static QFont font(const QFont::Weight &weight = QFont::Normal, const int &delta = 0);
+    static QFont font( const QFont::Weight &weight = QFont::Normal, const int &delta = 0 );
 
-    static QFont monoFont(const QFont::Weight &weight = QFont::Normal, const int &delta = 0);
+    static QFont monoFont( const QFont::Weight &weight = QFont::Normal, const int &delta = 0 );
 
     // from trojita Util.cpp
-    static QColor tintColor(const QColor &color, const QColor &tintColor);
+    static QColor tintColor( const QColor &color, const QColor &tintColor );
 };
 
 #endif // UTILITY_H

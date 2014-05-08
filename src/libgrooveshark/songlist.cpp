@@ -17,9 +17,9 @@ SongListPrivate::SongListPrivate( SongList* qq, QNetworkReply* reply ) :
     m_songs( QVariant() ),
     m_error( QNetworkReply::NoError )
 {
-    QObject::connect( m_reply, SIGNAL( finished() ), this, SLOT( parseData() ) );
-    QObject::connect( m_reply, SIGNAL( error( QNetworkReply::NetworkError ) ),
-                      this, SLOT( error( QNetworkReply::NetworkError ) ) );
+    QObject::connect( m_reply, SIGNAL(finished()), this, SLOT(parseData()) );
+    QObject::connect( m_reply, SIGNAL(error(QNetworkReply::NetworkError)),
+                      this, SLOT(error(QNetworkReply::NetworkError)) );
 }
 
 SongListPrivate::~SongListPrivate()

@@ -36,16 +36,16 @@ MatchItem::MatchItem( const PlaylistItemPtr &playlistItem, QWidget *parent )
     ui->setupUi(this);
     setupUi();
 
-    connect( ui->downloadButton, SIGNAL( buttonClicked() ), 
-                                 SLOT(downloadSlot() )
+    connect( ui->downloadButton, SIGNAL(buttonClicked()), 
+                                 SLOT(downloadSlot())
            );
     
-    connect( m_playlistItem.data(), SIGNAL( reloadCover() ), 
-                                    SLOT(loadCover() )
+    connect( m_playlistItem.data(), SIGNAL(reloadCover()), 
+                                    SLOT(loadCover())
            );
     
-    connect( m_playlistItem.data(), SIGNAL( reloadIcon() ), 
-                                    SLOT(setDownloadIcon() )
+    connect( m_playlistItem.data(), SIGNAL(reloadIcon()), 
+                                    SLOT(setDownloadIcon())
            );
 }
 

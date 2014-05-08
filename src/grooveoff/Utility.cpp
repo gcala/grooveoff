@@ -33,10 +33,11 @@ QString Utility::token = "";
 QString Utility::destinationPath = "";
 QString Utility::namingSchema = "";
 
-QString Utility::elidedText(const QString& text,
-                            const Qt::TextElideMode& elideMode,
-                            const int& width,
-                            const QFont::Weight &weight)
+QString Utility::elidedText( const QString& text,
+                             const Qt::TextElideMode& elideMode,
+                             const int& width,
+                             const QFont::Weight &weight
+                           )
 {
     QFont systemFont;
     systemFont.setWeight(weight);
@@ -45,21 +46,21 @@ QString Utility::elidedText(const QString& text,
     return fm.elidedText(text, elideMode, width);
 }
 
-QFont Utility::font(const QFont::Weight& weight, const int &delta)
+QFont Utility::font( const QFont::Weight& weight, const int &delta )
 {
     QFont systemFont;
-    systemFont.setPointSize(systemFont.pointSize() + delta);
-    systemFont.setWeight(weight);
+    systemFont.setPointSize( systemFont.pointSize() + delta );
+    systemFont.setWeight( weight );
 
     return systemFont;
 }
 
-QFont Utility::monoFont(const QFont::Weight& weight, const int &delta)
+QFont Utility::monoFont( const QFont::Weight& weight, const int &delta )
 {
     QFont systemFont;
-    systemFont.setStyleHint(QFont::Monospace);
-    systemFont.setPointSize(systemFont.pointSize() + delta);
-    systemFont.setWeight(weight);
+    systemFont.setStyleHint( QFont::Monospace );
+    systemFont.setPointSize( systemFont.pointSize() + delta );
+    systemFont.setWeight( weight );
 
     return systemFont;
 }
@@ -68,22 +69,23 @@ QFont Utility::monoFont(const QFont::Weight& weight, const int &delta)
 
 This is shamelessly stolen from Qt5's qtquick1 module.
 */
-QColor Utility::tintColor(const QColor &color, const QColor &tintColor)
+QColor Utility::tintColor( const QColor &color, const QColor &tintColor )
 {
     QColor finalColor;
     int a = tintColor.alpha();
-    if (a == 0xff) {
+    if( a == 0xff ) {
         finalColor = tintColor;
-    } else if (a == 0x00) {
+    } else if( a == 0x00 ) {
         finalColor = color;
     } else {
         qreal a = tintColor.alphaF();
         qreal inv_a = 1.0 - a;
 
-        finalColor.setRgbF(tintColor.redF() * a + color.redF() * inv_a,
-                           tintColor.greenF() * a + color.greenF() * inv_a,
-                           tintColor.blueF() * a + color.blueF() * inv_a,
-                           a + inv_a * color.alphaF());
+        finalColor.setRgbF( tintColor.redF()   * a + color.redF()   * inv_a,
+                            tintColor.greenF() * a + color.greenF() * inv_a,
+                            tintColor.blueF()  * a + color.blueF()  * inv_a,
+                            a + inv_a * color.alphaF() 
+                          );
     }
     return finalColor;
 }

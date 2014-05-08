@@ -37,14 +37,14 @@ class SessionReaderWriter : public QObject
 public:
     ~SessionReaderWriter(){}
 
-    QList<PlaylistItemPtr> read(const QString & file);
-    bool write(const QString &file, QList<PlaylistItemPtr> tracks);
+    QList<PlaylistItemPtr> read( const QString & file );
+    bool write( const QString &file, QList<PlaylistItemPtr> tracks );
 
 private:
     explicit SessionReaderWriter( QObject* parent = 0 ) : QObject(parent) {}
 
-    void parsePlaylistItem(const QDomElement& element, PlaylistItemPtr item);
-    void parseSong(const QDomElement& element, GrooveShark::SongPtr song);
+    void parsePlaylistItem( const QDomElement& element, PlaylistItemPtr item );
+    void parseSong( const QDomElement& element, GrooveShark::SongPtr song );
 };
 
 #endif // SESSIONREADERWRITER_H

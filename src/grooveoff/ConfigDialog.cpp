@@ -46,21 +46,21 @@ ConfigDialog::ConfigDialog( QWidget *parent )
     // connect all checkboxes to the same slot
     QList< QCheckBox * > checkboxList = this->findChildren< QCheckBox * >();
     foreach( QCheckBox *cb, checkboxList ) {
-        connect( cb, SIGNAL( toggled( bool ) ),
-                     SLOT( onConfigChanged() )
+        connect( cb, SIGNAL(toggled(bool)),
+                     SLOT(onConfigChanged())
                );
     }
 
     // connect all spinboxes to the same slot
     QList< QSpinBox * > spinboxList = this->findChildren< QSpinBox * >();
     foreach( QSpinBox *sb, spinboxList ) {
-        connect( sb, SIGNAL( valueChanged( int ) ),
-                     SLOT( onConfigChanged() )
+        connect( sb, SIGNAL(valueChanged(int)),
+                     SLOT(onConfigChanged())
                );
     }
 
-    connect( ui->m_nowPlayingText, SIGNAL( textChanged( QString ) ),
-                                   SLOT( onConfigChanged() )
+    connect( ui->m_nowPlayingText, SIGNAL(textChanged(QString)),
+                                   SLOT(onConfigChanged())
            );
 
     m_tagNames << QLatin1String( "%title" ) 
@@ -90,24 +90,24 @@ ConfigDialog::ConfigDialog( QWidget *parent )
 
     ui->m_nowPlayingText->setLocalizedTagNames( m_localizedTagNames );
 
-    connect( ui->cancelButton, SIGNAL( clicked() ),
-                               SLOT( close() )
+    connect( ui->cancelButton, SIGNAL(clicked()),
+                               SLOT(close())
            );
     
-    connect( ui->restoreButton, SIGNAL( clicked() ),
-                                SLOT( restoreDefaults() )
+    connect( ui->restoreButton, SIGNAL(clicked()),
+                                SLOT(restoreDefaults())
            );
     
-    connect( ui->applyButton, SIGNAL( clicked() ),
-                              SLOT( saveSettings() )
+    connect( ui->applyButton, SIGNAL(clicked()),
+                              SLOT(saveSettings())
            );
     
-    connect( ui->okButton, SIGNAL( clicked() ),
-                           SLOT( okClicked() )
+    connect( ui->okButton, SIGNAL(clicked()),
+                           SLOT(okClicked())
            );
     
-    connect( ui->contentsWidget, SIGNAL( currentRowChanged( int ) ),
-                                 SLOT( switchPage( int ) )
+    connect( ui->contentsWidget, SIGNAL(currentRowChanged(int)),
+                                 SLOT(switchPage(int))
            );
 
     loadSettings();

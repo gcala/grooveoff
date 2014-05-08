@@ -45,8 +45,8 @@ void CoverManager::addItem( const PlaylistItemPtr &playlistItemPtr )
         listOfSongsWithSameCover.append( playlistItemPtr );
         m_coverItems.insert( coverArtFilename, listOfSongsWithSameCover );
         CoverDownloader *downloader = new CoverDownloader( coverArtFilename, this );
-        connect( downloader, SIGNAL( done() ), 
-                             SLOT( setCover() )
+        connect( downloader, SIGNAL(done()), 
+                             SLOT(setCover())
                );
     }
 }
