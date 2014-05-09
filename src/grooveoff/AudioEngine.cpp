@@ -102,6 +102,16 @@ void AudioEngine::onFinished()
 
 void AudioEngine::playItem( const PlaylistItemPtr &track)
 {
+    // this was added to handle triggers from playlist menu
+    if(m_currentTrack == track) {
+        if(m_currentTrack->isPlaying())
+            pause();
+        else
+            play();
+        
+        return;
+    }
+    
     if( m_currentTrack )
         m_currentTrack->setState( Phonon::StoppedState );
 

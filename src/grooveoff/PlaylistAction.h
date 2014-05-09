@@ -16,34 +16,29 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-#ifndef DOWNLOADLIST_H
-#define DOWNLOADLIST_H
+#ifndef PLAYLISTACTION_H
+#define PLAYLISTACTION_H
 
 #include "PlaylistItem.h"
 
-#include <QListWidget>
-#include <phonon/phononnamespace.h>
+#include <QAction>
 
-class DownloadItem;
-
-class DownloadList : public QListWidget
+class PlaylistAction : public QAction
 {
     Q_OBJECT
 public:
-    explicit DownloadList( QWidget *parent = 0 );
-
-    QList< PlaylistItemPtr > playlistItems() const;
-
-public Q_SLOTS:
-    void reloadPlaylist();
-    void removeFailedAborted();
-    void removeDownloaded();
-    void abortAllDownloads();
-    void removeItem(DownloadItem *item);
+    PlaylistAction(const PlaylistItemPtr &track, QObject *parent = 0);
+    virtual ~PlaylistAction();
+    
+    inline PlaylistItemPtr track() const {
+        return m_track;
+    }
     
 private Q_SLOTS:
-    void actionTriggered();
+    void trackStateChanged( Phonon::State state );
+    
+private:
+    PlaylistItemPtr m_track;
 };
 
-#endif // DOWNLOADLIST_H
+#endif // PLAYLISTACTION_H

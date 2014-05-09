@@ -1,11 +1,11 @@
 /*
     GrooveOff - Offline Grooveshark.com music
-    Copyright ( C ) 2013-2014  Giuseppe Calà <jiveaxe@gmail.com>
+    Copyright (C) 2013-2014  Giuseppe Calà <jiveaxe@gmail.com>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
-    ( at your option ) any later version.
+    (at your option) any later version.
 
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -22,8 +22,11 @@
 #include "Utility.h"
 #include "Playlist.h"
 #include "AudioEngine.h"
+#include "ActionCollection.h"
+#include "PlaylistAction.h"
 
 #include <QDir>
+#include <QMenu>
 
 #define ITEM( x )  ( (DownloadItem * )itemWidget( item( x ) ) )
 
@@ -37,10 +40,21 @@ DownloadList::DownloadList( QWidget *parent ) :
 void DownloadList::reloadPlaylist()
 {
     The::playlist()->clear();
+    
+    foreach( QAction *action, The::actionCollection()->getMenu( "playlistMenu" )->actions() ) {
+        The::actionCollection()->getMenu( "playlistMenu" )->removeAction( action );
+        delete action;
+    }
 
     for( int i = 0; i < count(); i++ ) {
         if( ITEM( i )->downloadState() == GrooveOff::FinishedState ) {
             The::playlist()->appendItem( ITEM( i )->playlistItem() );
+            PlaylistAction *action = new PlaylistAction( ITEM( i )->playlistItem(), The::actionCollection()->getMenu( "playlistMenu" ) );
+            The::actionCollection()->getMenu( "playlistMenu" )->addAction( (QAction *)action );
+            
+            connect( action, SIGNAL(triggered()),
+                             SLOT(actionTriggered())
+                   );
         }
     }
 }
@@ -113,3 +127,10 @@ void DownloadList::removeItem( DownloadItem* downItem )
         }
     }
 }
+
+void DownloadList::actionTriggered()
+{
+    PlaylistAction *action = ( PlaylistAction * )QObject::sender();
+    The::audioEngine()->playItem( action->track() );
+}
+

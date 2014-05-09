@@ -50,12 +50,16 @@ public:
     inline bool isPlaying() {
         return m_state == Phonon::PlayingState;
     }
+    
+    inline Phonon::State state() {
+        return m_state;
+    }
 
     bool operator==( PlaylistItem & ) const;
 
 Q_SIGNALS:
     void reloadCover();
-    void stateChanged(Phonon::State);
+    void stateChanged( Phonon::State );
 
 public Q_SLOTS:
 

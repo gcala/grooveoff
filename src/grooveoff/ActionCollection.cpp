@@ -187,6 +187,10 @@ QMenuBar* ActionCollection::createMenuBar( QWidget *parent )
 //     QMenu* sessionsMenu = new QMenu( trUtf8( "&Load Session" ), menuBar );
 //     m_menuCollection[ QLatin1String( "sessionsMenu" ) ] = sessionsMenu;
 
+    QMenu* playlistMenu = new QMenu( trUtf8( "&Playlist" ), menuBar );
+    playlistMenu->setIcon( QIcon( QLatin1String( ":/resources/Playlist.png" ) ) );
+    m_menuCollection[ QLatin1String( "playlistMenu" ) ] = playlistMenu;
+
     QMenu* fileMenu = new QMenu( trUtf8( "&File" ), menuBar );
     fileMenu->addAction( m_actionCollection[ QLatin1String( "actionNewToken" ) ] );
     fileMenu->addSeparator();
@@ -196,6 +200,10 @@ QMenuBar* ActionCollection::createMenuBar( QWidget *parent )
     // fileMenu->addAction( m_actionCollection[ QLatin1String( "actionSaveSessionAs" ) ] );
     // fileMenu->addAction( m_actionCollection[ QLatin1String( "actionManageSessions" ) ] );
     // fileMenu->addSeparator();
+    
+    fileMenu->addMenu(playlistMenu);
+    fileMenu->addSeparator();
+    
     fileMenu->addAction( m_actionCollection[ QLatin1String( "actionDonate" ) ] );
     fileMenu->addSeparator();
     fileMenu->addAction( m_actionCollection[ QLatin1String( "actionClose" ) ] );
@@ -249,6 +257,8 @@ QMenu* ActionCollection::createCompactMenu( QWidget *parent )
 //     compactMenu->addAction( m_actionCollection[ QLatin1String( "actionRemoveFailed" ) ] );
 //     compactMenu->addAction( m_actionCollection[ QLatin1String( "actionClearDownloadList" ) ] );
 //     compactMenu->addSeparator();
+    compactMenu->addMenu( m_menuCollection[ QLatin1String( "playlistMenu" ) ] );
+    compactMenu->addSeparator();
     compactMenu->addAction( m_actionCollection[ QLatin1String( "actionCompact" ) ] );
     compactMenu->addAction( m_actionCollection[ QLatin1String( "actionWide" ) ] );
     compactMenu->addAction( m_actionCollection[ QLatin1String( "miniPlayer" ) ] );

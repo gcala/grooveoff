@@ -29,5 +29,8 @@
         <file>resources/view-media-artist.png</file>
         <file>resources/view-media-lyrics.png</file>
         <file>resources/view-media-playlist.png</file>
+        <file>resources/PLAYpause.png</file>
+        <file>resources/playPAUSE.png</file>
+        <file>resources/Playlist.png</file>
     </qresource>
 </RCC>

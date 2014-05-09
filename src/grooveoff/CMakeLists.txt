@@ -1,5 +1,4 @@
-set(grooveoff_SRCS SessionReaderWriter.cpp
-                   App.cpp
+set(grooveoff_SRCS App.cpp
                    ActionCollection.cpp
                    AboutDialog.cpp
                    AudioEngine.cpp
@@ -9,17 +8,19 @@ set(grooveoff_SRCS SessionReaderWriter.cpp
                    DownloadItem.cpp
                    DownloadList.cpp
                    MainWindow.cpp
+                   MatchItem.cpp
                    PlayerWidget.cpp
                    Playlist.cpp
+                   PlaylistAction.cpp
                    PlaylistItem.cpp
-                   MatchItem.cpp
                    SettingsItem.cpp
                    Utility.cpp
                    SvgHandler.cpp
                    SvgTinter.cpp
                    PaletteHandler.cpp
-                   SessionManager.cpp
                    SessionItem.cpp
+                   SessionManager.cpp
+                   SessionReaderWriter.cpp
                    widgets/SvgButton.cpp
                    widgets/ElidedComboBox.cpp
                    widgets/PlayAnimationWidget.cpp

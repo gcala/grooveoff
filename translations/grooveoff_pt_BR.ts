@@ -138,31 +138,36 @@
     </message>
     <message>
         <location filename="../src/grooveoff/ActionCollection.cpp" line="190"/>
+        <source>&amp;Playlist</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="194"/>
         <source>&amp;File</source>
         <translation type="unfinished">&amp;Arquivo</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="204"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="212"/>
         <source>&amp;Downloads</source>
         <translation type="unfinished">&amp;Downloads</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="215"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="223"/>
         <source>&amp;View</source>
         <translation type="unfinished">&amp;Exibição</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="221"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="229"/>
         <source>&amp;Settings</source>
         <translation type="unfinished">&amp;Configuração</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="225"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="233"/>
         <source>&amp;Help</source>
         <translation type="unfinished">&amp;Ajuda</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="244"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="252"/>
         <source>Main Menu</source>
         <translation type="unfinished"></translation>
     </message>
@@ -320,52 +325,52 @@
 <context>
     <name>DownloadItem</name>
     <message>
-        <location filename="../src/grooveoff/DownloadItem.cpp" line="145"/>
+        <location filename="../src/grooveoff/DownloadItem.cpp" line="136"/>
         <source>Play</source>
         <translation>Play</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/DownloadItem.cpp" line="160"/>
+        <location filename="../src/grooveoff/DownloadItem.cpp" line="151"/>
         <source>Open folder</source>
         <translation>Abrir pasta</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/DownloadItem.cpp" line="255"/>
+        <location filename="../src/grooveoff/DownloadItem.cpp" line="253"/>
         <source>Queued</source>
         <translation>Na fila</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/DownloadItem.cpp" line="148"/>
+        <location filename="../src/grooveoff/DownloadItem.cpp" line="139"/>
         <source>Remove track from queue</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/DownloadItem.cpp" line="151"/>
+        <location filename="../src/grooveoff/DownloadItem.cpp" line="142"/>
         <source>Stop track download</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/DownloadItem.cpp" line="154"/>
+        <location filename="../src/grooveoff/DownloadItem.cpp" line="145"/>
         <source>Delete track from disk</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/DownloadItem.cpp" line="157"/>
+        <location filename="../src/grooveoff/DownloadItem.cpp" line="148"/>
         <source>Redownload track</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/DownloadItem.cpp" line="334"/>
+        <location filename="../src/grooveoff/DownloadItem.cpp" line="332"/>
         <source>Aborted</source>
         <translation>Abortado</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/DownloadItem.cpp" line="355"/>
+        <location filename="../src/grooveoff/DownloadItem.cpp" line="353"/>
         <source>Network or Server error</source>
         <translation>Error de Rede ou Servidor</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/DownloadItem.cpp" line="479"/>
+        <location filename="../src/grooveoff/DownloadItem.cpp" line="477"/>
         <source>Abort deletion</source>
         <translation>Abortar remoção</translation>
     </message>
@@ -373,135 +378,136 @@
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="235"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="236"/>
         <source>GrooveOff</source>
         <translation>GrooveOff</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="240"/>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="484"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="241"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="578"/>
         <source>Connecting...</source>
         <translation>Conectando...</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="260"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="261"/>
         <source>Save in:</source>
         <translation>Salvar em:</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="263"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="264"/>
         <source>Current save folder</source>
         <translation>Pasta de salvamento atual</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="245"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="246"/>
         <source>Search:</source>
         <translation>Pesquisar:</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="249"/>
         <location filename="../src/grooveoff/MainWindow.cpp" line="250"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="251"/>
         <source>Search for songs, artists, genres, playlists</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="254"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="255"/>
         <source>Start search</source>
         <translation>Iniciar pesquisa</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="257"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="258"/>
         <source>Main menu</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="273"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="274"/>
         <source>Select save folder</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="281"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="282"/>
         <source>Download all tracks</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="393"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="487"/>
         <source>Select Directory</source>
         <translation>Selecionar Diretório</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="453"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="547"/>
         <source>All Artists</source>
         <translation>Todos os Artistas</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="455"/>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="1011"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="549"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="1020"/>
         <source>All Albums</source>
         <translation>Todos os Albuns</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="458"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="552"/>
         <source>Querying...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="512"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="606"/>
         <source>Connected to
 Grooveshark</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="513"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="607"/>
         <source>You&apos;re connected to Grooveshark!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="520"/>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="528"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="614"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="622"/>
         <source>Connection error!!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="642"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="737"/>
         <source>This song is already in queue.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="693"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="788"/>
         <source>The destination folder is not writable.
 Select a valid path</source>
         <translation>Não é possível escrever na pasta de destino
 Selecione uma pasta válida</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="972"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="981"/>
         <source>Donation to Grooveoff&apos;s author</source>
         <translation>Doações ao autor de Grooveoff</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="238"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="239"/>
         <source>Offline Grooveshark.com music</source>
         <translation>Música do Grooveshark.com Offline</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="641"/>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="660"/>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="692"/>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="720"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="736"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="755"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="787"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="815"/>
         <source>Attention</source>
         <translation>Atenção</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="661"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="756"/>
         <source>The destination folder does not exists.
 Select a valid path</source>
         <translation>A pasta de destino não existe
 Selecione uma pasta válida</translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/grooveoff/MainWindow.cpp" line="555"/>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="1004"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="633"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="650"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="1013"/>
         <source>%n song(s) found</source>
         <translation type="unfinished">
             <numerusform>%n música(s) encontradas</numerusform>
@@ -509,27 +515,27 @@ Selecione uma pasta válida</translation>
         </translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="678"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="773"/>
         <source>Overwrite File?</source>
         <translation>Sobrescrever Arquivo?</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="679"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="774"/>
         <source>A file named &quot;%1&quot; already exists. Are you sure you want to overwrite it?</source>
         <translation>Um arquivo chamado &quot;%1&quot; já existe. Tem certeza que deseja sobrescreve-lo?</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="721"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="816"/>
         <source>Can&apos;t create destination path:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="721"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="816"/>
         <source>Aborting...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="870"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="965"/>
         <source>Offline</source>
         <translation>Offline</translation>
     </message>
@@ -537,12 +543,12 @@ Selecione uma pasta válida</translation>
 <context>
     <name>MatchItem</name>
     <message>
-        <location filename="../src/grooveoff/MatchItem.cpp" line="121"/>
+        <location filename="../src/grooveoff/MatchItem.cpp" line="117"/>
         <source>Download again</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MatchItem.cpp" line="124"/>
+        <location filename="../src/grooveoff/MatchItem.cpp" line="120"/>
         <source>Download</source>
         <translation type="unfinished"></translation>
     </message>
@@ -550,22 +556,22 @@ Selecione uma pasta válida</translation>
 <context>
     <name>PlayerWidget</name>
     <message>
-        <location filename="../src/grooveoff/PlayerWidget.cpp" line="146"/>
+        <location filename="../src/grooveoff/PlayerWidget.cpp" line="101"/>
         <source>Bit Rate</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/PlayerWidget.cpp" line="147"/>
+        <location filename="../src/grooveoff/PlayerWidget.cpp" line="102"/>
         <source>Sample Rate</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/PlayerWidget.cpp" line="197"/>
+        <location filename="../src/grooveoff/PlayerWidget.cpp" line="207"/>
         <source>Pause</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/PlayerWidget.cpp" line="338"/>
+        <location filename="../src/grooveoff/PlayerWidget.cpp" line="349"/>
         <source>Play</source>
         <translation type="unfinished">Play</translation>
     </message>
