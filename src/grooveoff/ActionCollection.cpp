@@ -243,12 +243,12 @@ QMenu* ActionCollection::createCompactMenu( QWidget *parent )
 {
     QMenu* compactMenu = new QMenu( tr( "Main Menu" ), parent );
 
-    compactMenu->addAction( m_actionCollection[ QLatin1String( "actionNewToken" ) ] );
-    compactMenu->addSeparator();
-    compactMenu->addAction( m_actionCollection[ QLatin1String( "actionStopDownloads" ) ] );
-    compactMenu->addAction( m_actionCollection[ QLatin1String( "actionRemoveFailed" ) ] );
-    compactMenu->addAction( m_actionCollection[ QLatin1String( "actionClearDownloadList" ) ] );
-    compactMenu->addSeparator();
+//     compactMenu->addAction( m_actionCollection[ QLatin1String( "actionNewToken" ) ] );
+//     compactMenu->addSeparator();
+//     compactMenu->addAction( m_actionCollection[ QLatin1String( "actionStopDownloads" ) ] );
+//     compactMenu->addAction( m_actionCollection[ QLatin1String( "actionRemoveFailed" ) ] );
+//     compactMenu->addAction( m_actionCollection[ QLatin1String( "actionClearDownloadList" ) ] );
+//     compactMenu->addSeparator();
     compactMenu->addAction( m_actionCollection[ QLatin1String( "actionCompact" ) ] );
     compactMenu->addAction( m_actionCollection[ QLatin1String( "actionWide" ) ] );
     compactMenu->addAction( m_actionCollection[ QLatin1String( "miniPlayer" ) ] );
