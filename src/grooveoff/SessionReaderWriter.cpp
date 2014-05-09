@@ -44,7 +44,7 @@ QList< PlaylistItemPtr > SessionReaderWriter::read( const QString& file )
 {
     QFile sessionFile( file );
     if(!sessionFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qDebug() << "SessionReaderWriter ::" << "Unable to read session file" << sessionFile.fileName();
+        qDebug() << "SessionReaderWriter :: Unable to read session file" << file.toLocal8Bit().constData(), sessionFile.errorString().toLocal8Bit().constData();
         return QList< PlaylistItemPtr >();
     }
 
@@ -109,7 +109,7 @@ bool SessionReaderWriter::write( const QString& file, QList< PlaylistItemPtr > t
     QFile sessionFile( file );
     if( sessionFile.exists() ) {
         if( !sessionFile.remove() ) {
-            qDebug() << "SessionReaderWriter ::" << "Unable to remove old session file" << sessionFile.fileName();
+            qDebug() << "SessionReaderWriter :: Unable to remove old session file" << sessionFile.fileName();
             return false;
         }
     }
@@ -117,12 +117,12 @@ bool SessionReaderWriter::write( const QString& file, QList< PlaylistItemPtr > t
     QFileInfo fi( file );
     
     if( !QDir().mkpath(fi.absolutePath() ) ) {
-        qDebug() << "SessionReaderWriter ::" << "Cannot create session path" << fi.absolutePath();
+        qDebug() << "SessionReaderWriter :: Cannot create session path" << fi.absolutePath();
         return false;
     }
     
     if( !sessionFile.open( QIODevice::WriteOnly | QIODevice::Text ) ) {
-        qDebug() << "SessionReaderWriter ::" << "Unable to write to session file" << sessionFile.fileName();
+        qDebug() << "SessionReaderWriter :: Unable to write to session file" << file.toLocal8Bit().constData(), sessionFile.errorString().toLocal8Bit().constData();
         return false;
     }
 
@@ -165,6 +165,7 @@ bool SessionReaderWriter::write( const QString& file, QList< PlaylistItemPtr > t
     stream.writeEndElement(); // playlist
 
     sessionFile.close();
+    
     return true;
 }
 

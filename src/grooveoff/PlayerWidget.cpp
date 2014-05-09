@@ -341,9 +341,10 @@ void PlayerWidget::playPrevious() const
 
 void PlayerWidget::reloadPreviousNextButtons()
 {
-    if( The::playlist()->count() == 0 ) // no track in playlist
+    if( The::playlist()->count() == 0 ) { // no tracks in playlist
         ui->stackedWidget->setCurrentIndex( 0 );
-    else {
+        ui->playPauseButton->setButtonEnabled( false );
+    } else {
         ui->playPauseButton->setButtonEnabled( true );
         ui->playPauseButton->setToolTip( trUtf8( "Play" ) );
         if( The::audioEngine()->canGoNext() ) {

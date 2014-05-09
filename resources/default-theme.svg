@@ -17,7 +17,7 @@
    sodipodi:version="0.32"
    inkscape:version="0.48.4 r9939"
    version="1.0"
-   sodipodi:docname="default-theme-clean.svg"
+   sodipodi:docname="default-theme.svg"
    inkscape:output_extension="org.inkscape.output.svg.inkscape">
   <sodipodi:namedview
      id="base"
@@ -30,14 +30,14 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.5"
-     inkscape:cx="1042.4301"
-     inkscape:cy="562.0946"
+     inkscape:cx="1095.2059"
+     inkscape:cy="722.0946"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
      inkscape:window-width="1920"
      inkscape:window-height="1025"
-     inkscape:window-x="-2"
+     inkscape:window-x="0"
      inkscape:window-y="32"
      inkscape:window-maximized="1"
      inkscape:snap-global="true"
@@ -19938,6 +19938,38 @@
        fx="-51.71981"
        fy="197.97386"
        r="78.196533" />
+    <filter
+       id="filter7047"
+       style="color-interpolation-filters:sRGB;"
+       inkscape:label="Drop Shadow">
+      <feFlood
+         id="feFlood7049"
+         flood-opacity="0.5"
+         flood-color="rgb(0,0,0)"
+         result="flood" />
+      <feComposite
+         id="feComposite7051"
+         in2="SourceGraphic"
+         in="flood"
+         operator="in"
+         result="composite1" />
+      <feGaussianBlur
+         id="feGaussianBlur7053"
+         in="composite"
+         stdDeviation="3"
+         result="blur" />
+      <feOffset
+         id="feOffset7055"
+         dx="4"
+         dy="4"
+         result="offset" />
+      <feComposite
+         id="feComposite7057"
+         in2="offset"
+         in="SourceGraphic"
+         operator="over"
+         result="composite2" />
+    </filter>
   </defs>
   <metadata
      id="metadata6835">
@@ -19947,7 +19979,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -23542,5 +23574,18 @@
          d="m 556.40451,243.7604 c -8.00646,0 -48.46876,76.30308 -44.46554,83.84898 4.00322,7.54591 84.94979,7.54591 88.95301,0 4.00323,-7.5459 -36.48102,-83.84898 -44.48747,-83.84898 z m 0,13.47376 c 6.08527,0 36.86364,55.73484 33.82101,61.24642 -3.04263,5.51157 -64.57746,5.51157 -67.62009,0 -3.04263,-5.51158 27.7138,-61.24642 33.79908,-61.24642 z m -3.81887,5.72746 0,14.37348 c 0,4.27649 0.15538,8.16157 0.4609,11.67435 0.30551,3.46191 0.683,6.91775 1.14127,10.37963 l 4.43339,0 c 0.45825,-3.46188 0.83573,-6.91772 1.14126,-10.37963 0.3055,-3.51278 0.46088,-7.39786 0.4609,-11.67435 l 0,-14.37348 -7.63772,0 z m 3.81887,43.69099 c -1.57846,1e-5 -2.81456,0.51793 -3.73108,1.53611 -0.91652,1.01821 -1.38269,2.20234 -1.38269,3.57691 0,1.37458 0.46617,2.58065 1.38269,3.59886 0.91652,1.01821 2.15262,1.51415 3.73108,1.51415 1.57842,0 2.83648,-0.49594 3.75301,-1.51415 0.91651,-1.01821 1.38268,-2.22428 1.38269,-3.59886 -10e-6,-1.37457 -0.46618,-2.5587 -1.38269,-3.57691 -0.91653,-1.01818 -2.17459,-1.5361 -3.75301,-1.53611 z"
          style="fill:url(#linearGradient8920);fill-opacity:1;stroke:#000000;stroke-width:0.49158704;stroke-miterlimit:4;stroke-opacity:0.62745098;stroke-dasharray:none" />
     </g>
-  </g>
+    <flowRoot
+       xml:space="preserve"
+       id="flowRoot7039"
+       style="font-size:72px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:#5199df;font-family:Ubuntu;-inkscape-font-specification:Ubuntu;filter:url(#filter7047);stroke-opacity:1"
+       transform="translate(-736.98988,-273.38814)"><flowRegion
+         id="flowRegion7041"><rect
+           id="rect7043"
+           width="854"
+           height="182"
+           x="1590"
+           y="114.92725"
+           style="stroke:#5199df;stroke-opacity:1" /></flowRegion><flowPara
+         id="flowPara7045"
+         style="font-size:144px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:Open Sans;-inkscape-font-specification:Open Sans Bold;stroke:#5199df;stroke-opacity:1">GrooveOff</flowPara></flowRoot>  </g>
 </svg>

@@ -43,10 +43,6 @@ MatchItem::MatchItem( const PlaylistItemPtr &playlistItem, QWidget *parent )
     connect( m_playlistItem.data(), SIGNAL(reloadCover()), 
                                     SLOT(loadCover())
            );
-    
-    connect( m_playlistItem.data(), SIGNAL(reloadIcon()), 
-                                    SLOT(setDownloadIcon())
-           );
 }
 
 MatchItem::~MatchItem()

@@ -164,6 +164,7 @@ private:
     void setupSignals();
     void setupCompleter();
     void loadSettings();
+    void loadBootSettings();
     void saveSettings();
     void unqueue();
     void applyFilter();

@@ -44,6 +44,17 @@ void Playlist::appendItem( const PlaylistItemPtr &item )
     emit playlistChanged();
 }
 
+void Playlist::removeItem( const PlaylistItemPtr &item )
+{
+    for(int i = 0; i < m_playlist.count(); i++) {
+        if(m_playlist.at(i) == item) {
+            m_playlist.takeAt(i);
+            break;
+        }
+    }
+    emit playlistChanged();
+}
+
 void Playlist::clear()
 {
     m_playlist.clear();
@@ -75,15 +86,3 @@ int Playlist::row( const PlaylistItemPtr &item )
 
     return index;
 }
-
-void Playlist::removeItem( const PlaylistItemPtr &item )
-{
-    for(int i = 0; i < m_playlist.count(); i++) {
-        if(m_playlist.at(i) == item) {
-            m_playlist.takeAt(i);
-            break;
-        }
-    }
-    emit playlistChanged();
-}
-

@@ -48,15 +48,7 @@ DownloadItem::DownloadItem( const PlaylistItemPtr &playlistItemPtr, QWidget *par
     , m_context( context )
 {
     ui->setupUi( this );
-    connect( m_playlistItem.data(), SIGNAL(reloadCover()), 
-                                    SLOT(loadCover())
-           );
-    connect( m_playlistItem.data(), SIGNAL(stateChanged(Phonon::State)), 
-                                    SLOT(setPlayerState(Phonon::State))
-           );
-
     setupUi();
-
     setupConnections();
 
     if( m_context == GrooveOff::Track ) {
@@ -67,7 +59,6 @@ DownloadItem::DownloadItem( const PlaylistItemPtr &playlistItemPtr, QWidget *par
         }
         else {
             m_downloadState = GrooveOff::QueuedState;
-            // qDebug() << "GrooveOff ::" << "Queued download of" << m_playlistItem->song()->songName();
         }
     }
 
@@ -124,7 +115,7 @@ void DownloadItem::setupUi()
     ui->artist_albumLabel->setToolTip( m_playlistItem->song()->songName() );
     ui->artist_albumLabel->setSizePolicy( QSizePolicy::MinimumExpanding, QSizePolicy::Preferred ); // fix hidden label
     
-    // set shadow
+    // set shadows
     ui->titleLabel->enableShadow( true );
     ui->artist_albumLabel->enableShadow( true );
     
@@ -194,6 +185,13 @@ void DownloadItem::setupUi()
 */
 void DownloadItem::setupConnections()
 {
+    connect( m_playlistItem.data(), SIGNAL(reloadCover()), 
+                                    SLOT(loadCover())
+           );
+    connect( m_playlistItem.data(), SIGNAL(stateChanged(Phonon::State)), 
+                                    SLOT(setPlayerState(Phonon::State))
+           );
+    
     if( m_context == GrooveOff::Download ) {
         connect( ui->playButton, SIGNAL(buttonClicked()), 
                                  SLOT(playSong())

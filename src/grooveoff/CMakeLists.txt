@@ -129,8 +129,6 @@ install(FILES ${CMAKE_SOURCE_DIR}/grooveoff.desktop
         DESTINATION share/applications )
 install(FILES ${CMAKE_SOURCE_DIR}/resources/default-theme.svg
         DESTINATION share/apps/grooveoff/resources )
-install(FILES ${CMAKE_SOURCE_DIR}/resources/grooveoff.png
-        DESTINATION share/icons/hicolor/128x128/apps/)
 install(FILES ${CMAKE_SOURCE_DIR}/resources/grooveoff-16.png
         DESTINATION share/icons/hicolor/16x16/apps/ RENAME grooveoff.png)
 install(FILES ${CMAKE_SOURCE_DIR}/resources/grooveoff-24.png
@@ -141,5 +139,15 @@ install(FILES ${CMAKE_SOURCE_DIR}/resources/grooveoff-48.png
         DESTINATION share/icons/hicolor/48x48/apps/ RENAME grooveoff.png)
 install(FILES ${CMAKE_SOURCE_DIR}/resources/grooveoff-64.png
         DESTINATION share/icons/hicolor/64x64/apps/ RENAME grooveoff.png)
+install(FILES ${CMAKE_SOURCE_DIR}/resources/grooveoff-72.png
+        DESTINATION share/icons/hicolor/72x72/apps/ RENAME grooveoff.png)
 install(FILES ${CMAKE_SOURCE_DIR}/resources/grooveoff-96.png
         DESTINATION share/icons/hicolor/96x96/apps/ RENAME grooveoff.png)
+install(FILES ${CMAKE_SOURCE_DIR}/resources/grooveoff-128.png
+        DESTINATION share/icons/hicolor/128x128/apps/ RENAME grooveoff.png)
+install(FILES ${CMAKE_SOURCE_DIR}/resources/grooveoff-256.png
+        DESTINATION share/icons/hicolor/256x256/apps/ RENAME grooveoff.png)
+install(FILES ${CMAKE_SOURCE_DIR}/resources/grooveoff-512.png
+        DESTINATION share/icons/hicolor/512x512/apps/ RENAME grooveoff.png)
+install(FILES ${CMAKE_SOURCE_DIR}/resources/grooveoff.svgz
+        DESTINATION share/icons/hicolor/scalable/apps/ RENAME grooveoff.svgz)

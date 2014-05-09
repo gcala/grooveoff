@@ -105,6 +105,7 @@ MainWindow::MainWindow( QWidget *parent )
     setupUi();
     setupSignals();
     loadSettings();
+    loadBootSettings();
     statusBar()->addPermanentWidget( m_playerWidget, 1 );
     statusBar()->setSizeGripEnabled( false );
 
@@ -386,6 +387,99 @@ void MainWindow::setupSignals()
            );
 }
 
+void MainWindow::loadSettings()
+{
+    QSettings settings;
+    settings.setIniCodec( "UTF-8" );
+
+    m_saveSession     = settings.value( QLatin1String( "saveSession" ), true ).toBool();
+    if( m_saveSession )
+        m_saveAborted = settings.value( QLatin1String( "saveAborted" ), false ).toBool();
+    else
+        m_saveAborted = true;
+    m_showHistory     = settings.value( QLatin1String( "saveSearches" ), false ).toBool();
+    if( m_showHistory ) {
+        m_searchSize = settings.value( QLatin1String( "historySize" ), 5 ).toInt();
+        if(m_searchList.isEmpty())
+            m_searchList << settings.value( QLatin1String( "searchTerms" ), QStringList() ).toStringList();
+        setupCompleter();
+    }
+    m_maxResults      = settings.value( QLatin1String( "numResults" ), 0 ).toInt();
+    m_loadCovers      = settings.value( QLatin1String( "loadCovers" ), true ).toBool();
+    if( m_loadCovers )
+        m_emptyCache = settings.value( QLatin1String( "emptyCache" ), false ).toBool();
+    else
+        m_emptyCache = true;
+    m_maxDownloads    = settings.value( QLatin1String( "maxDownloads" ), 5 ).toInt();
+    m_saveDestination = settings.value( QLatin1String( "saveDestination" ), true ).toBool();
+
+    //Naming Schema
+    Utility::namingSchema = settings.value( QLatin1String( "namingSchema" ),
+                                            QLatin1String( "%artist/%album/%track - %title" ) 
+                                          ).toString();
+}
+
+void MainWindow::loadBootSettings()
+{
+    QSettings settings;
+    settings.setIniCodec( "UTF-8" );
+    
+    m_guiLayout       = ( GuiLayout )settings.value( QLatin1String( "guiLayout" ), Compact ).toInt();
+    
+    m_sessionFileName = settings.value( QLatin1String( "sessionFile" ), QLatin1String( "default" ) ).toString();
+    
+    ui->splitter->setOrientation( (Qt::Orientation )settings.value( QLatin1String( "splitterOrientation" ), Qt::Vertical ).toInt() );
+    m_playerWidget->showElapsedTimerLabel( ui->splitter->orientation() == Qt::Vertical ? false : true );
+    
+    const QList<int> &_sizes = settings.value( QLatin1String( "splitterSizes" ) ).value< QList<int> >();
+
+    if( !_sizes.isEmpty() ) {
+        ui->splitter->setSizes( _sizes );
+    }
+
+    The::audioEngine()->setVolume( settings.value( QLatin1String( "volume" ), 50 ).toInt() );
+    The::audioEngine()->setMuted( settings.value( QLatin1String( "muted" ), false ).toBool() );
+
+    m_playerWidget->setTimerState( (GrooveOff::TimerState )settings.value( QLatin1String( "timerState" ), GrooveOff::ElapsedState ).toInt() );
+    
+    if( m_guiLayout == Mini )
+        setMiniPlayerLayout();
+    else
+        ui->compactMenuButton->setVisible( false );
+}
+
+void MainWindow::saveSettings()
+{
+    QSettings settings;
+    settings.setIniCodec( "UTF-8" );
+
+    // Do not overwrite splittersSizes/windowGeometry if mini layout
+    if( m_guiLayout != Mini ) {
+        settings.setValue( QLatin1String( "splitterSizes" ), QVariant::fromValue< QList<int> >( ui->splitter->sizes() ) );
+        settings.setValue( QLatin1String( "windowGeometry" ), geometry() );
+    } else {
+        // if mini layout, save only x,y,width
+        QRect rect = settings.value( QLatin1String( "windowGeometry" ), QRect( 100,100,350,600 ) ).toRect();
+        rect.setWidth( geometry().width() );
+        settings.setValue( QLatin1String( "windowGeometry" ), rect );
+    }
+
+    if( !m_showHistory )
+        settings.setValue( QLatin1String( "searchTerms" ), QStringList() );
+    else
+        settings.setValue( QLatin1String( "searchTerms" ), m_searchList );
+
+    if( m_saveDestination )
+        settings.setValue( QLatin1String( "destination" ), ui->pathLine->text() );
+    else
+        settings.setValue( QLatin1String( "destination" ), QString() );
+
+    settings.setValue( QLatin1String( "timerState" ), m_playerWidget->getTimerState() );
+    settings.setValue( QLatin1String( "muted" ), The::audioEngine()->isMuted() );
+    settings.setValue( QLatin1String( "volume" ), The::audioEngine()->volume() );
+    settings.setValue( QLatin1String( "guiLayout" ), m_guiLayout );
+    settings.setValue( QLatin1String( "sessionFile" ), m_sessionFileName );
+}
 
 void MainWindow::selectFolder()
 {
@@ -536,6 +630,7 @@ void MainWindow::searchFinished()
     // check if last search returned results
     if( m_songList->list().count() == 0 ) {
         qDebug() << "GrooveOff ::" << "Empty result list";
+        ui->matchesMessage->setText( trUtf8( "%n song(s) found", "", 0 ) );
         return;
     }
 
@@ -879,92 +974,6 @@ void MainWindow::setupCompleter()
     QCompleter *completer = new QCompleter( m_searchList, this );
     completer->setCaseSensitivity( Qt::CaseInsensitive );
     ui->searchLine->setCompleter( completer );
-}
-
-void MainWindow::loadSettings()
-{
-    QSettings settings;
-    settings.setIniCodec( "UTF-8" );
-
-    m_saveSession     = settings.value( QLatin1String( "saveSession" ), true ).toBool();
-    if( m_saveSession )
-        m_saveAborted = settings.value( QLatin1String( "saveAborted" ), false ).toBool();
-    else
-        m_saveAborted = true;
-    m_showHistory     = settings.value( QLatin1String( "saveSearches" ), false ).toBool();
-    m_maxResults      = settings.value( QLatin1String( "numResults" ), 0 ).toInt();
-    m_loadCovers      = settings.value( QLatin1String( "loadCovers" ), true ).toBool();
-    if( m_loadCovers )
-        m_emptyCache = settings.value( QLatin1String( "emptyCache" ), false ).toBool();
-    else
-        m_emptyCache = true;
-    m_maxDownloads    = settings.value( QLatin1String( "maxDownloads" ), 5 ).toInt();
-    m_saveDestination = settings.value( QLatin1String( "saveDestination" ), true ).toBool();
-    m_guiLayout       = ( GuiLayout )settings.value( QLatin1String( "guiLayout" ), Compact ).toInt();
-    m_sessionFileName = settings.value( QLatin1String( "sessionFile" ), QLatin1String( "default" ) ).toString();
-
-    if( m_showHistory ) {
-        m_searchSize = settings.value( QLatin1String( "historySize" ), 5 ).toInt();
-        m_searchList << settings.value( QLatin1String( "searchTerms" ), QStringList() ).toStringList();
-        setupCompleter();
-    }
-
-    ui->splitter->setOrientation( (Qt::Orientation )settings.value( QLatin1String( "splitterOrientation" ), Qt::Vertical ).toInt() );
-    m_playerWidget->showElapsedTimerLabel( ui->splitter->orientation() == Qt::Vertical ? false : true );
-
-    const QList<int> &_sizes = settings.value( QLatin1String( "splitterSizes" ) ).value< QList<int> >();
-
-    if( !_sizes.isEmpty() ) {
-        ui->splitter->setSizes( _sizes );
-    }
-
-    The::audioEngine()->setVolume( settings.value( QLatin1String( "volume" ), 50 ).toInt() );
-    The::audioEngine()->setMuted( settings.value( QLatin1String( "muted" ), false ).toBool() );
-
-    m_playerWidget->setTimerState( (GrooveOff::TimerState )settings.value( QLatin1String( "timerState" ), GrooveOff::ElapsedState ).toInt() );
-
-    //Naming Schema
-    Utility::namingSchema = settings.value( QLatin1String( "namingSchema" ),
-                                            QLatin1String( "%artist/%album/%track - %title" ) 
-                                          ).toString();
-
-    if( m_guiLayout == Mini )
-        setMiniPlayerLayout();
-    else
-        ui->compactMenuButton->setVisible( false );
-}
-
-void MainWindow::saveSettings()
-{
-    QSettings settings;
-    settings.setIniCodec( "UTF-8" );
-
-    // Do not overwrite splittersSizes/windowGeometry if mini layout
-    if( m_guiLayout != Mini ) {
-        settings.setValue( QLatin1String( "splitterSizes" ), QVariant::fromValue< QList<int> >( ui->splitter->sizes() ) );
-        settings.setValue( QLatin1String( "windowGeometry" ), geometry() );
-    } else {
-        // if mini layout, save only x,y,width
-        QRect rect = settings.value( QLatin1String( "windowGeometry" ), QRect( 100,100,350,600 ) ).toRect();
-        rect.setWidth( geometry().width() );
-        settings.setValue( QLatin1String( "windowGeometry" ), rect );
-    }
-
-    if( !m_showHistory )
-        settings.setValue( QLatin1String( "searchTerms" ), QStringList() );
-    else
-        settings.setValue( QLatin1String( "searchTerms" ), m_searchList );
-
-    if( m_saveDestination )
-        settings.setValue( QLatin1String( "destination" ), ui->pathLine->text() );
-    else
-        settings.setValue( QLatin1String( "destination" ), QString() );
-
-    settings.setValue( QLatin1String( "timerState" ), m_playerWidget->getTimerState() );
-    settings.setValue( QLatin1String( "muted" ), The::audioEngine()->isMuted() );
-    settings.setValue( QLatin1String( "volume" ), The::audioEngine()->volume() );
-    settings.setValue( QLatin1String( "guiLayout" ), m_guiLayout );
-    settings.setValue( QLatin1String( "sessionFile" ), m_sessionFileName );
 }
 
 void MainWindow::donate()
