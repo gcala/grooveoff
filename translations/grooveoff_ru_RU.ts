@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.0" language="ru">
+<?xml version="1.0" ?><!DOCTYPE TS><TS language="ru_RU" version="2.0">
 <context>
     <name>AboutDialog</name>
     <message>
@@ -139,7 +137,7 @@
     <message>
         <location filename="../src/grooveoff/ActionCollection.cpp" line="190"/>
         <source>&amp;Playlist</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="../src/grooveoff/ActionCollection.cpp" line="194"/>
@@ -468,6 +466,13 @@ Grooveshark</translation>
         <source>Connection error!!</source>
         <translation>Ошибка соединения!!</translation>
     </message>
+    <message numerus="yes">
+        <location filename="../src/grooveoff/MainWindow.cpp" line="633"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="650"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="1013"/>
+        <source>%n song(s) found</source>
+        <translation type="unfinished"><numerusform></numerusform><numerusform></numerusform><numerusform></numerusform></translation>
+    </message>
     <message>
         <location filename="../src/grooveoff/MainWindow.cpp" line="737"/>
         <source>This song is already in queue.</source>
@@ -504,17 +509,6 @@ Select a valid path</source>
 Select a valid path</source>
         <translation>Папка назначения не существует. 
 Выберите правильный путь</translation>
-    </message>
-    <message numerus="yes">
-        <location filename="../src/grooveoff/MainWindow.cpp" line="633"/>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="650"/>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="1013"/>
-        <source>%n song(s) found</source>
-        <translation type="unfinished">
-            <numerusform>%n песня(и) найдено</numerusform>
-            <numerusform>%n песня(и) найдено</numerusform>
-            <numerusform>%n песня(и) найдено</numerusform>
-        </translation>
     </message>
     <message>
         <location filename="../src/grooveoff/MainWindow.cpp" line="773"/>
