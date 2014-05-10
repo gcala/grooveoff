@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.0" language="sk">
+<?xml version="1.0" ?><!DOCTYPE TS><TS language="sk" version="2.0">
 <context>
     <name>AboutDialog</name>
     <message>
@@ -139,7 +137,7 @@
     <message>
         <location filename="../src/grooveoff/ActionCollection.cpp" line="190"/>
         <source>&amp;Playlist</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Playlist</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/ActionCollection.cpp" line="194"/>
@@ -468,6 +466,13 @@ Grooveshark</translation>
         <source>Connection error!!</source>
         <translation>Chyba pripojenia</translation>
     </message>
+    <message numerus="yes">
+        <location filename="../src/grooveoff/MainWindow.cpp" line="633"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="650"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="1013"/>
+        <source>%n song(s) found</source>
+        <translation><numerusform>%n pieseň nájdená</numerusform><numerusform>%n piesne nájdené</numerusform><numerusform>%n piesní nájdených</numerusform></translation>
+    </message>
     <message>
         <location filename="../src/grooveoff/MainWindow.cpp" line="737"/>
         <source>This song is already in queue.</source>
@@ -504,17 +509,6 @@ Vyberte platný priečinok</translation>
 Select a valid path</source>
         <translation>Priečinok neexistuje.
 Vyberte platnú cestu</translation>
-    </message>
-    <message numerus="yes">
-        <location filename="../src/grooveoff/MainWindow.cpp" line="633"/>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="650"/>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="1013"/>
-        <source>%n song(s) found</source>
-        <translation type="unfinished">
-            <numerusform>%n pieseň nájdená</numerusform>
-            <numerusform>%n piesne nájdené</numerusform>
-            <numerusform>%n piesní nájdených</numerusform>
-        </translation>
     </message>
     <message>
         <location filename="../src/grooveoff/MainWindow.cpp" line="773"/>

@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.0" language="gl">
+<?xml version="1.0" ?><!DOCTYPE TS><TS language="gl" version="2.0">
 <context>
     <name>AboutDialog</name>
     <message>
@@ -139,7 +137,7 @@
     <message>
         <location filename="../src/grooveoff/ActionCollection.cpp" line="190"/>
         <source>&amp;Playlist</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Lista</translation>
     </message>
     <message>
         <location filename="../src/grooveoff/ActionCollection.cpp" line="194"/>
@@ -468,6 +466,13 @@ Grooveshark</translation>
         <source>Connection error!!</source>
         <translation>Erro de conexión</translation>
     </message>
+    <message numerus="yes">
+        <location filename="../src/grooveoff/MainWindow.cpp" line="633"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="650"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="1013"/>
+        <source>%n song(s) found</source>
+        <translation><numerusform>Encontráronse %n canción(s)</numerusform><numerusform>Encontráronse %n canción(s)</numerusform></translation>
+    </message>
     <message>
         <location filename="../src/grooveoff/MainWindow.cpp" line="737"/>
         <source>This song is already in queue.</source>
@@ -504,16 +509,6 @@ Selecciona un camiño válido</translation>
 Select a valid path</source>
         <translation>O cartafol de destino no existe.
 Selecciona un camiño válido</translation>
-    </message>
-    <message numerus="yes">
-        <location filename="../src/grooveoff/MainWindow.cpp" line="633"/>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="650"/>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="1013"/>
-        <source>%n song(s) found</source>
-        <translation type="unfinished">
-            <numerusform>Encontráronse %n canción(s)</numerusform>
-            <numerusform>Encontráronse %n canción(s)</numerusform>
-        </translation>
     </message>
     <message>
         <location filename="../src/grooveoff/MainWindow.cpp" line="773"/>
