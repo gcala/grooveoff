@@ -77,11 +77,11 @@ QList< PlaylistItemPtr > SessionReaderWriter::read( const QString& file )
 void SessionReaderWriter::parsePlaylistItem( const QDomElement& element, PlaylistItemPtr item )
 {
     QVariant var;
-    for( int i=0; i< item->metaObject()->propertyCount(); ++i ) {
+    for( int i = 0; i < item->metaObject()->propertyCount(); ++i ) {
         if( item->metaObject()->property(i).isStored( item.data() ) ) {
             // without this check a crash happens when compiled with qt5
             // "song" is the property's name containing a Song object
-            if( QString( item->metaObject()->property(i).typeName() ) == "song" )
+            if( QString( item->metaObject()->property(i).typeName() ) == "GrooveShark::SongPtr" )
                 continue;
             
             var = element.firstChildElement( QString( item->metaObject()->property(i).name() ) ).text();
@@ -96,7 +96,7 @@ void SessionReaderWriter::parsePlaylistItem( const QDomElement& element, Playlis
 void SessionReaderWriter::parseSong( const QDomElement& element, GrooveShark::SongPtr song )
 {
     QVariant var;
-    for( int i=0; i< song->metaObject()->propertyCount(); ++i ) {
+    for( int i = 0; i < song->metaObject()->propertyCount(); ++i ) {
         if( song->metaObject()->property(i).isStored( song.data() ) ) {
             var = element.firstChildElement( QString( song->metaObject()->property(i).name() ) ).text();
             song->metaObject()->property(i).write( song.data(), var );
