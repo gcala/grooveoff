@@ -1,7 +1,16 @@
 ChangeLog
 =========
 
-version 0.1.9 (release 2014-10-03 )
+version 0.2.0 (release 2014-05-13 )
+  * New: Icons theme
+  * New: Save and Restore Session
+  * New: Download all tracks
+  * New: 'Mini Player' layout
+  * New: Mpris support
+  * New: Qt5 support
+  * New: Search by playlist id (thanks Bas)
+
+version 0.1.9 (release 2014-03-10 )
   * Added Portuguese (Brazil) translation by JAKSON
   * Added Russian translation by Sema1011
 

@@ -75,7 +75,8 @@ if( Qt5Core_DIR )
                     ${PHONON4QT5_INCLUDES}
                     ${CMAKE_CURRENT_BINARY_DIR}
                     ${CMAKE_CURRENT_SOURCE_DIR}
-                    ${THIRDPARTY_DIR}/QtSingleApplication)
+                    ${THIRDPARTY_DIR}/QtSingleApplication
+                    /usr/include/phonon4qt5)
 
     qt5_add_resources(grooveoff_RC_SRCS ${grooveoff_RCS} )
     qt5_wrap_ui(grooveoff_UI_HEADERS ${grooveoff_UI})
@@ -87,7 +88,8 @@ if( NOT Qt5Core_DIR )
                     ${QJSON_INCLUDE_DIR}
                     ${CMAKE_CURRENT_BINARY_DIR}
                     ${CMAKE_CURRENT_SOURCE_DIR}
-                    ${THIRDPARTY_DIR}/QtSingleApplication)
+                    ${THIRDPARTY_DIR}/QtSingleApplication
+                    /usr/include/phonon4qt5)
     qt4_add_resources(grooveoff_RC_SRCS ${grooveoff_RCS} )
     qt4_wrap_ui(grooveoff_UI_HEADERS ${grooveoff_UI})
     qt4_add_translation(grooveoff_I18N ${TRANSLATIONS})

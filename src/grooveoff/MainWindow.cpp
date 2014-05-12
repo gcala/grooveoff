@@ -38,10 +38,10 @@
 #include "SessionManager.h"
 #include "SessionReaderWriter.h"
 
-#include <QtGui/QLabel>
-#include <QtGui/QMenu>
-#include <QtGui/QMenuBar>
-#include <QtGui/QAction>
+#include <QLabel>
+#include <QMenu>
+#include <QMenuBar>
+#include <QAction>
 #include <QHBoxLayout>
 #include <QGridLayout>
 #include <QSettings>
@@ -63,8 +63,10 @@
 #include <QFileDialog>
 #include <QDir>
 #include <QFile>
+#if QT_VERSION < QT_VERSION_CHECK( 5, 0, 0 )
 #include <qjson/serializer.h>
 #include <qjson/parser.h>
+#endif
 #include <QMessageBox>
 #include <QApplication>
 #include <QCompleter>
