@@ -6,6 +6,9 @@ extract downloaded archive and enter the application folder, then:
 mkdir build
 cd build
 cmake .. -DCMAKE_INSTALL_PREFIX=/usr
+
+(if you want to build Qt5 version, add the option -DBUILD_WITH_QT5=ON to cmake)
+
 make
 make install (as root)
 
