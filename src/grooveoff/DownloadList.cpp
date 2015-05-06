@@ -33,8 +33,7 @@
 DownloadList::DownloadList( QWidget *parent ) :
     QListWidget( parent )
 {
-    connect( model(), SIGNAL(layoutChanged()),
-                     SLOT(reloadPlaylist()) );
+    connect( model(), SIGNAL(layoutChanged()), SLOT(reloadPlaylist()) );
 }
 
 void DownloadList::reloadPlaylist()
@@ -52,9 +51,7 @@ void DownloadList::reloadPlaylist()
             PlaylistAction *action = new PlaylistAction( ITEM( i )->playlistItem(), The::actionCollection()->getMenu( "playlistMenu" ) );
             The::actionCollection()->getMenu( "playlistMenu" )->addAction( (QAction *)action );
             
-            connect( action, SIGNAL(triggered()),
-                             SLOT(actionTriggered())
-                   );
+            connect( action, SIGNAL(triggered()),  SLOT(actionTriggered()) );
         }
     }
 }
@@ -65,14 +62,8 @@ void DownloadList::reloadPlaylist()
 */
 void DownloadList::removeFailedAborted()
 {
-    for( int i = count() - 1; i >= 0; i-- ) {
-        GrooveOff::DownloadState state = ITEM( i )->downloadState();
-        if( state == GrooveOff::AbortedState || state == GrooveOff::ErrorState ) {
-            QListWidgetItem *item = takeItem( i );
-            removeItemWidget( item );
-            delete item;
-        }
-    }
+    removeItemsFromState( GrooveOff::AbortedState) ;
+    removeItemsFromState( GrooveOff::ErrorState );
 }
 
 /*!
@@ -81,10 +72,18 @@ void DownloadList::removeFailedAborted()
 */
 void DownloadList::removeDownloaded()
 {
-    The::audioEngine()->stop();
+    removeItemsFromState( GrooveOff::FinishedState );
+}
+
+void DownloadList::removeItemsFromState( GrooveOff::DownloadState state )
+{
+    // stop player if we're removing successfull downloaded tracks
+    if( state == GrooveOff::FinishedState )
+        The::audioEngine()->stop();
+    
     for( int i = count() - 1; i >= 0; i-- ) {
-        GrooveOff::DownloadState state = ITEM( i )->downloadState();
-        if( state == GrooveOff::FinishedState ) {
+        GrooveOff::DownloadState currentState = ITEM( i )->downloadState();
+        if( currentState == state ) {
             The::audioEngine()->removingTrack( ITEM( i )->playlistItem() );
             QListWidgetItem *item = takeItem( i );
             removeItemWidget( item );
@@ -92,7 +91,9 @@ void DownloadList::removeDownloaded()
         }
     }
 
-    The::playlist()->clear();
+    // clear playlist if we're removing successfull downloaded tracks
+    if( state == GrooveOff::FinishedState )
+        The::playlist()->clear();
 }
 
 void DownloadList::abortAllDownloads()
@@ -109,7 +110,7 @@ QList< PlaylistItemPtr > DownloadList::playlistItems() const
 {
     QList< PlaylistItemPtr > tracks;
     for( int i = 0; i < count(); i++ ) {
-            tracks << ITEM( i )->playlistItem();
+        tracks << ITEM( i )->playlistItem();
     }
 
     return tracks;

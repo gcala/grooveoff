@@ -30,39 +30,96 @@
 ConfigDialog::ConfigDialog( QWidget *parent )
     : QDialog( parent )
     , ui( new Ui::ConfigDialog )
+    , configChanged(false)
 {
     ui->setupUi( this );
-    setupUi();
+    setupConnections();
+    setupGraphicElements();
+    setupSettingCategories();
+    setupTagElements();
 
+    loadSettings();
+
+    ui->applyButton->setEnabled( false );
     // be sure that settings opens with general page
     ui->stackedWidget->setCurrentIndex( 0 );
-
-    // just started so this flag is false
-    configChanged = false;
-
+    
     ui->historySize->setMinimum( 1 );
     ui->historySize->setMaximum( 10 );
+}
 
+void ConfigDialog::setupConnections()
+{
     // connect all checkboxes to the same slot
     QList< QCheckBox * > checkboxList = this->findChildren< QCheckBox * >();
-    foreach( QCheckBox *cb, checkboxList ) {
-        connect( cb, SIGNAL(toggled(bool)),
-                     SLOT(onConfigChanged())
-               );
+    foreach( QCheckBox *checkbox, checkboxList ) {
+        connect( checkbox, SIGNAL(toggled(bool)), SLOT(onConfigChanged()) );
     }
 
     // connect all spinboxes to the same slot
     QList< QSpinBox * > spinboxList = this->findChildren< QSpinBox * >();
-    foreach( QSpinBox *sb, spinboxList ) {
-        connect( sb, SIGNAL(valueChanged(int)),
-                     SLOT(onConfigChanged())
-               );
+    foreach( QSpinBox *spinbox, spinboxList ) {
+        connect( spinbox, SIGNAL(valueChanged(int)), SLOT(onConfigChanged()) );
     }
 
-    connect( ui->m_nowPlayingText, SIGNAL(textChanged(QString)),
-                                   SLOT(onConfigChanged())
-           );
+    connect( ui->nowPlayingText, SIGNAL(textChanged(QString)), SLOT(onConfigChanged()) );
+    connect( ui->cancelButton, SIGNAL(clicked()), SLOT(close()) );
+    connect( ui->restoreButton, SIGNAL(clicked()), SLOT(restoreDefaults()) );
+    connect( ui->applyButton, SIGNAL(clicked()), SLOT(saveSettings()) );
+    connect( ui->okButton, SIGNAL(clicked()), SLOT(okClicked()) );
+    connect( ui->contentsWidget, SIGNAL(currentRowChanged(int)), SLOT(switchPage(int)) );
+}
 
+void ConfigDialog::setupGraphicElements()
+{
+    ui->cancelButton->setIcon( QIcon::fromTheme( QLatin1String( "dialog-cancel" ), QIcon( QLatin1String( ":/resources/dialog-cancel.png " ) ) ) );
+    ui->applyButton->setIcon( QIcon::fromTheme( QLatin1String( "dialog-ok-apply" ),
+                                                QIcon::fromTheme( QLatin1String( "dialog-apply" ), QIcon( QLatin1String( ":/resources/dialog-ok-apply.png" ) ) ) ) );
+
+    ui->okButton->setIcon( QIcon::fromTheme( QLatin1String( "dialog-ok" ), QIcon( ":/resources/dialog-ok.png" ) ) );
+    ui->restoreButton->setIcon( QIcon::fromTheme( QLatin1String( "document-revert" ), QIcon( ":/resources/document-revert.png" ) ) );
+    
+    ui->generalPageIcon->setPixmap( QPixmap( QLatin1String( ":/resources/grooveoff.png" ) ) );
+    ui->generalPageIcon->setScaledContents(true);
+
+    ui->performancePageIcon->setPixmap( QIcon::fromTheme( QLatin1String( "preferences-system-performance" ), 
+                                                          QIcon::fromTheme( QLatin1String( "software-update-available" ), QIcon( QLatin1String( ":/resources/preferences-system-performance.png" ) ) ) ).pixmap( 22,22 ) );
+    ui->performancePageIcon->setScaledContents( true );
+}
+
+void ConfigDialog::setupSettingCategories()
+{
+    QString generalString = trUtf8( "General" );
+    QString performanceString = trUtf8( "Performance" );
+
+    QFont boldFont;
+    boldFont.setBold( true );
+    QFontMetrics fmText( boldFont );
+
+    // adapat column width to translated strings
+    int maxWidth = qMax(fmText.width( generalString ), fmText.width( performanceString ));
+
+    ui->contentsWidget->setFixedWidth( maxWidth + 20 /*margin*/ );
+    
+    SettingsItem *generalItem = new SettingsItem( generalString, "", this ); // empty icon name is default for application own icon
+    SettingsItem *performanceItem = new SettingsItem( performanceString, QLatin1String( "preferences-system-performance" ), this );
+
+    QListWidgetItem *generalWidget = new QListWidgetItem();
+    ui->contentsWidget->addItem( generalWidget );
+    ui->contentsWidget->setItemWidget( generalWidget, generalItem );
+    generalWidget->setSizeHint( QSize( maxWidth,80 ) );
+
+    QListWidgetItem *performanceWidget = new QListWidgetItem();
+    ui->contentsWidget->addItem( performanceWidget );
+    ui->contentsWidget->setItemWidget( performanceWidget, performanceItem );
+    performanceWidget->setSizeHint( QSize(maxWidth,80 ) );
+
+    ui->contentsWidget->setCurrentItem( generalWidget );
+}
+
+
+void ConfigDialog::setupTagElements()
+{
     m_tagNames << QLatin1String( "%title" ) 
                << QLatin1String( "%artist" )
                << QLatin1String( "%album" )
@@ -84,109 +141,13 @@ ConfigDialog::ConfigDialog( QWidget *parent )
                << QLatin1String( "view-media-playlist" ) //%album
                << QLatin1String( "media-optical" );      //%track
 
-    ui->m_tagListWidget->setItemsIcons( itemsIcons );
-    ui->m_tagListWidget->setLocalizedTagNames( m_localizedTagNames );
-    ui->m_tagListWidget->setupItems(); //populate the list, load items icons and set list's maximum size
+    ui->tagListWidget->setItemsIcons( itemsIcons );
+    ui->tagListWidget->setLocalizedTagNames( m_localizedTagNames );
+    ui->tagListWidget->setupItems(); //populate the list, load items icons and set list's maximum size
 
-    ui->m_nowPlayingText->setLocalizedTagNames( m_localizedTagNames );
-
-    connect( ui->cancelButton, SIGNAL(clicked()),
-                               SLOT(close())
-           );
-    
-    connect( ui->restoreButton, SIGNAL(clicked()),
-                                SLOT(restoreDefaults())
-           );
-    
-    connect( ui->applyButton, SIGNAL(clicked()),
-                              SLOT(saveSettings())
-           );
-    
-    connect( ui->okButton, SIGNAL(clicked()),
-                           SLOT(okClicked())
-           );
-    
-    connect( ui->contentsWidget, SIGNAL(currentRowChanged(int)),
-                                 SLOT(switchPage(int))
-           );
-
-    loadSettings();
-
-    ui->applyButton->setEnabled( false );
+    ui->nowPlayingText->setLocalizedTagNames( m_localizedTagNames );
 }
 
-/*!
-  \brief setupUi: setup ui elements
-  \return void
-*/
-void ConfigDialog::setupUi()
-{
-    ui->cancelButton->setIcon( QIcon::fromTheme( QLatin1String( "dialog-cancel" ), 
-                                                 QIcon( QLatin1String( ":/resources/dialog-cancel.png " ) ) 
-                                               ) 
-                             );
-
-    ui->applyButton->setIcon( QIcon::fromTheme( QLatin1String( "dialog-ok-apply" ), 
-                                                QIcon::fromTheme( QLatin1String( "dialog-apply" ), 
-                                                                  QIcon( QLatin1String( ":/resources/dialog-ok-apply.png" ) ) 
-                                                                ) 
-                                              ) 
-                            );
-
-    ui->okButton->setIcon( QIcon::fromTheme( QLatin1String( "dialog-ok" ), 
-                                             QIcon( ":/resources/dialog-ok.png" ) 
-                                           ) 
-                         );
-
-    ui->restoreButton->setIcon( QIcon::fromTheme( QLatin1String( "document-revert" ), 
-                                                  QIcon( ":/resources/document-revert.png" ) 
-                                                ) 
-                              );
-
-    QString generalString = trUtf8( "General" );
-    QString performanceString = trUtf8( "Performance" );
-
-    QFont boldFont;
-    boldFont.setBold( true );
-    QFontMetrics fmText( boldFont );
-
-    // adpat column width to translated strings
-    int maxWidth = 0;
-    if( fmText.width( generalString ) > maxWidth )
-        maxWidth = fmText.width( generalString );
-    
-    if( fmText.width( performanceString ) > maxWidth )
-        maxWidth = fmText.width( performanceString );
-
-    ui->contentsWidget->setFixedWidth( maxWidth + 20 );
-
-    SettingsItem *generalItem = new SettingsItem( generalString, "", this ); // empty icon name is default for application own icon
-    SettingsItem *performanceItem = new SettingsItem( performanceString, QLatin1String( "preferences-system-performance" ), this );
-
-    QListWidgetItem *generalWidget = new QListWidgetItem();
-    ui->contentsWidget->addItem( generalWidget );
-    ui->contentsWidget->setItemWidget( generalWidget, generalItem );
-    generalWidget->setSizeHint( QSize( maxWidth,80 ) );
-
-    QListWidgetItem *performanceWidget = new QListWidgetItem();
-    ui->contentsWidget->addItem( performanceWidget );
-    ui->contentsWidget->setItemWidget( performanceWidget, performanceItem );
-    performanceWidget->setSizeHint( QSize(maxWidth,80 ) );
-
-    ui->generalPageIcon->setPixmap( QPixmap( QLatin1String( ":/resources/grooveoff.png" ) ) );
-    ui->generalPageIcon->setScaledContents(true);
-
-    ui->performancePageIcon->setPixmap( QIcon::fromTheme( QLatin1String( "preferences-system-performance" ), 
-                                                          QIcon::fromTheme( QLatin1String( "software-update-available" ), 
-                                                                            QIcon( QLatin1String( ":/resources/preferences-system-performance.png" ) ) 
-                                                                          )
-                                                        ).pixmap( 22,22 )
-                                      );
-
-    ui->performancePageIcon->setScaledContents( true );
-
-    ui->contentsWidget->setCurrentItem( generalWidget );
-}
 
 /*!
   \brief restoreDefaults: restore default settings
@@ -206,7 +167,7 @@ void ConfigDialog::restoreDefaults()
     ui->saveAborted->setChecked( false );
     ui->numResults->setValue( 0 );
     ui->maxDownloads->setValue( 5 );
-    ui->m_nowPlayingText->setText( QLatin1String( "%artist/%album/%track - %title" ) );
+    ui->nowPlayingText->setText( QLatin1String( "%artist/%album/%track - %title" ) );
 }
 
 /*!
@@ -234,7 +195,7 @@ void ConfigDialog::saveSettings()
     settings.setValue( QLatin1String( "saveDestination" ), ui->saveDestination->isChecked() );
 
     //we store a nowPlayingText version with untranslated tag names
-    QString modifiedNamingSchema = ui->m_nowPlayingText->text();
+    QString modifiedNamingSchema = ui->nowPlayingText->text();
     for( int i = 0; i < m_tagNames.size(); i++ ) {
         modifiedNamingSchema.replace( m_localizedTagNames.at( i ), m_tagNames.at( i ) );
     }
@@ -323,5 +284,5 @@ void ConfigDialog::loadSettings()
         namingSchemaText.replace( m_tagNames.at( i ), m_localizedTagNames.at( i ) );
     }
 
-    ui->m_nowPlayingText->setText( namingSchemaText );
+    ui->nowPlayingText->setText( namingSchemaText );
 }

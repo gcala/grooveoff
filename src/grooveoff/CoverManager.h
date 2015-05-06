@@ -31,7 +31,7 @@ class CoverManager :  public QObject
     Q_OBJECT
 public:
     explicit CoverManager( QObject *parent = 0 );
-    void addItem( const PlaylistItemPtr &playlistItemPtr );
+    void appendItem( const PlaylistItemPtr &playlistItemPtr );
     void clear();
 
 Q_SIGNALS:

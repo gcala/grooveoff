@@ -23,6 +23,7 @@
 #include "PlaylistItem.h"
 
 #include <QWidget>
+#include <qvarlengtharray.h>
 
 
 namespace Ui {
@@ -52,13 +53,16 @@ public Q_SLOTS:
 
 private Q_SLOTS:
     void loadCover();
-    void downloadSlot();
+    void downloadItem();
 
 private:
     Ui::MatchItem *ui;
     PlaylistItemPtr m_playlistItem;
 
-    void setupUi();
+    void setupShadows();
+    void setupLabels();
+    void setupWidgetsSizes();
+    void setupConnections();
 };
 
 #endif // MATCHITEM_H

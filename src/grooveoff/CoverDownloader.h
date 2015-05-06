@@ -49,6 +49,8 @@ private:
     bool m_success;
     QNetworkAccessManager m_qnam;
     QNetworkReply *m_reply;
+    
+    bool saveImageOnDisk(const QByteArray &data);
 };
 
 #endif // COVERDOWNLOADER_H

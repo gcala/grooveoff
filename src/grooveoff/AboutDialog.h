@@ -41,6 +41,10 @@ private Q_SLOTS:
 
 private:
     Ui::AboutDialog *ui;
+    
+    void setupConnections();
+    void setupGraphicElements();
+    void setupTextElements();
 };
 
 #endif // ABOUTDIALOG_H

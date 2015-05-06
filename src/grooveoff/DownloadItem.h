@@ -108,6 +108,11 @@ private:
     void setupConnections();
     void stateChanged();
     void removeEmptyFolder( QDir folder );
+    void setQueuedState();
+    void setDownloadingState();
+    void setFinishedState();
+    void setAbortedState();
+    void setErrorState();
 };
 
 #endif // DOWNLOADITEM_H

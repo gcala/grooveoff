@@ -64,13 +64,12 @@ void SessionManager::on_sessionsList_currentRowChanged(int currentRow)
 
     m_currentSessionName = session;
 
-    QList<PlaylistItemPtr> tracks = m_trackCollection[session];
+    const QList<PlaylistItemPtr> &tracks = m_trackCollection[session];
 
     foreach(PlaylistItemPtr track, tracks) {
         DownloadItem *item = new DownloadItem(track, this, GrooveOff::Track);
         
-        connect( item, SIGNAL(removeMeFromSession(quint32)),
-                       SLOT(removeTrack(quint32)));
+        connect( item, SIGNAL(removeMeFromSession(quint32)), SLOT(removeTrack(quint32)) );
         
         QListWidgetItem *wItem = new QListWidgetItem(ui->tracksList);
         wItem->setData(Qt::UserRole, track->song()->songID());

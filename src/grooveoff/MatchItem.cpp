@@ -34,57 +34,62 @@ MatchItem::MatchItem( const PlaylistItemPtr &playlistItem, QWidget *parent )
     , m_playlistItem(playlistItem)
 {
     ui->setupUi(this);
-    setupUi();
-
-    connect( ui->downloadButton, SIGNAL(buttonClicked()), 
-                                 SLOT(downloadSlot())
-           );
+    setupShadows();
+    setupLabels();
+    setupWidgetsSizes();
+    loadCover();
+    setDownloadIcon();
+    setupConnections();
     
-    connect( m_playlistItem.data(), SIGNAL(reloadCover()), 
-                                    SLOT(loadCover())
-           );
+    ui->downloadButton->setType( IconButton::Download );
 }
 
 MatchItem::~MatchItem()
 {
 }
 
-void MatchItem::setupUi()
+void MatchItem::setupShadows()
 {
-    ui->coverLabel->setScaledContents( true );
-    ui->coverLabel->setFixedSize( QSize(Utility::coverSize, Utility::coverSize ) );
-
-    loadCover();
-
-    ui->coverLabel->setToolTip( m_playlistItem->song()->songName() + QLatin1String( " - " ) + m_playlistItem->song()->artistName() );
-
     QGraphicsDropShadowEffect *coverShadow = new QGraphicsDropShadowEffect( this );
     coverShadow->setBlurRadius( 15.0 );
     coverShadow->setColor( palette().color( QPalette::Shadow ) );
     coverShadow->setOffset( 0.0);
 
     ui->coverLabel->setGraphicsEffect( coverShadow );
+    
+    ui->titleLabel->enableShadow( true );
+    ui->artist_albumLabel->enableShadow( true );
+}
+
+void MatchItem::setupLabels()
+{
+    ui->coverLabel->setScaledContents( true );
+    ui->coverLabel->setToolTip( m_playlistItem->song()->songName() + QLatin1String( " - " ) + m_playlistItem->song()->artistName() );
 
     ui->titleLabel->setFont( Utility::font(QFont::Bold) );
     ui->titleLabel->setText( m_playlistItem->song()->songName() );
     ui->titleLabel->setToolTip( m_playlistItem->song()->songName() );
-    ui->titleLabel->setSizePolicy( QSizePolicy::MinimumExpanding, QSizePolicy::Preferred ); // fix hidden label
 
     ui->artist_albumLabel->setText( m_playlistItem->song()->artistName() + QLatin1String( " - " ) + m_playlistItem->song()->albumName() );
     ui->artist_albumLabel->setToolTip( m_playlistItem->song()->songName() );
+    
+}
+
+void MatchItem::setupWidgetsSizes()
+{
+    ui->coverLabel->setFixedSize( QSize(Utility::coverSize, Utility::coverSize ) );
+    ui->titleLabel->setSizePolicy( QSizePolicy::MinimumExpanding, QSizePolicy::Preferred ); // fix hidden label
     ui->artist_albumLabel->setSizePolicy( QSizePolicy::MinimumExpanding, QSizePolicy::Preferred ); // fix hidden label
-
-    ui->downloadButton->setType( IconButton::Download );
     ui->downloadButton->setFixedSize( QSize( Utility::buttonSize, Utility::buttonSize ) );
-
-    setDownloadIcon();
     
     ui->mainLayout->setContentsMargins( 4, 4, 4, 4 );
     ui->downloadLayout->setContentsMargins( 0, 4, 0, 4 );
-    
-    // Enable shadows
-    ui->titleLabel->enableShadow( true );
-    ui->artist_albumLabel->enableShadow( true );
+}
+
+void MatchItem::setupConnections()
+{
+    connect( ui->downloadButton, SIGNAL(buttonClicked()), SLOT(downloadItem()) );
+    connect( m_playlistItem.data(), SIGNAL(reloadCover()), SLOT(loadCover()) );
 }
 
 void MatchItem::loadCover()
@@ -99,7 +104,7 @@ void MatchItem::loadCover()
                                                    ).pixmap( Utility::coverSize ) );
 }
 
-void MatchItem::downloadSlot()
+void MatchItem::downloadItem()
 {
     emit download( m_playlistItem );
 }

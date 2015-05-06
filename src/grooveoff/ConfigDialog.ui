@@ -192,10 +192,10 @@
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_10">
             <item>
-             <widget class="NamingSchema" name="m_nowPlayingText"/>
+             <widget class="NamingSchema" name="nowPlayingText"/>
             </item>
             <item>
-             <widget class="NamingElements" name="m_tagListWidget"/>
+             <widget class="NamingElements" name="tagListWidget"/>
             </item>
             <item>
              <spacer name="verticalSpacer">

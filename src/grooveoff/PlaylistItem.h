@@ -21,6 +21,7 @@
 #define PLAYLISTITEM_H
 
 #include <QObject>
+#include <QFileInfo>
 #include <phonon/mediasource.h>
 #include <../libgrooveshark/song.h>
 
@@ -38,8 +39,10 @@ public:
 
     QString path() const;
     void setPath( const QString& path );
+    
     GrooveShark::SongPtr song();
     void setSong( const GrooveShark::SongPtr &song );
+    
     QString namingSchema() const;
     void setNamingSchema( const QString& schema );
 
@@ -56,6 +59,8 @@ public:
     }
 
     bool operator==( PlaylistItem & ) const;
+    
+    QFileInfo fileInfo();
 
 Q_SIGNALS:
     void reloadCover();

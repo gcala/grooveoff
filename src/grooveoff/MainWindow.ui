@@ -24,14 +24,14 @@
        <number>0</number>
       </property>
       <item>
-       <widget class="QLabel" name="label0">
+       <widget class="QLabel" name="logoLabel">
         <property name="text">
          <string/>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="label1">
+       <widget class="QLabel" name="appLabel">
         <property name="text">
          <string/>
         </property>
@@ -41,7 +41,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="label2">
+       <widget class="QLabel" name="subtitleLabel">
         <property name="text">
          <string/>
         </property>
@@ -254,7 +254,7 @@
      <x>0</x>
      <y>0</y>
      <width>509</width>
-     <height>24</height>
+     <height>27</height>
     </rect>
    </property>
   </widget>

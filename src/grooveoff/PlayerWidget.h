@@ -81,8 +81,16 @@ private:
     QGraphicsDropShadowEffect *m_coverShadow;
 
     //Methods
-    void setupUi();
     void setupConnections();
+    void setupShadows();
+    void setupFonts();
+    void setupWidgetsSizes();
+    void setupLabels();
+    void setupButtonsType();
+    void setErrorState();
+    void setPlayingState();
+    void setStoppedState();
+    void setPausedState();
 };
 
 #endif // PLAYERWIDGET_H

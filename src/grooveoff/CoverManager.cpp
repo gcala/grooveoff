@@ -33,7 +33,7 @@ CoverManager::CoverManager( QObject *parent )
     }
 }
 
-void CoverManager::addItem( const PlaylistItemPtr &playlistItemPtr )
+void CoverManager::appendItem( const PlaylistItemPtr &playlistItemPtr )
 {
     const QString &coverArtFilename = playlistItemPtr->song()->coverArtFilename();
     if( coverArtFilename == "0" )
@@ -45,9 +45,7 @@ void CoverManager::addItem( const PlaylistItemPtr &playlistItemPtr )
         listOfSongsWithSameCover.append( playlistItemPtr );
         m_coverItems.insert( coverArtFilename, listOfSongsWithSameCover );
         CoverDownloader *downloader = new CoverDownloader( coverArtFilename, this );
-        connect( downloader, SIGNAL(done()), 
-                             SLOT(setCover())
-               );
+        connect( downloader, SIGNAL(done()), SLOT(setCover()) );
     }
 }
 

@@ -61,7 +61,7 @@ QList< PlaylistItemPtr > SessionReaderWriter::read( const QString& file )
     }
     sessionFile.close();
 
-    QDomElement root = doc.documentElement();
+    const QDomElement &root = doc.documentElement();
     QDomElement itemEl = root.firstChildElement( QLatin1String( "item" ) );
     while (!itemEl.isNull()) {
         PlaylistItemPtr item( new PlaylistItem() );
@@ -116,7 +116,7 @@ bool SessionReaderWriter::write( const QString& file, QList< PlaylistItemPtr > t
     
     QFileInfo fi( file );
     
-    if( !QDir().mkpath(fi.absolutePath() ) ) {
+    if( !QDir().mkpath( fi.absolutePath() ) ) {
         qDebug() << "SessionReaderWriter :: Cannot create session path" << fi.absolutePath();
         return false;
     }
