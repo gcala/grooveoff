@@ -44,6 +44,8 @@ AudioEngine::AudioEngine()
 
     // The AudioOutput class is used to send data to audio output devices
     m_audioOutput = new Phonon::AudioOutput( Phonon::MusicCategory, this );
+    
+    setupConnections();
 
     m_mediaObject->setTickInterval( 1000 );
 
@@ -54,31 +56,6 @@ AudioEngine::AudioEngine()
     // function, which is part of the Phonon namespace.
     Phonon::createPath(m_mediaObject, m_audioOutput);
 
-    connect( m_mediaObject, SIGNAL(stateChanged(Phonon::State,Phonon::State)),
-                            SLOT(onStateChanged(Phonon::State,Phonon::State))
-           );
-    connect( m_mediaObject, SIGNAL(tick(qint64)),
-                            SLOT(timerTriggered(qint64))
-           );
-    connect( m_mediaObject, SIGNAL(finished()),
-                            SLOT(onFinished())
-           );
-    connect( m_mediaObject, SIGNAL(currentSourceChanged(Phonon::MediaSource)),
-                            SLOT(sourceChanged(Phonon::MediaSource))
-           );
-    connect( m_audioOutput, SIGNAL(volumeChanged(qreal)),
-                            SLOT(onVolumeChanged(qreal))
-           );
-    connect( m_audioOutput, SIGNAL(mutedChanged(bool)),
-                            SLOT(onMutedChanged(bool))
-           );
-    connect( m_mediaObject, SIGNAL(seekableChanged(bool)),
-                            SLOT(onSeekableChanged(bool))
-           );
-    connect( m_mediaObject, SIGNAL(totalTimeChanged(qint64)),
-                            SLOT(onTrackLengthChanged(qint64))
-           );
-
     // Read the volume from phonon
     m_volume = qBound<qreal>( 0, qRound( m_audioOutput->volume() * 100 ), 100 );
 
@@ -87,6 +64,18 @@ AudioEngine::AudioEngine()
 
 AudioEngine::~AudioEngine()
 {
+}
+
+void AudioEngine::setupConnections()
+{
+    connect( m_mediaObject, SIGNAL(stateChanged(Phonon::State,Phonon::State)), SLOT(onStateChanged(Phonon::State,Phonon::State)) );
+    connect( m_mediaObject, SIGNAL(tick(qint64)), SLOT(timerTriggered(qint64)) );
+    connect( m_mediaObject, SIGNAL(finished()), SLOT(onFinished()) );
+    connect( m_mediaObject, SIGNAL(currentSourceChanged(Phonon::MediaSource)), SLOT(sourceChanged(Phonon::MediaSource)) );
+    connect( m_audioOutput, SIGNAL(volumeChanged(qreal)), SLOT(onVolumeChanged(qreal)) );
+    connect( m_audioOutput, SIGNAL(mutedChanged(bool)), SLOT(onMutedChanged(bool)) );
+    connect( m_mediaObject, SIGNAL(seekableChanged(bool)), SLOT(onSeekableChanged(bool)) );
+    connect( m_mediaObject, SIGNAL(totalTimeChanged(qint64)), SLOT(onTrackLengthChanged(qint64)) );
 }
 
 void AudioEngine::timerTriggered( qint64 time )
@@ -104,11 +93,7 @@ void AudioEngine::playItem( const PlaylistItemPtr &track)
 {
     // this was added to handle triggers from playlist menu
     if(m_currentTrack == track) {
-        if(m_currentTrack->isPlaying())
-            pause();
-        else
-            play();
-        
+        m_currentTrack->isPlaying() ? pause() : play();
         return;
     }
     
@@ -246,13 +231,7 @@ void AudioEngine::next()
 {
     if( canGoNext() ) {
         PlaylistItemPtr track = The::playlist()->item( The::playlist()->row( m_oldTrack ) + 1 );
-        if( m_currentTrack )
-            m_currentTrack->setState( Phonon::StoppedState );
-
-        m_currentTrack = track;
-        m_oldTrack = track;
-        m_mediaObject->setCurrentSource( QUrl::fromLocalFile( m_currentTrack->path() + QDir::separator() + m_currentTrack->fileName() ) );
-        play();
+        playItem(track);
     }
 }
 
@@ -260,13 +239,7 @@ void AudioEngine::previous()
 {
     if( canGoPrevious() ) {
         PlaylistItemPtr track = The::playlist()->item( The::playlist()->row( m_currentTrack ) - 1 );
-        if( m_currentTrack )
-            m_currentTrack->setState( Phonon::StoppedState );
-
-        m_currentTrack = track;
-        m_oldTrack = track;
-        m_mediaObject->setCurrentSource( QUrl::fromLocalFile( m_currentTrack->path() + QDir::separator() + m_currentTrack->fileName() ) );
-        play();
+        playItem(track);
     }
 }
 

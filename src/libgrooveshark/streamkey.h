@@ -13,7 +13,7 @@ class StreamKeyPrivate;
 class StreamKey : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY( QString streamKey READ streamKey CONSTANT )
+    Q_PROPERTY( QString content READ content CONSTANT )
     Q_PROPERTY( QString ip READ ip CONSTANT )
     Q_PROPERTY( uint id READ id CONSTANT )
 
@@ -22,7 +22,7 @@ public:
     virtual ~StreamKey();
 
     QString errorString() const;
-    QString streamKey() const;
+    QString content() const;
     QString ip() const;
     uint id() const;
     void abort();

@@ -14,7 +14,8 @@ public:
     TokenPrivate ( Token* qq, QNetworkReply* reply, QObject* parent = 0 );
     TokenPrivate ( Token* qq, const QVariant& variant, QObject* parent = 0 );
 
-    QString result() const;
+    QString content() const;
+    bool isEmpty() const;
     bool prefetchEnabled() const;
     QString serviceVersion() const;
     QString session() const;
@@ -24,7 +25,7 @@ private:
     QNetworkReply* m_reply;
     Token* const q;
 
-    QString m_result;
+    QString m_content;
     bool m_prefetchEnabled;
     QString m_serviceVersion;
     QString m_session;

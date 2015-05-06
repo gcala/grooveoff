@@ -29,9 +29,7 @@ PlaylistAction::PlaylistAction( const PlaylistItemPtr &track, QObject *parent )
 {
     setText( track->song()->songName() );
     
-    connect( m_track.data(), SIGNAL(stateChanged(Phonon::State)),
-                      SLOT(trackStateChanged(Phonon::State))
-           );
+    connect( m_track.data(), SIGNAL(stateChanged(Phonon::State)), SLOT(trackStateChanged(Phonon::State)) );
     
     trackStateChanged( track->state() );
 }
@@ -43,18 +41,11 @@ PlaylistAction::~PlaylistAction()
 
 void PlaylistAction::trackStateChanged( Phonon::State state )
 {
-    switch( state ) {
-        case Phonon::PlayingState:
-            setFont( Utility::font( QFont::Bold ) );
-            setIcon( QIcon( QLatin1String ( ":/resources/playPAUSE.png" ) ) );
-            break;
-        case Phonon::PausedState:
-            setIcon( QIcon( QLatin1String ( ":/resources/PLAYpause.png" ) ) );
-            setFont( Utility::font( QFont::Bold ) );
-            break;
-            
-        default:
-            setIcon( QIcon() );
-            setFont( Utility::font( QFont::Normal ) );
+    if( state == Phonon::PlayingState || state == Phonon::PausedState) {
+        setFont( Utility::font( QFont::Bold ) );
+        setIcon( QIcon( state == Phonon::PlayingState ? QLatin1String ( ":/resources/playPAUSE.png" ) : QLatin1String ( ":/resources/PLAYpause.png" ) ) );
+    } else {
+        setIcon( QIcon() );
+        setFont( Utility::font( QFont::Normal ) );
     }
 }

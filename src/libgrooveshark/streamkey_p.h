@@ -13,7 +13,7 @@ class StreamKeyPrivate : public QObject
 public:
     StreamKeyPrivate ( StreamKey* qq, uint id, QString token, QObject* parent = 0 );
 
-    QString streamKey() const;
+    QString content() const;
     QString ip() const;
     uint id() const;
     void abort();

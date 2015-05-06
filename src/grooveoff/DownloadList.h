@@ -21,6 +21,7 @@
 #define DOWNLOADLIST_H
 
 #include "PlaylistItem.h"
+#include "GrooveOffNamespace.h"
 
 #include <QListWidget>
 #include <phonon/phononnamespace.h>
@@ -39,6 +40,7 @@ public Q_SLOTS:
     void reloadPlaylist();
     void removeFailedAborted();
     void removeDownloaded();
+    void removeItemsFromState( GrooveOff::DownloadState state);
     void abortAllDownloads();
     void removeItem(DownloadItem *item);
     

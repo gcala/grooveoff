@@ -100,7 +100,7 @@ App::App( int & argc, char ** argv ):
     //for us as default (bad KMainWindow)
     mainWindow()->setAttribute( Qt::WA_DeleteOnClose, false );
 
-    m_mainWindow.data()->show();
+    mainWindow()->show();
 }
 
 App::~App()

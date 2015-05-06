@@ -26,15 +26,14 @@ SongListPrivate::~SongListPrivate()
 {
 }
 
-QList<SongPtr> SongListPrivate::list() const
+int SongListPrivate::count() const
 {
-    QList<SongPtr> list;
-    QVariantList varList = m_songs.toList();
-    foreach( QVariant var, varList )
-    {
-        list.append( var.value<GrooveShark::SongPtr>() );
-    }
-    return list;
+    return m_songs.toList().count();
+}
+
+SongPtr SongListPrivate::item ( int row )
+{
+    return m_songs.toList().at( row ).value<SongPtr>();
 }
 
 QVariant SongListPrivate::songs() const
@@ -140,11 +139,6 @@ SongList::~SongList()
     delete d;
 }
 
-QList<SongPtr> SongList::list() const
-{
-    return d->list();
-}
-
 QVariant SongList::songs() const
 {
     return d->songs();
@@ -153,5 +147,15 @@ QVariant SongList::songs() const
 QString SongList::errorString() const
 {
     return d->errorString();
+}
+
+int SongList::count() const
+{
+    return d->count();
+}
+
+SongPtr SongList::item ( int row )
+{
+    return d->item( row );
 }
 

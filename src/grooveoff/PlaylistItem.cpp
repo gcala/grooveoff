@@ -31,21 +31,17 @@
 
 using namespace GrooveShark;
 
-PlaylistItem::PlaylistItem ( const SongPtr &song ) :
-    m_song(song)
+PlaylistItem::PlaylistItem ( const SongPtr &song )
+    : m_song(song)
+    , m_state( Phonon::StoppedState )
 {
-    m_state = Phonon::StoppedState;
 }
 
 PlaylistItem::PlaylistItem()
+    : m_song( SongPtr( new Song() ) )
 {
-    m_song = SongPtr( new Song() );
 }
 
-
-/*!
-\brief ~Song: this is the Song destructor.
-*/
 PlaylistItem::~PlaylistItem()
 {
 }
@@ -106,12 +102,7 @@ void PlaylistItem::setSong( const SongPtr &song )
 
 QString PlaylistItem::fileName() const
 {
-    QString fileName = m_namingSchema;
-
-    if(fileName.isEmpty()) { // m_namingSchema is erroneously empty
-        qWarning() << "GrooveOff ::" << "naming schema is empty. Set to default.";
-        fileName = QLatin1String( "%artist/%album/%track - %title" );
-    }
+    QString fileName = namingSchema();
 
     fileName.replace(QLatin1String("%title"), m_song->songName(), Qt::CaseInsensitive);
     fileName.replace(QLatin1String("%artist"), m_song->artistName(), Qt::CaseInsensitive);
@@ -126,6 +117,12 @@ void PlaylistItem::setState( const Phonon::State &state )
     m_state = state;
     emit stateChanged( m_state );
 }
+
+QFileInfo PlaylistItem::fileInfo()
+{
+    return QFileInfo( m_path + QDir::separator() + fileName() );
+}
+
 
 QDataStream& operator<<( QDataStream& dataStream, const PlaylistItemPtr item )
 {

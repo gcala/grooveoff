@@ -19,7 +19,8 @@ class SongList : public QObject
 public:
     SongList( QNetworkReply* reply, QObject* parent = 0 );
     virtual ~SongList();
-    QList<SongPtr> list() const;
+    int count() const;
+    SongPtr item ( int row );
     QVariant songs() const;
     QString errorString() const;
 

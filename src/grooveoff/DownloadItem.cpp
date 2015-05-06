@@ -138,8 +138,8 @@ void DownloadItem::setupUi()
     ui->unqueueButton->setType( IconButton::Remove );
     ui->unqueueButton->setToolTip( trUtf8( "Remove track from queue" ) );
     
-    ui->stopButton->setType( IconButton::Stop );
-    ui->stopButton->setToolTip( trUtf8( "Stop track download" ) );
+    ui->stopDownloadButton->setType( IconButton::Stop );
+    ui->stopDownloadButton->setToolTip( trUtf8( "Stop track download" ) );
     
     ui->deleteButton->setType( IconButton::Trash );
     ui->deleteButton->setToolTip( trUtf8( "Delete track from disk" ) );
@@ -155,7 +155,7 @@ void DownloadItem::setupUi()
     ui->timerButton->setFixedSize( QSize( Utility::buttonSize,Utility::buttonSize ) );
     ui->barsWidget->setFixedSize( QSize( Utility::buttonSize,Utility::buttonSize ) );
     ui->unqueueButton->setFixedSize( QSize( Utility::buttonSize,Utility::buttonSize ) );
-    ui->stopButton->setFixedSize( QSize( Utility::buttonSize,Utility::buttonSize ) );
+    ui->stopDownloadButton->setFixedSize( QSize( Utility::buttonSize,Utility::buttonSize ) );
     ui->deleteButton->setFixedSize( QSize( Utility::buttonSize,Utility::buttonSize ) );
     ui->queueButton->setFixedSize( QSize( Utility::buttonSize,Utility::buttonSize ) );
     ui->openFolderButton->setFixedSize( QSize( Utility::buttonSize,Utility::buttonSize ) );
@@ -177,6 +177,13 @@ void DownloadItem::setupUi()
     ui->playLayout->setContentsMargins( 0,4,0,4 );
     ui->songWidgetLayout->setContentsMargins( 1,1,0,2 );
     ui->songWidgetLayout->setHorizontalSpacing( 5 );
+    
+    ui->timerWidget->setVisible( false );
+    ui->deleteWidget->setVisible( false );
+    ui->infoMessageWidget->setVisible( false );
+    ui->openFolderWidget->setVisible( false );
+    ui->unqueueWidget->setVisible( false );
+    ui->queueWidget->setVisible( false );
 }
 
 /*!
@@ -185,46 +192,20 @@ void DownloadItem::setupUi()
 */
 void DownloadItem::setupConnections()
 {
-    connect( m_playlistItem.data(), SIGNAL(reloadCover()), 
-                                    SLOT(loadCover())
-           );
-    connect( m_playlistItem.data(), SIGNAL(stateChanged(Phonon::State)), 
-                                    SLOT(setPlayerState(Phonon::State))
-           );
+    connect( m_playlistItem.data(), SIGNAL(reloadCover()), SLOT(loadCover()) );
+    connect( m_playlistItem.data(), SIGNAL(stateChanged(Phonon::State)), SLOT(setPlayerState(Phonon::State)) );
     
     if( m_context == GrooveOff::Download ) {
-        connect( ui->playButton, SIGNAL(buttonClicked()), 
-                                 SLOT(playSong())
-               );
-        
-        connect( ui->openFolderButton, SIGNAL(buttonClicked()), 
-                                       SLOT(openFolder())
-               );
+        connect( ui->playButton, SIGNAL(buttonClicked()), SLOT(playSong()) );
+        connect( ui->openFolderButton, SIGNAL(buttonClicked()), SLOT(openFolder()) );
     }
 
-    connect( ui->timerButton, SIGNAL(clicked()), 
-                              SLOT(timerButtonClicked())
-           );
-    
-    connect( ui->timerButton, SIGNAL(countdownFinished()), 
-                              SLOT(removeSong())
-           );
-    
-    connect( ui->unqueueButton, SIGNAL(buttonClicked()),
-                                SLOT(unqueueItem())
-           );
-    
-    connect( ui->stopButton, SIGNAL(buttonClicked()),
-                             SLOT(stopDownload())
-           );
-    
-    connect( ui->deleteButton, SIGNAL(buttonClicked()),
-                               SLOT(deleteItem())
-           );
-    
-    connect( ui->queueButton, SIGNAL(buttonClicked()),
-                              SLOT(queueItem())
-           );
+    connect( ui->timerButton, SIGNAL(clicked()), SLOT(timerButtonClicked()) );
+    connect( ui->timerButton, SIGNAL(countdownFinished()), SLOT(removeSong()) );
+    connect( ui->unqueueButton, SIGNAL(buttonClicked()), SLOT(unqueueItem()) );
+    connect( ui->stopDownloadButton, SIGNAL(buttonClicked()), SLOT(stopDownload()) );
+    connect( ui->deleteButton, SIGNAL(buttonClicked()), SLOT(deleteItem()) );
+    connect( ui->queueButton, SIGNAL(buttonClicked()), SLOT(queueItem()) );
 }
 
 /*!
@@ -237,130 +218,121 @@ void DownloadItem::stateChanged()
 
     switch( m_downloadState ) {
         case GrooveOff::QueuedState:
-            ui->timerWidget->setVisible( false );
-            ui->animationWidget->setVisible( false );
-            ui->barsWidget->stopAnimation();
-            ui->stopWidget->setVisible( false );
-            ui->deleteWidget->setVisible( false );
-            ui->queueWidget->setVisible( false );
-            ui->playWidget->setVisible( false );
-            ui->progressWidget->setVisible( false );
-            ui->openFolderWidget->setVisible( false );
-            
-            ui->infoIconWidget->setVisible( true );
-            ui->infoIcon->setType( IconButton::Clock );
-            
-            ui->infoMessage->setText( trUtf8( "Queued" ) );
-            ui->infoMessageWidget->setVisible( false );  // shown when mouse is hovering
-            ui->unqueueWidget->setVisible( false );      // shown when mouse is hovering
-            
+            setQueuedState();
             break;
             
         case GrooveOff::DownloadingState:
-            ui->timerWidget->setVisible( false );
-            ui->unqueueWidget->setVisible( false );
-            ui->deleteWidget->setVisible( false );
-            ui->queueWidget->setVisible( false );
-            ui->infoIconWidget->setVisible( false );
-            ui->infoMessageWidget->setVisible( false );
-            ui->openFolderWidget->setVisible( false );
-            
-            if( m_playerState == Phonon::StoppedState ) {
-                ui->animationWidget->setVisible( false );
-                ui->barsWidget->stopAnimation();
-                ui->playWidget->setVisible( true );
-            } else if( m_playerState == Phonon::PlayingState ) {
-                ui->playWidget->setVisible( false );
-                ui->animationWidget->setVisible( true );
-                ui->barsWidget->startAnimation();
-            } else {
-                ui->playWidget->setVisible( false );
-                ui->animationWidget->setVisible( true );
-                ui->barsWidget->stopAnimation();
-            }
-            
-            ui->progressWidget->setVisible( true );
-            ui->stopWidget->setVisible( true );
+            setDownloadingState();
             break;
             
         case GrooveOff::FinishedState:
-            ui->stopWidget->setVisible( false );
-            ui->unqueueWidget->setVisible( false );
-            ui->queueWidget->setVisible( false );
-            ui->progressWidget->setVisible( false );
-            ui->infoIconWidget->setVisible( false );
-            ui->infoMessageWidget->setVisible( false );
-            
-            
-            if( m_context == GrooveOff::Track ) {
-                ui->playWidget->setVisible( false );
-                ui->animationWidget->setVisible( false );
-            } else {
-                ui->playButton->setButtonEnabled( true );
-                if( m_playerState == Phonon::StoppedState ) {
-                    ui->playWidget->setVisible( true );
-                    ui->animationWidget->setVisible( false );
-                    ui->barsWidget->stopAnimation();
-                } else if( m_playerState == Phonon::PlayingState ) {
-                    ui->playWidget->setVisible( false );
-                    ui->animationWidget->setVisible( true );
-                    ui->barsWidget->startAnimation();
-                } else {
-                    ui->playWidget->setVisible( false );
-                    ui->animationWidget->setVisible( true );
-                    ui->barsWidget->stopAnimation();
-                }
-            }
-            
-            ui->timerWidget->setVisible( false );      // shown when countdown is on
-            ui->openFolderWidget->setVisible( false ); // shown when mouse is hovering
-            ui->deleteWidget->setVisible( false );     // shown when mouse is hovering
-            
+            setFinishedState(); 
             break;
             
         case GrooveOff::AbortedState:
-            ui->playWidget->setVisible( false );
-            ui->animationWidget->setVisible( false );
-            ui->barsWidget->stopAnimation();
-            ui->progressWidget->setVisible( false );
-            ui->timerWidget->setVisible( false );
-            ui->stopWidget->setVisible( false );
-            ui->unqueueWidget->setVisible( false );
-            ui->deleteWidget->setVisible( false );
-            ui->openFolderWidget->setVisible( false );
-            
-            ui->infoMessage->setText( trUtf8( "Aborted" ) );
-            ui->infoMessageWidget->setVisible( false );    // shown when mouse is hovering
-            ui->queueWidget->setVisible( false );          // shown when mouse is hovering
-            
-            ui->infoIcon->setType( IconButton::Aborted );
-            ui->infoIconWidget->setVisible( true );
-
+            setAbortedState();
             break;
             
         default: // error state
-            ui->playWidget->setVisible( false );
-            ui->animationWidget->setVisible( false );
-            ui->barsWidget->stopAnimation();
-            ui->progressWidget->setVisible( false );
-            ui->timerWidget->setVisible( false );
-            ui->openFolderWidget->setVisible( false );
-            
-            ui->stopWidget->setVisible( false );
-            ui->unqueueWidget->setVisible( false );
-            ui->deleteWidget->setVisible( false );
-            
-            ui->infoMessage->setText( trUtf8( "Network or Server error" ) );
-            ui->infoMessageWidget->setVisible( false );     // shown when mouse is hovering
-            
-            ui->infoIcon->setType( IconButton::Warning );
-            ui->infoIconWidget->setVisible( true );
-            
-            ui->queueWidget->setVisible( false );           // shown when mouse is hovering
+            setErrorState();
     }
     
     update();
 }
+
+void DownloadItem::setQueuedState()
+{
+    ui->animationWidget->setVisible( false );
+    ui->barsWidget->stopAnimation();
+    ui->stopDownloadWidget->setVisible( false );
+    ui->playWidget->setVisible( false );
+    ui->progressWidget->setVisible( false );
+    
+    ui->infoIconWidget->setVisible( true );
+    ui->infoIcon->setType( IconButton::Clock );
+    
+    ui->infoMessage->setText( trUtf8( "Queued" ) );
+}
+
+void DownloadItem::setDownloadingState()
+{
+    ui->infoIconWidget->setVisible( false );
+    
+    if( m_playerState == Phonon::StoppedState ) {
+        ui->playWidget->setVisible( true );
+        ui->animationWidget->setVisible( false );
+        ui->barsWidget->stopAnimation();
+    } else if( m_playerState == Phonon::PlayingState ) {
+        ui->playWidget->setVisible( false );
+        ui->animationWidget->setVisible( true );
+        ui->barsWidget->startAnimation();
+    } else {
+        ui->playWidget->setVisible( false );
+        ui->animationWidget->setVisible( true );
+        ui->barsWidget->stopAnimation();
+    }
+    
+    ui->progressWidget->setVisible( true );
+    ui->stopDownloadWidget->setVisible( true );
+    ui->infoMessageWidget->setVisible(false);
+}
+
+void DownloadItem::setFinishedState()
+{
+    ui->stopDownloadWidget->setVisible( false );
+    ui->progressWidget->setVisible( false );
+    ui->infoIconWidget->setVisible( false );
+    
+    if( m_context == GrooveOff::Track ) {
+        ui->playWidget->setVisible( false );
+        ui->animationWidget->setVisible( false );
+    } else {
+        ui->playButton->setButtonEnabled( true );
+        if( m_playerState == Phonon::StoppedState ) {
+            ui->playWidget->setVisible( true );
+            ui->animationWidget->setVisible( false );
+            ui->barsWidget->stopAnimation();
+        } else if( m_playerState == Phonon::PlayingState ) {
+            ui->playWidget->setVisible( false );
+            ui->animationWidget->setVisible( true );
+            ui->barsWidget->startAnimation();
+        } else {
+            ui->playWidget->setVisible( false );
+            ui->animationWidget->setVisible( true );
+            ui->barsWidget->stopAnimation();
+        }
+    }
+}
+
+void DownloadItem::setAbortedState()
+{
+    ui->playWidget->setVisible( false );
+    ui->animationWidget->setVisible( false );
+    ui->barsWidget->stopAnimation();
+    ui->progressWidget->setVisible( false );
+    ui->stopDownloadWidget->setVisible( false );
+    
+    ui->infoMessage->setText( trUtf8( "Aborted" ) );
+    
+    ui->infoIcon->setType( IconButton::Aborted );
+    ui->infoIconWidget->setVisible( true );
+}
+
+void DownloadItem::setErrorState()
+{
+    ui->playWidget->setVisible( false );
+    ui->animationWidget->setVisible( false );
+    ui->barsWidget->stopAnimation();
+    ui->progressWidget->setVisible( false );
+    
+    ui->stopDownloadWidget->setVisible( false );
+    
+    ui->infoMessage->setText( trUtf8( "Network or Server error" ) );
+    
+    ui->infoIcon->setType( IconButton::Warning );
+    ui->infoIconWidget->setVisible( true );
+}
+
 
 /*!
   \brief startDownload: start song download
@@ -371,6 +343,7 @@ void DownloadItem::startDownload()
     m_oneShot = true;
     m_downloadState = GrooveOff::DownloadingState;
     stateChanged();
+    
     m_downloader = ApiRequest::instance()->downloadSong( m_playlistItem->path(),
                                                          m_playlistItem->fileName(),
                                                          m_playlistItem->song()->songID(),
@@ -551,7 +524,7 @@ void DownloadItem::enterEvent( QEvent* event )
 {
     switch( m_downloadState ) {
         case GrooveOff::FinishedState:
-            ui->timerWidget->setVisible( ui->timerButton->isCountdownStarted() );
+            ui->infoMessageWidget->setVisible( false );
             ui->deleteWidget->setVisible( !ui->timerButton->isCountdownStarted() );
             if( m_context == GrooveOff::Download )
                 ui->openFolderWidget->setVisible( true );
@@ -559,11 +532,14 @@ void DownloadItem::enterEvent( QEvent* event )
         case GrooveOff::QueuedState:
             ui->infoMessageWidget->setVisible( true );
             ui->unqueueWidget->setVisible( true );
+            ui->openFolderWidget->setVisible( false );
             break;
         case GrooveOff::AbortedState:
         case GrooveOff::ErrorState:
+            ui->openFolderWidget->setVisible( false );
             ui->infoMessageWidget->setVisible( true );
             ui->queueWidget->setVisible( true );
+            ui->unqueueWidget->setVisible( false );
             break;
         default:
             break;
@@ -580,7 +556,6 @@ void DownloadItem::leaveEvent( QEvent* event )
 {
     switch( m_downloadState ) {
         case GrooveOff::FinishedState:
-            ui->timerWidget->setVisible( ui->timerButton->isCountdownStarted() );
             ui->deleteWidget->setVisible( false );
             if( m_context == GrooveOff::Download )
                 ui->openFolderWidget->setVisible( false );
@@ -588,11 +563,13 @@ void DownloadItem::leaveEvent( QEvent* event )
         case GrooveOff::QueuedState:
             ui->infoMessageWidget->setVisible( false );
             ui->unqueueWidget->setVisible( false );
+            ui->queueWidget->setVisible( false );
             break;
         case GrooveOff::AbortedState:
         case GrooveOff::ErrorState:
             ui->infoMessageWidget->setVisible( false );
             ui->queueWidget->setVisible( false );
+            ui->unqueueWidget->setVisible( false );
             break;
         default:
             //do nothing

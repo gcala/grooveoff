@@ -156,6 +156,8 @@ private:
     Phonon::AudioOutput* m_audioOutput;
 
     int m_volume;
+    
+    void setupConnections();
 };
 
 #endif // AUDIOENGINE_H

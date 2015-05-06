@@ -13,7 +13,7 @@ class TokenPrivate;
 class Token : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY( QString result READ result CONSTANT )
+    Q_PROPERTY( QString content READ content CONSTANT )
     Q_PROPERTY( bool prefetchEnabled READ prefetchEnabled CONSTANT )
     Q_PROPERTY( QString serviceVersion READ serviceVersion CONSTANT )
     Q_PROPERTY( QString session READ session CONSTANT )
@@ -24,7 +24,8 @@ public:
     Token( const QVariant& variant, QObject* parent = 0 );
     virtual ~Token();
 
-    QString result() const;
+    QString content() const;
+    bool isEmpty() const;
     bool prefetchEnabled() const;
     QString serviceVersion() const;
     QString session() const;

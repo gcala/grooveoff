@@ -13,7 +13,8 @@ class SongListPrivate : public QObject
 public:
     SongListPrivate( SongList* qq, QNetworkReply* reply );
     virtual ~SongListPrivate();
-    QList<SongPtr> list() const;
+    int count() const;
+    SongPtr item ( int row );
     QVariant songs() const;
     QString errorString() const;
 

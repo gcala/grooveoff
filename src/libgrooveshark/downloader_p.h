@@ -29,10 +29,10 @@ private:
 
     QNetworkReply::NetworkError m_error;
 
-    StreamKeyPtr streamKey_;
-    QNetworkReply *reply_;
-    QFile *file_;
-    QNetworkRequest mainRequest_;
+    StreamKeyPtr m_streamKey;
+    QNetworkReply *m_reply;
+    QFile *m_file;
+    QNetworkRequest m_mainRequest;
 
 private slots:
     void error ( QNetworkReply::NetworkError error );

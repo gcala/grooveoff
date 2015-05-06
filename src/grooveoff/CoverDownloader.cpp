@@ -35,9 +35,7 @@ CoverDownloader::CoverDownloader(const QString &name, QObject *parent)
     request.setUrl( QUrl( QString( "http://images.gs-cdn.net/static/albums/200_%1" ).arg( m_coverName ) ) );
     request.setHeader( QNetworkRequest::ContentTypeHeader, QLatin1String( "application/x-www-form-urlencoded" ) );
     m_reply = m_qnam.get( request );
-    connect( m_reply, SIGNAL(finished()), 
-                      SLOT(downloadFinished())
-           );
+    connect( m_reply, SIGNAL(finished()), SLOT(downloadFinished()) );
 }
 
 CoverDownloader::~CoverDownloader()
@@ -49,16 +47,9 @@ CoverDownloader::~CoverDownloader()
 void CoverDownloader::downloadFinished()
 {
     switch( m_reply->error() ) {
-    case QNetworkReply::NoError: {
-        // if no error
-        const QByteArray &data = m_reply->readAll();
-        m_success = true;
-        QFile file( Utility::coversCachePath + m_coverName );
-        file.open( QIODevice::WriteOnly );
-        file.write( data );
-        file.close();
+    case QNetworkReply::NoError:
+        m_success = saveImageOnDisk( m_reply->readAll() );
         break;
-    }
     default:
         qDebug() << "GrooveOff ::" << "Error downloading cover of" << m_coverName;
         m_success = false;
@@ -66,4 +57,18 @@ void CoverDownloader::downloadFinished()
 
     emit done();
 }
+
+bool CoverDownloader::saveImageOnDisk( const QByteArray& data )
+{
+    QFile file( Utility::coversCachePath + m_coverName );
+    if(!file.open( QIODevice::WriteOnly )) {
+        qDebug() << "GrooveOff ::" << Q_FUNC_INFO << file.errorString();
+        return false;
+    }
+    
+    file.write( data );
+    file.close();
+    return true;
+}
+
 

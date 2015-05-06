@@ -46,9 +46,12 @@ private:
     QStringList m_localizedTagNames;
     QString m_localizedTimeTagName;
 
-    void setupUi();
     bool configChanged;
     void loadSettings();
+    void setupConnections();
+    void setupTagElements();
+    void setupGraphicElements();
+    void setupSettingCategories();
 };
 
 #endif // CONFIGDIALOG_H

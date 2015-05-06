@@ -52,7 +52,7 @@ StreamKeyPrivate::StreamKeyPrivate ( StreamKey* qq, uint id, QString token, QObj
                        this, SLOT (error(QNetworkReply::NetworkError)) );
 }
 
-QString StreamKeyPrivate::streamKey() const
+QString StreamKeyPrivate::content() const
 {
     return m_streamKey;
 }
@@ -183,9 +183,9 @@ StreamKey::~StreamKey()
     delete d;
 }
 
-QString StreamKey::streamKey() const
+QString StreamKey::content() const
 {
-    return d->streamKey();
+    return d->content();
 }
 
 QString StreamKey::ip() const

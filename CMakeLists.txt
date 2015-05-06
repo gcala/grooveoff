@@ -8,6 +8,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config-version.h.cmake ${CMAKE_CURREN
 # ==================================================================================
 
 cmake_minimum_required(VERSION 2.8.6)
+add_definitions(-std=c++0x)
 set( CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules )
 set( CMAKE_AUTOMOC ON )
 SET( THIRDPARTY_DIR  ${CMAKE_SOURCE_DIR}/thirdparty )

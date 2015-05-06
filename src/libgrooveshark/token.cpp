@@ -31,9 +31,14 @@ TokenPrivate::TokenPrivate ( Token* qq, const QVariant& variant, QObject* parent
     parse ( variant );
 }
 
-QString TokenPrivate::result() const
+QString TokenPrivate::content() const
 {
-    return m_result;
+    return m_content;
+}
+
+bool TokenPrivate::isEmpty() const
+{
+    return m_content.isEmpty();
 }
 
 bool TokenPrivate::prefetchEnabled() const
@@ -73,7 +78,7 @@ bool TokenPrivate::parse( const QVariant& data )
     QVariant v = tokenMap.value( QLatin1String( "result" ) );
     if( !v.canConvert( QVariant::String ) )
         qDebug() << "'result' field is invalid";
-    m_result = v.toString();
+    m_content = v.toString();
 
     QVariantMap headerMap = tokenMap.value(QLatin1String( "header" )).toMap();
 
@@ -167,9 +172,9 @@ Token::~Token()
     delete d;
 }
 
-QString Token::result() const
+QString Token::content() const
 {
-    return d->result();
+    return d->content();
 }
 
 bool Token::prefetchEnabled() const
@@ -191,4 +196,10 @@ QString Token::errorString() const
 {
     return d->errorString();
 }
+
+bool Token::isEmpty() const
+{
+    return d->isEmpty();
+}
+
 

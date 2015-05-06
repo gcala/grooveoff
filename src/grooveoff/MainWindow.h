@@ -91,10 +91,10 @@ protected:
 
 private Q_SLOTS:
     void selectFolder();
-    void downloadRequest( PlaylistItemPtr playlistItem );
+    void downloadPlaylistItem( PlaylistItemPtr playlistItem );
     void getToken();
-    void tokenFinished();
-    void tokenError();
+    void tokenRequestFinished();
+    void tokenRequestError();
     void beginSearch();
     void searchFinished();
     void searchError();
@@ -124,7 +124,7 @@ private:
     Spinner      *m_spinner;
     
     QNetworkConfigurationManager *m_qncm; // used to monitor internet connection status
-    QList<QPair<QString, QStringList> > m_artistsAlbumsContainer; // the pair is: artist - artist's albums
+    QHash<QString, QStringList> m_artistsAlbumsContainer; // artists/album container
     QString m_sessionFilePath; // contains the session file path (depends on qt internals)
     int m_parallelDownloadsCount; // holds how many downloads are running
     QList< DownloadItem * > m_queue; // download queue
@@ -161,8 +161,12 @@ private:
     // Methods
     void setupUi();
     void setupMenus();
-    void setupSignals();
+    void setupConnections();
     void setupCompleter();
+    void setupGuiLayout();
+    void setupPaths();
+    void initRandomNumberGenerator();
+    void initPathLine();
     void loadSettings();
     void loadBootSettings();
     void saveSettings();
@@ -175,6 +179,8 @@ private:
     void loadSessions();
     void saveSession();
     void addDownloadItem( const PlaylistItemPtr &playlistItem );
+    int numberOfElementsToShow( int searchSize );
+    void appendArtistAlbum( const GrooveShark::SongPtr &song );
     
     Mpris *m_mpris;
 

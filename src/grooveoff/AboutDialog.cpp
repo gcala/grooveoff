@@ -26,6 +26,8 @@
 #include <QDesktopServices>
 #include <QUrl>
 
+const QString &paypalUrl = "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=WJNETV7GLTKDG&item_name=";
+
 /*!
   \class AboudDialog
   \inheaderfile AboutDialog.h
@@ -37,44 +39,9 @@ AboutDialog::AboutDialog( QWidget *parent )
 {
     ui->setupUi( this );
     
-    ui->closeButton->setIcon( QIcon::fromTheme( QLatin1String( "dialog-close "),
-                                                QIcon( QLatin1String( ":/resources/dialog-close.png" ) ) 
-                                              ) 
-                            );
-    
-    connect( ui->closeButton, SIGNAL(clicked()), 
-                              SLOT(close())
-           );
-    
-    ui->logoLabel->setPixmap( QPixmap( QLatin1String( ":/resources/grooveoff.png" ) ) );
-    ui->logoLabel->setScaledContents( true );
-    
-    ui->gpl3Button->setIcon( QIcon( QLatin1String( ":/resources/gplv3-127x51.png" ) ) );
-    ui->gpl3Button->setIconSize( QSize( 96,38 ) );
-    
-    ui->titleLabel->setText( trUtf8( "GrooveOff" ) );
-    
-    ui->versionLabel->setText( trUtf8("Version ") + GROOVEOFF_VERSION );
-    
-    ui->descriptionLabel->setWordWrap( true );
-    ui->descriptionLabel->setTextFormat( Qt::RichText );
-    ui->descriptionLabel->setText(trUtf8( "Offline Grooveshark.com music." ) + QLatin1String( "<br><br>" ) +
-                                  trUtf8( "GrooveOff can access the huge Grooveshark database through its <a href=\"http://developers.grooveshark.com/docs/public_api/v3/\">public api</a>." ) + QLatin1String( "<br><br>" ) +
-                                  trUtf8( "<b>Author</b>: " ) + QString( "Giuseppe Calà &lt;<a href=\"mailto:jiveaxe@gmail.com\">jiveaxe@gmail.com</a>&gt;<br><br>" ) +
-                                  trUtf8( "<b>License</b>: ") + QLatin1String( "GPLv3+<br><br>" ) +
-                                  QLatin1String( "<b>" ) + trUtf8( "Disclaimer:" ) + QLatin1String( "</b> " ) +
-                                  trUtf8( "GrooveOff is not affiliated with Grooveshark™ and has not been reviewed or officially approved by Grooveshark.com. The author is not responsible for any violations this application does to Grooveshark's TOS. The author is not related to Grooveshark™ in any way! Support the Artists You Like by Buying Their Music." ) );
-    
-    ui->donateButton->setIcon( QIcon( ":/resources/btn_donate_LG.gif" ) );
-    ui->donateButton->setIconSize( QSize( 96,27 ) );
-
-    connect( ui->gpl3Button, SIGNAL(clicked()), 
-                             SLOT(openGplPage()) 
-           );
-    
-    connect( ui->donateButton, SIGNAL(clicked()), 
-                               SLOT(openDonatePage()) 
-           );
+    setupGraphicElements();
+    setupTextElements();
+    setupConnections();
 
     setMinimumSize( 620,400 );
 }
@@ -86,6 +53,51 @@ AboutDialog::~AboutDialog()
 {
 
 }
+
+void AboutDialog::setupConnections()
+{
+    connect( ui->closeButton, SIGNAL(clicked()), SLOT(close()) );
+    connect( ui->gpl3Button, SIGNAL(clicked()), SLOT(openGplPage()) );
+    connect( ui->donateButton, SIGNAL(clicked()), SLOT(openDonatePage()) );
+}
+
+void AboutDialog::setupGraphicElements()
+{
+    ui->closeButton->setIcon( QIcon::fromTheme( QLatin1String( "dialog-close "), QIcon( QLatin1String( ":/resources/dialog-close.png" ) ) ) );
+    
+    ui->logoLabel->setPixmap( QPixmap( QLatin1String( ":/resources/grooveoff.png" ) ) );
+    ui->logoLabel->setScaledContents( true );
+    
+    ui->gpl3Button->setIcon( QIcon( QLatin1String( ":/resources/gplv3-127x51.png" ) ) );
+    ui->gpl3Button->setIconSize( QSize( 96,38 ) );
+    
+    ui->donateButton->setIcon( QIcon( ":/resources/btn_donate_LG.gif" ) );
+    ui->donateButton->setIconSize( QSize( 96,27 ) );
+}
+
+void AboutDialog::setupTextElements()
+{
+    ui->titleLabel->setText( trUtf8( "GrooveOff" ) );
+    
+    ui->versionLabel->setText( trUtf8("Version ") + GROOVEOFF_VERSION );
+    
+    ui->descriptionLabel->setWordWrap( true );
+    ui->descriptionLabel->setTextFormat( Qt::RichText );
+    ui->descriptionLabel->setText(trUtf8( "Offline Grooveshark.com music." ) + QLatin1String( "<br><br>" ) +
+                                  trUtf8( "GrooveOff can access the huge Grooveshark database through its "
+                                          "<a href=\"http://developers.grooveshark.com/docs/public_api/v3/\">"
+                                          "public api"
+                                          "</a>." ) + QLatin1String( "<br><br>" ) +
+                                  QLatin1String( "<b>" ) + trUtf8( "Author:" ) + QLatin1String( "</b> Giuseppe Calà &lt;<a href=\"mailto:jiveaxe@gmail.com\">jiveaxe@gmail.com</a>&gt;<br><br>" ) +
+                                  QLatin1String( "<b>" ) + trUtf8( "License:" ) + QLatin1String( "</b> GPLv3+<br><br>" ) +
+                                  QLatin1String( "<b>" ) + trUtf8( "Disclaimer:" ) + QLatin1String( "</b> " ) +
+                                  trUtf8( "GrooveOff is not affiliated with Grooveshark™ and has not been reviewed or "
+                                          "officially approved by Grooveshark.com. The author is not responsible for any "
+                                          "violations this application does to Grooveshark's TOS. The author is not related "
+                                          "to Grooveshark™ in any way! Support the Artists You Like by Buying Their Music." ) );
+}
+
+
 
 /*!
   \brief Open gpl license with web browser
@@ -100,8 +112,5 @@ void AboutDialog::openGplPage()
 */
 void AboutDialog::openDonatePage()
 {
-    QDesktopServices::openUrl( QUrl( QLatin1String( "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=WJNETV7GLTKDG&item_name=" ) + 
-                                     trUtf8( "Donation to Grooveoff's author" ) 
-                                   )
-                             );
+    QDesktopServices::openUrl( QUrl( paypalUrl + trUtf8( "Donation to Grooveoff's author" ) ) );
 }
