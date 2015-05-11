@@ -1,6 +1,6 @@
 /*
     GrooveOff - Offline Grooveshark.com music
-    Copyright ( C ) 2013-2014  Giuseppe Calà <jiveaxe@gmail.com>
+    Copyright ( C ) 2013-2015  Giuseppe Calà <jiveaxe@gmail.com>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
 #include "widgets/TimerButton.h"
 #include "Utility.h"
 #include "ui_DownloadItem.h"
-#include <../libgrooveshark/apirequest.h>
+#include <../groovesharkcom/apirequest.h>
 #include "AudioEngine.h"
 #include "Playlist.h"
 #include "MainWindow.h"
@@ -35,7 +35,7 @@
 #include <QDesktopServices>
 #include <QGraphicsDropShadowEffect>
 
-using namespace GrooveShark;
+using namespace GroovesharkCom;
 
 /*!
   \brief Class representing an item in download list

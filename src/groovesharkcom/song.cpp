@@ -10,7 +10,7 @@
 #include <QDebug>
 #include <QMetaProperty>
 
-using namespace GrooveShark;
+using namespace GroovesharkCom;
 
 SongPrivate::SongPrivate ( Song* qq, const QVariant& variant, bool fromPlaylist, QObject* parent ) :
     QObject ( parent ),

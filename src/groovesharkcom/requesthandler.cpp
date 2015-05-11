@@ -4,7 +4,7 @@
 #include <QAuthenticator>
 #include <QCoreApplication>
 
-using namespace GrooveShark;
+using namespace GroovesharkCom;
 
 RequestHandler::RequestHandler( QNetworkAccessManager* nam ) : m_nam( nam )
 {

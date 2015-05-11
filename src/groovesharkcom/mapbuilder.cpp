@@ -5,7 +5,7 @@
 #include <QUuid>
 #include <QCryptographicHash>
 
-using namespace GrooveShark;
+using namespace GroovesharkCom;
 
 /*!
   \brief randomHex: generate a session unique random hex

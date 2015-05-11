@@ -9,7 +9,7 @@
 class QByteArray;
 class QString;
 
-namespace GrooveShark
+namespace GroovesharkCom
 {
 
 class ApiRequestPrivate;

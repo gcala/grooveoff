@@ -3,7 +3,7 @@
 
 #include <QVariantMap>
 
-namespace GrooveShark
+namespace GroovesharkCom
 {
 
 class MapBuilder

@@ -9,7 +9,7 @@
 #include <qjson/parser.h>
 #endif
 
-using namespace GrooveShark;
+using namespace GroovesharkCom;
 
 TokenPrivate::TokenPrivate ( Token* qq, QNetworkReply* reply, QObject* parent ) :
     QObject ( parent ),

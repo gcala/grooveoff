@@ -4,7 +4,7 @@
 #include <QSharedPointer>
 #include <QNetworkReply>
 
-namespace GrooveShark
+namespace GroovesharkCom
 {
 
 class DownloaderPrivate;
@@ -40,6 +40,6 @@ typedef QSharedPointer<Downloader> DownloaderPtr;
 
 }
 
-Q_DECLARE_METATYPE( GrooveShark::DownloaderPtr )
+Q_DECLARE_METATYPE( GroovesharkCom::DownloaderPtr )
 
 #endif // DOWNLOADER_H

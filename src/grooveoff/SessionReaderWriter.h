@@ -1,6 +1,6 @@
 /*
     GrooveOff - Offline Grooveshark.com music
-    Copyright (C) 2013-2014  Giuseppe Calà <jiveaxe@gmail.com>
+    Copyright (C) 2013-2015  Giuseppe Calà <jiveaxe@gmail.com>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -44,7 +44,7 @@ private:
     explicit SessionReaderWriter( QObject* parent = 0 ) : QObject(parent) {}
 
     void parsePlaylistItem( const QDomElement& element, PlaylistItemPtr item );
-    void parseSong( const QDomElement& element, GrooveShark::SongPtr song );
+    void parseSong( const QDomElement& element, GroovesharkCom::SongPtr song );
 };
 
 #endif // SESSIONREADERWRITER_H

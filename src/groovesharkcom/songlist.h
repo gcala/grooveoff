@@ -7,7 +7,7 @@
 #include <QSharedPointer>
 #include <QList>
 
-namespace GrooveShark
+namespace GroovesharkCom
 {
 
 class SongListPrivate;
@@ -42,6 +42,6 @@ typedef QSharedPointer<SongList> SongListPtr;
 
 }
 
-Q_DECLARE_METATYPE( GrooveShark::SongListPtr )
+Q_DECLARE_METATYPE( GroovesharkCom::SongListPtr )
 
 #endif // SONGLIST_H

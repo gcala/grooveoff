@@ -18,7 +18,7 @@
 #endif
 
 
-using namespace GrooveShark;
+using namespace GroovesharkCom;
 
 ApiRequest* ApiRequest::s_instance = 0;
 

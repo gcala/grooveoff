@@ -5,7 +5,7 @@
 #include <QVariant>
 #include <QNetworkReply>
 
-namespace GrooveShark
+namespace GroovesharkCom
 {
 
 class TokenPrivate;
@@ -49,6 +49,6 @@ typedef QSharedPointer<Token> TokenPtr;
 
 }
 
-Q_DECLARE_METATYPE( GrooveShark::TokenPtr )
+Q_DECLARE_METATYPE( GroovesharkCom::TokenPtr )
 
 #endif // TOKEN_H

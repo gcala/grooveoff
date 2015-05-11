@@ -1,6 +1,6 @@
 /*
     GrooveOff - Offline Grooveshark.com music
-    Copyright (C) 2013-2014  Giuseppe Calà <jiveaxe@gmail.com>
+    Copyright (C) 2013-2015  Giuseppe Calà <jiveaxe@gmail.com>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "../libgrooveshark/apirequest.h"
+#include "../groovesharkcom/apirequest.h"
 #include "PlaylistItem.h"
 
 // Dbus & remote
@@ -134,10 +134,10 @@ private:
                               // when true all warnings (qmessagebox) are suppressed and a default action is performed
     bool m_stopBatchDownload; // flag to exit from batch download (avoids adding items to download queue) if a serious error happens
 
-    // libgrooveshark
-    GrooveShark::ApiRequest *m_api;
-    GrooveShark::TokenPtr m_token;
-    GrooveShark::SongListPtr m_songList;
+    // GroovesharkCom
+    GroovesharkCom::ApiRequest *m_api;
+    GroovesharkCom::TokenPtr m_token;
+    GroovesharkCom::SongListPtr m_songList;
 
     // Menus and menu actions: Accounts menu
     QMenuBar    *m_menuBar;
@@ -180,7 +180,7 @@ private:
     void saveSession();
     void addDownloadItem( const PlaylistItemPtr &playlistItem );
     int numberOfElementsToShow( int searchSize );
-    void appendArtistAlbum( const GrooveShark::SongPtr &song );
+    void appendArtistAlbum( const GroovesharkCom::SongPtr &song );
     
     Mpris *m_mpris;
 

@@ -11,7 +11,7 @@
 #include <QUrlQuery>
 #endif
 
-using namespace GrooveShark;
+using namespace GroovesharkCom;
 
 DownloaderPrivate::DownloaderPrivate ( Downloader* qq, QString path, QString fileName, uint id, QString token, QObject* parent )
     : QNetworkAccessManager ( parent )

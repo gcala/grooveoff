@@ -9,7 +9,7 @@
 #include <qjson/parser.h>
 #endif
 
-using namespace GrooveShark;
+using namespace GroovesharkCom;
 
 SongListPrivate::SongListPrivate( SongList* qq, QNetworkReply* reply ) :
     q( qq ),
@@ -67,7 +67,7 @@ bool SongListPrivate::parse( const QVariant& data )
     foreach( QVariant var, varList )
     {
         QVariant v;
-        v.setValue<GrooveShark::SongPtr>( SongPtr( new Song( var, isPlaylist ) ) );
+        v.setValue<GroovesharkCom::SongPtr>( SongPtr( new Song( var, isPlaylist ) ) );
         songList.append( v );
     }
     m_songs = QVariant( songList );

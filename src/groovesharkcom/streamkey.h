@@ -5,7 +5,7 @@
 #include <QVariant>
 #include <QNetworkReply>
 
-namespace GrooveShark
+namespace GroovesharkCom
 {
 
 class StreamKeyPrivate;
@@ -45,6 +45,6 @@ typedef QSharedPointer<StreamKey> StreamKeyPtr;
 
 }
 
-Q_DECLARE_METATYPE( GrooveShark::StreamKeyPtr )
+Q_DECLARE_METATYPE( GroovesharkCom::StreamKeyPtr )
 
 #endif // STREAMKEY_H

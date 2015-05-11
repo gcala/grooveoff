@@ -14,7 +14,7 @@
 #include <QStringList>
 #include <QDebug>
 
-using namespace GrooveShark;
+using namespace GroovesharkCom;
 
 StreamKeyPrivate::StreamKeyPrivate ( StreamKey* qq, uint id, QString token, QObject* parent ) :
     QObject ( parent ),

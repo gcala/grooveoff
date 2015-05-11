@@ -3,7 +3,7 @@
 
 #include <QString>
 
-namespace GrooveShark
+namespace GroovesharkCom
 {
 
 class UrlBuilder

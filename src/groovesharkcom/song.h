@@ -5,7 +5,7 @@
 #include <QVariant>
 #include <QNetworkReply>
 
-namespace GrooveShark
+namespace GroovesharkCom
 {
 
 class SongPrivate;
@@ -99,9 +99,9 @@ typedef QSharedPointer<Song> SongPtr;
 
 }
 
-QDataStream& operator<<( QDataStream& dataStream, const GrooveShark::SongPtr song );
-QDataStream& operator>>( QDataStream& dataStream, GrooveShark::SongPtr song ); // deprecated: throw( UserException )
+QDataStream& operator<<( QDataStream& dataStream, const GroovesharkCom::SongPtr song );
+QDataStream& operator>>( QDataStream& dataStream, GroovesharkCom::SongPtr song ); // deprecated: throw( UserException )
 
-Q_DECLARE_METATYPE( GrooveShark::SongPtr )
+Q_DECLARE_METATYPE( GroovesharkCom::SongPtr )
 
 #endif // SONG_H

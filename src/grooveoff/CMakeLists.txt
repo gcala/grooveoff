@@ -39,16 +39,16 @@ set(grooveoff_SRCS App.cpp
                    dbus/mpris1/Mpris1PluginPlayerAdaptor.cpp
                    dbus/mpris2/Mpris2PluginRootAdaptor.cpp
                    dbus/mpris2/Mpris2PluginPlayerAdaptor.cpp
-                   ../libgrooveshark/apirequest.cpp
-                   ../libgrooveshark/config.cpp
-                   ../libgrooveshark/requesthandler.cpp
-                   ../libgrooveshark/song.cpp
-                   ../libgrooveshark/songlist.cpp
-                   ../libgrooveshark/token.cpp
-                   ../libgrooveshark/urlbuilder.cpp
-                   ../libgrooveshark/streamkey.cpp
-                   ../libgrooveshark/downloader.cpp
-                   ../libgrooveshark/mapbuilder.cpp)
+                   ../groovesharkcom/apirequest.cpp
+                   ../groovesharkcom/config.cpp
+                   ../groovesharkcom/requesthandler.cpp
+                   ../groovesharkcom/song.cpp
+                   ../groovesharkcom/songlist.cpp
+                   ../groovesharkcom/token.cpp
+                   ../groovesharkcom/urlbuilder.cpp
+                   ../groovesharkcom/streamkey.cpp
+                   ../groovesharkcom/downloader.cpp
+                   ../groovesharkcom/mapbuilder.cpp)
 
 LIST(APPEND grooveoff_SRCS ${THIRDPARTY_DIR}/QtSingleApplication/qtsingleapplication.cpp
                            ${THIRDPARTY_DIR}/QtSingleApplication/qtlocalpeer.cpp)

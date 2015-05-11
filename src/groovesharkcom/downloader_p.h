@@ -6,7 +6,7 @@
 
 class QFile;
 
-namespace GrooveShark
+namespace GroovesharkCom
 {
 
 class DownloaderPrivate : public QNetworkAccessManager

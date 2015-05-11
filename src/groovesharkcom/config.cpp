@@ -4,7 +4,7 @@
 #include <QStringBuilder>
 #include <QLatin1String>
 
-using namespace GrooveShark;
+using namespace GroovesharkCom;
 
 Config* Config::s_instance = 0;
 

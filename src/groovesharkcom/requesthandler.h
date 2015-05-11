@@ -4,7 +4,7 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 
-namespace GrooveShark
+namespace GroovesharkCom
 {
 
 class RequestHandler

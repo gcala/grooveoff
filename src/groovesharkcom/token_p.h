@@ -3,7 +3,7 @@
 
 #include "token.h"
 
-namespace GrooveShark
+namespace GroovesharkCom
 {
 
 class TokenPrivate : public QObject

@@ -22,7 +22,7 @@
 
 #include "GrooveOffNamespace.h"
 #include "PlaylistItem.h"
-#include <../libgrooveshark/downloader.h>
+#include <../groovesharkcom/downloader.h>
 
 #include <QWidget>
 #include <qlistwidget.h>
@@ -100,7 +100,7 @@ private:
     PlaylistItemPtr m_playlistItem;
     GrooveOff::DownloadState m_downloadState;
     Phonon::State m_playerState;
-    GrooveShark::DownloaderPtr m_downloader;
+    GroovesharkCom::DownloaderPtr m_downloader;
     bool m_oneShot;
     GrooveOff::Context m_context;
 

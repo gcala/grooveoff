@@ -3,7 +3,7 @@
 
 #include "streamkey.h"
 
-namespace GrooveShark
+namespace GroovesharkCom
 {
 
 class StreamKeyPrivate : public QObject

@@ -5,7 +5,7 @@
 
 #include "requesthandler.h"
 
-namespace GrooveShark
+namespace GroovesharkCom
 {
 
 class ApiRequestPrivate

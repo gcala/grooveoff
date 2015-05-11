@@ -5,7 +5,7 @@
 #include <QStringBuilder>
 #include <QLatin1String>
 
-using namespace GrooveShark;
+using namespace GroovesharkCom;
 
 const QString UrlBuilder::s_server = Config::instance()->gsBaseUrl().toString();
 

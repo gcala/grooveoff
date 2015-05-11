@@ -1,6 +1,6 @@
 /*
     GrooveOff - Offline Grooveshark.com music
-    Copyright (C) 2013-2014  Giuseppe Calà <jiveaxe@gmail.com>
+    Copyright (C) 2013-2015  Giuseppe Calà <jiveaxe@gmail.com>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@
 #include <QDir>
 #include <QDebug>
 
-using namespace GrooveShark;
+using namespace GroovesharkCom;
 
 namespace The {
     static SessionReaderWriter* s_SessionReaderWriter_instance = 0;
@@ -81,7 +81,7 @@ void SessionReaderWriter::parsePlaylistItem( const QDomElement& element, Playlis
         if( item->metaObject()->property(i).isStored( item.data() ) ) {
             // without this check a crash happens when compiled with qt5
             // "song" is the property's name containing a Song object
-            if( QString( item->metaObject()->property(i).typeName() ) == "GrooveShark::SongPtr" )
+            if( QString( item->metaObject()->property(i).typeName() ) == "GroovesharkCom::SongPtr" )
                 continue;
             
             var = element.firstChildElement( QString( item->metaObject()->property(i).name() ) ).text();
@@ -93,7 +93,7 @@ void SessionReaderWriter::parsePlaylistItem( const QDomElement& element, Playlis
     parseSong( songEl, item->song() );
 }
 
-void SessionReaderWriter::parseSong( const QDomElement& element, GrooveShark::SongPtr song )
+void SessionReaderWriter::parseSong( const QDomElement& element, GroovesharkCom::SongPtr song )
 {
     QVariant var;
     for( int i = 0; i < song->metaObject()->propertyCount(); ++i ) {

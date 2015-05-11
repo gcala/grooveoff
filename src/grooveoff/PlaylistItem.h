@@ -1,6 +1,6 @@
 /*
     GrooveOff - Offline Grooveshark.com music
-    Copyright (C) 2013-2014  Giuseppe Calà <jiveaxe@gmail.com>
+    Copyright (C) 2013-2015  Giuseppe Calà <jiveaxe@gmail.com>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -23,25 +23,25 @@
 #include <QObject>
 #include <QFileInfo>
 #include <phonon/mediasource.h>
-#include <../libgrooveshark/song.h>
+#include <../groovesharkcom/song.h>
 
 class PlaylistItem : public QObject
 {
     Q_OBJECT
     Q_PROPERTY( QString path READ path WRITE setPath )
     Q_PROPERTY( QString namingSchema READ namingSchema WRITE setNamingSchema )
-    Q_PROPERTY( GrooveShark::SongPtr song READ song WRITE setSong )
+    Q_PROPERTY( GroovesharkCom::SongPtr song READ song WRITE setSong )
 
 public:
-    explicit PlaylistItem ( const GrooveShark::SongPtr &song );
+    explicit PlaylistItem ( const GroovesharkCom::SongPtr &song );
     PlaylistItem();
     ~PlaylistItem();
 
     QString path() const;
     void setPath( const QString& path );
     
-    GrooveShark::SongPtr song();
-    void setSong( const GrooveShark::SongPtr &song );
+    GroovesharkCom::SongPtr song();
+    void setSong( const GroovesharkCom::SongPtr &song );
     
     QString namingSchema() const;
     void setNamingSchema( const QString& schema );
@@ -70,7 +70,7 @@ public Q_SLOTS:
 
 private:
     Phonon::State m_state;
-    GrooveShark::SongPtr m_song;
+    GroovesharkCom::SongPtr m_song;
     QString m_path;
     QString m_namingSchema;
 };

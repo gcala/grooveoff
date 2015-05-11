@@ -3,7 +3,7 @@
 
 #include "song.h"
 
-namespace GrooveShark
+namespace GroovesharkCom
 {
 
 class SongPrivate : public QObject
