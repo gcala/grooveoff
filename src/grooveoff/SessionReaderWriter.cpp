@@ -51,11 +51,9 @@ QList< PlaylistItemPtr > SessionReaderWriter::read( const QString& file )
     QList<PlaylistItemPtr> items;
 
     QDomDocument doc( QLatin1String( "mydocument" ) );
-    QString errorStr;
-    int errorLine;
-    int errorColumn;
-    if ( !doc.setContent( &sessionFile, true, &errorStr, &errorLine, &errorColumn ) ) {
-        qDebug() << "SessionReaderWriter ::" << errorStr << errorLine << errorColumn;
+    const QDomDocument::ParseResult result = doc.setContent( &sessionFile, QDomDocument::ParseOption::UseNamespaceProcessing );
+    if ( !result ) {
+        qDebug() << "SessionReaderWriter ::" << result.errorMessage << result.errorLine << result.errorColumn;
         sessionFile.close();
         return QList< PlaylistItemPtr >();
     }

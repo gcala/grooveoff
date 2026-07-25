@@ -49,7 +49,7 @@ void SessionList::dropEvent(QDropEvent *event)
 {
     const QMimeData *content = event->mimeData();
 
-    QString sessionName = itemAt(event->pos())->data(Qt::UserRole).toString();
+    QString sessionName = itemAt(event->position().toPoint())->data(Qt::UserRole).toString();
     //adapt the dropped text and insert it at current cursor position
     if (content->hasFormat(QLatin1String("application/x-grooveoff"))) {
         QByteArray data = content->data(QLatin1String("application/x-grooveoff"));
