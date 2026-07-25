@@ -29,11 +29,10 @@ SvgButton::SvgButton( QWidget *parent )
     , m_isPlaying(false)
     , m_fileExists(false)
 {
-    connect (this, SIGNAL(clicked()), 
-                   SLOT(clicked()) );
+    connect( this, &IconButton::clicked, this, &SvgButton::clicked );
 }
 
-void SvgButton::enterEvent( QEvent * )
+void SvgButton::enterEvent( QEnterEvent * )
 {
     setIcon( icon(), 3);
 }
@@ -160,9 +159,9 @@ void SvgButton::reloadContent( const QSize &sz )
     {
         for ( int i = 0; i < 3; ++i )
         {
-            m_icon.play[i] = m_icon.play[i].mirrored( true, false );
-            m_icon.next[i] = m_icon.next[i].mirrored( true, false );
-            m_icon.previous[i] = m_icon.previous[i].mirrored( true, false );
+            m_icon.play[i] = m_icon.play[i].flipped( Qt::Horizontal );
+            m_icon.next[i] = m_icon.next[i].flipped( Qt::Horizontal );
+            m_icon.previous[i] = m_icon.previous[i].flipped( Qt::Horizontal );
         }
     }
 
@@ -187,7 +186,7 @@ void SvgButton::setPlaying( bool playing )
     if ( m_isPlaying == playing )
         return;
 
-    setToolTip( playing ? trUtf8( "Pause" ) : trUtf8( "Play" ) );
+    setToolTip( playing ? tr( "Pause" ) : tr( "Play" ) );
 
     m_isPlaying = playing;
     setIcon( icon(), 4 );

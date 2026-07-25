@@ -51,11 +51,9 @@ QList< PlaylistItemPtr > SessionReaderWriter::read( const QString& file )
     QList<PlaylistItemPtr> items;
 
     QDomDocument doc( QLatin1String( "mydocument" ) );
-    QString errorStr;
-    int errorLine;
-    int errorColumn;
-    if ( !doc.setContent( &sessionFile, true, &errorStr, &errorLine, &errorColumn ) ) {
-        qDebug() << "SessionReaderWriter ::" << errorStr << errorLine << errorColumn;
+    const QDomDocument::ParseResult result = doc.setContent( &sessionFile, QDomDocument::ParseOption::UseNamespaceProcessing );
+    if ( !result ) {
+        qDebug() << "SessionReaderWriter ::" << result.errorMessage << result.errorLine << result.errorColumn;
         sessionFile.close();
         return QList< PlaylistItemPtr >();
     }
@@ -78,7 +76,7 @@ void SessionReaderWriter::parsePlaylistItem( const QDomElement& element, Playlis
 {
     QVariant var;
     for( int i = 0; i < item->metaObject()->propertyCount(); ++i ) {
-        if( item->metaObject()->property(i).isStored( item.data() ) ) {
+        if( item->metaObject()->property(i).isStored() ) {
             // without this check a crash happens when compiled with qt5
             // "song" is the property's name containing a Song object
             if( QString( item->metaObject()->property(i).typeName() ) == "GrooveShark::SongPtr" )
@@ -97,7 +95,7 @@ void SessionReaderWriter::parseSong( const QDomElement& element, GrooveShark::So
 {
     QVariant var;
     for( int i = 0; i < song->metaObject()->propertyCount(); ++i ) {
-        if( song->metaObject()->property(i).isStored( song.data() ) ) {
+        if( song->metaObject()->property(i).isStored() ) {
             var = element.firstChildElement( QString( song->metaObject()->property(i).name() ) ).text();
             song->metaObject()->property(i).write( song.data(), var );
         }
@@ -131,17 +129,17 @@ bool SessionReaderWriter::write( const QString& file, QList< PlaylistItemPtr > t
     stream.writeStartDocument();
     stream.writeStartElement( QLatin1String( "playlist" ) );
 
-    foreach( const PlaylistItemPtr &track, tracks ) {
+    for( const PlaylistItemPtr &track : tracks ) {
         stream.writeStartElement( QLatin1String( "item" ) );
         for( int j = 0; j < track->metaObject()->propertyCount(); j++ ) {
-            if( track->metaObject()->property( j ).isStored( track.data() ) ) {
+            if( track->metaObject()->property( j ).isStored() ) {
                 if( QString( track->metaObject()->property(j).name() ) ==  QLatin1String( "objectName" ) )
                     continue;
                 if( QString( track->metaObject()->property( j ).name() ) ==  QLatin1String( "song" ) ) {
                     const SongPtr &song = track->song();
                     stream.writeStartElement( QLatin1String( "song_info" ) );
                     for( int k = 0; k < song->metaObject()->propertyCount(); k++ ) {
-                        if( song->metaObject()->property( k ).isStored( song.data() ) ) {
+                        if( song->metaObject()->property( k ).isStored() ) {
                             if( QString( song->metaObject()->property( k ).name() ) ==  QLatin1String( "objectName" ) )
                                 continue;
                             if( QString( song->metaObject()->property( k ).name() ) ==  QLatin1String( "errorString" ) )

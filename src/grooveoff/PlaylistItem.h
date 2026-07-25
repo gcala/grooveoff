@@ -22,7 +22,7 @@
 
 #include <QObject>
 #include <QFileInfo>
-#include <phonon/mediasource.h>
+#include "GrooveOffNamespace.h"
 #include <../libgrooveshark/song.h>
 
 class PlaylistItem : public QObject
@@ -48,13 +48,13 @@ public:
 
     QString fileName() const;
     void requireCoverReload();
-    void setState( const Phonon::State &state );
+    void setState( const GrooveOff::PlayerState &state );
     
     inline bool isPlaying() {
-        return m_state == Phonon::PlayingState;
+        return m_state == GrooveOff::PlayerState::Playing;
     }
     
-    inline Phonon::State state() {
+    inline GrooveOff::PlayerState state() {
         return m_state;
     }
 
@@ -64,12 +64,12 @@ public:
 
 Q_SIGNALS:
     void reloadCover();
-    void stateChanged( Phonon::State );
+    void stateChanged( GrooveOff::PlayerState );
 
 public Q_SLOTS:
 
 private:
-    Phonon::State m_state;
+    GrooveOff::PlayerState m_state;
     GrooveShark::SongPtr m_song;
     QString m_path;
     QString m_namingSchema;

@@ -24,8 +24,6 @@
 #include "GrooveOffNamespace.h"
 
 #include <QWidget>
-#include <phonon/MediaObject>
-#include <phonon/AudioOutput>
 
 namespace Ui {
 class PlayerWidget;
@@ -64,7 +62,7 @@ protected:
 
 private Q_SLOTS:
     void tick( qint64 elapsedTime, bool userSeek );
-    void stateChanged( Phonon::State state );
+    void stateChanged( GrooveOff::PlayerState state );
     void toggleTimeLabel();
     void sourceChanged();
     void playPrevious() const;
@@ -72,11 +70,14 @@ private Q_SLOTS:
     void removedPlayingTrack();
     void switchPage() const;
     void muteStateChanged( bool mute ) const;
+    void trackLengthChanged( qint64 milliseconds );
+    void seekSliderValueChanged( int value );
 
 private:
     Ui::PlayerWidget *ui;
     GrooveOff::TimerState m_timerState;
     bool m_playedRemoved;
+    bool m_updatingSeekSlider; // tells a programmatic slider update from a user one
     QTimer *m_timer;
     QGraphicsDropShadowEffect *m_coverShadow;
 

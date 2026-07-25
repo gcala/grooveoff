@@ -88,8 +88,8 @@ void MatchItem::setupWidgetsSizes()
 
 void MatchItem::setupConnections()
 {
-    connect( ui->downloadButton, SIGNAL(buttonClicked()), SLOT(downloadItem()) );
-    connect( m_playlistItem.data(), SIGNAL(reloadCover()), SLOT(loadCover()) );
+    connect( ui->downloadButton, &SvgButton::buttonClicked, this, &MatchItem::downloadItem );
+    connect( m_playlistItem.data(), &PlaylistItem::reloadCover, this, &MatchItem::loadCover );
 }
 
 void MatchItem::loadCover()
@@ -119,10 +119,10 @@ void MatchItem::setDownloadIcon()
 
     if( QFile::exists( Utility::destinationPath + QDir::separator() + schema + QLatin1String( ".mp3" ) ) ) {
         ui->downloadButton->setExists( true );
-        ui->downloadButton->setToolTip( trUtf8( "Download again" ) );
+        ui->downloadButton->setToolTip( tr( "Download again" ) );
     } else {
         ui->downloadButton->setExists( false );
-        ui->downloadButton->setToolTip( trUtf8( "Download" ) );
+        ui->downloadButton->setToolTip( tr( "Download" ) );
     }
 }
 

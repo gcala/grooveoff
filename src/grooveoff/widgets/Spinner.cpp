@@ -33,6 +33,8 @@
 #include <qmath.h>
 #include <QtDebug>
 
+#include <utility>
+
 Spinner::Spinner(QWidget *parent)
     : QWidget(parent)
     , m_step(0)
@@ -93,12 +95,11 @@ void Spinner::start(uint delay)
         if (!m_startTimer) {
             m_startTimer = new QTimer(this);
             m_startTimer->setSingleShot(true);
-            connect(m_startTimer, SIGNAL(timeout()), SLOT(start()));
+            // start() has a default argument, so it cannot be used as a slot directly
+            connect(m_startTimer, &QTimer::timeout, this, [this] { start(); });
         }
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
         if (m_startTimer->remainingTime() > -1) // preserve oldest request original delay
             delay = m_startTimer->remainingTime();
-#endif
         m_startTimer->start(delay);
         return;
     }
@@ -280,7 +281,7 @@ void Spinner::timerEvent(QTimerEvent *e)
 
 void Spinner::updateAncestors()
 {
-    foreach (QWidget *w, m_ancestors)
+    for (QWidget *w : std::as_const(m_ancestors))
         w->removeEventFilter(this);
 
     m_ancestors.clear();
@@ -289,7 +290,7 @@ void Spinner::updateAncestors()
     while ((w = w->parentWidget())) {
         m_ancestors << w;
         w->installEventFilter(this);
-        connect(w, SIGNAL(destroyed()), SLOT(updateAncestors()));
+        connect(w, &QObject::destroyed, this, &Spinner::updateAncestors);
     }
     updateGeometry();
 }

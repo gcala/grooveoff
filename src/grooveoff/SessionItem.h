@@ -41,7 +41,7 @@ public:
 
 protected:
     virtual void leaveEvent ( QEvent * event );
-    virtual void enterEvent ( QEvent * event );
+    virtual void enterEvent ( QEnterEvent * event );
 
 Q_SIGNALS:
     void remove(const QString &);

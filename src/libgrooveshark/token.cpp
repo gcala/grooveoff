@@ -2,12 +2,8 @@
 
 #include <QDebug>
 
-#if QT_VERSION >= QT_VERSION_CHECK( 5, 0, 0 )
 #include <QJsonParseError>
 #include <QJsonDocument>
-#else
-#include <qjson/parser.h>
-#endif
 
 using namespace GrooveShark;
 
@@ -17,10 +13,8 @@ TokenPrivate::TokenPrivate ( Token* qq, QNetworkReply* reply, QObject* parent ) 
     q ( qq ),
     m_error ( QNetworkReply::NoError )
 {
-    QObject::connect ( m_reply, SIGNAL (finished()),
-                       this, SLOT (parseData()) );
-    QObject::connect ( m_reply, SIGNAL (error(QNetworkReply::NetworkError)),
-                       this, SLOT (error(QNetworkReply::NetworkError)) );
+    QObject::connect ( m_reply, &QNetworkReply::finished, this, &TokenPrivate::parseData );
+    QObject::connect ( m_reply, &QNetworkReply::errorOccurred, this, &TokenPrivate::error );
 }
 
 TokenPrivate::TokenPrivate ( Token* qq, const QVariant& variant, QObject* parent ) :
@@ -63,7 +57,7 @@ QString TokenPrivate::errorString() const
 
 bool TokenPrivate::parse( const QVariant& data )
 {
-    if( !data.canConvert( QVariant::Map ) ) {
+    if( !data.canConvert<QVariantMap>() ) {
         m_errorString = "  received data is not valid";
         return false;
     }
@@ -76,24 +70,24 @@ bool TokenPrivate::parse( const QVariant& data )
     }
 
     QVariant v = tokenMap.value( QLatin1String( "result" ) );
-    if( !v.canConvert( QVariant::String ) )
+    if( !v.canConvert<QString>() )
         qDebug() << "'result' field is invalid";
     m_content = v.toString();
 
     QVariantMap headerMap = tokenMap.value(QLatin1String( "header" )).toMap();
 
     v = headerMap.value( QLatin1String( "prefetchEnabled" ) );
-    if( !v.canConvert( QVariant::Bool ) )
+    if( !v.canConvert<bool>() )
         qDebug() << "'prefetchEnabled' field is invalid";
     m_prefetchEnabled = v.toBool();
 
     v = headerMap.value( QLatin1String( "serviceVersion" ) );
-    if( !v.canConvert( QVariant::String ) )
+    if( !v.canConvert<QString>() )
         qDebug() << "'serviceVersion' field is invalid";
     m_serviceVersion = v.toString();
 
     v = headerMap.value( QLatin1String( "session" ) );
-    if( !v.canConvert( QVariant::String ) )
+    if( !v.canConvert<QString>() )
         qDebug() << "'session' field is invalid";
     m_session = v.toString();
 
@@ -105,22 +99,15 @@ bool TokenPrivate::parse ( const QByteArray& data )
     bool ok;
     QVariant variant;
 
-#if QT_VERSION >= QT_VERSION_CHECK( 5, 0, 0 )
-    QJsonParseError *err = new QJsonParseError();
-    QJsonDocument doc = QJsonDocument::fromJson(data, err);
-    if (err->error != 0) {
-        m_errorString = err->errorString();
+    QJsonParseError err;
+    QJsonDocument doc = QJsonDocument::fromJson(data, &err);
+    if (err.error != QJsonParseError::NoError) {
+        m_errorString = err.errorString();
         ok = false;
     } else {
         variant = doc.toVariant();
         ok = true;
     }
-#else
-    QJson::Parser parser;
-    variant = parser.parse ( data, &ok );
-    if(!ok)
-        m_errorString = parser.errorString();
-#endif
 
     if( ok )
     {

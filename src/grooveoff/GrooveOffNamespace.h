@@ -79,6 +79,21 @@ namespace GrooveOff {
     };
 
     /**
+     * The state of the audio player.
+     *
+     * This is the application's own player state: only AudioEngine knows about
+     * the multimedia framework underneath, everything else talks in these terms.
+     * It is a scoped enum because DownloadState already defines an ErrorState.
+     */
+    enum class PlayerState {
+         Stopped,
+         Playing,
+         Paused,
+         Buffering,
+         Error
+    };
+
+    /**
      * The player timer state
      */
     enum TimerState {
@@ -105,7 +120,6 @@ namespace GrooveOff {
 Q_DECLARE_METATYPE( GrooveOff::Context )
 Q_DECLARE_METATYPE( GrooveOff::DownloadState )
 Q_DECLARE_METATYPE( GrooveOff::NetworkJob )
-
-QT_END_HEADER
+Q_DECLARE_METATYPE( GrooveOff::PlayerState )
 
 #endif // GROOVEOFFNAMESPACE_H

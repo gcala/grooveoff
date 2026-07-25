@@ -26,24 +26,25 @@
 
 #include <QDir>
 
+#include <utility>
+
 SessionManager::SessionManager(const QString &path, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::SessionManager),
     m_sessionsPath(path)
 {
     ui->setupUi(this);
-//     setWindowTitle(QLatin1String("GrooveOff - ") + trUtf8("Session Manager"));
+//     setWindowTitle(QLatin1String("GrooveOff - ") + tr("Session Manager"));
     loadSessionFiles();
-    connect(ui->sessionsList, SIGNAL(appendItem(QByteArray,QString)),
-                              SLOT(addTrack(QByteArray,QString))
-    );
+    connect(ui->sessionsList, &SessionList::appendItem,
+            this, &SessionManager::addTrack);
 }
 
 SessionManager::~SessionManager()
 {
-    foreach(const QString &sessionName, m_changesFlag.keys()) {
-        if(m_changesFlag[sessionName]) {
-            The::sessionReaderWriter()->write(m_sessionsPath + sessionName + ".xml", m_trackCollection[sessionName]);
+    for(auto it = m_changesFlag.cbegin(); it != m_changesFlag.cend(); ++it) {
+        if(it.value()) {
+            The::sessionReaderWriter()->write(m_sessionsPath + it.key() + ".xml", m_trackCollection[it.key()]);
         }
     }
 
@@ -66,10 +67,10 @@ void SessionManager::on_sessionsList_currentRowChanged(int currentRow)
 
     const QList<PlaylistItemPtr> &tracks = m_trackCollection[session];
 
-    foreach(PlaylistItemPtr track, tracks) {
+    for(const PlaylistItemPtr &track : tracks) {
         DownloadItem *item = new DownloadItem(track, this, GrooveOff::Track);
         
-        connect( item, SIGNAL(removeMeFromSession(quint32)), SLOT(removeTrack(quint32)) );
+        connect( item, &DownloadItem::removeMeFromSession, this, &SessionManager::removeTrack );
         
         QListWidgetItem *wItem = new QListWidgetItem(ui->tracksList);
         wItem->setData(Qt::UserRole, track->song()->songID());
@@ -92,7 +93,7 @@ void SessionManager::loadSessionFiles()
     QDir sessionPath(m_sessionsPath);
     QStringList sessions = sessionPath.entryList(QStringList() << "*.xml", QDir::Files, QDir::Name | QDir::IgnoreCase);
 
-    foreach(QString session, sessions) {
+    for(QString session : std::as_const(sessions)) {
         session.remove(".xml", Qt::CaseInsensitive);
         generateTrackList(session);
 
@@ -100,9 +101,8 @@ void SessionManager::loadSessionFiles()
         if( session == QLatin1String( "default" ) )
             sessionItem->deleteButtonEnabled(false);
         else {
-            connect( sessionItem, SIGNAL(remove(QString)),
-                                  SLOT(removeSession(QString))
-            );
+            connect( sessionItem, &SessionItem::remove,
+                     this, &SessionManager::removeSession );
         }
         QListWidgetItem *wItem = new QListWidgetItem;
         wItem->setData(Qt::UserRole, session);
@@ -149,7 +149,9 @@ void SessionManager::removeTrack(quint32 songID)
         if(item->data(Qt::UserRole) == songID) {
             ui->tracksList->takeItem(ui->tracksList->row(item));
             delete item;
-            foreach(PlaylistItemPtr track, m_trackCollection[m_currentSessionName]) {
+            // iterate over a copy: the loop removes from the very list it walks
+            const QList<PlaylistItemPtr> sessionTracks = m_trackCollection[m_currentSessionName];
+            for(const PlaylistItemPtr &track : sessionTracks) {
                 if(track->song()->songID() == songID)
                     m_trackCollection[m_currentSessionName].removeOne(track);
             }

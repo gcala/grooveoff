@@ -45,7 +45,7 @@ void CoverManager::appendItem( const PlaylistItemPtr &playlistItemPtr )
         listOfSongsWithSameCover.append( playlistItemPtr );
         m_coverItems.insert( coverArtFilename, listOfSongsWithSameCover );
         CoverDownloader *downloader = new CoverDownloader( coverArtFilename, this );
-        connect( downloader, SIGNAL(done()), SLOT(setCover()) );
+        connect( downloader, &CoverDownloader::done, this, &CoverManager::setCover );
     }
 }
 
@@ -59,7 +59,8 @@ void CoverManager::setCover()
     CoverDownloader *coverDownloader = (CoverDownloader *)QObject::sender();
     if( coverDownloader->isSuccess() ) {
         const QString &coverArtFilename = coverDownloader->coverName();
-        foreach ( PlaylistItemPtr playlistItem, m_coverItems.value( coverArtFilename ) ) {
+        const QList< PlaylistItemPtr > waitingItems = m_coverItems.value( coverArtFilename );
+        for ( const PlaylistItemPtr &playlistItem : waitingItems ) {
             playlistItem.data()->requireCoverReload();
         }
     }

@@ -22,10 +22,12 @@
 
 #include "MainWindow.h"
 
-#include <QtSingleApplication>
+#include <QApplication>
 #include <QPointer>
 
-class App : public QtSingleApplication
+class QTranslator;
+
+class App : public QApplication
 {
     Q_OBJECT
 public:
@@ -40,6 +42,17 @@ public:
         return m_mainWindow.data();
     }
 
+    /**
+     * Builds and shows the main window. Kept out of the constructor so that
+     * a second instance can hand over and quit before any window is created.
+     */
+    void start();
+
+    /**
+     * Brings the main window to the front, on request of a second instance
+     */
+    void raiseWindow();
+
     // FRIENDS
     friend class MainWindow;
 
@@ -50,7 +63,11 @@ public Q_SLOTS:
     void quit();
 
 private:
+    void loadTranslations();
+
     QPointer<MainWindow>    m_mainWindow;
+    QTranslator            *m_appTranslator;
+    QTranslator            *m_qtTranslator;
 };
 
 #define pApp static_cast<App*>(qApp)

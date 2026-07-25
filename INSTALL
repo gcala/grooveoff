@@ -1,15 +1,17 @@
 INSTALL
 =======
 
+Requirements:
+
+  Qt 6.5 or later (Core, Gui, Widgets, Network, Xml, Svg, DBus, Multimedia,
+                   LinguistTools)
+  a QtMultimedia backend (ffmpeg is the default one)
+  TagLib 2.0 or later
+  KDSingleApplication (Qt 6 build)
+  CMake 3.21 or later
+
 extract downloaded archive and enter the application folder, then:
 
-mkdir build
-cd build
-cmake .. -DCMAKE_INSTALL_PREFIX=/usr
-
-(if you want to build Qt5 version, add the option -DBUILD_WITH_QT5=ON to cmake)
-
-make
-make install (as root)
-
-
+cmake -S . -B build -DCMAKE_INSTALL_PREFIX=/usr
+cmake --build build
+cmake --install build (as root)

@@ -20,12 +20,13 @@
 #ifndef AUDIOENGINE_H
 #define AUDIOENGINE_H
 
+#include "GrooveOffNamespace.h"
 #include "PlaylistItem.h"
 
 #include <QObject>
-#include <phonon/MediaObject>
-#include <phonon/AudioOutput>
-#include <phonon/AudioDataOutput>
+#include <QMediaPlayer>
+
+class QAudioOutput;
 
 class AudioEngine;
 
@@ -33,6 +34,14 @@ namespace The {
     AudioEngine* audioEngine();
 }
 
+/**
+  * @class AudioEngine
+  * @short The audio playback engine.
+  *
+  * This is the only class aware of the multimedia framework in use: it exposes
+  * playback through GrooveOff::PlayerState so that the rest of the application
+  * never depends on QtMultimedia types.
+  */
 class AudioEngine : public QObject
 {
     Q_OBJECT
@@ -43,9 +52,9 @@ public:
     void playPause();
     void play();
     void pause();
-    void stop( Phonon::ErrorType errorCode = Phonon::NoError );
+    void stop();
 
-    Phonon::State state() const;
+    GrooveOff::PlayerState state() const;
     bool isPlaying() const;
     bool isPaused() const;
     bool isStopped() const;
@@ -64,10 +73,6 @@ public:
     void seek( int ms ); // for compatibility with seekbar in audiocontrols
     void playItem(const PlaylistItemPtr &track);
     void removingTrack(const PlaylistItemPtr &track);
-    inline Phonon::MediaObject * mediaObject() const {
-        return m_mediaObject;
-        
-    }
     bool isSeekable() const;
 
     /**
@@ -90,24 +95,24 @@ Q_SIGNALS:
      * Called when audio track changes
      */
     void sourceChanged();
-    
+
     /*
      * Called when slider moved to new position
      */
     void seeked( qint64 ms, bool userSeek );
-    
+
     /*
      * Called when player state changes
      */
-    void stateChanged( Phonon::State );
-    
+    void stateChanged( GrooveOff::PlayerState );
+
     /*
      * Called when volume changes
      */
     void volumeChanged( int volume /* in percent */ );
-    
+
     /*
-     * Called when the current playing track is removed 
+     * Called when the current playing track is removed
      */
     void removedPlayingTrack();
 
@@ -126,20 +131,25 @@ Q_SIGNALS:
 
     /**
        Called when the track length changes, typically because the track has changed but
-       also when phonon manages to determine the full track length.
+       also when the backend manages to determine the full track length.
      */
     void trackLengthChanged( qint64 milliseconds );
 
 private Q_SLOTS:
-    void timerTriggered( qint64 time );
-    void onStateChanged( Phonon::State newState, Phonon::State oldState );
-    void sourceChanged( Phonon::MediaSource );
+    void onPositionChanged( qint64 time );
+    void onMediaStatusChanged( QMediaPlayer::MediaStatus status );
+    void onSourceChanged();
     void onFinished();
 
     /**
-     * For volume/mute changes from the phonon side
+     * Recomputes the player state out of playback state, media status and errors
      */
-    void onVolumeChanged( qreal volume );
+    void updateState();
+
+    /**
+     * For volume/mute changes coming from the audio output
+     */
+    void onVolumeChanged( float volume );
     void onMutedChanged( bool );
 
     void onSeekableChanged( bool );
@@ -148,15 +158,17 @@ private Q_SLOTS:
 private:
     AudioEngine();
 
-    PlaylistItemPtr m_currentTrack;
-    PlaylistItemPtr m_oldTrack;
-    Phonon::State   m_state;
+    void setState( GrooveOff::PlayerState state );
 
-    Phonon::MediaObject* m_mediaObject;
-    Phonon::AudioOutput* m_audioOutput;
+    PlaylistItemPtr        m_currentTrack;
+    PlaylistItemPtr        m_oldTrack;
+    GrooveOff::PlayerState m_state;
+
+    QMediaPlayer* m_mediaPlayer;
+    QAudioOutput* m_audioOutput;
 
     int m_volume;
-    
+
     void setupConnections();
 };
 

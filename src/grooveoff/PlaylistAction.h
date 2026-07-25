@@ -35,7 +35,7 @@ public:
     }
     
 private Q_SLOTS:
-    void trackStateChanged( Phonon::State state );
+    void trackStateChanged( GrooveOff::PlayerState state );
     
 private:
     PlaylistItemPtr m_track;

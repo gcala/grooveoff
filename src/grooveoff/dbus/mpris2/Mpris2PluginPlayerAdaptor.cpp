@@ -28,6 +28,8 @@
 #include <QDBusMessage>
 #include <QDBusConnection>
 
+#include <utility>
+
 static QByteArray idFromPlaylistItem( const PlaylistItemPtr item )
 {
     return QByteArray( "/org/grooveoff/tid_" ) +
@@ -38,18 +40,18 @@ Mpris2PluginPlayerAdaptor::Mpris2PluginPlayerAdaptor( QObject *parent )
     : QDBusAbstractAdaptor( parent )
 {
     m_engine = The::audioEngine();
-    connect( m_engine, SIGNAL(sourceChanged()),
-                       SLOT(emitPropertiesChanged()) );
-    connect( m_engine, SIGNAL(stateChanged(Phonon::State)),
-                       SLOT(emitPropertiesChanged()) );
-    connect( m_engine, SIGNAL(volumeChanged(int)),
-                       SLOT(emitPropertiesChanged()) );
-    connect( m_engine, SIGNAL(seeked(qint64,bool)),
-                       SLOT(onSeeked(qint64,bool)) );
-    connect( m_engine, SIGNAL(seekableChanged(bool)),
-                       SLOT(emitPropertiesChanged()) );
-    connect( The::playlist(), SIGNAL(playlistChanged()),
-                              SLOT(emitPropertiesChanged()) );
+    connect( m_engine, &AudioEngine::sourceChanged,
+             this, &Mpris2PluginPlayerAdaptor::emitPropertiesChanged );
+    connect( m_engine, &AudioEngine::stateChanged,
+             this, &Mpris2PluginPlayerAdaptor::emitPropertiesChanged );
+    connect( m_engine, &AudioEngine::volumeChanged,
+             this, &Mpris2PluginPlayerAdaptor::emitPropertiesChanged );
+    connect( m_engine, &AudioEngine::seeked,
+             this, &Mpris2PluginPlayerAdaptor::onSeeked );
+    connect( m_engine, &AudioEngine::seekableChanged,
+             this, &Mpris2PluginPlayerAdaptor::emitPropertiesChanged );
+    connect( The::playlist(), &Playlist::playlistChanged,
+             this, &Mpris2PluginPlayerAdaptor::emitPropertiesChanged );
     syncProperties();
 }
 
@@ -73,7 +75,7 @@ bool Mpris2PluginPlayerAdaptor::canGoPrevious() const
 
 bool Mpris2PluginPlayerAdaptor::canPause() const
 {
-    return (m_engine->state() == Phonon::PausedState || m_engine->state() == Phonon::PlayingState);
+    return (m_engine->state() == GrooveOff::PlayerState::Paused || m_engine->state() == GrooveOff::PlayerState::Playing);
 }
 bool Mpris2PluginPlayerAdaptor::canPlay() const
 {
@@ -127,9 +129,9 @@ double Mpris2PluginPlayerAdaptor::minimumRate() const
 
 QString Mpris2PluginPlayerAdaptor::playbackStatus() const
 {
-    if( m_engine->state() == Phonon::PlayingState )
+    if( m_engine->state() == GrooveOff::PlayerState::Playing )
         return QString::fromLatin1( "Playing" );
-    else if( m_engine->state() == Phonon::PausedState )
+    else if( m_engine->state() == GrooveOff::PlayerState::Paused )
         return QString::fromLatin1( "Paused" );
     return QString::fromLatin1( "Stopped" );
 }
@@ -186,9 +188,9 @@ void Mpris2PluginPlayerAdaptor::Play()
 
 void Mpris2PluginPlayerAdaptor::PlayPause()
 {
-    if( m_engine->state() == Phonon::StoppedState )
+    if( m_engine->state() == GrooveOff::PlayerState::Stopped )
         m_engine->play();
-    else if( m_engine->state() == Phonon::PausedState || m_engine->state() == Phonon::PlayingState )
+    else if( m_engine->state() == GrooveOff::PlayerState::Paused || m_engine->state() == GrooveOff::PlayerState::Playing )
         m_engine->playPause();
 }
 
@@ -276,7 +278,7 @@ void Mpris2PluginPlayerAdaptor::emitPropertiesChanged()
     syncProperties();
 
     QVariantMap map;
-    foreach( QLatin1String name, changedProps )
+    for( QLatin1String name : std::as_const(changedProps) )
         map.insert( name, m_props.value( name ) );
 
     QDBusMessage msg = QDBusMessage::createSignal(QLatin1String( "/org/mpris/MediaPlayer2" ),

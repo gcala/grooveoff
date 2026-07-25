@@ -27,7 +27,7 @@
 #include <QWidget>
 #include <qlistwidget.h>
 #include <QVariantMap>
-#include <phonon/MediaObject>
+#include "GrooveOffNamespace.h"
 
 namespace Ui {
 class DownloadItem;
@@ -66,7 +66,7 @@ public:
     bool operator==( DownloadItem & ) const;
 
 public Q_SLOTS:
-    void setPlayerState( Phonon::State );
+    void setPlayerState( GrooveOff::PlayerState );
 
 Q_SIGNALS:
     void downloadFinished();
@@ -80,7 +80,7 @@ Q_SIGNALS:
 
 protected:
     virtual void leaveEvent ( QEvent * event );
-    virtual void enterEvent ( QEvent * event );
+    virtual void enterEvent ( QEnterEvent * event );
 
 private Q_SLOTS:
     void downloadFinished( bool ok );
@@ -99,7 +99,7 @@ private:
     Ui::DownloadItem *ui;
     PlaylistItemPtr m_playlistItem;
     GrooveOff::DownloadState m_downloadState;
-    Phonon::State m_playerState;
+    GrooveOff::PlayerState m_playerState;
     GrooveShark::DownloaderPtr m_downloader;
     bool m_oneShot;
     GrooveOff::Context m_context;

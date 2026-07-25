@@ -17,30 +17,23 @@
 */
 
 
-#include "mpris1/Mpris1PluginPlayerAdaptor.h"
-#include "mpris1/Mpris1PluginRootAdaptor.h"
 #include "mpris2/Mpris2PluginRootAdaptor.h"
 #include "mpris2/Mpris2PluginPlayerAdaptor.h"
 #include "mpris.h"
 
-#include <QtDBus>
+#include <QDBusConnection>
 
 Mpris::Mpris(QObject *parent) : QObject( parent )
 {
     QDBusConnection connection = QDBusConnection::sessionBus();
-    //MPRISv1.0
-    connection.registerObject( QLatin1String( "/Player" ), new Mpris1PluginPlayerAdaptor( this ), QDBusConnection::ExportAllContents );
-    connection.registerObject( QLatin1String( "/" ), new Mpris1PluginRootAdaptor( this ), QDBusConnection::ExportAllContents );
-    //MPRISv2.0
+
     new Mpris2PluginRootAdaptor( this );
     new Mpris2PluginPlayerAdaptor( this );
     connection.registerObject( QLatin1String( "/org/mpris/MediaPlayer2" ), this );
-    connection.registerService( QLatin1String( "org.mpris.grooveoff" ) );
     connection.registerService( QLatin1String( "org.mpris.MediaPlayer2.grooveoff" ) );
 }
 
 Mpris::~Mpris()
 {
-    QDBusConnection::sessionBus().unregisterService( QLatin1String( "org.mpris.grooveoff" ) );
     QDBusConnection::sessionBus().unregisterService( QLatin1String( "org.mpris.MediaPlayer2.grooveoff" ) );
 }

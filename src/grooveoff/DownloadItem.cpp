@@ -33,6 +33,7 @@
 #include <QDir>
 #include <QDebug>
 #include <QDesktopServices>
+#include <QStandardPaths>
 #include <QGraphicsDropShadowEffect>
 
 using namespace GrooveShark;
@@ -62,7 +63,7 @@ DownloadItem::DownloadItem( const PlaylistItemPtr &playlistItemPtr, QWidget *par
         }
     }
 
-    m_playerState = Phonon::StoppedState;
+    m_playerState = GrooveOff::PlayerState::Stopped;
     stateChanged();
 }
 
@@ -133,22 +134,22 @@ void DownloadItem::setupUi()
     }
     
     ui->playButton->setType( IconButton::PlayPause );
-    ui->playButton->setToolTip( trUtf8( "Play" ) );
+    ui->playButton->setToolTip( tr( "Play" ) );
     
     ui->unqueueButton->setType( IconButton::Remove );
-    ui->unqueueButton->setToolTip( trUtf8( "Remove track from queue" ) );
+    ui->unqueueButton->setToolTip( tr( "Remove track from queue" ) );
     
     ui->stopDownloadButton->setType( IconButton::Stop );
-    ui->stopDownloadButton->setToolTip( trUtf8( "Stop track download" ) );
+    ui->stopDownloadButton->setToolTip( tr( "Stop track download" ) );
     
     ui->deleteButton->setType( IconButton::Trash );
-    ui->deleteButton->setToolTip( trUtf8( "Delete track from disk" ) );
+    ui->deleteButton->setToolTip( tr( "Delete track from disk" ) );
     
     ui->queueButton->setType( IconButton::Redownload );
-    ui->queueButton->setToolTip( trUtf8( "Redownload track" ) );
+    ui->queueButton->setToolTip( tr( "Redownload track" ) );
     
     ui->openFolderButton->setType( IconButton::Browse );
-    ui->openFolderButton->setToolTip( trUtf8( "Open folder" ) );
+    ui->openFolderButton->setToolTip( tr( "Open folder" ) );
     
     ui->infoIcon->setType( IconButton::Clock );
     
@@ -192,20 +193,20 @@ void DownloadItem::setupUi()
 */
 void DownloadItem::setupConnections()
 {
-    connect( m_playlistItem.data(), SIGNAL(reloadCover()), SLOT(loadCover()) );
-    connect( m_playlistItem.data(), SIGNAL(stateChanged(Phonon::State)), SLOT(setPlayerState(Phonon::State)) );
+    connect( m_playlistItem.data(), &PlaylistItem::reloadCover, this, &DownloadItem::loadCover );
+    connect( m_playlistItem.data(), &PlaylistItem::stateChanged, this, &DownloadItem::setPlayerState );
     
     if( m_context == GrooveOff::Download ) {
-        connect( ui->playButton, SIGNAL(buttonClicked()), SLOT(playSong()) );
-        connect( ui->openFolderButton, SIGNAL(buttonClicked()), SLOT(openFolder()) );
+        connect( ui->playButton, &SvgButton::buttonClicked, this, &DownloadItem::playSong );
+        connect( ui->openFolderButton, &SvgButton::buttonClicked, this, &DownloadItem::openFolder );
     }
 
-    connect( ui->timerButton, SIGNAL(clicked()), SLOT(timerButtonClicked()) );
-    connect( ui->timerButton, SIGNAL(countdownFinished()), SLOT(removeSong()) );
-    connect( ui->unqueueButton, SIGNAL(buttonClicked()), SLOT(unqueueItem()) );
-    connect( ui->stopDownloadButton, SIGNAL(buttonClicked()), SLOT(stopDownload()) );
-    connect( ui->deleteButton, SIGNAL(buttonClicked()), SLOT(deleteItem()) );
-    connect( ui->queueButton, SIGNAL(buttonClicked()), SLOT(queueItem()) );
+    connect( ui->timerButton, &TimerButton::clicked, this, &DownloadItem::timerButtonClicked );
+    connect( ui->timerButton, &TimerButton::countdownFinished, this, &DownloadItem::removeSong );
+    connect( ui->unqueueButton, &SvgButton::buttonClicked, this, &DownloadItem::unqueueItem );
+    connect( ui->stopDownloadButton, &SvgButton::buttonClicked, this, &DownloadItem::stopDownload );
+    connect( ui->deleteButton, &SvgButton::buttonClicked, this, &DownloadItem::deleteItem );
+    connect( ui->queueButton, &SvgButton::buttonClicked, this, &DownloadItem::queueItem );
 }
 
 /*!
@@ -251,18 +252,18 @@ void DownloadItem::setQueuedState()
     ui->infoIconWidget->setVisible( true );
     ui->infoIcon->setType( IconButton::Clock );
     
-    ui->infoMessage->setText( trUtf8( "Queued" ) );
+    ui->infoMessage->setText( tr( "Queued" ) );
 }
 
 void DownloadItem::setDownloadingState()
 {
     ui->infoIconWidget->setVisible( false );
     
-    if( m_playerState == Phonon::StoppedState ) {
+    if( m_playerState == GrooveOff::PlayerState::Stopped ) {
         ui->playWidget->setVisible( true );
         ui->animationWidget->setVisible( false );
         ui->barsWidget->stopAnimation();
-    } else if( m_playerState == Phonon::PlayingState ) {
+    } else if( m_playerState == GrooveOff::PlayerState::Playing ) {
         ui->playWidget->setVisible( false );
         ui->animationWidget->setVisible( true );
         ui->barsWidget->startAnimation();
@@ -288,11 +289,11 @@ void DownloadItem::setFinishedState()
         ui->animationWidget->setVisible( false );
     } else {
         ui->playButton->setButtonEnabled( true );
-        if( m_playerState == Phonon::StoppedState ) {
+        if( m_playerState == GrooveOff::PlayerState::Stopped ) {
             ui->playWidget->setVisible( true );
             ui->animationWidget->setVisible( false );
             ui->barsWidget->stopAnimation();
-        } else if( m_playerState == Phonon::PlayingState ) {
+        } else if( m_playerState == GrooveOff::PlayerState::Playing ) {
             ui->playWidget->setVisible( false );
             ui->animationWidget->setVisible( true );
             ui->barsWidget->startAnimation();
@@ -312,7 +313,7 @@ void DownloadItem::setAbortedState()
     ui->progressWidget->setVisible( false );
     ui->stopDownloadWidget->setVisible( false );
     
-    ui->infoMessage->setText( trUtf8( "Aborted" ) );
+    ui->infoMessage->setText( tr( "Aborted" ) );
     
     ui->infoIcon->setType( IconButton::Aborted );
     ui->infoIconWidget->setVisible( true );
@@ -327,7 +328,7 @@ void DownloadItem::setErrorState()
     
     ui->stopDownloadWidget->setVisible( false );
     
-    ui->infoMessage->setText( trUtf8( "Network or Server error" ) );
+    ui->infoMessage->setText( tr( "Network or Server error" ) );
     
     ui->infoIcon->setType( IconButton::Warning );
     ui->infoIconWidget->setVisible( true );
@@ -349,13 +350,11 @@ void DownloadItem::startDownload()
                                                          m_playlistItem->song()->songID(),
                                                          Utility::token );
 
-    connect( m_downloader.data(), SIGNAL(progress(qint64,qint64)),
-                                  SLOT(setProgress(qint64,qint64))
-           );
+    connect( m_downloader.data(), &Downloader::progress,
+             this, &DownloadItem::setProgress );
 
-    connect( m_downloader.data(), SIGNAL(downloadCompleted(bool)),
-                                  SLOT(downloadFinished(bool))
-           );
+    connect( m_downloader.data(), &Downloader::downloadCompleted,
+             this, QOverload<bool>::of(&DownloadItem::downloadFinished) );
 
 //    qDebug() << "GrooveOff ::" << "Started download of" << m_playlistItem->song()->songName();
 }
@@ -447,7 +446,7 @@ void DownloadItem::deleteItem()
     }
     
     ui->timerWidget->setVisible( true );
-    ui->timerButton->setToolTip( trUtf8( "Abort deletion" ) );
+    ui->timerButton->setToolTip( tr( "Abort deletion" ) );
     ui->timerButton->startCountdown();
     ui->deleteWidget->setVisible( false );
 }
@@ -520,7 +519,7 @@ QString DownloadItem::songFile()
   \brief enterEvent: manage mouse movement
   \return void
 */
-void DownloadItem::enterEvent( QEvent* event )
+void DownloadItem::enterEvent( QEnterEvent* event )
 {
     switch( m_downloadState ) {
         case GrooveOff::FinishedState:
@@ -584,7 +583,7 @@ void DownloadItem::leaveEvent( QEvent* event )
          for icon synchronization
   \return void
 */
-void DownloadItem::setPlayerState( Phonon::State state )
+void DownloadItem::setPlayerState( GrooveOff::PlayerState state )
 {
     m_playerState = state;
     stateChanged();
@@ -635,17 +634,10 @@ void DownloadItem::removeEmptyFolder( QDir folder )
     if( !folder.exists() )
         return;
     
-#if QT_VERSION >= QT_VERSION_CHECK( 5, 0, 0 )
     if( folder.path() == QStandardPaths::writableLocation( QStandardPaths::MusicLocation ) ||
        folder.path() == Utility::destinationPath
     )
         return;
-#else
-    if( folder.path() == QDesktopServices::storageLocation( QDesktopServices::MusicLocation ) ||
-       folder.path() == Utility::destinationPath
-    )
-        return;
-#endif
 
     if( folder.entryList( QDir::NoDotAndDotDot ).count() == 0 ) {
         folder.rmdir( folder.path() );

@@ -183,9 +183,9 @@
                </widget>
               </item>
               <item>
-               <widget class="Phonon::SeekSlider" name="seekSlider">
-                <property name="iconVisible">
-                 <bool>false</bool>
+               <widget class="QSlider" name="seekSlider">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
                 </property>
                </widget>
               </item>
@@ -284,11 +284,6 @@
   </layout>
  </widget>
  <customwidgets>
-  <customwidget>
-   <class>Phonon::SeekSlider</class>
-   <extends>QWidget</extends>
-   <header location="global">phonon/seekslider.h</header>
-  </customwidget>
   <customwidget>
    <class>ElidedLabel</class>
    <extends>QLabel</extends>

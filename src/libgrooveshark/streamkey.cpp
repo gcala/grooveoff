@@ -3,13 +3,8 @@
 #include "urlbuilder.h"
 #include "config.h"
 
-#if QT_VERSION >= QT_VERSION_CHECK( 5, 0, 0 )
 #include <QJsonParseError>
 #include <QJsonDocument>
-#else
-#include <qjson/parser.h>
-#include <qjson/serializer.h>
-#endif
 
 #include <QStringList>
 #include <QDebug>
@@ -25,13 +20,8 @@ StreamKeyPrivate::StreamKeyPrivate ( StreamKey* qq, uint id, QString token, QObj
     QVariantMap map = MapBuilder::getDownloadMap(QString::number(id), token);
     QByteArray json;
 
-#if QT_VERSION < QT_VERSION_CHECK( 5, 0, 0 )
-    QJson::Serializer serializer;
-    json = serializer.serialize(map);
-#else
     QJsonDocument doc = QJsonDocument::fromVariant(map);
     json = doc.toJson();
-#endif
 
     QString requestUrl = UrlBuilder::getSongStreamKeyUrl() + map.value("method").toByteArray();
     QString refererUrl = UrlBuilder::getRefererUrl() + MapBuilder::jsqueue().at(1);
@@ -46,10 +36,8 @@ StreamKeyPrivate::StreamKeyPrivate ( StreamKey* qq, uint id, QString token, QObj
 
     m_reply = m_nam->post( request, json );
 
-    QObject::connect ( m_reply, SIGNAL (finished()),
-                       this, SLOT (parseData()) );
-    QObject::connect ( m_reply, SIGNAL (error(QNetworkReply::NetworkError)),
-                       this, SLOT (error(QNetworkReply::NetworkError)) );
+    QObject::connect ( m_reply, &QNetworkReply::finished, this, &StreamKeyPrivate::parseData );
+    QObject::connect ( m_reply, &QNetworkReply::errorOccurred, this, &StreamKeyPrivate::error );
 }
 
 QString StreamKeyPrivate::content() const
@@ -81,7 +69,7 @@ QString StreamKeyPrivate::errorString() const
 
 bool StreamKeyPrivate::parse( const QVariant& data )
 {
-    if( !data.canConvert( QVariant::Map ) ) {
+    if( !data.canConvert<QVariantMap>() ) {
         m_errorString = "Can't convert streamkey data to map";
         return false;
     }
@@ -122,22 +110,15 @@ bool StreamKeyPrivate::parse ( const QByteArray& data )
     bool ok;
     QVariant variant;
 
-#if QT_VERSION < QT_VERSION_CHECK( 5, 0, 0 )
-    QJson::Parser parser;
-    variant = parser.parse ( data, &ok );
-    if(!ok)
-        m_errorString = parser.errorString();
-#else
-    QJsonParseError *err = new QJsonParseError();
-    QJsonDocument doc = QJsonDocument::fromJson(data, err);
-    if (err->error != 0) {
-        m_errorString = err->errorString();
+    QJsonParseError err;
+    QJsonDocument doc = QJsonDocument::fromJson(data, &err);
+    if (err.error != QJsonParseError::NoError) {
+        m_errorString = err.errorString();
         ok = false;
     } else {
         variant = doc.toVariant();
         ok = true;
     }
-#endif
 
     if( ok )
     {

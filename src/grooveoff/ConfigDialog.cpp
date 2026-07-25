@@ -51,23 +51,23 @@ ConfigDialog::ConfigDialog( QWidget *parent )
 void ConfigDialog::setupConnections()
 {
     // connect all checkboxes to the same slot
-    QList< QCheckBox * > checkboxList = this->findChildren< QCheckBox * >();
-    foreach( QCheckBox *checkbox, checkboxList ) {
-        connect( checkbox, SIGNAL(toggled(bool)), SLOT(onConfigChanged()) );
+    const QList< QCheckBox * > checkboxList = this->findChildren< QCheckBox * >();
+    for( QCheckBox *checkbox : checkboxList ) {
+        connect( checkbox, &QCheckBox::toggled, this, &ConfigDialog::onConfigChanged );
     }
 
     // connect all spinboxes to the same slot
-    QList< QSpinBox * > spinboxList = this->findChildren< QSpinBox * >();
-    foreach( QSpinBox *spinbox, spinboxList ) {
-        connect( spinbox, SIGNAL(valueChanged(int)), SLOT(onConfigChanged()) );
+    const QList< QSpinBox * > spinboxList = this->findChildren< QSpinBox * >();
+    for( QSpinBox *spinbox : spinboxList ) {
+        connect( spinbox, &QSpinBox::valueChanged, this, &ConfigDialog::onConfigChanged );
     }
 
-    connect( ui->nowPlayingText, SIGNAL(textChanged(QString)), SLOT(onConfigChanged()) );
-    connect( ui->cancelButton, SIGNAL(clicked()), SLOT(close()) );
-    connect( ui->restoreButton, SIGNAL(clicked()), SLOT(restoreDefaults()) );
-    connect( ui->applyButton, SIGNAL(clicked()), SLOT(saveSettings()) );
-    connect( ui->okButton, SIGNAL(clicked()), SLOT(okClicked()) );
-    connect( ui->contentsWidget, SIGNAL(currentRowChanged(int)), SLOT(switchPage(int)) );
+    connect( ui->nowPlayingText, &NamingSchema::textChanged, this, &ConfigDialog::onConfigChanged );
+    connect( ui->cancelButton, &QPushButton::clicked, this, &ConfigDialog::close );
+    connect( ui->restoreButton, &QPushButton::clicked, this, &ConfigDialog::restoreDefaults );
+    connect( ui->applyButton, &QPushButton::clicked, this, &ConfigDialog::saveSettings );
+    connect( ui->okButton, &QPushButton::clicked, this, &ConfigDialog::okClicked );
+    connect( ui->contentsWidget, &QListWidget::currentRowChanged, this, &ConfigDialog::switchPage );
 }
 
 void ConfigDialog::setupGraphicElements()
@@ -89,15 +89,15 @@ void ConfigDialog::setupGraphicElements()
 
 void ConfigDialog::setupSettingCategories()
 {
-    QString generalString = trUtf8( "General" );
-    QString performanceString = trUtf8( "Performance" );
+    QString generalString = tr( "General" );
+    QString performanceString = tr( "Performance" );
 
     QFont boldFont;
     boldFont.setBold( true );
     QFontMetrics fmText( boldFont );
 
     // adapat column width to translated strings
-    int maxWidth = qMax(fmText.width( generalString ), fmText.width( performanceString ));
+    int maxWidth = qMax(fmText.horizontalAdvance( generalString ), fmText.horizontalAdvance( performanceString ));
 
     ui->contentsWidget->setFixedWidth( maxWidth + 20 /*margin*/ );
     
@@ -125,15 +125,15 @@ void ConfigDialog::setupTagElements()
                << QLatin1String( "%album" )
                << QLatin1String( "%track" );
     // xgettext: no-c-format
-    m_localizedTagNames << trUtf8( "%title" )
+    m_localizedTagNames << tr( "%title" )
                         // xgettext: no-c-format
-                        << trUtf8( "%artist" )
+                        << tr( "%artist" )
                         // xgettext: no-c-format
-                        << trUtf8( "%album" )
+                        << tr( "%album" )
                         // xgettext: no-c-format
-                        << trUtf8( "%track" );
+                        << tr( "%track" );
     // xgettext: no-c-format
-    m_localizedTimeTagName = trUtf8("%time" );
+    m_localizedTimeTagName = tr("%time" );
 
     QStringList itemsIcons;
     itemsIcons << QLatin1String( "view-media-lyrics" )   //%title

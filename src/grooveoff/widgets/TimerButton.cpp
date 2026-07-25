@@ -20,6 +20,7 @@
 #include "TimerButton.h"
 
 #include <QPainter>
+#include <QPainterPath>
 #include <QTimer>
 #include <QDebug>
 
@@ -28,7 +29,7 @@ TimerButton::TimerButton(QWidget *parent) :
 {
     countdownStarted_ = false;
     timer_ = new QTimer(this);
-    connect(timer_, SIGNAL(timeout()), this, SLOT(decreaseCounter()));
+    connect(timer_, &QTimer::timeout, this, &TimerButton::decreaseCounter);
 }
 
 TimerButton::~TimerButton()

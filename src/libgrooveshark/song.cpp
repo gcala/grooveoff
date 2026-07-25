@@ -1,11 +1,7 @@
 #include "song_p.h"
 
-#if QT_VERSION >= QT_VERSION_CHECK( 5, 0, 0 )
 #include <QJsonParseError>
 #include <QJsonDocument>
-#else
-#include <qjson/parser.h>
-#endif
 
 #include <QDebug>
 #include <QMetaProperty>
@@ -254,7 +250,7 @@ QString SongPrivate::errorString() const
 
 bool SongPrivate::parse( const QVariant& data )
 {
-    if( !data.canConvert( QVariant::Map ) ){
+    if( !data.canConvert<QVariantMap>() ){
         m_errorString = "  received data is not valid";
         return false;
     }
@@ -266,20 +262,20 @@ bool SongPrivate::parse( const QVariant& data )
     }
     
     QVariant v = songMap.value( QLatin1String( "SongID" ) );
-    if( !v.canConvert( QVariant::UInt ) ) {
+    if( !v.canConvert<uint>() ) {
         m_errorString = QLatin1String("Missing SongID");
         return false;
     }
     m_songID = v.toUInt();
 
     v = songMap.value( QLatin1String( "AlbumID" ) );
-    if( !v.canConvert( QVariant::UInt ) )
+    if( !v.canConvert<uint>() )
         m_albumID = 0;
     else
         m_albumID = v.toUInt();
 
     v = songMap.value( QLatin1String( "AlbumName" ) );
-    if( !v.canConvert( QVariant::String ) )
+    if( !v.canConvert<QString>() )
         m_albumName = QLatin1String("unknown");
     else {
         m_albumName = v.toString().replace('/','-');
@@ -290,76 +286,76 @@ bool SongPrivate::parse( const QVariant& data )
 
     if(!m_fromPlaylist) {
         v = songMap.value( QLatin1String( "ArtistCoverArtFilename" ) );
-        if( !v.canConvert( QVariant::String ) )
+        if( !v.canConvert<QString>() )
             m_artistCoverArtFilename = QString();
         else
             m_artistCoverArtFilename = v.toString();
     }
 
     v = songMap.value( QLatin1String( "ArtistID" ) );
-    if( !v.canConvert( QVariant::UInt ) )
+    if( !v.canConvert<uint>() )
         m_artistID = 0;
     else
         m_artistID = v.toUInt();
 
     v = songMap.value( QLatin1String( "ArtistName" ) );
-    if( !v.canConvert( QVariant::String ) )
+    if( !v.canConvert<QString>() )
         m_artistName = QString();
     else
         m_artistName = v.toString().replace('/','-');
 
     if(!m_fromPlaylist) {
         v = songMap.value( QLatin1String( "AvgDuration" ) );
-        if( !v.canConvert( QVariant::String ) )
+        if( !v.canConvert<QString>() )
             m_avgDuration = QString();
         else
             m_avgDuration = v.toString();
     }
 
     v = songMap.value( QLatin1String( "AvgRating" ) );
-    if( !v.canConvert( QVariant::String ) )
+    if( !v.canConvert<QString>() )
         m_avgRating = QString();
     else
         m_avgRating = v.toString();
 
     v = songMap.value( QLatin1String( "CoverArtFilename" ) );
-    if( !v.canConvert( QVariant::String ) )
+    if( !v.canConvert<QString>() )
         m_coverArtFilename = QString();
     else
         m_coverArtFilename = v.toString();
 
     v = songMap.value( QLatin1String( "EstimateDuration" ) );
-    if( !v.canConvert( QVariant::String ) )
+    if( !v.canConvert<QString>() )
         m_coverArtFilename = QString();
     else
         m_estimateDuration = v.toString();
 
     v = songMap.value( QLatin1String( "Flags" ) );
-    if( !v.canConvert( QVariant::ULongLong ) )
+    if( !v.canConvert<qulonglong>() )
         m_flags = 0;
     m_flags = v.toULongLong();
 
     v = songMap.value( QLatin1String( "IsLowBitrateAvailable" ) );
-    if( !v.canConvert( QVariant::Bool ) )
+    if( !v.canConvert<bool>() )
         m_isLowBitrateAvailable = false;
     else
         m_isLowBitrateAvailable = v.toBool();
 
     v = songMap.value( QLatin1String( "IsVerified" ) );
-    if( !v.canConvert( QVariant::Bool ) )
+    if( !v.canConvert<bool>() )
         m_isVerified = false;
     else
         m_isVerified = v.toBool();
 
     v = songMap.value( QLatin1String( "Popularity" ) );
-    if( !v.canConvert( QVariant::ULongLong ) )
+    if( !v.canConvert<qulonglong>() )
         m_popularity = 0;
     else
         m_popularity = v.toULongLong();
 
     if(!m_fromPlaylist) {
         v = songMap.value( QLatin1String( "PopularityIndex" ) );
-        if( !v.canConvert( QVariant::ULongLong ) )
+        if( !v.canConvert<qulonglong>() )
             m_popularityIndex = 0;
         else
             m_popularityIndex = v.toULongLong();
@@ -367,7 +363,7 @@ bool SongPrivate::parse( const QVariant& data )
 
     if(!m_fromPlaylist) {
         v = songMap.value( QLatin1String( "RawScore" ) );
-        if( !v.canConvert( QVariant::ULongLong ) )
+        if( !v.canConvert<qulonglong>() )
             m_rawScore = 0;
         else
             m_rawScore = v.toULongLong();
@@ -375,34 +371,34 @@ bool SongPrivate::parse( const QVariant& data )
 
     if(!m_fromPlaylist) {
         v = songMap.value( QLatin1String( "Score" ) );
-        if( !v.canConvert( QVariant::Double ) )
+        if( !v.canConvert<double>() )
             m_score = 0;
         else
             m_score = v.toDouble();
     }
 
     v = songMap.value( QLatin1String( m_fromPlaylist ? "Name" : "SongName" ) );
-    if( !v.canConvert( QVariant::String ) )
+    if( !v.canConvert<QString>() )
         m_songName = QString();
     else
         m_songName = v.toString().replace('/','-');
 
     if(!m_fromPlaylist) {
         v = songMap.value( QLatin1String( "TSAdded" ) );
-        if( !v.canConvert( QVariant::String ) )
+        if( !v.canConvert<QString>() )
             m_tsAdded = QString();
         else
             m_tsAdded = v.toString();
     }
 
     v = songMap.value( QLatin1String( "TrackNum" ) );
-    if( !v.canConvert( QVariant::UInt ) )
+    if( !v.canConvert<uint>() )
         m_trackNum = 0;
     else
         m_trackNum = v.toUInt();
 
     v = songMap.value( QLatin1String( "Year" ) );
-    if( !v.canConvert( QVariant::UInt ) )
+    if( !v.canConvert<uint>() )
         m_year = 0;
     else
         m_year = v.toUInt();
@@ -415,20 +411,15 @@ bool SongPrivate::parse ( const QByteArray& data )
     bool ok;
     QVariant variant;
 
-#if QT_VERSION < QT_VERSION_CHECK( 5, 0, 0 )
-    QJson::Parser parser;
-    variant = parser.parse ( data, &ok );
-#else
-    QJsonParseError *err = new QJsonParseError();
-    QJsonDocument doc = QJsonDocument::fromJson(data, err);
-    if (err->error != 0) {
-        qDebug() << err->errorString();
+    QJsonParseError err;
+    QJsonDocument doc = QJsonDocument::fromJson(data, &err);
+    if (err.error != QJsonParseError::NoError) {
+        qDebug() << err.errorString();
         ok = false;
     } else {
         variant = doc.toVariant();
         ok = true;
     }
-#endif
 
     if( ok )
     {
@@ -684,7 +675,7 @@ QString Song::errorString() const
 QDataStream& operator<<( QDataStream& dataStream, const SongPtr song )
 {
     for(int i=0; i< song->metaObject()->propertyCount(); ++i) {
-        if(song->metaObject()->property(i).isStored(song.data())) {
+        if(song->metaObject()->property(i).isStored()) {
             dataStream << song->metaObject()->property(i).read(song.data());
         }
     }
@@ -694,7 +685,7 @@ QDataStream& operator<<( QDataStream& dataStream, const SongPtr song )
 QDataStream & operator>>(QDataStream & dataStream, SongPtr song) {
     QVariant var;
     for(int i = 0; i < song->metaObject()->propertyCount(); ++i) {
-        if(song->metaObject()->property(i).isStored(song.data())) {
+        if(song->metaObject()->property(i).isStored()) {
             dataStream >> var;
             song->metaObject()->property(i).write(song.data(), var);
         }

@@ -7,9 +7,7 @@
 #include <QDir>
 #include <QDebug>
 
-#if QT_VERSION >= QT_VERSION_CHECK( 5, 0, 0 )
 #include <QUrlQuery>
-#endif
 
 using namespace GrooveShark;
 
@@ -24,9 +22,9 @@ DownloaderPrivate::DownloaderPrivate ( Downloader* qq, QString path, QString fil
 {
     m_streamKey = ApiRequest::instance()->streamKey(id, token);
 
-    connect( m_streamKey.data(), SIGNAL(finished()), SLOT(streamKeyFinished()) );
-    connect( m_streamKey.data(), SIGNAL(parseError()), SLOT(streamKeyError()) );
-    connect( m_streamKey.data(), SIGNAL(requestError(QNetworkReply::NetworkError)), SLOT(streamKeyError()) );
+    connect( m_streamKey.data(), &StreamKey::finished, this, &DownloaderPrivate::streamKeyFinished );
+    connect( m_streamKey.data(), &StreamKey::parseError, this, &DownloaderPrivate::streamKeyError );
+    connect( m_streamKey.data(), &StreamKey::requestError, this, &DownloaderPrivate::streamKeyError );
 }
 
 QString DownloaderPrivate::errorString() const
@@ -59,7 +57,7 @@ void DownloaderPrivate::streamKeyFinished()
     QString key = m_streamKey->content();
     QString ip = m_streamKey->ip();
 
-    connect( this, SIGNAL(finished(QNetworkReply*)), SLOT(onFinished(QNetworkReply*)) );
+    connect( this, &QNetworkAccessManager::finished, this, &DownloaderPrivate::onFinished );
 
     m_file = new QFile;
     m_file->setFileName(m_path + QDir::separator() + m_fileName);
@@ -78,11 +76,7 @@ void DownloaderPrivate::streamKeyFinished()
         return;
     }
 
-#if QT_VERSION >= QT_VERSION_CHECK( 5, 0, 0 )
     QUrlQuery postData;
-#else
-    QUrl postData;
-#endif
 
     postData.addQueryItem( QLatin1String( "streamKey" ), m_streamKey->content() );
 
@@ -92,15 +86,11 @@ void DownloaderPrivate::streamKeyFinished()
     m_mainRequest.setUrl( QUrl( QString( "http://%1/stream.php" ).arg( m_streamKey->ip() ) ) );
     m_mainRequest.setHeader( QNetworkRequest::ContentTypeHeader, QLatin1String( "application/x-www-form-urlencoded" ) );
 
-#if QT_VERSION >= QT_VERSION_CHECK( 5, 0, 0 )
     m_reply = post( m_mainRequest, postData.query( QUrl::EncodeUnicode ).toLatin1() );
-#else
-    m_reply = post( m_mainRequest, postData.encodedQuery() );
-#endif
 
-    connect( m_reply, SIGNAL(downloadProgress(qint64,qint64)), SLOT(onDownloadProgress(qint64,qint64)) );
-    connect( m_reply, SIGNAL(readyRead()), SLOT(onReadyRead()) );
-    connect( m_reply, SIGNAL(finished()), SLOT(onReplyFinished()) );
+    connect( m_reply, &QNetworkReply::downloadProgress, this, &DownloaderPrivate::onDownloadProgress );
+    connect( m_reply, &QNetworkReply::readyRead, this, &DownloaderPrivate::onReadyRead );
+    connect( m_reply, &QNetworkReply::finished, this, &DownloaderPrivate::onReplyFinished );
 }
 
 void DownloaderPrivate::streamKeyError()

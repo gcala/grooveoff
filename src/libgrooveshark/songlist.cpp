@@ -2,12 +2,10 @@
 
 #include <QDebug>
 
-#if QT_VERSION >= QT_VERSION_CHECK( 5, 0, 0 )
 #include <QJsonParseError>
 #include <QJsonDocument>
-#else
-#include <qjson/parser.h>
-#endif
+
+#include <utility>
 
 using namespace GrooveShark;
 
@@ -17,9 +15,8 @@ SongListPrivate::SongListPrivate( SongList* qq, QNetworkReply* reply ) :
     m_songs( QVariant() ),
     m_error( QNetworkReply::NoError )
 {
-    QObject::connect( m_reply, SIGNAL(finished()), this, SLOT(parseData()) );
-    QObject::connect( m_reply, SIGNAL(error(QNetworkReply::NetworkError)),
-                      this, SLOT(error(QNetworkReply::NetworkError)) );
+    QObject::connect( m_reply, &QNetworkReply::finished, this, &SongListPrivate::parseData );
+    QObject::connect( m_reply, &QNetworkReply::errorOccurred, this, &SongListPrivate::error );
 }
 
 SongListPrivate::~SongListPrivate()
@@ -64,7 +61,7 @@ bool SongListPrivate::parse( const QVariant& data )
         varList = data.toMap()[QLatin1String("result")].toMap()[QLatin1String("result")].toList();
 
     QVariantList songList;
-    foreach( QVariant var, varList )
+    for( const QVariant &var : std::as_const(varList) )
     {
         QVariant v;
         v.setValue<GrooveShark::SongPtr>( SongPtr( new Song( var, isPlaylist ) ) );
@@ -79,22 +76,15 @@ bool SongListPrivate::parse( const QByteArray& data )
     bool ok;
     QVariant variant;
 
-#if QT_VERSION >= QT_VERSION_CHECK( 5, 0, 0 )
-    QJsonParseError *err = new QJsonParseError();
-    QJsonDocument doc = QJsonDocument::fromJson(data, err);
-    if (err->error != 0) {
-        m_errorString = err->errorString();
+    QJsonParseError err;
+    QJsonDocument doc = QJsonDocument::fromJson(data, &err);
+    if (err.error != QJsonParseError::NoError) {
+        m_errorString = err.errorString();
         ok = false;
     } else {
         variant = doc.toVariant();
         ok = true;
     }
-#else
-    QJson::Parser parser;
-    variant = parser.parse ( data, &ok );
-    if(!ok)
-        m_errorString = parser.errorString();
-#endif
 
     if( ok )
     {

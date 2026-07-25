@@ -22,60 +22,50 @@
 #include "Playlist.h"
 #include "ActionCollection.h"
 
-#include <QTextCodec>
 #include <QLibraryInfo>
 #include <QTranslator>
+
+#include <utility>
 
 #define SHARE_PATH "/../share/apps/grooveoff"
 
 App::App( int & argc, char ** argv ):
-    QtSingleApplication( argc, argv )
+    QApplication( argc, argv )
+    , m_appTranslator( new QTranslator( this ) )
+    , m_qtTranslator( new QTranslator( this ) )
 {
-
-    if(isRunning())
-        return;
-
-    // set application info
+    // set application info: it has to happen before anything else, the single
+    // instance socket name is derived from it
     QCoreApplication::setOrganizationName( QLatin1String( "gcala" ) );
     QCoreApplication::setOrganizationDomain( QLatin1String( "gcala.blogger.com" ) );
     setApplicationName( QLatin1String( "grooveoff" ) );
 
-#if QT_VERSION < QT_VERSION_CHECK( 5, 0, 0 )
-    // Set the codec to UTF-8
-    QTextCodec::setCodecForLocale( QTextCodec::codecForName( "UTF-8" ) );
-    QTextCodec::setCodecForCStrings( QTextCodec::codecForName( "UTF-8" ) );
-#endif
+    loadTranslations();
 
-    QTranslator appTranslator; // application translator
-    QTranslator qtTranslator;  // qt translator
-    QStringList uiLanguages;   // enabled languages
-    // uiLanguages crashes on Windows with 4.8.0 release builds
-#if ( QT_VERSION >= 0x040801 ) || ( QT_VERSION >= 0x040800 && !defined( Q_OS_WIN ) )
-    uiLanguages = QLocale::system().uiLanguages();
-#else
-    uiLanguages << QLocale::system().name();
-#endif
+    // application icon
+    setWindowIcon( QIcon( QLatin1String( ":/resources/grooveoff.png" ) ) );
+}
+
+void App::loadTranslations()
+{
+    QStringList uiLanguages = QLocale::system().uiLanguages(); // enabled languages
 
     // the path to translations
     const QString &appTrPath = QCoreApplication::applicationDirPath()
             + QLatin1String( SHARE_PATH "/translations" );
 
-    foreach (QString locale, uiLanguages) {
-#if (QT_VERSION >= 0x050000)
-        locale = QLocale(locale).name();
-#else
-        locale.replace( QLatin1Char( '-' ), QLatin1Char( '_' ) ); // work around QTBUG-25973
-#endif
-        if ( appTranslator.load( QLatin1String( "grooveoff_" ) + locale, appTrPath ) ) {
-            installTranslator(&appTranslator);
-            
+    for (const QString &uiLanguage : std::as_const(uiLanguages)) {
+        const QString locale = QLocale(uiLanguage).name();
+        if ( m_appTranslator->load( QLatin1String( "grooveoff_" ) + locale, appTrPath ) ) {
+            installTranslator( m_appTranslator );
+
             // the path to qt translations
-            const QString &qtTrPath = QLibraryInfo::location( QLibraryInfo::TranslationsPath );
+            const QString &qtTrPath = QLibraryInfo::path( QLibraryInfo::TranslationsPath );
             // translation file name
             const QString &qtTrFile = QLatin1String( "qt_" ) + locale;
             // Binary installer puts Qt tr files into creatorTrPath
-            if (qtTranslator.load( qtTrFile, qtTrPath ) || qtTranslator.load( qtTrFile, appTrPath ) ) {
-                installTranslator( &qtTranslator );
+            if ( m_qtTranslator->load( qtTrFile, qtTrPath ) || m_qtTranslator->load( qtTrFile, appTrPath ) ) {
+                installTranslator( m_qtTranslator );
                 setProperty( "qtc_locale", locale );
             }
             break;
@@ -87,10 +77,10 @@ App::App( int & argc, char ** argv ):
             break;
         }
     }
+}
 
-    // application icon
-    setWindowIcon( QIcon( QLatin1String( ":/resources/grooveoff.png" ) ) );
-
+void App::start()
+{
     // Creating MainWindow
     m_mainWindow = new MainWindow();
 
@@ -101,6 +91,19 @@ App::App( int & argc, char ** argv ):
     mainWindow()->setAttribute( Qt::WA_DeleteOnClose, false );
 
     mainWindow()->show();
+}
+
+/*!
+  \brief raiseWindow: bring the window to the front, on behalf of a second instance
+*/
+void App::raiseWindow()
+{
+    if( !m_mainWindow )
+        return;
+
+    mainWindow()->show();
+    mainWindow()->raise();
+    mainWindow()->activateWindow();
 }
 
 App::~App()
