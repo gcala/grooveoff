@@ -24,6 +24,8 @@
 #include <QMenuBar>
 #include <QMenu>
 
+#include <utility>
+
 namespace The {
     static ActionCollection* s_ActionCollection_instance = 0;
 
@@ -44,8 +46,8 @@ ActionCollection::ActionCollection( )
 ActionCollection::~ActionCollection()
 {
     // delete all actions before exiting
-    foreach( const QString &key, m_actionCollection.keys() )
-        delete m_actionCollection[ key ];
+    for( QAction *action : std::as_const( m_actionCollection ) )
+        delete action;
 }
 
 void ActionCollection::initActions()

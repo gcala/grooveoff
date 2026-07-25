@@ -33,14 +33,15 @@
 DownloadList::DownloadList( QWidget *parent ) :
     QListWidget( parent )
 {
-    connect( model(), SIGNAL(layoutChanged()), SLOT(reloadPlaylist()) );
+    connect( model(), &QAbstractItemModel::layoutChanged, this, &DownloadList::reloadPlaylist );
 }
 
 void DownloadList::reloadPlaylist()
 {
     The::playlist()->clear();
     
-    foreach( QAction *action, The::actionCollection()->getMenu( "playlistMenu" )->actions() ) {
+    const QList< QAction * > playlistActions = The::actionCollection()->getMenu( "playlistMenu" )->actions();
+    for( QAction *action : playlistActions ) {
         The::actionCollection()->getMenu( "playlistMenu" )->removeAction( action );
         delete action;
     }
@@ -51,7 +52,7 @@ void DownloadList::reloadPlaylist()
             PlaylistAction *action = new PlaylistAction( ITEM( i )->playlistItem(), The::actionCollection()->getMenu( "playlistMenu" ) );
             The::actionCollection()->getMenu( "playlistMenu" )->addAction( (QAction *)action );
             
-            connect( action, SIGNAL(triggered()),  SLOT(actionTriggered()) );
+            connect( action, &QAction::triggered, this, &DownloadList::actionTriggered );
         }
     }
 }

@@ -47,7 +47,7 @@ SvgHandler::SvgHandler( QObject* parent )
     : QObject( parent )
     , m_themeFile(  QCoreApplication::applicationDirPath() + QLatin1String( SHARE_PATH "/resources/default-theme.svg" ) )
 {
-    connect( The::paletteHandler(), SIGNAL(newPalette(QPalette)), this, SLOT(discardCache()) );
+    connect( The::paletteHandler(), &PaletteHandler::newPalette, this, &SvgHandler::discardCache );
 }
 
 SvgHandler::~SvgHandler()

@@ -56,9 +56,9 @@ AboutDialog::~AboutDialog()
 
 void AboutDialog::setupConnections()
 {
-    connect( ui->closeButton, SIGNAL(clicked()), SLOT(close()) );
-    connect( ui->gpl3Button, SIGNAL(clicked()), SLOT(openGplPage()) );
-    connect( ui->donateButton, SIGNAL(clicked()), SLOT(openDonatePage()) );
+    connect( ui->closeButton, &QPushButton::clicked, this, &AboutDialog::close );
+    connect( ui->gpl3Button, &QPushButton::clicked, this, &AboutDialog::openGplPage );
+    connect( ui->donateButton, &QPushButton::clicked, this, &AboutDialog::openDonatePage );
 }
 
 void AboutDialog::setupGraphicElements()

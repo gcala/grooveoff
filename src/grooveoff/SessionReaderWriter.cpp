@@ -129,7 +129,7 @@ bool SessionReaderWriter::write( const QString& file, QList< PlaylistItemPtr > t
     stream.writeStartDocument();
     stream.writeStartElement( QLatin1String( "playlist" ) );
 
-    foreach( const PlaylistItemPtr &track, tracks ) {
+    for( const PlaylistItemPtr &track : tracks ) {
         stream.writeStartElement( QLatin1String( "item" ) );
         for( int j = 0; j < track->metaObject()->propertyCount(); j++ ) {
             if( track->metaObject()->property( j ).isStored() ) {

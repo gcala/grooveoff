@@ -29,8 +29,7 @@ SvgButton::SvgButton( QWidget *parent )
     , m_isPlaying(false)
     , m_fileExists(false)
 {
-    connect (this, SIGNAL(clicked()), 
-                   SLOT(clicked()) );
+    connect( this, &IconButton::clicked, this, &SvgButton::clicked );
 }
 
 void SvgButton::enterEvent( QEnterEvent * )

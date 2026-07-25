@@ -143,20 +143,20 @@ void PlayerWidget::setupButtonsType()
 
 void PlayerWidget::setupConnections()
 {
-    connect( m_timer, SIGNAL(timeout()), SLOT(switchPage()) );
-    connect( ui->previousButton, SIGNAL(buttonClicked()), SLOT(playPrevious()) );
-    connect( ui->playPauseButton, SIGNAL(buttonClicked()), SLOT(pauseResumePlaying()) );
-    connect( ui->nextButton, SIGNAL(buttonClicked()), SLOT(playNext()) );
-    connect( ui->timeLabel, SIGNAL(clicked()), SLOT(toggleTimeLabel()) );
-    connect( The::audioEngine(), SIGNAL(seeked(qint64,bool)), SLOT(tick(qint64,bool)) );
-    connect( The::audioEngine(), SIGNAL(stateChanged(GrooveOff::PlayerState)), SLOT(stateChanged(GrooveOff::PlayerState)) );
-    connect( The::audioEngine(), SIGNAL(sourceChanged()), SLOT(sourceChanged()) );
-    connect( The::audioEngine(), SIGNAL(removedPlayingTrack()), SLOT(removedPlayingTrack()) );
-    connect( The::audioEngine(), SIGNAL(volumeChanged(int)), ui->volume, SLOT(setValue(int)) );
-    connect( The::audioEngine(), SIGNAL(muteStateChanged(bool)), SLOT(muteStateChanged(bool)) );
-    connect( The::playlist(), SIGNAL(playlistChanged()), SLOT(reloadPreviousNextButtons()) );
-    connect( ui->volume, SIGNAL(valueChanged(int)), The::audioEngine(), SLOT(setVolume(int)) );
-    connect( ui->volume, SIGNAL(muteToggled(bool)), The::audioEngine(), SLOT(setMuted(bool)) );
+    connect( m_timer, &QTimer::timeout, this, &PlayerWidget::switchPage );
+    connect( ui->previousButton, &SvgButton::buttonClicked, this, &PlayerWidget::playPrevious );
+    connect( ui->playPauseButton, &SvgButton::buttonClicked, this, &PlayerWidget::pauseResumePlaying );
+    connect( ui->nextButton, &SvgButton::buttonClicked, this, &PlayerWidget::playNext );
+    connect( ui->timeLabel, &TimerLabel::clicked, this, &PlayerWidget::toggleTimeLabel );
+    connect( The::audioEngine(), &AudioEngine::seeked, this, &PlayerWidget::tick );
+    connect( The::audioEngine(), &AudioEngine::stateChanged, this, &PlayerWidget::stateChanged );
+    connect( The::audioEngine(), &AudioEngine::sourceChanged, this, &PlayerWidget::sourceChanged );
+    connect( The::audioEngine(), &AudioEngine::removedPlayingTrack, this, &PlayerWidget::removedPlayingTrack );
+    connect( The::audioEngine(), &AudioEngine::volumeChanged, ui->volume, &VolumeDial::setValue );
+    connect( The::audioEngine(), &AudioEngine::muteStateChanged, this, &PlayerWidget::muteStateChanged );
+    connect( The::playlist(), &Playlist::playlistChanged, this, &PlayerWidget::reloadPreviousNextButtons );
+    connect( ui->volume, &VolumeDial::valueChanged, The::audioEngine(), &AudioEngine::setVolume );
+    connect( ui->volume, &VolumeDial::muteToggled, The::audioEngine(), &AudioEngine::setMuted );
 
     // seek slider, which Phonon used to drive on its own
     connect( The::audioEngine(), &AudioEngine::trackLengthChanged, this, &PlayerWidget::trackLengthChanged );

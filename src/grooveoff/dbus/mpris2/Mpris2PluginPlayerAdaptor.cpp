@@ -28,6 +28,8 @@
 #include <QDBusMessage>
 #include <QDBusConnection>
 
+#include <utility>
+
 static QByteArray idFromPlaylistItem( const PlaylistItemPtr item )
 {
     return QByteArray( "/org/grooveoff/tid_" ) +
@@ -38,18 +40,18 @@ Mpris2PluginPlayerAdaptor::Mpris2PluginPlayerAdaptor( QObject *parent )
     : QDBusAbstractAdaptor( parent )
 {
     m_engine = The::audioEngine();
-    connect( m_engine, SIGNAL(sourceChanged()),
-                       SLOT(emitPropertiesChanged()) );
-    connect( m_engine, SIGNAL(stateChanged(GrooveOff::PlayerState)),
-                       SLOT(emitPropertiesChanged()) );
-    connect( m_engine, SIGNAL(volumeChanged(int)),
-                       SLOT(emitPropertiesChanged()) );
-    connect( m_engine, SIGNAL(seeked(qint64,bool)),
-                       SLOT(onSeeked(qint64,bool)) );
-    connect( m_engine, SIGNAL(seekableChanged(bool)),
-                       SLOT(emitPropertiesChanged()) );
-    connect( The::playlist(), SIGNAL(playlistChanged()),
-                              SLOT(emitPropertiesChanged()) );
+    connect( m_engine, &AudioEngine::sourceChanged,
+             this, &Mpris2PluginPlayerAdaptor::emitPropertiesChanged );
+    connect( m_engine, &AudioEngine::stateChanged,
+             this, &Mpris2PluginPlayerAdaptor::emitPropertiesChanged );
+    connect( m_engine, &AudioEngine::volumeChanged,
+             this, &Mpris2PluginPlayerAdaptor::emitPropertiesChanged );
+    connect( m_engine, &AudioEngine::seeked,
+             this, &Mpris2PluginPlayerAdaptor::onSeeked );
+    connect( m_engine, &AudioEngine::seekableChanged,
+             this, &Mpris2PluginPlayerAdaptor::emitPropertiesChanged );
+    connect( The::playlist(), &Playlist::playlistChanged,
+             this, &Mpris2PluginPlayerAdaptor::emitPropertiesChanged );
     syncProperties();
 }
 
@@ -276,7 +278,7 @@ void Mpris2PluginPlayerAdaptor::emitPropertiesChanged()
     syncProperties();
 
     QVariantMap map;
-    foreach( QLatin1String name, changedProps )
+    for( QLatin1String name : std::as_const(changedProps) )
         map.insert( name, m_props.value( name ) );
 
     QDBusMessage msg = QDBusMessage::createSignal(QLatin1String( "/org/mpris/MediaPlayer2" ),

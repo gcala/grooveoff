@@ -88,8 +88,8 @@ void MatchItem::setupWidgetsSizes()
 
 void MatchItem::setupConnections()
 {
-    connect( ui->downloadButton, SIGNAL(buttonClicked()), SLOT(downloadItem()) );
-    connect( m_playlistItem.data(), SIGNAL(reloadCover()), SLOT(loadCover()) );
+    connect( ui->downloadButton, &SvgButton::buttonClicked, this, &MatchItem::downloadItem );
+    connect( m_playlistItem.data(), &PlaylistItem::reloadCover, this, &MatchItem::loadCover );
 }
 
 void MatchItem::loadCover()

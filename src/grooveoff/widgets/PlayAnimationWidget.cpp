@@ -32,7 +32,7 @@ PlayAnimationWidget::PlayAnimationWidget(QWidget *parent) :
     QWidget(parent),
     animating_(false)
 {
-    connect(&timer_, SIGNAL(timeout()), SLOT(repaint()));
+    connect(&timer_, &QTimer::timeout, this, QOverload<>::of(&PlayAnimationWidget::repaint));
 
     for(int i = 0; i < NUM_BARS; i++) {
         currentHeights_.append(MIN_HEIGHT);

@@ -73,11 +73,11 @@ void SessionItem::setupUi()
 
 void SessionItem::setupConnections()
 {
-    connect(ui->multiFuncButton, SIGNAL(clicked()),
-                                 SLOT(multiFuncBtnClicked()));
-    
-    connect(ui->multiFuncButton, SIGNAL(countdownFinished()), 
-                                 SLOT(removeSession()));
+    connect(ui->multiFuncButton, &TimerButton::clicked,
+            this, &SessionItem::multiFuncBtnClicked);
+
+    connect(ui->multiFuncButton, &TimerButton::countdownFinished,
+            this, &SessionItem::removeSession);
 }
 
 void SessionItem::multiFuncBtnClicked()

@@ -29,7 +29,7 @@ PlaylistAction::PlaylistAction( const PlaylistItemPtr &track, QObject *parent )
 {
     setText( track->song()->songName() );
     
-    connect( m_track.data(), SIGNAL(stateChanged(GrooveOff::PlayerState)), SLOT(trackStateChanged(GrooveOff::PlayerState)) );
+    connect( m_track.data(), &PlaylistItem::stateChanged, this, &PlaylistAction::trackStateChanged );
     
     trackStateChanged( track->state() );
 }

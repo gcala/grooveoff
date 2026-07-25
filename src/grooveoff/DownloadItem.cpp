@@ -193,20 +193,20 @@ void DownloadItem::setupUi()
 */
 void DownloadItem::setupConnections()
 {
-    connect( m_playlistItem.data(), SIGNAL(reloadCover()), SLOT(loadCover()) );
-    connect( m_playlistItem.data(), SIGNAL(stateChanged(GrooveOff::PlayerState)), SLOT(setPlayerState(GrooveOff::PlayerState)) );
+    connect( m_playlistItem.data(), &PlaylistItem::reloadCover, this, &DownloadItem::loadCover );
+    connect( m_playlistItem.data(), &PlaylistItem::stateChanged, this, &DownloadItem::setPlayerState );
     
     if( m_context == GrooveOff::Download ) {
-        connect( ui->playButton, SIGNAL(buttonClicked()), SLOT(playSong()) );
-        connect( ui->openFolderButton, SIGNAL(buttonClicked()), SLOT(openFolder()) );
+        connect( ui->playButton, &SvgButton::buttonClicked, this, &DownloadItem::playSong );
+        connect( ui->openFolderButton, &SvgButton::buttonClicked, this, &DownloadItem::openFolder );
     }
 
-    connect( ui->timerButton, SIGNAL(clicked()), SLOT(timerButtonClicked()) );
-    connect( ui->timerButton, SIGNAL(countdownFinished()), SLOT(removeSong()) );
-    connect( ui->unqueueButton, SIGNAL(buttonClicked()), SLOT(unqueueItem()) );
-    connect( ui->stopDownloadButton, SIGNAL(buttonClicked()), SLOT(stopDownload()) );
-    connect( ui->deleteButton, SIGNAL(buttonClicked()), SLOT(deleteItem()) );
-    connect( ui->queueButton, SIGNAL(buttonClicked()), SLOT(queueItem()) );
+    connect( ui->timerButton, &TimerButton::clicked, this, &DownloadItem::timerButtonClicked );
+    connect( ui->timerButton, &TimerButton::countdownFinished, this, &DownloadItem::removeSong );
+    connect( ui->unqueueButton, &SvgButton::buttonClicked, this, &DownloadItem::unqueueItem );
+    connect( ui->stopDownloadButton, &SvgButton::buttonClicked, this, &DownloadItem::stopDownload );
+    connect( ui->deleteButton, &SvgButton::buttonClicked, this, &DownloadItem::deleteItem );
+    connect( ui->queueButton, &SvgButton::buttonClicked, this, &DownloadItem::queueItem );
 }
 
 /*!
@@ -350,13 +350,11 @@ void DownloadItem::startDownload()
                                                          m_playlistItem->song()->songID(),
                                                          Utility::token );
 
-    connect( m_downloader.data(), SIGNAL(progress(qint64,qint64)),
-                                  SLOT(setProgress(qint64,qint64))
-           );
+    connect( m_downloader.data(), &Downloader::progress,
+             this, &DownloadItem::setProgress );
 
-    connect( m_downloader.data(), SIGNAL(downloadCompleted(bool)),
-                                  SLOT(downloadFinished(bool))
-           );
+    connect( m_downloader.data(), &Downloader::downloadCompleted,
+             this, QOverload<bool>::of(&DownloadItem::downloadFinished) );
 
 //    qDebug() << "GrooveOff ::" << "Started download of" << m_playlistItem->song()->songName();
 }

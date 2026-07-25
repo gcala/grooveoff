@@ -71,6 +71,8 @@ using namespace GrooveShark;
 // version include
 #include <../config-version.h>
 
+#include <utility>
+
 Q_DECLARE_METATYPE( QList<int> )
 
 QPointer<MainWindow> MainWindow::s_instance;
@@ -147,7 +149,7 @@ MainWindow::~MainWindow()
         QDir coversPath( Utility::coversCachePath );
         QStringList covers = coversPath.entryList( QStringList() << "*.jpg" << "*.png", QDir::Files, QDir::Name );
 
-        foreach( const QString &cover, covers ) {
+        for( const QString &cover : std::as_const(covers) ) {
             QFile::remove( Utility::coversCachePath + QDir::separator() + cover );
         }
     }
@@ -293,17 +295,17 @@ void MainWindow::setupConnections()
     // <Menu Items>
     ActionCollection *ac = The::actionCollection();
 
-    connect( ac->getAction( "actionClose" ), SIGNAL(triggered()), SLOT(close()) );
-    connect( ac->getAction( "actionDonate" ), SIGNAL(triggered()), SLOT(donate()) );
-    connect( ac->getAction( "actionConfigure" ), SIGNAL(triggered()), SLOT(configure()) );
-    connect( ac->getAction( "actionCompact" ), SIGNAL(triggered()), SLOT(setCompactLayout()) );
-    connect( ac->getAction( "actionWide" ), SIGNAL(triggered()), SLOT(setWideLayout()) );
-    connect( ac->getAction( "miniPlayer" ), SIGNAL(triggered()), SLOT(setMiniPlayerLayout()) );
-    connect( ac->getAction( "actionNewToken" ), SIGNAL(triggered()), SLOT(getToken()) );
-    connect( ac->getAction( "actionStopDownloads" ), SIGNAL(triggered(bool)), ui->downloadList, SLOT(abortAllDownloads()) );
-    connect( ac->getAction( "actionRemoveFailed" ), SIGNAL(triggered(bool)), ui->downloadList, SLOT(removeFailedAborted()) );
-    connect( ac->getAction( "actionClearDownloadList" ), SIGNAL(triggered(bool)), ui->downloadList, SLOT(removeDownloaded()) );
-    connect( ac->getAction( "actionAbout" ), SIGNAL(triggered()), SLOT(about()) );
+    connect( ac->getAction( "actionClose" ), &QAction::triggered, this, &MainWindow::close );
+    connect( ac->getAction( "actionDonate" ), &QAction::triggered, this, &MainWindow::donate );
+    connect( ac->getAction( "actionConfigure" ), &QAction::triggered, this, &MainWindow::configure );
+    connect( ac->getAction( "actionCompact" ), &QAction::triggered, this, &MainWindow::setCompactLayout );
+    connect( ac->getAction( "actionWide" ), &QAction::triggered, this, &MainWindow::setWideLayout );
+    connect( ac->getAction( "miniPlayer" ), &QAction::triggered, this, &MainWindow::setMiniPlayerLayout );
+    connect( ac->getAction( "actionNewToken" ), &QAction::triggered, this, &MainWindow::getToken );
+    connect( ac->getAction( "actionStopDownloads" ), &QAction::triggered, ui->downloadList, &DownloadList::abortAllDownloads );
+    connect( ac->getAction( "actionRemoveFailed" ), &QAction::triggered, ui->downloadList, &DownloadList::removeFailedAborted );
+    connect( ac->getAction( "actionClearDownloadList" ), &QAction::triggered, ui->downloadList, &DownloadList::removeDownloaded );
+    connect( ac->getAction( "actionAbout" ), &QAction::triggered, this, &MainWindow::about );
 
 //     connect( ac->getAction( "actionSaveSessionAs" ), SIGNAL(triggered()),
 //                                                     SLOT(saveSessionAs()) );
@@ -311,16 +313,16 @@ void MainWindow::setupConnections()
 //     connect( ac->getAction( "actionManageSessions" ), SIGNAL(triggered()),
 //                                                      SLOT(openSessionManager()) );
 
-    connect( ac->getAction( "actionQtAbout" ), SIGNAL(triggered()), qApp, SLOT(aboutQt()) );
+    connect( ac->getAction( "actionQtAbout" ), &QAction::triggered, qApp, &QApplication::aboutQt );
 
     // gui widgets
-    connect( ui->searchButton, SIGNAL(buttonClicked()), SLOT(beginSearch()) );
-    connect( ui->browseButton, SIGNAL(buttonClicked()), SLOT(selectFolder()) );
-    connect( ui->searchLine, SIGNAL(returnPressed()), SLOT(beginSearch()) );
-    connect( ui->artistsCB, SIGNAL(activated(int)), SLOT(artistChanged()) );
-    connect( ui->albumsCB, SIGNAL(activated(int)), SLOT(albumChanged()) );
-    connect( ui->batchDownloadButton, SIGNAL(buttonClicked()), SLOT(batchDownload()) );
-    connect( ui->pathLine, SIGNAL(textChanged(QString)), SLOT(changeDestinationPath()) );
+    connect( ui->searchButton, &SvgButton::buttonClicked, this, &MainWindow::beginSearch );
+    connect( ui->browseButton, &SvgButton::buttonClicked, this, &MainWindow::selectFolder );
+    connect( ui->searchLine, &QLineEdit::returnPressed, this, &MainWindow::beginSearch );
+    connect( ui->artistsCB, &QComboBox::activated, this, &MainWindow::artistChanged );
+    connect( ui->albumsCB, &QComboBox::activated, this, &MainWindow::albumChanged );
+    connect( ui->batchDownloadButton, &SvgButton::buttonClicked, this, &MainWindow::batchDownload );
+    connect( ui->pathLine, &QLineEdit::textChanged, this, &MainWindow::changeDestinationPath );
 
     // network
     if( QNetworkInformation::loadDefaultBackend() && QNetworkInformation::instance() ) {
@@ -497,9 +499,9 @@ void MainWindow::beginSearch()
 
     m_songList = m_api->songs( ui->searchLine->text(), Utility::token );
 
-    connect( m_songList.data(), SIGNAL(finished()),  SLOT(searchFinished()) );
-    connect( m_songList.data(), SIGNAL(parseError()), SLOT(searchError()) );
-    connect( m_songList.data(), SIGNAL(requestError(QNetworkReply::NetworkError)), SLOT(searchError()) );
+    connect( m_songList.data(), &SongList::finished, this, &MainWindow::searchFinished );
+    connect( m_songList.data(), &SongList::parseError, this, &MainWindow::searchError );
+    connect( m_songList.data(), &SongList::requestError, this, &MainWindow::searchError );
 
     // force downloadList repaint to prevent blank items
     ui->downloadList->repaint();
@@ -515,9 +517,9 @@ void MainWindow::getToken()
 
     m_token = m_api->token();
 
-    connect( m_token.data(), SIGNAL(finished()), SLOT(tokenRequestFinished()) );
-    connect( m_token.data(), SIGNAL(parseError()), SLOT(tokenRequestError()) );
-    connect( m_token.data(), SIGNAL(requestError(QNetworkReply::NetworkError)), SLOT(tokenRequestError()) );
+    connect( m_token.data(), &Token::finished, this, &MainWindow::tokenRequestFinished );
+    connect( m_token.data(), &Token::parseError, this, &MainWindow::tokenRequestError );
+    connect( m_token.data(), &Token::requestError, this, &MainWindow::tokenRequestError );
 }
 
 void MainWindow::tokenRequestFinished()
@@ -587,7 +589,7 @@ void MainWindow::searchFinished()
         ui->matchList->setItemWidget( wItem, matchItem );
         wItem->setSizeHint( QSize( Utility::coverSize + Utility::marginSize * 2,Utility::coverSize + Utility::marginSize * 2 ) );
         
-        connect( matchItem, SIGNAL(download(PlaylistItemPtr)), SLOT(downloadPlaylistItem(PlaylistItemPtr)) );
+        connect( matchItem, &MatchItem::download, this, &MainWindow::downloadPlaylistItem );
 
         // don't freeze gui inserting items
         QCoreApplication::processEvents();
@@ -721,21 +723,17 @@ void MainWindow::addDownloadItem( const PlaylistItemPtr &playlistItem )
     // build a DownloadItem with all required data
     DownloadItem *item = new DownloadItem( playlistItem, this );
 
-    connect( item,             SIGNAL(reloadPlaylist()),
-             ui->downloadList, SLOT(reloadPlaylist()) 
-           );
-    
-    connect( item,             SIGNAL(removeMe(DownloadItem*)), 
-             ui->downloadList, SLOT(removeItem(DownloadItem*)) 
-           );
-    
-    connect( item, SIGNAL(downloadFinished()), 
-                   SLOT(freeDownloadSlot()) 
-           );
-    
-    connect( item, SIGNAL(addToQueue(DownloadItem*)), 
-                   SLOT(addItemToQueue(DownloadItem*)) 
-           );
+    connect( item,             &DownloadItem::reloadPlaylist,
+             ui->downloadList, &DownloadList::reloadPlaylist );
+
+    connect( item,             &DownloadItem::removeMe,
+             ui->downloadList, &DownloadList::removeItem );
+
+    connect( item, QOverload<>::of(&DownloadItem::downloadFinished),
+             this, &MainWindow::freeDownloadSlot );
+
+    connect( item, &DownloadItem::addToQueue,
+             this, &MainWindow::addItemToQueue );
 
     if( !playlistItem->fileInfo().exists() ) {
         // check if download m_queue is full
@@ -1054,7 +1052,7 @@ void MainWindow::loadSession()
 
     QList<PlaylistItemPtr> items = The::sessionReaderWriter()->read( m_sessionFilePath + m_sessionFileName + QLatin1String( ".xml" ) );
 
-    foreach( PlaylistItemPtr item, items ) {
+    for( const PlaylistItemPtr &item : std::as_const(items) ) {
         // Decide if show cover arts
         if( m_loadCovers && !QFile::exists( Utility::coversCachePath + item->song()->coverArtFilename() ) ) {
             m_coverManager->appendItem( item );
@@ -1074,7 +1072,8 @@ void MainWindow::loadSession()
 // each file will have a menu entry and a qaction
 void MainWindow::loadSessions()
 {
-    foreach( QAction *action, The::actionCollection()->getMenu( "sessionsMenu" )->actions() ) {
+    const QList< QAction * > sessionActions = The::actionCollection()->getMenu( "sessionsMenu" )->actions();
+    for( QAction *action : sessionActions ) {
         The::actionCollection()->getMenu( "sessionsMenu" )->removeAction( action );
         delete action;
     }
@@ -1082,15 +1081,13 @@ void MainWindow::loadSessions()
     QDir sessionPath( m_sessionFilePath );
     QStringList sessions = sessionPath.entryList( QStringList() << "*.xml", QDir::Files, QDir::Name );
 
-    foreach( QString session, sessions ) {
+    for( QString session : std::as_const(sessions) ) {
         QAction *action = new QAction( session.remove( ".xml", Qt::CaseInsensitive ), The::actionCollection()->getMenu( "sessionsMenu" ) );
         if( session == m_sessionFileName )
             action->setFont( Utility::font( QFont::Bold ) );
         The::actionCollection()->getMenu( "sessionsMenu" )->addAction( action );
         
-        connect( action, SIGNAL(triggered()),
-                        SLOT(loadSessionFile())
-               );
+        connect( action, &QAction::triggered, this, &MainWindow::loadSessionFile );
     }
 }
 

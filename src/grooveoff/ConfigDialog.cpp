@@ -51,23 +51,23 @@ ConfigDialog::ConfigDialog( QWidget *parent )
 void ConfigDialog::setupConnections()
 {
     // connect all checkboxes to the same slot
-    QList< QCheckBox * > checkboxList = this->findChildren< QCheckBox * >();
-    foreach( QCheckBox *checkbox, checkboxList ) {
-        connect( checkbox, SIGNAL(toggled(bool)), SLOT(onConfigChanged()) );
+    const QList< QCheckBox * > checkboxList = this->findChildren< QCheckBox * >();
+    for( QCheckBox *checkbox : checkboxList ) {
+        connect( checkbox, &QCheckBox::toggled, this, &ConfigDialog::onConfigChanged );
     }
 
     // connect all spinboxes to the same slot
-    QList< QSpinBox * > spinboxList = this->findChildren< QSpinBox * >();
-    foreach( QSpinBox *spinbox, spinboxList ) {
-        connect( spinbox, SIGNAL(valueChanged(int)), SLOT(onConfigChanged()) );
+    const QList< QSpinBox * > spinboxList = this->findChildren< QSpinBox * >();
+    for( QSpinBox *spinbox : spinboxList ) {
+        connect( spinbox, &QSpinBox::valueChanged, this, &ConfigDialog::onConfigChanged );
     }
 
-    connect( ui->nowPlayingText, SIGNAL(textChanged(QString)), SLOT(onConfigChanged()) );
-    connect( ui->cancelButton, SIGNAL(clicked()), SLOT(close()) );
-    connect( ui->restoreButton, SIGNAL(clicked()), SLOT(restoreDefaults()) );
-    connect( ui->applyButton, SIGNAL(clicked()), SLOT(saveSettings()) );
-    connect( ui->okButton, SIGNAL(clicked()), SLOT(okClicked()) );
-    connect( ui->contentsWidget, SIGNAL(currentRowChanged(int)), SLOT(switchPage(int)) );
+    connect( ui->nowPlayingText, &NamingSchema::textChanged, this, &ConfigDialog::onConfigChanged );
+    connect( ui->cancelButton, &QPushButton::clicked, this, &ConfigDialog::close );
+    connect( ui->restoreButton, &QPushButton::clicked, this, &ConfigDialog::restoreDefaults );
+    connect( ui->applyButton, &QPushButton::clicked, this, &ConfigDialog::saveSettings );
+    connect( ui->okButton, &QPushButton::clicked, this, &ConfigDialog::okClicked );
+    connect( ui->contentsWidget, &QListWidget::currentRowChanged, this, &ConfigDialog::switchPage );
 }
 
 void ConfigDialog::setupGraphicElements()

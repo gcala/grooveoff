@@ -25,6 +25,8 @@
 #include <QLibraryInfo>
 #include <QTranslator>
 
+#include <utility>
+
 #define SHARE_PATH "/../share/apps/grooveoff"
 
 App::App( int & argc, char ** argv ):
@@ -52,8 +54,8 @@ void App::loadTranslations()
     const QString &appTrPath = QCoreApplication::applicationDirPath()
             + QLatin1String( SHARE_PATH "/translations" );
 
-    foreach (QString locale, uiLanguages) {
-        locale = QLocale(locale).name();
+    for (const QString &uiLanguage : std::as_const(uiLanguages)) {
+        const QString locale = QLocale(uiLanguage).name();
         if ( m_appTranslator->load( QLatin1String( "grooveoff_" ) + locale, appTrPath ) ) {
             installTranslator( m_appTranslator );
 

@@ -31,6 +31,8 @@
 #include <cmath>
 #include <math.h>
 
+#include <utility>
+
 static const qreal yc[3] = { 0.34375, 0.5, 0.15625 };
 
 // normalize: like qBound(a, 0.0, 1.0) but without needing the args and with
@@ -55,8 +57,8 @@ VolumeDial::VolumeDial( QWidget *parent ) : QDial( parent )
     m_anim.timer = 0;
     setMouseTracking( true );
 
-    connect ( this, SIGNAL(valueChanged(int)), SLOT(valueChangedSlot(int)) );
-    connect( The::paletteHandler(), SIGNAL(newPalette(QPalette)), SLOT(paletteChanged(QPalette)) );
+    connect( this, &VolumeDial::valueChanged, this, &VolumeDial::valueChangedSlot );
+    connect( The::paletteHandler(), &PaletteHandler::newPalette, this, &VolumeDial::paletteChanged );
 }
 
 VolumeDial::~VolumeDial()
@@ -66,12 +68,12 @@ VolumeDial::~VolumeDial()
 
 void VolumeDial::addWheelProxies( QList<QWidget*> proxies )
 {
-    foreach ( QWidget *proxy, proxies )
+    for ( QWidget *proxy : std::as_const(proxies) )
     {
         if ( !m_wheelProxies.contains( proxy ) )
         {
             proxy->installEventFilter( this );
-            connect ( proxy, SIGNAL(destroyed(QObject*)), this, SLOT(removeWheelProxy(QObject*)) );
+            connect ( proxy, &QObject::destroyed, this, &VolumeDial::removeWheelProxy );
             m_wheelProxies << proxy;
         }
     }

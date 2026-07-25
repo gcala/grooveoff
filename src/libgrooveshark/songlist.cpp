@@ -5,6 +5,8 @@
 #include <QJsonParseError>
 #include <QJsonDocument>
 
+#include <utility>
+
 using namespace GrooveShark;
 
 SongListPrivate::SongListPrivate( SongList* qq, QNetworkReply* reply ) :
@@ -59,7 +61,7 @@ bool SongListPrivate::parse( const QVariant& data )
         varList = data.toMap()[QLatin1String("result")].toMap()[QLatin1String("result")].toList();
 
     QVariantList songList;
-    foreach( QVariant var, varList )
+    for( const QVariant &var : std::as_const(varList) )
     {
         QVariant v;
         v.setValue<GrooveShark::SongPtr>( SongPtr( new Song( var, isPlaylist ) ) );
