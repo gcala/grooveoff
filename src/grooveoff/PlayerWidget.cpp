@@ -38,6 +38,7 @@ PlayerWidget::PlayerWidget( QWidget *parent )
     , ui( new Ui::PlayerWidget )
     , m_timer( new QTimer( this ) )
     , m_playedRemoved( false )
+    , m_updatingSeekSlider( false )
 {
     ui->setupUi( this );
 
@@ -48,9 +49,11 @@ PlayerWidget::PlayerWidget( QWidget *parent )
     setupButtonsType();
     setupConnections();
 
-    // Supply with the MediaObject object seekSlider should control
-    ui->seekSlider->setMediaObject( The::audioEngine()->mediaObject() );
-    
+    // the seek slider is driven by the engine, and drives it back when the user
+    // moves it: see seekSliderValueChanged() and tick()
+    ui->seekSlider->setRange( 0, 0 );
+    ui->seekSlider->setEnabled( false );
+
     // change background for track frame
     ui->stackedWidget->setBackgroundRole( QPalette::Midlight );
 
@@ -65,7 +68,7 @@ PlayerWidget::PlayerWidget( QWidget *parent )
 
 PlayerWidget::~PlayerWidget()
 {
-    The::audioEngine()->stop( Phonon::NoError );
+    The::audioEngine()->stop();
 }
 
 void PlayerWidget::setupShadows()
@@ -146,7 +149,7 @@ void PlayerWidget::setupConnections()
     connect( ui->nextButton, SIGNAL(buttonClicked()), SLOT(playNext()) );
     connect( ui->timeLabel, SIGNAL(clicked()), SLOT(toggleTimeLabel()) );
     connect( The::audioEngine(), SIGNAL(seeked(qint64,bool)), SLOT(tick(qint64,bool)) );
-    connect( The::audioEngine(), SIGNAL(stateChanged(Phonon::State)), SLOT(stateChanged(Phonon::State)) );
+    connect( The::audioEngine(), SIGNAL(stateChanged(GrooveOff::PlayerState)), SLOT(stateChanged(GrooveOff::PlayerState)) );
     connect( The::audioEngine(), SIGNAL(sourceChanged()), SLOT(sourceChanged()) );
     connect( The::audioEngine(), SIGNAL(removedPlayingTrack()), SLOT(removedPlayingTrack()) );
     connect( The::audioEngine(), SIGNAL(volumeChanged(int)), ui->volume, SLOT(setValue(int)) );
@@ -154,6 +157,35 @@ void PlayerWidget::setupConnections()
     connect( The::playlist(), SIGNAL(playlistChanged()), SLOT(reloadPreviousNextButtons()) );
     connect( ui->volume, SIGNAL(valueChanged(int)), The::audioEngine(), SLOT(setVolume(int)) );
     connect( ui->volume, SIGNAL(muteToggled(bool)), The::audioEngine(), SLOT(setMuted(bool)) );
+
+    // seek slider, which Phonon used to drive on its own
+    connect( The::audioEngine(), &AudioEngine::trackLengthChanged, this, &PlayerWidget::trackLengthChanged );
+    connect( The::audioEngine(), &AudioEngine::seekableChanged, ui->seekSlider, &QSlider::setEnabled );
+    connect( ui->seekSlider, &QSlider::valueChanged, this, &PlayerWidget::seekSliderValueChanged );
+}
+
+/*!
+  \brief trackLengthChanged: resize the seek slider to the new track
+*/
+void PlayerWidget::trackLengthChanged( qint64 milliseconds )
+{
+    m_updatingSeekSlider = true;
+    ui->seekSlider->setRange( 0, milliseconds );
+    m_updatingSeekSlider = false;
+}
+
+/*!
+  \brief seekSliderValueChanged: seek when the change comes from the user
+
+  valueChanged() covers dragging, clicking on the groove and keyboard alike;
+  the flag filters out the updates we make ourselves while playing.
+*/
+void PlayerWidget::seekSliderValueChanged( int value )
+{
+    if( m_updatingSeekSlider )
+        return;
+
+    The::audioEngine()->seek( (qint64)value );
 }
 
 
@@ -162,22 +194,22 @@ void PlayerWidget::showElapsedTimerLabel( bool ok )
     ui->elapsedTimeLabel->setVisible( ok );
 }
 
-void PlayerWidget::stateChanged( Phonon::State state )
+void PlayerWidget::stateChanged( GrooveOff::PlayerState state )
 {
     switch ( state ) {
-    case Phonon::ErrorState:
+    case GrooveOff::PlayerState::Error:
         setErrorState();
         break;
         
-    case Phonon::PlayingState:
+    case GrooveOff::PlayerState::Playing:
         setPlayingState();
         break;
         
-    case Phonon::StoppedState:
+    case GrooveOff::PlayerState::Stopped:
         setStoppedState();
         break;
         
-    case Phonon::PausedState:
+    case GrooveOff::PlayerState::Paused:
         setPausedState();
         break;
 
@@ -227,10 +259,14 @@ void PlayerWidget::setPausedState()
 
 void PlayerWidget::tick( qint64 elapsedTime, bool userSeek )
 {
-    Q_UNUSED( userSeek )
-
-    if( The::audioEngine()->state() == Phonon::StoppedState )
+    if( The::audioEngine()->state() == GrooveOff::PlayerState::Stopped )
         return;
+
+    if( !userSeek ) {
+        m_updatingSeekSlider = true;
+        ui->seekSlider->setValue( elapsedTime );
+        m_updatingSeekSlider = false;
+    }
 
     const quint64 remainingTime = The::audioEngine()->remainingTime();
 
@@ -266,7 +302,7 @@ void PlayerWidget::toggleTimeLabel()
 
 void PlayerWidget::showMessage( const QString& message )
 {
-    if( The::audioEngine()->state() == Phonon::PlayingState || The::audioEngine()->state() == Phonon::PausedState ) {
+    if( The::audioEngine()->state() == GrooveOff::PlayerState::Playing || The::audioEngine()->state() == GrooveOff::PlayerState::Paused ) {
         m_timer->setSingleShot( true );
         m_timer->start( 3000 );
     }

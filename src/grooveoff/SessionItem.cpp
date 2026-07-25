@@ -139,7 +139,7 @@ QString SessionItem::sessionName() const
   \brief enterEvent: manage mouse movement
   \return void
 */
-void SessionItem::enterEvent(QEvent* event)
+void SessionItem::enterEvent(QEnterEvent* event)
 {
     switch(m_state) {
         case GrooveOff::FinishedState:

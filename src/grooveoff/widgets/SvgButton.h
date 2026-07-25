@@ -35,7 +35,7 @@ public:
     void setExists( bool ok );
 
 protected:
-    void enterEvent( QEvent * );
+    void enterEvent( QEnterEvent * );
     void leaveEvent( QEvent * );
     void mousePressEvent( QMouseEvent * );
     void mouseReleaseEvent( QMouseEvent * );

@@ -52,7 +52,7 @@ signals:
     void muteToggled( bool mute );
 
 protected:
-    void enterEvent( QEvent * );
+    void enterEvent( QEnterEvent * );
     bool eventFilter( QObject *o, QEvent *e );
     void leaveEvent( QEvent * );
     void paintEvent( QPaintEvent * );

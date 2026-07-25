@@ -40,7 +40,7 @@ Mpris2PluginPlayerAdaptor::Mpris2PluginPlayerAdaptor( QObject *parent )
     m_engine = The::audioEngine();
     connect( m_engine, SIGNAL(sourceChanged()),
                        SLOT(emitPropertiesChanged()) );
-    connect( m_engine, SIGNAL(stateChanged(Phonon::State)),
+    connect( m_engine, SIGNAL(stateChanged(GrooveOff::PlayerState)),
                        SLOT(emitPropertiesChanged()) );
     connect( m_engine, SIGNAL(volumeChanged(int)),
                        SLOT(emitPropertiesChanged()) );
@@ -73,7 +73,7 @@ bool Mpris2PluginPlayerAdaptor::canGoPrevious() const
 
 bool Mpris2PluginPlayerAdaptor::canPause() const
 {
-    return (m_engine->state() == Phonon::PausedState || m_engine->state() == Phonon::PlayingState);
+    return (m_engine->state() == GrooveOff::PlayerState::Paused || m_engine->state() == GrooveOff::PlayerState::Playing);
 }
 bool Mpris2PluginPlayerAdaptor::canPlay() const
 {
@@ -127,9 +127,9 @@ double Mpris2PluginPlayerAdaptor::minimumRate() const
 
 QString Mpris2PluginPlayerAdaptor::playbackStatus() const
 {
-    if( m_engine->state() == Phonon::PlayingState )
+    if( m_engine->state() == GrooveOff::PlayerState::Playing )
         return QString::fromLatin1( "Playing" );
-    else if( m_engine->state() == Phonon::PausedState )
+    else if( m_engine->state() == GrooveOff::PlayerState::Paused )
         return QString::fromLatin1( "Paused" );
     return QString::fromLatin1( "Stopped" );
 }
@@ -186,9 +186,9 @@ void Mpris2PluginPlayerAdaptor::Play()
 
 void Mpris2PluginPlayerAdaptor::PlayPause()
 {
-    if( m_engine->state() == Phonon::StoppedState )
+    if( m_engine->state() == GrooveOff::PlayerState::Stopped )
         m_engine->play();
-    else if( m_engine->state() == Phonon::PausedState || m_engine->state() == Phonon::PlayingState )
+    else if( m_engine->state() == GrooveOff::PlayerState::Paused || m_engine->state() == GrooveOff::PlayerState::Playing )
         m_engine->playPause();
 }
 

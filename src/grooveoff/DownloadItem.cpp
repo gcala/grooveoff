@@ -63,7 +63,7 @@ DownloadItem::DownloadItem( const PlaylistItemPtr &playlistItemPtr, QWidget *par
         }
     }
 
-    m_playerState = Phonon::StoppedState;
+    m_playerState = GrooveOff::PlayerState::Stopped;
     stateChanged();
 }
 
@@ -194,7 +194,7 @@ void DownloadItem::setupUi()
 void DownloadItem::setupConnections()
 {
     connect( m_playlistItem.data(), SIGNAL(reloadCover()), SLOT(loadCover()) );
-    connect( m_playlistItem.data(), SIGNAL(stateChanged(Phonon::State)), SLOT(setPlayerState(Phonon::State)) );
+    connect( m_playlistItem.data(), SIGNAL(stateChanged(GrooveOff::PlayerState)), SLOT(setPlayerState(GrooveOff::PlayerState)) );
     
     if( m_context == GrooveOff::Download ) {
         connect( ui->playButton, SIGNAL(buttonClicked()), SLOT(playSong()) );
@@ -259,11 +259,11 @@ void DownloadItem::setDownloadingState()
 {
     ui->infoIconWidget->setVisible( false );
     
-    if( m_playerState == Phonon::StoppedState ) {
+    if( m_playerState == GrooveOff::PlayerState::Stopped ) {
         ui->playWidget->setVisible( true );
         ui->animationWidget->setVisible( false );
         ui->barsWidget->stopAnimation();
-    } else if( m_playerState == Phonon::PlayingState ) {
+    } else if( m_playerState == GrooveOff::PlayerState::Playing ) {
         ui->playWidget->setVisible( false );
         ui->animationWidget->setVisible( true );
         ui->barsWidget->startAnimation();
@@ -289,11 +289,11 @@ void DownloadItem::setFinishedState()
         ui->animationWidget->setVisible( false );
     } else {
         ui->playButton->setButtonEnabled( true );
-        if( m_playerState == Phonon::StoppedState ) {
+        if( m_playerState == GrooveOff::PlayerState::Stopped ) {
             ui->playWidget->setVisible( true );
             ui->animationWidget->setVisible( false );
             ui->barsWidget->stopAnimation();
-        } else if( m_playerState == Phonon::PlayingState ) {
+        } else if( m_playerState == GrooveOff::PlayerState::Playing ) {
             ui->playWidget->setVisible( false );
             ui->animationWidget->setVisible( true );
             ui->barsWidget->startAnimation();
@@ -521,7 +521,7 @@ QString DownloadItem::songFile()
   \brief enterEvent: manage mouse movement
   \return void
 */
-void DownloadItem::enterEvent( QEvent* event )
+void DownloadItem::enterEvent( QEnterEvent* event )
 {
     switch( m_downloadState ) {
         case GrooveOff::FinishedState:
@@ -585,7 +585,7 @@ void DownloadItem::leaveEvent( QEvent* event )
          for icon synchronization
   \return void
 */
-void DownloadItem::setPlayerState( Phonon::State state )
+void DownloadItem::setPlayerState( GrooveOff::PlayerState state )
 {
     m_playerState = state;
     stateChanged();

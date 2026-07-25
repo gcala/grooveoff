@@ -1132,7 +1132,7 @@ void MainWindow::openSessionManager()
     QPointer<SessionManager> manager = new SessionManager( m_sessionFilePath, this );
     if( manager->exec() ) {
         if( !QFile::exists( m_sessionFilePath + m_sessionFileName + QLatin1String( ".xml" ) ) ) {
-            if( The::audioEngine()->state() == Phonon::PlayingState || The::audioEngine()->state() == Phonon::PausedState )
+            if( The::audioEngine()->state() == GrooveOff::PlayerState::Playing || The::audioEngine()->state() == GrooveOff::PlayerState::Paused )
                 The::audioEngine()->stop();
 
             m_sessionFileName = QLatin1String( "default" );

@@ -24,7 +24,7 @@
 #include "GrooveOffNamespace.h"
 
 #include <QListWidget>
-#include <phonon/phononnamespace.h>
+#include "GrooveOffNamespace.h"
 
 class DownloadItem;
 

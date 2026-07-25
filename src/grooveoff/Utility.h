@@ -26,7 +26,7 @@
 #include <QString>
 #include <QFont>
 #include <QStringList>
-#include <phonon/MediaSource>
+
 
 class Utility
 {

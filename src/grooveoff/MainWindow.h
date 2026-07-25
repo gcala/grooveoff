@@ -29,7 +29,7 @@
 #include <QPointer>
 #include <QMainWindow>
 #include <QNetworkCookie>
-#include <phonon/phononnamespace.h>
+#include "GrooveOffNamespace.h"
 
 //Qt
 class QLabel;

@@ -25,7 +25,7 @@
 #include <QDBusObjectPath>
 #include <QMap>
 #include <QUuid>
-#include <phonon/phononnamespace.h>
+#include "../../GrooveOffNamespace.h"
 
 
 class AudioEngine;

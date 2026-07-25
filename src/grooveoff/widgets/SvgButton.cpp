@@ -33,7 +33,7 @@ SvgButton::SvgButton( QWidget *parent )
                    SLOT(clicked()) );
 }
 
-void SvgButton::enterEvent( QEvent * )
+void SvgButton::enterEvent( QEnterEvent * )
 {
     setIcon( icon(), 3);
 }

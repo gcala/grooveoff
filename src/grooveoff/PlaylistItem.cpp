@@ -29,7 +29,7 @@ using namespace GrooveShark;
 
 PlaylistItem::PlaylistItem ( const SongPtr &song )
     : m_song(song)
-    , m_state( Phonon::StoppedState )
+    , m_state( GrooveOff::PlayerState::Stopped )
 {
 }
 
@@ -104,7 +104,7 @@ QString PlaylistItem::fileName() const
     return fileName + ".mp3";
 }
 
-void PlaylistItem::setState( const Phonon::State &state )
+void PlaylistItem::setState( const GrooveOff::PlayerState &state )
 {
     m_state = state;
     emit stateChanged( m_state );

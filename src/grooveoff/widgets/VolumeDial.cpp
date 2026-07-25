@@ -86,7 +86,7 @@ void VolumeDial::paletteChanged( const QPalette &palette )
     renderIcons();
 }
 
-void VolumeDial::enterEvent( QEvent * )
+void VolumeDial::enterEvent( QEnterEvent * )
 {
     m_mouseOver = true;
     startFade();
