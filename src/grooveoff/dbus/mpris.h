@@ -19,6 +19,8 @@
 #ifndef MPRIS_H
 #define MPRIS_H
 
+#include <QObject>
+
 class Mpris : public QObject
 {
     Q_OBJECT

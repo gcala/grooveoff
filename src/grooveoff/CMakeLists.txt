@@ -36,8 +36,6 @@ set(grooveoff_SRCS main.cpp
                    widgets/SessionList.cpp
                    widgets/TrackList.cpp
                    dbus/mpris.cpp
-                   dbus/mpris1/Mpris1PluginRootAdaptor.cpp
-                   dbus/mpris1/Mpris1PluginPlayerAdaptor.cpp
                    dbus/mpris2/Mpris2PluginRootAdaptor.cpp
                    dbus/mpris2/Mpris2PluginPlayerAdaptor.cpp
                    ../libgrooveshark/apirequest.cpp
