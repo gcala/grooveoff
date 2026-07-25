@@ -8,12 +8,13 @@ Submit translations to Transifex' [page](https://www.transifex.com/projects/p/gr
 
 ## Installation
 
+GrooveOff requires Qt 6.5 or later, a QtMultimedia backend, TagLib 2 and
+KDSingleApplication. See `INSTALL` for the full list.
+
 ```bash
-mkdir build
-cd build
-cmake .. -DCMAKE_INSTALL_PREFIX=/usr
-make
-make install (as root)
+cmake -S . -B build -DCMAKE_INSTALL_PREFIX=/usr
+cmake --build build
+cmake --install build (as root)
 ```
 
 ## Disclaimer
