@@ -19,9 +19,24 @@
 
 #include "App.h"
 
+#include <kdsingleapplication.h>
+
 int main( int argc, char** argv )
 {
     App app( argc, argv );
+
+    KDSingleApplication singleInstance;
+
+    // a second instance asks the running one to show up, then gets out of the way
+    if( !singleInstance.isPrimaryInstance() ) {
+        singleInstance.sendMessage( QByteArrayLiteral( "raise" ) );
+        return 0;
+    }
+
+    QObject::connect( &singleInstance, &KDSingleApplication::messageReceived,
+                      &app, [&app]( const QByteArray & ) { app.raiseWindow(); } );
+
+    app.start();
 
     return app.exec();
 }
