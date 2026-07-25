@@ -106,6 +106,4 @@ Q_DECLARE_METATYPE( GrooveOff::Context )
 Q_DECLARE_METATYPE( GrooveOff::DownloadState )
 Q_DECLARE_METATYPE( GrooveOff::NetworkJob )
 
-QT_END_HEADER
-
 #endif // GROOVEOFFNAMESPACE_H

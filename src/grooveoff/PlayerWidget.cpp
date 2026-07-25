@@ -124,8 +124,8 @@ void PlayerWidget::setupLabels()
     ui->samplerateLabel->setElideMode( Qt::ElideNone );
     ui->channelsLabel->setElideMode( Qt::ElideNone );
     
-    ui->bitrateLabel->setToolTip( trUtf8( "Bit Rate" ) );
-    ui->samplerateLabel->setToolTip( trUtf8( "Sample Rate" ) );
+    ui->bitrateLabel->setToolTip( tr( "Bit Rate" ) );
+    ui->samplerateLabel->setToolTip( tr( "Sample Rate" ) );
     
     ui->coverLabel->setScaledContents( true );
 }
@@ -199,7 +199,7 @@ void PlayerWidget::setPlayingState()
     ui->stackedWidget->setCurrentIndex( 1 );
     ui->playPauseButton->setButtonEnabled( true );
     ui->playPauseButton->setPlaying( true );
-    ui->playPauseButton->setToolTip( trUtf8( "Pause" ) );
+    ui->playPauseButton->setToolTip( tr( "Pause" ) );
 }
 void PlayerWidget::setStoppedState()
 {
@@ -337,7 +337,7 @@ void PlayerWidget::reloadPreviousNextButtons()
         ui->playPauseButton->setButtonEnabled( false );
     } else {
         ui->playPauseButton->setButtonEnabled( true );
-        ui->playPauseButton->setToolTip( trUtf8( "Play" ) );
+        ui->playPauseButton->setToolTip( tr( "Play" ) );
         if( The::audioEngine()->canGoNext() ) {
             const int currentRow = The::playlist()->row( The::audioEngine()->currentTrack() );
             ui->nextButton->setToolTip( The::playlist()->item( currentRow + 1 )->song()->songName() );

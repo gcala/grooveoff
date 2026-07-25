@@ -11,11 +11,7 @@
 #include <QCryptographicHash>
 #include <QStringList>
 
-#if QT_VERSION < QT_VERSION_CHECK( 5, 0, 0 )
-#include <qjson/serializer.h>
-#else
 #include <QJsonDocument>
-#endif
 
 
 using namespace GrooveShark;
@@ -39,13 +35,8 @@ SongListPtr ApiRequestPrivate::songs(QString match, QString token )
     QVariantMap map = MapBuilder::getSearchMap(match, token);
     QByteArray json;
 
-#if QT_VERSION < QT_VERSION_CHECK( 5, 0, 0 )
-    QJson::Serializer serializer;
-    json = serializer.serialize(map);
-#else
     QJsonDocument doc = QJsonDocument::fromVariant(map);
     json = doc.toJson();
-#endif
 
     QString requestUrl = UrlBuilder::getSearchUrl() + map.value(QLatin1String("method")).toString();
 
@@ -60,13 +51,8 @@ TokenPtr ApiRequestPrivate::token()
 {
     QByteArray json;
 
-#if QT_VERSION < QT_VERSION_CHECK( 5, 0, 0 )
-    QJson::Serializer serializer;
-    json = serializer.serialize(MapBuilder::getTokenMap());
-#else
     QJsonDocument doc = QJsonDocument::fromVariant(MapBuilder::getTokenMap());
     json = doc.toJson();
-#endif
 
     QString requestUrl = UrlBuilder::getTokenUrl();
 
@@ -101,8 +87,8 @@ ApiRequest::~ApiRequest()
 ApiRequest* ApiRequest::instance()
 {
     if ( !s_instance ) {
+        // Qt6 registers the QDataStream operators along with the metatype
         qRegisterMetaType<SongPtr>("SongPtr");
-        qRegisterMetaTypeStreamOperators<SongPtr>("SongPtr");
         s_instance = new ApiRequest;
     }
 

@@ -7,9 +7,7 @@
 #include <QDir>
 #include <QDebug>
 
-#if QT_VERSION >= QT_VERSION_CHECK( 5, 0, 0 )
 #include <QUrlQuery>
-#endif
 
 using namespace GrooveShark;
 
@@ -78,11 +76,7 @@ void DownloaderPrivate::streamKeyFinished()
         return;
     }
 
-#if QT_VERSION >= QT_VERSION_CHECK( 5, 0, 0 )
     QUrlQuery postData;
-#else
-    QUrl postData;
-#endif
 
     postData.addQueryItem( QLatin1String( "streamKey" ), m_streamKey->content() );
 
@@ -92,11 +86,7 @@ void DownloaderPrivate::streamKeyFinished()
     m_mainRequest.setUrl( QUrl( QString( "http://%1/stream.php" ).arg( m_streamKey->ip() ) ) );
     m_mainRequest.setHeader( QNetworkRequest::ContentTypeHeader, QLatin1String( "application/x-www-form-urlencoded" ) );
 
-#if QT_VERSION >= QT_VERSION_CHECK( 5, 0, 0 )
     m_reply = post( m_mainRequest, postData.query( QUrl::EncodeUnicode ).toLatin1() );
-#else
-    m_reply = post( m_mainRequest, postData.encodedQuery() );
-#endif
 
     connect( m_reply, SIGNAL(downloadProgress(qint64,qint64)), SLOT(onDownloadProgress(qint64,qint64)) );
     connect( m_reply, SIGNAL(readyRead()), SLOT(onReadyRead()) );

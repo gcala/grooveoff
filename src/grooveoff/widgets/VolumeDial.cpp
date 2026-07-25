@@ -104,8 +104,9 @@ bool VolumeDial::eventFilter( QObject *o, QEvent *e )
             QWheelEvent *wev = static_cast<QWheelEvent*>(e);
             if ( o != this )
             {
-                QPoint pos( 0, 0 ); // the event needs to be on us or nothing will happen
-                QWheelEvent nwev( pos, mapToGlobal( pos ), wev->delta(), wev->buttons(), wev->modifiers() );
+                QPointF pos( 0, 0 ); // the event needs to be on us or nothing will happen
+                QWheelEvent nwev( pos, mapToGlobal( pos ), wev->pixelDelta(), wev->angleDelta(),
+                                  wev->buttons(), wev->modifiers(), wev->phase(), wev->inverted() );
                 wheelEvent( &nwev );
             }
             else
@@ -240,7 +241,7 @@ void VolumeDial::renderIcons()
     if( layoutDirection() == Qt::RightToLeft )
     {
         for ( int i = 0; i < 8; ++i )
-            m_icon[i] = QPixmap::fromImage( m_icon[i].toImage().mirrored( true, false ) );
+            m_icon[i] = QPixmap::fromImage( m_icon[i].toImage().flipped( Qt::Horizontal ) );
     }
 }
 
@@ -329,7 +330,7 @@ void VolumeDial::setMuted( bool mute )
 {
     m_muted = mute;
 
-    setToolTip( m_muted ? trUtf8( "Muted" ) : trUtf8( "Volume: %1").arg(value()) );
+    setToolTip( m_muted ? tr( "Muted" ) : tr( "Volume: %1").arg(value()) );
     update();
 }
 
@@ -368,7 +369,7 @@ void VolumeDial::valueChangedSlot( int v )
 {
     m_isClick = false;
 
-    setToolTip( m_muted ? trUtf8( "Muted" ) : trUtf8( "Volume: %1").arg(v) );
+    setToolTip( m_muted ? tr( "Muted" ) : tr( "Volume: %1").arg(v) );
     update();
 }
 

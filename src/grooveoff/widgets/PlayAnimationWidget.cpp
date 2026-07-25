@@ -20,7 +20,7 @@
 #include "PlayAnimationWidget.h"
 
 #include <QPainter>
-#include <QTime>
+#include <QRandomGenerator>
 
 #define NUM_BARS 4
 #define BAR_WIDTH 3
@@ -33,9 +33,6 @@ PlayAnimationWidget::PlayAnimationWidget(QWidget *parent) :
     animating_(false)
 {
     connect(&timer_, SIGNAL(timeout()), SLOT(repaint()));
-
-    QTime time = QTime::currentTime();
-    qsrand((uint)time.msec());
 
     for(int i = 0; i < NUM_BARS; i++) {
         currentHeights_.append(MIN_HEIGHT);
@@ -70,8 +67,8 @@ void PlayAnimationWidget::paintEvent(QPaintEvent *event)
     QPainter painter(this);
 //    painter.setRenderHint(QPainter::Antialiasing);
     QPalette systemPalette;
-    painter.setPen(QPen(systemPalette.color(QPalette::Foreground), 1, Qt::SolidLine));
-    painter.setBrush(systemPalette.color(QPalette::Foreground));
+    painter.setPen(QPen(systemPalette.color(QPalette::WindowText), 1, Qt::SolidLine));
+    painter.setBrush(systemPalette.color(QPalette::WindowText));
 
     // calculating spacer
     int emptySpace = rect().width() - BAR_WIDTH * NUM_BARS;
@@ -101,6 +98,6 @@ void PlayAnimationWidget::paintEvent(QPaintEvent *event)
 
 int PlayAnimationWidget::randomHeight()
 {
-    return qrand() % ( rect().height() - MIN_HEIGHT ) + MIN_HEIGHT;
+    return QRandomGenerator::global()->bounded( rect().height() - MIN_HEIGHT ) + MIN_HEIGHT;
 }
 

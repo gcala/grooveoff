@@ -29,7 +29,6 @@
 #include <QPointer>
 #include <QMainWindow>
 #include <QNetworkCookie>
-#include <QNetworkConfigurationManager>
 #include <phonon/phononnamespace.h>
 
 //Qt
@@ -70,7 +69,6 @@ namespace The {
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
-    Q_ENUMS( GuiLayout )
     friend MainWindow* The::mainWindow();
 
 public:
@@ -79,6 +77,7 @@ public:
         Wide = 1,
         Mini = 2
     };
+    Q_ENUM( GuiLayout )
 
     explicit MainWindow( QWidget *parent = 0 );
     virtual ~MainWindow();
@@ -123,7 +122,6 @@ private:
     CoverManager *m_coverManager;
     Spinner      *m_spinner;
     
-    QNetworkConfigurationManager *m_qncm; // used to monitor internet connection status
     QHash<QString, QStringList> m_artistsAlbumsContainer; // artists/album container
     QString m_sessionFilePath; // contains the session file path (depends on qt internals)
     int m_parallelDownloadsCount; // holds how many downloads are running
@@ -165,8 +163,8 @@ private:
     void setupCompleter();
     void setupGuiLayout();
     void setupPaths();
-    void initRandomNumberGenerator();
     void initPathLine();
+    bool isOnline() const;
     void loadSettings();
     void loadBootSettings();
     void saveSettings();

@@ -33,6 +33,7 @@
 #include <QDir>
 #include <QDebug>
 #include <QDesktopServices>
+#include <QStandardPaths>
 #include <QGraphicsDropShadowEffect>
 
 using namespace GrooveShark;
@@ -133,22 +134,22 @@ void DownloadItem::setupUi()
     }
     
     ui->playButton->setType( IconButton::PlayPause );
-    ui->playButton->setToolTip( trUtf8( "Play" ) );
+    ui->playButton->setToolTip( tr( "Play" ) );
     
     ui->unqueueButton->setType( IconButton::Remove );
-    ui->unqueueButton->setToolTip( trUtf8( "Remove track from queue" ) );
+    ui->unqueueButton->setToolTip( tr( "Remove track from queue" ) );
     
     ui->stopDownloadButton->setType( IconButton::Stop );
-    ui->stopDownloadButton->setToolTip( trUtf8( "Stop track download" ) );
+    ui->stopDownloadButton->setToolTip( tr( "Stop track download" ) );
     
     ui->deleteButton->setType( IconButton::Trash );
-    ui->deleteButton->setToolTip( trUtf8( "Delete track from disk" ) );
+    ui->deleteButton->setToolTip( tr( "Delete track from disk" ) );
     
     ui->queueButton->setType( IconButton::Redownload );
-    ui->queueButton->setToolTip( trUtf8( "Redownload track" ) );
+    ui->queueButton->setToolTip( tr( "Redownload track" ) );
     
     ui->openFolderButton->setType( IconButton::Browse );
-    ui->openFolderButton->setToolTip( trUtf8( "Open folder" ) );
+    ui->openFolderButton->setToolTip( tr( "Open folder" ) );
     
     ui->infoIcon->setType( IconButton::Clock );
     
@@ -251,7 +252,7 @@ void DownloadItem::setQueuedState()
     ui->infoIconWidget->setVisible( true );
     ui->infoIcon->setType( IconButton::Clock );
     
-    ui->infoMessage->setText( trUtf8( "Queued" ) );
+    ui->infoMessage->setText( tr( "Queued" ) );
 }
 
 void DownloadItem::setDownloadingState()
@@ -312,7 +313,7 @@ void DownloadItem::setAbortedState()
     ui->progressWidget->setVisible( false );
     ui->stopDownloadWidget->setVisible( false );
     
-    ui->infoMessage->setText( trUtf8( "Aborted" ) );
+    ui->infoMessage->setText( tr( "Aborted" ) );
     
     ui->infoIcon->setType( IconButton::Aborted );
     ui->infoIconWidget->setVisible( true );
@@ -327,7 +328,7 @@ void DownloadItem::setErrorState()
     
     ui->stopDownloadWidget->setVisible( false );
     
-    ui->infoMessage->setText( trUtf8( "Network or Server error" ) );
+    ui->infoMessage->setText( tr( "Network or Server error" ) );
     
     ui->infoIcon->setType( IconButton::Warning );
     ui->infoIconWidget->setVisible( true );
@@ -447,7 +448,7 @@ void DownloadItem::deleteItem()
     }
     
     ui->timerWidget->setVisible( true );
-    ui->timerButton->setToolTip( trUtf8( "Abort deletion" ) );
+    ui->timerButton->setToolTip( tr( "Abort deletion" ) );
     ui->timerButton->startCountdown();
     ui->deleteWidget->setVisible( false );
 }
@@ -635,17 +636,10 @@ void DownloadItem::removeEmptyFolder( QDir folder )
     if( !folder.exists() )
         return;
     
-#if QT_VERSION >= QT_VERSION_CHECK( 5, 0, 0 )
     if( folder.path() == QStandardPaths::writableLocation( QStandardPaths::MusicLocation ) ||
        folder.path() == Utility::destinationPath
     )
         return;
-#else
-    if( folder.path() == QDesktopServices::storageLocation( QDesktopServices::MusicLocation ) ||
-       folder.path() == Utility::destinationPath
-    )
-        return;
-#endif
 
     if( folder.entryList( QDir::NoDotAndDotDot ).count() == 0 ) {
         folder.rmdir( folder.path() );

@@ -23,11 +23,7 @@
 #include <QDir>
 #include <QMetaProperty>
 
-#if QT_VERSION >= QT_VERSION_CHECK( 5, 0, 0 )
 #include <QStandardPaths>
-#else
-#include <QDesktopServices>
-#endif
 
 using namespace GrooveShark;
 
@@ -61,11 +57,7 @@ QString PlaylistItem::path() const
     if(m_path.isEmpty()) {
         qWarning() << "GrooveOff ::" << "path is empty";
         // returning standard music path
-#if QT_VERSION >= QT_VERSION_CHECK( 5, 0, 0 )
         return QStandardPaths::writableLocation( QStandardPaths::MusicLocation );
-#else
-        return QDesktopServices::storageLocation( QDesktopServices::MusicLocation );
-#endif
     }
     return m_path;
 }
@@ -127,7 +119,7 @@ QFileInfo PlaylistItem::fileInfo()
 QDataStream& operator<<( QDataStream& dataStream, const PlaylistItemPtr item )
 {
     for( int i=0; i< item->metaObject()->propertyCount(); ++i ) {
-        if( item->metaObject()->property(i).isStored( item.data() ) ) {
+        if( item->metaObject()->property(i).isStored() ) {
             dataStream << item->metaObject()->property(i).read( item.data() );
         }
     }
@@ -137,7 +129,7 @@ QDataStream& operator<<( QDataStream& dataStream, const PlaylistItemPtr item )
 QDataStream & operator>>( QDataStream & dataStream, PlaylistItemPtr item ) {
     QVariant var;
     for( int i = 0; i < item->metaObject()->propertyCount(); ++i ) {
-        if( item->metaObject()->property(i).isStored( item.data() ) ) {
+        if( item->metaObject()->property(i).isStored() ) {
             dataStream >> var;
             item->metaObject()->property(i).write( item.data(), var );
         }

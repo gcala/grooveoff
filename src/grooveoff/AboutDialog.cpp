@@ -77,21 +77,21 @@ void AboutDialog::setupGraphicElements()
 
 void AboutDialog::setupTextElements()
 {
-    ui->titleLabel->setText( trUtf8( "GrooveOff" ) );
+    ui->titleLabel->setText( tr( "GrooveOff" ) );
     
-    ui->versionLabel->setText( trUtf8("Version ") + GROOVEOFF_VERSION );
+    ui->versionLabel->setText( tr("Version ") + GROOVEOFF_VERSION );
     
     ui->descriptionLabel->setWordWrap( true );
     ui->descriptionLabel->setTextFormat( Qt::RichText );
-    ui->descriptionLabel->setText(trUtf8( "Offline Grooveshark.com music." ) + QLatin1String( "<br><br>" ) +
-                                  trUtf8( "GrooveOff can access the huge Grooveshark database through its "
+    ui->descriptionLabel->setText(tr( "Offline Grooveshark.com music." ) + QLatin1String( "<br><br>" ) +
+                                  tr( "GrooveOff can access the huge Grooveshark database through its "
                                           "<a href=\"http://developers.grooveshark.com/docs/public_api/v3/\">"
                                           "public api"
                                           "</a>." ) + QLatin1String( "<br><br>" ) +
-                                  QLatin1String( "<b>" ) + trUtf8( "Author:" ) + QLatin1String( "</b> Giuseppe Calà &lt;<a href=\"mailto:jiveaxe@gmail.com\">jiveaxe@gmail.com</a>&gt;<br><br>" ) +
-                                  QLatin1String( "<b>" ) + trUtf8( "License:" ) + QLatin1String( "</b> GPLv3+<br><br>" ) +
-                                  QLatin1String( "<b>" ) + trUtf8( "Disclaimer:" ) + QLatin1String( "</b> " ) +
-                                  trUtf8( "GrooveOff is not affiliated with Grooveshark™ and has not been reviewed or "
+                                  QLatin1String( "<b>" ) + tr( "Author:" ) + QLatin1String( "</b> Giuseppe Calà &lt;<a href=\"mailto:jiveaxe@gmail.com\">jiveaxe@gmail.com</a>&gt;<br><br>" ) +
+                                  QLatin1String( "<b>" ) + tr( "License:" ) + QLatin1String( "</b> GPLv3+<br><br>" ) +
+                                  QLatin1String( "<b>" ) + tr( "Disclaimer:" ) + QLatin1String( "</b> " ) +
+                                  tr( "GrooveOff is not affiliated with Grooveshark™ and has not been reviewed or "
                                           "officially approved by Grooveshark.com. The author is not responsible for any "
                                           "violations this application does to Grooveshark's TOS. The author is not related "
                                           "to Grooveshark™ in any way! Support the Artists You Like by Buying Their Music." ) );
@@ -112,5 +112,5 @@ void AboutDialog::openGplPage()
 */
 void AboutDialog::openDonatePage()
 {
-    QDesktopServices::openUrl( QUrl( paypalUrl + trUtf8( "Donation to Grooveoff's author" ) ) );
+    QDesktopServices::openUrl( QUrl( paypalUrl + tr( "Donation to Grooveoff's author" ) ) );
 }

@@ -22,7 +22,6 @@
 #include "Playlist.h"
 #include "ActionCollection.h"
 
-#include <QTextCodec>
 #include <QLibraryInfo>
 #include <QTranslator>
 
@@ -40,37 +39,21 @@ App::App( int & argc, char ** argv ):
     QCoreApplication::setOrganizationDomain( QLatin1String( "gcala.blogger.com" ) );
     setApplicationName( QLatin1String( "grooveoff" ) );
 
-#if QT_VERSION < QT_VERSION_CHECK( 5, 0, 0 )
-    // Set the codec to UTF-8
-    QTextCodec::setCodecForLocale( QTextCodec::codecForName( "UTF-8" ) );
-    QTextCodec::setCodecForCStrings( QTextCodec::codecForName( "UTF-8" ) );
-#endif
-
     QTranslator appTranslator; // application translator
     QTranslator qtTranslator;  // qt translator
-    QStringList uiLanguages;   // enabled languages
-    // uiLanguages crashes on Windows with 4.8.0 release builds
-#if ( QT_VERSION >= 0x040801 ) || ( QT_VERSION >= 0x040800 && !defined( Q_OS_WIN ) )
-    uiLanguages = QLocale::system().uiLanguages();
-#else
-    uiLanguages << QLocale::system().name();
-#endif
+    QStringList uiLanguages = QLocale::system().uiLanguages(); // enabled languages
 
     // the path to translations
     const QString &appTrPath = QCoreApplication::applicationDirPath()
             + QLatin1String( SHARE_PATH "/translations" );
 
     foreach (QString locale, uiLanguages) {
-#if (QT_VERSION >= 0x050000)
         locale = QLocale(locale).name();
-#else
-        locale.replace( QLatin1Char( '-' ), QLatin1Char( '_' ) ); // work around QTBUG-25973
-#endif
         if ( appTranslator.load( QLatin1String( "grooveoff_" ) + locale, appTrPath ) ) {
             installTranslator(&appTranslator);
-            
+
             // the path to qt translations
-            const QString &qtTrPath = QLibraryInfo::location( QLibraryInfo::TranslationsPath );
+            const QString &qtTrPath = QLibraryInfo::path( QLibraryInfo::TranslationsPath );
             // translation file name
             const QString &qtTrFile = QLatin1String( "qt_" ) + locale;
             // Binary installer puts Qt tr files into creatorTrPath

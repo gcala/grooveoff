@@ -4,6 +4,7 @@
 #include <QStringList>
 #include <QUuid>
 #include <QCryptographicHash>
+#include <QRandomGenerator>
 
 using namespace GrooveShark;
 
@@ -17,7 +18,7 @@ QString randomHex(const int &length)
     QString randomHex;
 
     for(int i = 0; i < length; i++) {
-        int n = qrand() % 16;
+        int n = QRandomGenerator::global()->bounded(16);
         randomHex.append(QString::number(n,16));
     }
 

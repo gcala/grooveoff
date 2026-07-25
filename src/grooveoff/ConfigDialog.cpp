@@ -89,15 +89,15 @@ void ConfigDialog::setupGraphicElements()
 
 void ConfigDialog::setupSettingCategories()
 {
-    QString generalString = trUtf8( "General" );
-    QString performanceString = trUtf8( "Performance" );
+    QString generalString = tr( "General" );
+    QString performanceString = tr( "Performance" );
 
     QFont boldFont;
     boldFont.setBold( true );
     QFontMetrics fmText( boldFont );
 
     // adapat column width to translated strings
-    int maxWidth = qMax(fmText.width( generalString ), fmText.width( performanceString ));
+    int maxWidth = qMax(fmText.horizontalAdvance( generalString ), fmText.horizontalAdvance( performanceString ));
 
     ui->contentsWidget->setFixedWidth( maxWidth + 20 /*margin*/ );
     
@@ -125,15 +125,15 @@ void ConfigDialog::setupTagElements()
                << QLatin1String( "%album" )
                << QLatin1String( "%track" );
     // xgettext: no-c-format
-    m_localizedTagNames << trUtf8( "%title" )
+    m_localizedTagNames << tr( "%title" )
                         // xgettext: no-c-format
-                        << trUtf8( "%artist" )
+                        << tr( "%artist" )
                         // xgettext: no-c-format
-                        << trUtf8( "%album" )
+                        << tr( "%album" )
                         // xgettext: no-c-format
-                        << trUtf8( "%track" );
+                        << tr( "%track" );
     // xgettext: no-c-format
-    m_localizedTimeTagName = trUtf8("%time" );
+    m_localizedTimeTagName = tr("%time" );
 
     QStringList itemsIcons;
     itemsIcons << QLatin1String( "view-media-lyrics" )   //%title
