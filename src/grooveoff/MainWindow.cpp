@@ -36,6 +36,10 @@
 #include "../db/Catalog.h"
 #include "../db/Database.h"
 #include "../db/PlaylistStore.h"
+#include "../torrent/StreamServer.h"
+#include "../torrent/TorrentSession.h"
+
+#include <QFileDialog>
 
 #include <QLabel>
 #include <QMenu>
@@ -102,8 +106,6 @@ MainWindow::MainWindow( QWidget *parent )
     m_spinner->setText( QString() );
     m_spinner->setType( Spinner::Sun );
 
-    setupPaths();
-
     setWindowTitle( QString::fromLatin1( "GrooveOff %1" ).arg( GROOVEOFF_VERSION ) );
 
     setupGuiLayout();
@@ -118,6 +120,7 @@ MainWindow::MainWindow( QWidget *parent )
     }
 
     loadCurrentPlaylist();
+    wakeLastUsedTorrent();
 
     m_mpris = new Mpris( this );
 }
@@ -152,10 +155,13 @@ void MainWindow::setupUi()
     ui->compactMenuButton->setToolTip( tr( "Main menu" ) );
     ui->compactMenuButton->setMenu( m_compactMainMenu );
 
-    // The search era is over: these widgets go away for good when the magnet
-    // field takes their place, and rewriting the .ui twice would be wasted work.
-    ui->label3->setVisible( false );
-    ui->searchLine->setVisible( false );
+    // The search line becomes the magnet field, which is the least invasive
+    // change the .ui can take: same widget, same layout, another meaning. The
+    // rest of these go away for good when the interface is rewritten, and
+    // doing that twice would be wasted work.
+    ui->label3->setText( tr( "Magnet" ) );
+    ui->searchLine->setPlaceholderText( tr( "Paste a magnet link and press enter" ) );
+    ui->searchLine->setClearButtonEnabled( true );
     ui->searchButton->setVisible( false );
     ui->label4->setVisible( false );
     ui->pathLine->setVisible( false );
@@ -187,19 +193,6 @@ void MainWindow::setupGuiLayout()
     } else {
         The::actionCollection()->getAction( QLatin1String( "actionWide" ) )->setChecked( true );
         m_playerWidget->showElapsedTimerLabel( true );
-    }
-}
-
-void MainWindow::setupPaths()
-{
-    const QString &cachePath = QStandardPaths::writableLocation( QStandardPaths::CacheLocation );
-
-    Utility::torrentsCachePath = cachePath + QDir::separator() + QLatin1String( "torrents" ) + QDir::separator();
-    Utility::resumeCachePath   = cachePath + QDir::separator() + QLatin1String( "resume" ) + QDir::separator();
-
-    QDir dir;
-    if( !dir.mkpath( Utility::torrentsCachePath ) || !dir.mkpath( Utility::resumeCachePath ) ) {
-        qWarning() << "GrooveOff ::" << "cannot create the cache directories under" << cachePath;
     }
 }
 
@@ -242,11 +235,24 @@ void MainWindow::setupConnections()
     connect( ac->getAction( "actionClearDownloadList" ), &QAction::triggered, ui->downloadList, &DownloadList::removeAll );
     connect( ac->getAction( "actionAbout" ), &QAction::triggered, this, &MainWindow::about );
     connect( ac->getAction( "actionQtAbout" ), &QAction::triggered, qApp, &QApplication::aboutQt );
+    connect( ac->getAction( "actionOpenTorrent" ), &QAction::triggered, this, &MainWindow::openTorrentFile );
 
-    // Nothing is downloaded and no token is fetched any more. The menus are
-    // rebuilt around magnets and playlists later on.
-    ac->getAction( "actionNewToken" )->setVisible( false );
+    // Nothing is downloaded any more, so there is nothing to stop. The menus
+    // are rebuilt around playlists later on.
     ac->getAction( "actionStopDownloads" )->setVisible( false );
+
+    connect( ui->searchLine, &QLineEdit::returnPressed, this, &MainWindow::addFromMagnetField );
+
+    connect( The::torrentSession(), &TorrentSession::metadataReady, this, &MainWindow::onMetadataReady );
+    connect( The::torrentSession(), &TorrentSession::statsUpdated,  this, &MainWindow::onTorrentStats );
+    connect( The::torrentSession(), &TorrentSession::torrentError,  this, &MainWindow::onTorrentError );
+
+    // The catalogue is told a resume file exists so that the next start knows
+    // it can reopen this torrent without the network.
+    connect( The::torrentSession(), &TorrentSession::resumeDataSaved, this,
+             []( const QString &infoHash ) {
+        The::catalog()->setHasResume( infoHash, true );
+    } );
 
     // network
     if( QNetworkInformation::loadDefaultBackend() && QNetworkInformation::instance() ) {
@@ -354,6 +360,148 @@ void MainWindow::loadCurrentPlaylist()
             ui->downloadList->setCurrentRow( i );
             break;
         }
+    }
+}
+
+/*!
+  \brief wakeLastUsedTorrent: reactivation is lazy, with one exception
+
+  Every other row waits for somebody to press play on it. This one does not,
+  because it is the one the user left playing and almost certainly the one they
+  will press play on: paying its few seconds now, while the window is opening,
+  is better than paying them at the first click.
+*/
+void MainWindow::wakeLastUsedTorrent()
+{
+    if( !The::torrentSession()->isRunning() )
+        return;
+
+    const qint64 trackId = The::playlistStore()->currentTrackId();
+    if( trackId <= 0 )
+        return;
+
+    const TrackInfoPtr track = The::catalog()->track( trackId );
+    if( !track || track->infoHash().isEmpty() )
+        return;
+
+    QString error;
+    if( !The::torrentSession()->reopen( track->infoHash(), track->magnetUri(), &error ) )
+        qDebug() << "GrooveOff ::" << "cannot reopen the last used torrent:" << error;
+}
+
+void MainWindow::addFromMagnetField()
+{
+    const QString source = ui->searchLine->text().trimmed();
+    if( source.isEmpty() )
+        return;
+
+    addTorrentSource( source );
+}
+
+void MainWindow::openTorrentFile()
+{
+    const QString fileName = QFileDialog::getOpenFileName( this,
+                                                           tr( "Open a torrent" ),
+                                                           QString(),
+                                                           tr( "Torrents (*.torrent)" ) );
+    if( !fileName.isEmpty() )
+        addTorrentSource( fileName );
+}
+
+void MainWindow::addTorrentSource( const QString &source )
+{
+    QString error;
+    const QString infoHash = source.startsWith( QLatin1String( "magnet:" ) )
+                             ? The::torrentSession()->addMagnet( source, &error )
+                             : The::torrentSession()->addTorrentFile( source, &error );
+
+    if( infoHash.isEmpty() ) {
+        // No modal for this: what was typed stays in the field so that it can
+        // be corrected, and the reason is on the status bar next to it.
+        m_playerWidget->showMessage( error );
+        return;
+    }
+
+    ui->searchLine->clear();
+    m_playerWidget->showMessage( tr( "Reading the track list…" ) );
+}
+
+/*!
+  \brief onMetadataReady: a torrent has told us what is inside it
+
+  Every file is stored, audio or not: an extension nobody thought of would
+  otherwise become a track that simply is not there, with no way to tell why.
+  What goes into the playlist is the audio, minus whatever was excluded before.
+*/
+void MainWindow::onMetadataReady( const QString &infoHash, const QString &name, const QList<TrackInfoPtr> &tracks )
+{
+    if( !The::database()->isOpen() )
+        return;
+
+    Catalog *catalog = The::catalog();
+
+    catalog->addTorrent( infoHash, The::torrentSession()->magnetUri( infoHash ), name );
+    catalog->setName( infoHash, name );
+    catalog->addTracks( tracks );
+    catalog->touch( infoHash );
+
+    const qint64 playlistId = The::playlistStore()->torrentPlaylistId( infoHash );
+    if( playlistId <= 0 )
+        return;
+
+    // A torrent already known keeps the list it had: reopening it must not
+    // undo an exclusion or a removal made last time.
+    if( The::playlistStore()->tracks( playlistId ).isEmpty() )
+        The::playlistStore()->appendTracks( playlistId, catalog->tracks( infoHash ) );
+
+    if( The::playlistStore()->currentPlaylistId() != playlistId ) {
+        The::playlistStore()->setPlaybackState( playlistId, 0, 0 );
+        loadCurrentPlaylist();
+    }
+
+    refreshRowsOf( infoHash );
+    m_playerWidget->showMessage( name );
+}
+
+void MainWindow::onTorrentStats( const QString &infoHash, int peers, int seeds, qint64 rate, qint64 bytesDone )
+{
+    Q_UNUSED( rate )
+
+    The::catalog()->setBytesDone( infoHash, bytesDone );
+
+    // Red with nobody to talk to, yellow with peers, green with a seed: the
+    // difference the user actually feels is whether anything is coming in.
+    if( peers == 0 )
+        ui->svgLed->setType( IconButton::Offline );
+    else
+        ui->svgLed->setType( IconButton::Online );
+
+    ui->svgLed->setToolTip( tr( "%n peer(s)", "", peers ) + QLatin1String( ", " ) + tr( "%n seed(s)", "", seeds ) );
+}
+
+void MainWindow::onTorrentError( const QString &infoHash, const QString &message )
+{
+    Q_UNUSED( infoHash )
+
+    // Errors on a torrent are ordinary, not exceptional: a modal in the middle
+    // of listening would be the most annoying thing this application could do.
+    m_playerWidget->showMessage( message );
+}
+
+void MainWindow::refreshRowsOf( const QString &infoHash )
+{
+    const bool awake = The::torrentSession()->hasMetadata( infoHash );
+
+    for( int i = 0; i < ui->downloadList->count(); ++i ) {
+        DownloadItem *item = qobject_cast<DownloadItem *>( ui->downloadList->itemWidget( ui->downloadList->item( i ) ) );
+        if( !item || !item->playlistItem()->track() )
+            continue;
+
+        if( item->playlistItem()->track()->infoHash() != infoHash )
+            continue;
+
+        if( item->trackState() != GrooveOff::ErrorState )
+            item->setTrackState( awake ? GrooveOff::ReadyState : GrooveOff::DormantState );
     }
 }
 

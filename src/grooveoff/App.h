@@ -65,6 +65,9 @@ public Q_SLOTS:
 private:
     void loadTranslations();
 
+    /** starts the torrent session and the local stream server, in that order */
+    void startTorrentEngine();
+
     QPointer<MainWindow>    m_mainWindow;
     QTranslator            *m_appTranslator;
     QTranslator            *m_qtTranslator;

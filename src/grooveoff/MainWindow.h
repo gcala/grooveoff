@@ -79,6 +79,17 @@ protected:
     void resizeEvent( QResizeEvent *event ) override;
 
 private Q_SLOTS:
+    /** takes what was typed in the magnet field and hands it to the session */
+    void addFromMagnetField();
+
+    void openTorrentFile();
+
+    /** writes a torrent and its files into the catalogue, then shows them */
+    void onMetadataReady( const QString &infoHash, const QString &name, const QList<TrackInfoPtr> &tracks );
+
+    void onTorrentStats( const QString &infoHash, int peers, int seeds, qint64 rate, qint64 bytesDone );
+    void onTorrentError( const QString &infoHash, const QString &message );
+
     void setCompactLayout();
     void setWideLayout();
     void setMiniPlayerLayout();
@@ -106,7 +117,6 @@ private:
     void setupMenus();
     void setupConnections();
     void setupGuiLayout();
-    void setupPaths();
     bool isOnline() const;
     void loadSettings();
     void loadBootSettings();
@@ -116,6 +126,15 @@ private:
     void loadCurrentPlaylist();
     void savePlaybackState();
     void addPlaylistItem( const PlaylistItemPtr &playlistItem );
+
+    /** hands the torrent of the track that was playing back to the session */
+    void wakeLastUsedTorrent();
+
+    /** brings the rows of one torrent out of the dormant state */
+    void refreshRowsOf( const QString &infoHash );
+
+    /** adds a magnet or a .torrent, and says so when it will not go in */
+    void addTorrentSource( const QString &source );
 
     Mpris *m_mpris;
 

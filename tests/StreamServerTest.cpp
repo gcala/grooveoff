@@ -56,6 +56,7 @@ private Q_SLOTS:
     void cleanupTestCase();
 
     void listensOnTheLoopbackOnly();
+    void tellsWhenATrackCanBePlayed();
     void servesTheWholeFile();
     void servesARange();
     void servesASuffixRange();
@@ -211,6 +212,26 @@ void StreamServerTest::listensOnTheLoopbackOnly()
     QVERIFY( socket.waitForConnected( 3000 ) );
     QCOMPARE( socket.peerAddress(), QHostAddress( QHostAddress::LocalHost ) );
     socket.abort();
+}
+
+void StreamServerTest::tellsWhenATrackCanBePlayed()
+{
+    // The gate in front of the player: handing ffmpeg a url before the head of
+    // the file is there gets an i/o error rather than a wait, and the track
+    // never starts at all.
+    QVERIFY( The::streamServer()->isPlayable( m_infoHash, 0 ) );
+    QVERIFY( !The::streamServer()->isPlayable( QString( 40, QLatin1Char( 'a' ) ), 0 ) );
+    QVERIFY( !The::streamServer()->isPlayable( m_infoHash, 99 ) );
+
+    // A track whose head is already in the cache is playable at once, and
+    // saying so has to be immediate: waiting for a piece that has already
+    // arrived would leave it silent for ever.
+    QSignalSpy playable( The::streamServer(), &StreamServer::trackPlayable );
+    The::streamServer()->prepare( m_infoHash, 0 );
+
+    QCOMPARE( playable.count(), 1 );
+    QCOMPARE( playable.first().at( 0 ).toString(), m_infoHash );
+    QCOMPARE( playable.first().at( 1 ).toInt(), 0 );
 }
 
 void StreamServerTest::servesTheWholeFile()

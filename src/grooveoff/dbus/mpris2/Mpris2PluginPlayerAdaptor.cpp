@@ -116,7 +116,11 @@ QVariantMap Mpris2PluginPlayerAdaptor::metadata() const
     map[ QLatin1String( "xesam:artist"  ) ] = QStringList( track->track()->artist() );
     map[ QLatin1String( "xesam:title"   ) ] = track->displayTitle();
     map[ QLatin1String( "mpris:trackid" ) ] = QVariant::fromValue< QDBusObjectPath >( QDBusObjectPath( playingTrackFileId.constData() ) );
-    map[ QLatin1String( "xesam:url"     ) ] = QUrl::fromLocalFile( track->localPath() ).toString();
+
+    // No xesam:url on purpose. The path in the cache is a sparse file, so
+    // anything else opening it would get holes, and the url of the stream
+    // server carries the token that keeps other local processes out — putting
+    // it on the session bus would hand it to every one of them.
     return map;
 }
 

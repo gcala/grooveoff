@@ -21,11 +21,17 @@
 #include "AudioEngine.h"
 #include "Playlist.h"
 #include "ActionCollection.h"
+#include "Utility.h"
 #include "../db/Catalog.h"
 #include "../db/Database.h"
 #include "../db/PlaylistStore.h"
+#include "../torrent/StreamServer.h"
+#include "../torrent/TorrentSession.h"
 
+#include <QDebug>
+#include <QDir>
 #include <QLibraryInfo>
+#include <QStandardPaths>
 #include <QTranslator>
 
 #include <utility>
@@ -84,6 +90,8 @@ void App::loadTranslations()
 
 void App::start()
 {
+    startTorrentEngine();
+
     // Creating MainWindow
     m_mainWindow = new MainWindow();
 
@@ -109,12 +117,46 @@ void App::raiseWindow()
     mainWindow()->activateWindow();
 }
 
+/*!
+  \brief startTorrentEngine: brings up the session and the local stream server
+
+  Both are needed before the window opens: the list is built from the database,
+  but the row of the track that was playing has to know whether its torrent is
+  awake, and the player is handed a url from the server rather than a path.
+*/
+void App::startTorrentEngine()
+{
+    const QString &cacheRoot = QStandardPaths::writableLocation( QStandardPaths::CacheLocation );
+
+    if( !The::torrentSession()->start( cacheRoot ) ) {
+        qDebug() << "GrooveOff ::" << "the torrent session did not start; nothing will play";
+        return;
+    }
+
+    // One layout, one owner: the session derives the cache paths from the root
+    // and everything else asks it, rather than building the same strings again.
+    Utility::torrentsCachePath = The::torrentSession()->torrentsPath() + QDir::separator();
+    Utility::resumeCachePath   = The::torrentSession()->resumePath() + QDir::separator();
+
+    if( !The::streamServer()->start() )
+        qDebug() << "GrooveOff ::" << "the stream server did not start; nothing will play";
+}
+
 App::~App()
 {
+    // The engine goes first, while the window is still there to hear it: the
+    // shutdown saves the resume data of every torrent, and it is the window
+    // that writes what came back into the catalogue.
+    The::streamServer()->stop();
+    The::torrentSession()->shutdown();
+
     delete mainWindow();
     delete The::audioEngine();
     delete The::playlist();
     delete The::actionCollection();
+
+    delete The::streamServer();
+    delete The::torrentSession();
 
     // Persistence goes last: the window writes what was playing on its way out.
     delete The::playlistStore();

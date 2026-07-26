@@ -143,6 +143,9 @@ public:
     TorrentTrack* trackFor( const QString &infoHash, int fileIndex, QString *key );
     void releaseTrack( const QString &key );
 
+    /** emits trackPlayable and lets the preparation go once the opening is in */
+    void checkPreparation();
+
     void sweep();
 
     StreamServer *q;
@@ -152,6 +155,11 @@ public:
 
     QHash<QTcpSocket*, PendingRead*> reads;
     QHash<QString, TrackEntry>       tracks;
+
+    /** the one track being brought up for the player, if any */
+    QString preparedKey;
+    QString preparedHash;
+    int     preparedIndex = -1;
 
     QTimer *sweepTimer = nullptr;
 };
@@ -478,6 +486,29 @@ void StreamServer::Private::releaseTrack( const QString &key )
         entry.value().idle.restart();
 }
 
+void StreamServer::Private::checkPreparation()
+{
+    if( preparedKey.isEmpty() )
+        return;
+
+    if( !q->isPlayable( preparedHash, preparedIndex ) )
+        return;
+
+    const QString infoHash  = preparedHash;
+    const int     fileIndex = preparedIndex;
+    const QString key       = preparedKey;
+
+    preparedKey.clear();
+    preparedHash.clear();
+    preparedIndex = -1;
+
+    // The reference is dropped here rather than at the request: the track has
+    // ten seconds of grace, which is more than the player needs to ask for it.
+    releaseTrack( key );
+
+    emit q->trackPlayable( infoHash, fileIndex );
+}
+
 void StreamServer::Private::sweep()
 {
     const QList<QTcpSocket*> sockets = reads.keys();
@@ -575,6 +606,8 @@ bool StreamServer::start()
             if( read && read->track && read->track->infoHash() == infoHash )
                 d->pump( read );
         }
+
+        d->checkPreparation();
     } );
 
     if( !d->sweepTimer ) {
@@ -642,4 +675,56 @@ QUrl StreamServer::urlFor( const TrackInfoPtr &track ) const
         return QUrl();
 
     return urlFor( track->infoHash(), track->fileIndex() );
+}
+
+bool StreamServer::isPlayable( const QString &infoHash, int fileIndex ) const
+{
+    TorrentSession *session = The::torrentSession();
+
+    if( !session->hasMetadata( infoHash ) )
+        return false;
+
+    const qint64 size = session->fileSize( infoHash, fileIndex );
+    if( size <= 0 )
+        return false;
+
+    // The head and nothing more. The tail is asked for at the same time, by
+    // TorrentTrack, because ffmpeg probes it — but waiting for it here would
+    // hold a forty megabyte flac hostage to a piece at the far end of it,
+    // while a piece it has to wait for is a wait and not an error.
+    const TorrentSession::PieceLocation head = session->locate( infoHash, fileIndex, 0 );
+
+    return session->havePiece( infoHash, head.piece );
+}
+
+void StreamServer::prepare( const QString &infoHash, int fileIndex )
+{
+    if( !isRunning() )
+        return;
+
+    cancelPreparation();
+
+    QString key;
+    if( !d->trackFor( infoHash, fileIndex, &key ) )
+        return;
+
+    d->preparedKey   = key;
+    d->preparedHash  = infoHash;
+    d->preparedIndex = fileIndex;
+
+    // Whatever is already there may be enough: a track played before is
+    // playable at once, and waiting for a piece that will never come again
+    // would leave it silent for ever.
+    d->checkPreparation();
+}
+
+void StreamServer::cancelPreparation()
+{
+    if( d->preparedKey.isEmpty() )
+        return;
+
+    d->releaseTrack( d->preparedKey );
+    d->preparedKey.clear();
+    d->preparedHash.clear();
+    d->preparedIndex = -1;
 }

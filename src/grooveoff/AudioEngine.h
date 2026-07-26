@@ -160,8 +160,22 @@ private:
 
     void setState( GrooveOff::PlayerState state );
 
+    /**
+     * Points the player at the local stream server. Fails when the torrent is
+     * not in the session yet, which is the normal state of most rows after a
+     * start up.
+     */
+    bool openStream( const PlaylistItemPtr &track );
+
+    /** hands the torrent of @p track to the session and remembers to play it */
+    void wakeTorrentFor( const PlaylistItemPtr &track );
+
     PlaylistItemPtr        m_currentTrack;
     PlaylistItemPtr        m_oldTrack;
+
+    /** what to play as soon as the file list of its torrent comes back */
+    PlaylistItemPtr        m_pendingTrack;
+
     GrooveOff::PlayerState m_state;
 
     QMediaPlayer* m_mediaPlayer;

@@ -733,6 +733,11 @@ QStringList TorrentSession::activeTorrents() const
     return d->handles.keys();
 }
 
+QString TorrentSession::magnetUri( const QString &infoHash ) const
+{
+    return d->magnets.value( infoHash );
+}
+
 bool TorrentSession::hasResume( const QString &infoHash ) const
 {
     return QFile::exists( d->resumeFileFor( infoHash ) );

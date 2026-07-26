@@ -19,6 +19,8 @@
 
 #include "AudioEngine.h"
 #include "Playlist.h"
+#include "../torrent/StreamServer.h"
+#include "../torrent/TorrentSession.h"
 
 #include <QAudio>
 #include <QAudioOutput>
@@ -70,6 +72,48 @@ void AudioEngine::setupConnections()
 
     connect( m_audioOutput, &QAudioOutput::volumeChanged, this, &AudioEngine::onVolumeChanged );
     connect( m_audioOutput, &QAudioOutput::mutedChanged, this, &AudioEngine::onMutedChanged );
+
+    // A track asked for while its torrent was asleep waits here for its file
+    // list to arrive.
+    connect( The::torrentSession(), &TorrentSession::metadataReady, this,
+             [this]( const QString &infoHash, const QString &, const QList<TrackInfoPtr> & ) {
+        if( !m_pendingTrack || !m_pendingTrack->track() || m_pendingTrack->track()->infoHash() != infoHash )
+            return;
+
+        const PlaylistItemPtr track = m_pendingTrack;
+        m_pendingTrack.clear();
+
+        if( openStream( track ) )
+            play();
+    } );
+
+    // And here for its opening buffer, which is the second half of the same
+    // wait: knowing the file list is not yet being able to read the file.
+    connect( The::streamServer(), &StreamServer::trackPlayable, this,
+             [this]( const QString &infoHash, int fileIndex ) {
+        if( !m_pendingTrack || !m_pendingTrack->track() )
+            return;
+
+        const TrackInfoPtr &info = m_pendingTrack->track();
+        if( info->infoHash() != infoHash || info->fileIndex() != fileIndex )
+            return;
+
+        const PlaylistItemPtr track = m_pendingTrack;
+        m_pendingTrack.clear();
+
+        if( openStream( track ) )
+            play();
+    } );
+
+    connect( The::torrentSession(), &TorrentSession::torrentError, this,
+             [this]( const QString &infoHash, const QString &message ) {
+        if( !m_pendingTrack || !m_pendingTrack->track() || m_pendingTrack->track()->infoHash() != infoHash )
+            return;
+
+        qDebug() << "GrooveOff ::" << "cannot wake" << infoHash << message;
+        m_pendingTrack.clear();
+        setState( GrooveOff::PlayerState::Error );
+    } );
 }
 
 void AudioEngine::onPositionChanged( qint64 time )
@@ -154,11 +198,93 @@ void AudioEngine::playItem( const PlaylistItemPtr &track)
 
     m_currentTrack = track;
     m_oldTrack = track;
-    // Straight off the sparse file in the torrent cache. This is the one line
-    // that becomes an http url once the stream server can serve pieces that
-    // have not arrived yet.
-    m_mediaPlayer->setSource( QUrl::fromLocalFile( m_currentTrack->localPath() ) );
-    play();
+    m_pendingTrack.clear();
+
+    // Whatever was being brought up for the previous choice is dropped here.
+    // Skipping this is how ten skips become ten downloads and a cache full of
+    // music nobody listened to.
+    The::streamServer()->cancelPreparation();
+
+    if( track && track->track()
+        && !The::torrentSession()->hasMetadata( track->track()->infoHash() ) ) {
+        wakeTorrentFor( track );
+        return;
+    }
+
+    if( openStream( track ) )
+        play();
+}
+
+/*!
+  \brief openStream: points the player at the local server
+
+  A url rather than a path, which is the whole difference: a path can only be
+  read where the bytes already are, a url is answered as they arrive.
+*/
+bool AudioEngine::openStream( const PlaylistItemPtr &track )
+{
+    if( !track || !track->track() )
+        return false;
+
+    const TrackInfoPtr &info = track->track();
+
+    if( !The::torrentSession()->hasMetadata( info->infoHash() ) )
+        return false;
+
+    // Handing the url over too early is not a wait, it is a failure: ffmpeg
+    // reads the head of the file and probes its tail before it will play
+    // anything, and with neither there it gives up with an i/o error.
+    if( !The::streamServer()->isPlayable( info->infoHash(), info->fileIndex() ) ) {
+        m_pendingTrack = track;
+        setState( GrooveOff::PlayerState::Buffering );
+        The::streamServer()->prepare( info->infoHash(), info->fileIndex() );
+        return false;
+    }
+
+    const QUrl url = The::streamServer()->urlFor( info );
+    if( url.isEmpty() ) {
+        qDebug() << "GrooveOff ::" << "the stream server is not running";
+        setState( GrooveOff::PlayerState::Error );
+        return false;
+    }
+
+    m_mediaPlayer->setSource( url );
+    return true;
+}
+
+/*!
+  \brief wakeTorrentFor: lazy reactivation, from here because every play goes through here
+
+  Most rows are dormant right after a start up: their torrent has not been
+  handed to the session, on purpose, so that opening the application does not
+  announce twenty torrents to as many trackers. Waking one up is asynchronous,
+  so the intent is kept and playback starts when the file list comes back.
+*/
+void AudioEngine::wakeTorrentFor( const PlaylistItemPtr &track )
+{
+    if( !track || !track->track() )
+        return;
+
+    const TrackInfoPtr &info = track->track();
+
+    m_pendingTrack = track;
+    setState( GrooveOff::PlayerState::Buffering );
+
+    QString error;
+    if( The::torrentSession()->reopen( info->infoHash(), info->magnetUri(), &error ) ) {
+        // The metadata may already be in hand, in which case no alert follows
+        // and the opening buffer is the only thing left to wait for.
+        if( The::torrentSession()->hasMetadata( info->infoHash() ) ) {
+            m_pendingTrack.clear();
+            if( openStream( track ) )
+                play();
+        }
+        return;
+    }
+
+    qDebug() << "GrooveOff ::" << "cannot reopen" << info->infoHash() << error;
+    m_pendingTrack.clear();
+    setState( GrooveOff::PlayerState::Error );
 }
 
 void AudioEngine::playPause()
@@ -173,6 +299,12 @@ void AudioEngine::pause()
 
 void AudioEngine::play()
 {
+    // A track is already on its way: pressing play again does not bring it any
+    // sooner, and falling through would start the first row of the list, which
+    // is not what anybody asked for.
+    if( m_pendingTrack )
+        return;
+
     if( m_mediaPlayer->source().isEmpty() ) {
         if( The::playlist()->count() > 0 ) {
             playItem( The::playlist()->item( 0 ) );
@@ -270,6 +402,9 @@ void AudioEngine::previous()
 
 void AudioEngine::removingTrack( const PlaylistItemPtr &track )
 {
+    if( m_pendingTrack == track )
+        m_pendingTrack.clear();
+
     if( m_currentTrack == track ) {
         emit removedPlayingTrack();
         m_mediaPlayer->stop();

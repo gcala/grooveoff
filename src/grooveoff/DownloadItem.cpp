@@ -24,6 +24,7 @@
 #include "AudioEngine.h"
 #include "Playlist.h"
 #include "MainWindow.h"
+#include "../torrent/TorrentSession.h"
 
 #include <QDebug>
 #include <QFile>
@@ -45,8 +46,13 @@ DownloadItem::DownloadItem( const PlaylistItemPtr &playlistItemPtr, QWidget *par
 
     // Whatever is already in the cache can be played straight away; everything
     // else waits for its torrent to be woken up.
-    if( QFile::exists( m_playlistItem->localPath() ) )
+    // Whether the file exists says nothing: the cache is made of sparse files,
+    // so one arrived piece creates a file of the full size with almost nothing
+    // in it. What a row can honestly say is whether its torrent is awake.
+    if( m_playlistItem->track()
+        && The::torrentSession()->hasMetadata( m_playlistItem->track()->infoHash() ) ) {
         m_trackState = GrooveOff::ReadyState;
+    }
 
     stateChanged();
 }

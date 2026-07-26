@@ -107,12 +107,12 @@ void ActionCollection::initActions()
                                      );
     miniPlayer->setCheckable( true );
 
-    QAction *actionNewToken = new QAction( QIcon::fromTheme( QLatin1String( "emblem-new" ),
-                                                             QIcon( QLatin1String( ":/resources/emblem-new.png" ) )
-                                                           ),
-                                           tr( "Get &new token..." ),
-                                           this
-                                         );
+    QAction *actionOpenTorrent = new QAction( QIcon::fromTheme( QLatin1String( "document-open" ),
+                                                                QIcon( QLatin1String( ":/resources/emblem-new.png" ) )
+                                                              ),
+                                              tr( "&Open torrent..." ),
+                                              this
+                                            );
 
     QAction *actionStopDownloads = new QAction( QIcon::fromTheme( QLatin1String( "process-stop" ),
                                                                   QIcon( QLatin1String( ":/resources/process-stop.png" ) )
@@ -160,7 +160,7 @@ void ActionCollection::initActions()
     m_actionCollection[ QLatin1String( "actionWide" ) ] = actionWide;
     m_actionCollection[ QLatin1String( "miniPlayer" ) ] = miniPlayer;
     m_actionCollection[ QLatin1String( "miniPlayer" ) ] = miniPlayer;
-    m_actionCollection[ QLatin1String( "actionNewToken" ) ] = actionNewToken;
+    m_actionCollection[ QLatin1String( "actionOpenTorrent" ) ] = actionOpenTorrent;
     m_actionCollection[ QLatin1String( "actionStopDownloads" ) ] = actionStopDownloads;
     m_actionCollection[ QLatin1String( "actionRemoveFailed" ) ] = actionRemoveFailed;
     m_actionCollection[ QLatin1String( "actionClearDownloadList" ) ] = actionClearDownloadList;
@@ -176,11 +176,12 @@ void ActionCollection::initActions()
     actionDonate->setToolTip( tr( "Donate with PayPal" ) );
 //     actionManageSessions->setToolTip( tr( "Open Session Manager" ) );
 //     actionSaveSessionAs->setToolTip( tr( "Save Session As..." ) );
-    actionClearDownloadList->setToolTip( tr( "Removes all finished downloads preserving files on disk" ) );
+    actionOpenTorrent->setToolTip( tr( "Add a .torrent file as a playlist" ) );
+    actionClearDownloadList->setToolTip( tr( "Empties the list, leaving the catalogue alone" ) );
     
     // set actions shortcuts
     actionClose->setShortcut( QKeySequence( Qt::CTRL | Qt::Key_Q ) );
-    actionNewToken->setShortcut( QKeySequence( Qt::CTRL | Qt::Key_N ) );
+    actionOpenTorrent->setShortcut( QKeySequence( Qt::CTRL | Qt::Key_O ) );
 }
 
 QMenuBar* ActionCollection::createMenuBar( QWidget *parent )
@@ -195,7 +196,7 @@ QMenuBar* ActionCollection::createMenuBar( QWidget *parent )
     m_menuCollection[ QLatin1String( "playlistMenu" ) ] = playlistMenu;
 
     QMenu* fileMenu = new QMenu( tr( "&File" ), menuBar );
-    fileMenu->addAction( m_actionCollection[ QLatin1String( "actionNewToken" ) ] );
+    fileMenu->addAction( m_actionCollection[ QLatin1String( "actionOpenTorrent" ) ] );
     fileMenu->addSeparator();
     // FIXME
     // fileMenu->addMenu(sessionsMenu);

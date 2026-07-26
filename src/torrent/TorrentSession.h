@@ -137,6 +137,9 @@ public:
     bool isActive( const QString &infoHash ) const;
     QStringList activeTorrents() const;
 
+    /** the magnet this torrent was added with, derived for a .torrent file */
+    QString magnetUri( const QString &infoHash ) const;
+
     /** whether a resume file exists, hence whether reopening needs no network */
     bool hasResume( const QString &infoHash ) const;
 

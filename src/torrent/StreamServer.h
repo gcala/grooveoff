@@ -78,6 +78,28 @@ public:
     QUrl urlFor( const QString &infoHash, int fileIndex ) const;
     QUrl urlFor( const TrackInfoPtr &track ) const;
 
+    /**
+     * Whether a player can be pointed at this track yet. ffmpeg reads the head
+     * of a file and then probes its tail before it will say anything about it,
+     * so those are the two pieces that have to be there. Handing it a url any
+     * earlier gets an i/o error rather than a wait, and the track never starts.
+     */
+    bool isPlayable( const QString &infoHash, int fileIndex ) const;
+
+    /**
+     * Asks for the pieces that make a track playable and holds it while they
+     * arrive; @c trackPlayable follows. Preparing another track drops the
+     * previous preparation, which is what keeps ten skips from turning into
+     * ten downloads.
+     */
+    void prepare( const QString &infoHash, int fileIndex );
+
+    void cancelPreparation();
+
+Q_SIGNALS:
+    /** the opening buffer of a prepared track is in */
+    void trackPlayable( const QString &infoHash, int fileIndex );
+
 private:
     StreamServer();
     Q_DISABLE_COPY( StreamServer )
