@@ -37,6 +37,12 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 find_package(TagLib 2.0 REQUIRED CONFIG)
 
+# BitTorrent engine: metadata, piece deadlines and streaming primitives.
+# CONFIG mode on purpose: the FindLibtorrentRasterbar module shipped with CMake
+# falls through to its pkg-config branch even after config mode succeeded, and
+# then fails creating an alias target that already exists.
+find_package(LibtorrentRasterbar 2.0 REQUIRED CONFIG)
+
 # Single instance handling, replaces the bundled Qt Solutions QtSingleApplication.
 find_package(KDSingleApplication-qt6 REQUIRED)
 
