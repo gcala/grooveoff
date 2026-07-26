@@ -18,20 +18,16 @@
 
 
 #include "Utility.h"
-#include "PlaylistItem.h"
 
 #include <QFontMetrics>
-#include <QDesktopServices>
 #include <QDir>
 #include <QColor>
 
 const int Utility::coverSize  = 40; // possible values are 40,50,70,80,90,120
 const int Utility::buttonSize = 24;
 const int Utility::marginSize = 5;
-QString Utility::coversCachePath = "";
-QString Utility::token = "";
-QString Utility::destinationPath = "";
-QString Utility::namingSchema = "";
+QString Utility::torrentsCachePath = QString();
+QString Utility::resumeCachePath = QString();
 
 QString Utility::elidedText( const QString& text,
                              const Qt::TextElideMode& elideMode,

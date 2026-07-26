@@ -38,10 +38,14 @@ public:
 
 public Q_SLOTS:
     void reloadPlaylist();
-    void removeFailedAborted();
-    void removeDownloaded();
-    void removeItemsFromState( GrooveOff::DownloadState state);
-    void abortAllDownloads();
+
+    /** takes out the tracks that will not play however long one waits */
+    void removeErrored();
+
+    /** empties the list */
+    void removeAll();
+
+    void removeItemsFromState( GrooveOff::TrackState state );
     void removeItem(DownloadItem *item);
     
 private Q_SLOTS:

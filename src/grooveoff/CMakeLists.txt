@@ -4,12 +4,9 @@ set(grooveoff_SRCS main.cpp
                    AboutDialog.cpp
                    AudioEngine.cpp
                    ConfigDialog.cpp
-                   CoverDownloader.cpp
-                   CoverManager.cpp
                    DownloadItem.cpp
                    DownloadList.cpp
                    MainWindow.cpp
-                   MatchItem.cpp
                    PlayerWidget.cpp
                    Playlist.cpp
                    PlaylistAction.cpp
@@ -19,9 +16,6 @@ set(grooveoff_SRCS main.cpp
                    SvgHandler.cpp
                    SvgTinter.cpp
                    PaletteHandler.cpp
-                   SessionItem.cpp
-                   SessionManager.cpp
-                   SessionReaderWriter.cpp
                    widgets/SvgButton.cpp
                    widgets/ElidedComboBox.cpp
                    widgets/PlayAnimationWidget.cpp
@@ -30,24 +24,12 @@ set(grooveoff_SRCS main.cpp
                    widgets/TimerLabel.cpp
                    widgets/VolumeDial.cpp
                    widgets/IconButton.cpp
-                   widgets/NamingElements.cpp
-                   widgets/NamingSchema.cpp
                    widgets/Spinner.cpp
                    widgets/SessionList.cpp
                    widgets/TrackList.cpp
                    dbus/mpris.cpp
                    dbus/mpris2/Mpris2PluginRootAdaptor.cpp
-                   dbus/mpris2/Mpris2PluginPlayerAdaptor.cpp
-                   ../libgrooveshark/apirequest.cpp
-                   ../libgrooveshark/config.cpp
-                   ../libgrooveshark/requesthandler.cpp
-                   ../libgrooveshark/song.cpp
-                   ../libgrooveshark/songlist.cpp
-                   ../libgrooveshark/token.cpp
-                   ../libgrooveshark/urlbuilder.cpp
-                   ../libgrooveshark/streamkey.cpp
-                   ../libgrooveshark/downloader.cpp
-                   ../libgrooveshark/mapbuilder.cpp)
+                   dbus/mpris2/Mpris2PluginPlayerAdaptor.cpp)
 
 # handled by AUTOUIC
 set(grooveoff_UI DownloadItem.ui
@@ -55,10 +37,7 @@ set(grooveoff_UI DownloadItem.ui
                  MainWindow.ui
                  ConfigDialog.ui
                  SettingsItem.ui
-                 AboutDialog.ui
-                 MatchItem.ui
-                 SessionManager.ui
-                 SessionItem.ui)
+                 AboutDialog.ui)
 
 # handled by AUTORCC
 set(grooveoff_RCS ${CMAKE_SOURCE_DIR}/grooveoff.qrc)
@@ -76,7 +55,6 @@ target_link_libraries(grooveoff PRIVATE
                       Qt6::Widgets
                       Qt6::Network
                       Qt6::Sql
-                      Qt6::Xml
                       Qt6::Svg
                       Qt6::DBus
                       Qt6::Multimedia

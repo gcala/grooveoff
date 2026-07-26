@@ -20,21 +20,18 @@
 #include "PlaylistItem.h"
 #include "Utility.h"
 
+#include <QDataStream>
 #include <QDir>
-#include <QMetaProperty>
 
-#include <QStandardPaths>
-
-using namespace GrooveShark;
-
-PlaylistItem::PlaylistItem ( const SongPtr &song )
-    : m_song(song)
-    , m_state( GrooveOff::PlayerState::Stopped )
+PlaylistItem::PlaylistItem( const TrackInfoPtr &track )
+    : m_state( GrooveOff::PlayerState::Stopped )
+    , m_track( track )
 {
 }
 
 PlaylistItem::PlaylistItem()
-    : m_song( SongPtr( new Song() ) )
+    : m_state( GrooveOff::PlayerState::Stopped )
+    , m_track( TrackInfoPtr( new TrackInfo() ) )
 {
 }
 
@@ -44,7 +41,7 @@ PlaylistItem::~PlaylistItem()
 
 bool PlaylistItem::operator==( PlaylistItem& right ) const
 {
-    return m_song->songID() == right.song()->songID();
+    return m_track && right.track() && *m_track == *right.track();
 }
 
 void PlaylistItem::requireCoverReload()
@@ -52,56 +49,45 @@ void PlaylistItem::requireCoverReload()
     emit reloadCover();
 }
 
-QString PlaylistItem::path() const
+TrackInfoPtr PlaylistItem::track() const
 {
-    if(m_path.isEmpty()) {
-        qWarning() << "GrooveOff ::" << "path is empty";
-        // returning standard music path
-        return QStandardPaths::writableLocation( QStandardPaths::MusicLocation );
-    }
-    return m_path;
+    return m_track;
 }
 
-void PlaylistItem::setPath( const QString& path )
+void PlaylistItem::setTrack( const TrackInfoPtr &track )
 {
-    m_path = path;
+    m_track = track;
 }
 
-QString PlaylistItem::namingSchema() const
+QString PlaylistItem::localPath() const
 {
-    if( m_namingSchema.isEmpty() ) {
-        qWarning() << "GrooveOff ::" << "naming schema is empty. Returning default.";
-        return QLatin1String( "%artist/%album/%track - %title" );
-    }
+    if( !m_track || m_track->infoHash().isEmpty() )
+        return QString();
 
-    return m_namingSchema;
+    return Utility::torrentsCachePath + m_track->infoHash() + QDir::separator() + m_track->filePath();
 }
 
-void PlaylistItem::setNamingSchema( const QString& schema )
+QString PlaylistItem::displayTitle() const
 {
-    m_namingSchema = schema;
+    return m_track ? m_track->displayTitle() : QString();
 }
 
-SongPtr PlaylistItem::song()
+QString PlaylistItem::displaySubtitle() const
 {
-    return m_song;
-}
+    if( !m_track )
+        return QString();
 
-void PlaylistItem::setSong( const SongPtr &song )
-{
-    m_song = song;
-}
+    const QString &artist = m_track->artist();
+    const QString &album  = m_track->album();
 
-QString PlaylistItem::fileName() const
-{
-    QString fileName = namingSchema();
+    if( artist.isEmpty() && album.isEmpty() )
+        return QString();
+    if( artist.isEmpty() )
+        return album;
+    if( album.isEmpty() )
+        return artist;
 
-    fileName.replace(QLatin1String("%title"), m_song->songName(), Qt::CaseInsensitive);
-    fileName.replace(QLatin1String("%artist"), m_song->artistName(), Qt::CaseInsensitive);
-    fileName.replace(QLatin1String("%album"), m_song->albumName(), Qt::CaseInsensitive);
-    fileName.replace(QLatin1String("%track"), QString::number(m_song->trackNum()), Qt::CaseInsensitive);
-
-    return fileName + ".mp3";
+    return artist + QLatin1String( " - " ) + album;
 }
 
 void PlaylistItem::setState( const GrooveOff::PlayerState &state )
@@ -110,29 +96,12 @@ void PlaylistItem::setState( const GrooveOff::PlayerState &state )
     emit stateChanged( m_state );
 }
 
-QFileInfo PlaylistItem::fileInfo()
-{
-    return QFileInfo( m_path + QDir::separator() + fileName() );
-}
-
-
 QDataStream& operator<<( QDataStream& dataStream, const PlaylistItemPtr item )
 {
-    for( int i=0; i< item->metaObject()->propertyCount(); ++i ) {
-        if( item->metaObject()->property(i).isStored() ) {
-            dataStream << item->metaObject()->property(i).read( item.data() );
-        }
-    }
-    return dataStream;
+    return dataStream << item->track();
 }
 
-QDataStream & operator>>( QDataStream & dataStream, PlaylistItemPtr item ) {
-    QVariant var;
-    for( int i = 0; i < item->metaObject()->propertyCount(); ++i ) {
-        if( item->metaObject()->property(i).isStored() ) {
-            dataStream >> var;
-            item->metaObject()->property(i).write( item.data(), var );
-        }
-    }
-    return dataStream;
+QDataStream& operator>>( QDataStream& dataStream, PlaylistItemPtr item )
+{
+    return dataStream >> item->track();
 }

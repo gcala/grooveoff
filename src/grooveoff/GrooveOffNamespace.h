@@ -22,60 +22,40 @@
 
 namespace GrooveOff {
     /**
-     * The context in which DownloadItem can be found
+     * How far a track is from being playable.
+     *
+     * Replaces the old DownloadState: nothing is downloaded any more, a track
+     * is buffered out of a torrent and thrown away again, so the states track
+     * availability rather than a transfer.
      */
-    enum Context {
-         Download, // when DownloadItem is used in DownloadList
-         Session,  // when DownloadItem is used as Session item
-         Track     // when DownloadItem is used as track item in SessionManager
-    };
-
-    /**
-     * The state of song download
-     */
-    enum DownloadState {
-        /**
-         * The initial state.
-         */
-         QueuedState,
+    enum TrackState {
          /**
-          * Download in progress.
+          * Known, but its torrent has not been handed to the torrent session
+          * yet. Most rows are in this state right after start up, because
+          * torrents are reactivated lazily.
           */
-         DownloadingState,
+         DormantState,
          /**
-          * Download finished successfully.
+          * The torrent is active and nothing of this track is buffered yet.
           */
-         FinishedState,
+         IdleState,
          /**
-          * Download was aborted or error occurred.
+          * Pieces are coming in.
           */
-         AbortedState,
+         BufferingState,
          /**
-          * Something goes wrong during download
+          * Enough is buffered to start playing.
+          */
+         ReadyState,
+         /**
+          * Buffering, but nothing has arrived for a while. Not an error: the
+          * swarm may well wake up.
+          */
+         StalledState,
+         /**
+          * Something went wrong and waiting will not fix it.
           */
          ErrorState
-    };
-
-    /**
-     * The network operation
-     */
-    enum NetworkJob {
-         /**
-          * Retrieval of site token
-          */
-         TokenJob,
-         /**
-          * Search for a given text
-          */
-         SearchJob,
-         /**
-          * Get key
-          */
-         KeyJob,
-         /**
-          * Get song
-          */
-         SongJob
     };
 
     /**
@@ -117,9 +97,7 @@ namespace GrooveOff {
 
 #include <QtCore/QMetaType>
 
-Q_DECLARE_METATYPE( GrooveOff::Context )
-Q_DECLARE_METATYPE( GrooveOff::DownloadState )
-Q_DECLARE_METATYPE( GrooveOff::NetworkJob )
+Q_DECLARE_METATYPE( GrooveOff::TrackState )
 Q_DECLARE_METATYPE( GrooveOff::PlayerState )
 
 #endif // GROOVEOFFNAMESPACE_H

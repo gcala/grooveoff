@@ -27,7 +27,7 @@ PlaylistAction::PlaylistAction( const PlaylistItemPtr &track, QObject *parent )
     : QAction( parent )
     , m_track( track )
 {
-    setText( track->song()->songName() );
+    setText( track->displayTitle() );
     
     connect( m_track.data(), &PlaylistItem::stateChanged, this, &PlaylistAction::trackStateChanged );
     

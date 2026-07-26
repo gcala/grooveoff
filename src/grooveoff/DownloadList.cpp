@@ -46,45 +46,51 @@ void DownloadList::reloadPlaylist()
         delete action;
     }
 
+    // Every track goes into the playlist, whatever its state: a dormant one is
+    // still playable, pressing play is what wakes its torrent up.
     for( int i = 0; i < count(); i++ ) {
-        if( ITEM( i )->downloadState() == GrooveOff::FinishedState ) {
-            The::playlist()->appendItem( ITEM( i )->playlistItem() );
-            PlaylistAction *action = new PlaylistAction( ITEM( i )->playlistItem(), The::actionCollection()->getMenu( "playlistMenu" ) );
-            The::actionCollection()->getMenu( "playlistMenu" )->addAction( (QAction *)action );
-            
-            connect( action, &QAction::triggered, this, &DownloadList::actionTriggered );
-        }
+        if( ITEM( i )->trackState() == GrooveOff::ErrorState )
+            continue;
+
+        The::playlist()->appendItem( ITEM( i )->playlistItem() );
+        PlaylistAction *action = new PlaylistAction( ITEM( i )->playlistItem(), The::actionCollection()->getMenu( "playlistMenu" ) );
+        The::actionCollection()->getMenu( "playlistMenu" )->addAction( (QAction *)action );
+
+        connect( action, &QAction::triggered, this, &DownloadList::actionTriggered );
     }
 }
 
 /*!
-  \brief removeFailedDeletedAborted : remove failed/deleted/aborted items from download list
+  \brief removeErrored : remove the tracks that will not play however long one waits
   \return void
 */
-void DownloadList::removeFailedAborted()
+void DownloadList::removeErrored()
 {
-    removeItemsFromState( GrooveOff::AbortedState) ;
     removeItemsFromState( GrooveOff::ErrorState );
 }
 
 /*!
-  \brief removeDownloaded : remove successfully downloaded items from download list
+  \brief removeAll : empty the list
   \return void
 */
-void DownloadList::removeDownloaded()
+void DownloadList::removeAll()
 {
-    removeItemsFromState( GrooveOff::FinishedState );
+    The::audioEngine()->stop();
+
+    for( int i = count() - 1; i >= 0; i-- ) {
+        The::audioEngine()->removingTrack( ITEM( i )->playlistItem() );
+        QListWidgetItem *item = takeItem( i );
+        removeItemWidget( item );
+        delete item;
+    }
+
+    The::playlist()->clear();
 }
 
-void DownloadList::removeItemsFromState( GrooveOff::DownloadState state )
+void DownloadList::removeItemsFromState( GrooveOff::TrackState state )
 {
-    // stop player if we're removing successfull downloaded tracks
-    if( state == GrooveOff::FinishedState )
-        The::audioEngine()->stop();
-    
     for( int i = count() - 1; i >= 0; i-- ) {
-        GrooveOff::DownloadState currentState = ITEM( i )->downloadState();
-        if( currentState == state ) {
+        if( ITEM( i )->trackState() == state ) {
             The::audioEngine()->removingTrack( ITEM( i )->playlistItem() );
             QListWidgetItem *item = takeItem( i );
             removeItemWidget( item );
@@ -92,19 +98,7 @@ void DownloadList::removeItemsFromState( GrooveOff::DownloadState state )
         }
     }
 
-    // clear playlist if we're removing successfull downloaded tracks
-    if( state == GrooveOff::FinishedState )
-        The::playlist()->clear();
-}
-
-void DownloadList::abortAllDownloads()
-{
-    for( int i = count() - 1; i >= 0; i-- ) {
-        GrooveOff::DownloadState state = ITEM( i )->downloadState();
-        if( state == GrooveOff::DownloadingState || state == GrooveOff::QueuedState ) {
-            ITEM( i )->abortDownload();
-        }
-    }
+    reloadPlaylist();
 }
 
 QList< PlaylistItemPtr > DownloadList::playlistItems() const

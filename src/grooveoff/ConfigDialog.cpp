@@ -62,7 +62,6 @@ void ConfigDialog::setupConnections()
         connect( spinbox, &QSpinBox::valueChanged, this, &ConfigDialog::onConfigChanged );
     }
 
-    connect( ui->nowPlayingText, &NamingSchema::textChanged, this, &ConfigDialog::onConfigChanged );
     connect( ui->cancelButton, &QPushButton::clicked, this, &ConfigDialog::close );
     connect( ui->restoreButton, &QPushButton::clicked, this, &ConfigDialog::restoreDefaults );
     connect( ui->applyButton, &QPushButton::clicked, this, &ConfigDialog::saveSettings );
@@ -141,11 +140,6 @@ void ConfigDialog::setupTagElements()
                << QLatin1String( "view-media-playlist" ) //%album
                << QLatin1String( "media-optical" );      //%track
 
-    ui->tagListWidget->setItemsIcons( itemsIcons );
-    ui->tagListWidget->setLocalizedTagNames( m_localizedTagNames );
-    ui->tagListWidget->setupItems(); //populate the list, load items icons and set list's maximum size
-
-    ui->nowPlayingText->setLocalizedTagNames( m_localizedTagNames );
 }
 
 
@@ -167,7 +161,6 @@ void ConfigDialog::restoreDefaults()
     ui->saveAborted->setChecked( false );
     ui->numResults->setValue( 0 );
     ui->maxDownloads->setValue( 5 );
-    ui->nowPlayingText->setText( QLatin1String( "%artist/%album/%track - %title" ) );
 }
 
 /*!
@@ -193,14 +186,6 @@ void ConfigDialog::saveSettings()
     settings.setValue( QLatin1String( "numResults" ), ui->numResults->value() );
     settings.setValue( QLatin1String( "maxDownloads" ), ui->maxDownloads->value() );
     settings.setValue( QLatin1String( "saveDestination" ), ui->saveDestination->isChecked() );
-
-    //we store a nowPlayingText version with untranslated tag names
-    QString modifiedNamingSchema = ui->nowPlayingText->text();
-    for( int i = 0; i < m_tagNames.size(); i++ ) {
-        modifiedNamingSchema.replace( m_localizedTagNames.at( i ), m_tagNames.at( i ) );
-    }
-
-    settings.setValue( QLatin1String( "namingSchema" ), modifiedNamingSchema );
 }
 
 /*!
@@ -276,13 +261,4 @@ void ConfigDialog::loadSettings()
     ui->saveDestination->setChecked( settings.value( QLatin1String( "saveDestination" ), true ).toBool() );
 
     //Naming Schema
-    QString namingSchemaText = settings.value( QLatin1String( "namingSchema" ),
-                                              QLatin1String( "%artist/%album/%track - %title" ) ).toString();
-
-    //in namingSchemaText tag names aren't localized, here they're replaced with the localized ones
-    for ( int i = 0; i < m_tagNames.size(); i++ ) {
-        namingSchemaText.replace( m_tagNames.at( i ), m_localizedTagNames.at( i ) );
-    }
-
-    ui->nowPlayingText->setText( namingSchemaText );
 }

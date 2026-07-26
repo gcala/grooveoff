@@ -20,7 +20,6 @@ find_package(Qt6 6.5 REQUIRED COMPONENTS
              Widgets
              Network
              Sql
-             Xml
              Svg
              DBus
              Multimedia

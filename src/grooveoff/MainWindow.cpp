@@ -26,8 +26,6 @@
 #include "AboutDialog.h"
 #include "Utility.h"
 #include "GrooveOffNamespace.h"
-#include "CoverManager.h"
-#include "MatchItem.h"
 #include "PlaylistItem.h"
 #include "AudioEngine.h"
 #include "ActionCollection.h"
@@ -35,8 +33,9 @@
 #include "SvgHandler.h"
 #include "Playlist.h"
 #include "widgets/Spinner.h"
-#include "SessionManager.h"
-#include "SessionReaderWriter.h"
+#include "../db/Catalog.h"
+#include "../db/Database.h"
+#include "../db/PlaylistStore.h"
 
 #include <QLabel>
 #include <QMenu>
@@ -50,23 +49,15 @@
 #include <QListWidget>
 #include <QLineEdit>
 #include <QPushButton>
-#include <QNetworkAccessManager>
-#include <QNetworkReply>
 #include <QDesktopServices>
-#include <QInputDialog>
 
 #include <QStandardPaths>
-#include <QFileDialog>
 #include <QDir>
 #include <QFile>
 #include <QMessageBox>
 #include <QApplication>
-#include <QCompleter>
-#include <QFileSystemModel>
 #include <QNetworkInformation>
 #include <QPointer>
-
-using namespace GrooveShark;
 
 // version include
 #include <../config-version.h>
@@ -91,10 +82,10 @@ MainWindow::MainWindow( QWidget *parent )
     : QMainWindow( parent )
     , ui( new Ui::MainWindow )
     , m_playerWidget( new PlayerWidget( this ) )
-    , m_coverManager( new CoverManager( this ) )
 {
     // Qt6 registers the QDataStream operators along with the metatype
     qRegisterMetaType< PlaylistItemPtr >( "PlaylistItemPtr" );
+    qRegisterMetaType< TrackInfoPtr >( "TrackInfoPtr" );
 
     ui->setupUi( this );
     s_instance = this;
@@ -108,29 +99,25 @@ MainWindow::MainWindow( QWidget *parent )
     statusBar()->setSizeGripEnabled( false );
 
     m_spinner = new Spinner( ui->spinnerWidget );
-    m_spinner->setText( tr( "" ) );
+    m_spinner->setText( QString() );
     m_spinner->setType( Spinner::Sun );
-    
-    setupPaths();
 
-    m_api = ApiRequest::instance();
+    setupPaths();
 
     setWindowTitle( QString::fromLatin1( "GrooveOff %1" ).arg( GROOVEOFF_VERSION ) );
 
     setupGuiLayout();
 
-    if( isOnline() )
-        getToken();
+    if( !The::database()->isOpen() ) {
+        QMessageBox::critical( this,
+                               tr( "Attention" ),
+                               tr( "The database could not be opened:" ) + QLatin1String( "\n\n" )
+                                   + The::database()->errorString() + QLatin1String( "\n\n" )
+                                   + tr( "Playlists will not be remembered." ),
+                               QMessageBox::Ok );
+    }
 
-    m_parallelDownloadsCount = 0;
-
-    initPathLine();
-
-    if( m_saveSession )
-        loadSession();
-
-    // FIXME
-    // loadSessions();
+    loadCurrentPlaylist();
 
     m_mpris = new Mpris( this );
 }
@@ -142,21 +129,9 @@ MainWindow::~MainWindow()
 
     m_spinner->stop();
 
-    if( m_saveSession )
-        saveSession();
-    
-    if( m_emptyCache ) {
-        QDir coversPath( Utility::coversCachePath );
-        QStringList covers = coversPath.entryList( QStringList() << "*.jpg" << "*.png", QDir::Files, QDir::Name );
-
-        for( const QString &cover : std::as_const(covers) ) {
-            QFile::remove( Utility::coversCachePath + QDir::separator() + cover );
-        }
-    }
-
+    savePlaybackState();
     saveSettings();
 
-    delete m_api;
     delete m_mpris;
 }
 
@@ -168,61 +143,36 @@ void MainWindow::setupUi()
     ui->logoLabel->setScaledContents( 30 );
 
     ui->appLabel->setText( tr( "GrooveOff" ) );
-    QFontMetrics fmTitle( Utility::font( QFont::Bold, 2 ) );
     ui->appLabel->setFont( Utility::font( QFont::Bold, 2 ) );
-    ui->subtitleLabel->setText( tr( "Offline Grooveshark.com music" ) );
+    ui->subtitleLabel->setText( tr( "Music streaming from torrents" ) );
 
-    m_playerWidget->showMessage( tr( "Connecting..." ) );
+    m_playerWidget->showMessage( tr( "Idle" ) );
 
-    QFontMetrics fmSystemFont( Utility::font( QFont::Bold ) );
-    int fontHeight = fmSystemFont.height();
-
-    ui->label3->setText( tr( "Search:" ) );
-    ui->label3->setBuddy( ui->searchLine );
-    ui->searchLine->setSizePolicy( QSizePolicy::Expanding, QSizePolicy::Fixed );
-    ui->searchLine->setFixedHeight( fontHeight > 24 ? fontHeight : 24 );
-    ui->searchLine->setToolTip( tr( "Search for songs, artists, genres, playlists" ) );
-    ui->searchLine->setPlaceholderText( tr( "Search for songs, artists, genres, playlists" ) );
-    
-    ui->searchButton->setType( IconButton::Search );
-    ui->searchButton->setButtonEnabled( false );
-    ui->searchButton->setToolTip( tr( "Start search" ) );
-    
     ui->compactMenuButton->setType( IconButton::Settings );
     ui->compactMenuButton->setToolTip( tr( "Main menu" ) );
     ui->compactMenuButton->setMenu( m_compactMainMenu );
 
-    ui->label4->setText( tr( "Save in:" ) );
-    ui->label4->setBuddy( ui->pathLine );
+    // The search era is over: these widgets go away for good when the magnet
+    // field takes their place, and rewriting the .ui twice would be wasted work.
+    ui->label3->setVisible( false );
+    ui->searchLine->setVisible( false );
+    ui->searchButton->setVisible( false );
+    ui->label4->setVisible( false );
+    ui->pathLine->setVisible( false );
+    ui->browseButton->setVisible( false );
+    ui->combosContainer->setVisible( false );
+    ui->matchList->setVisible( false );
 
-    ui->pathLine->setToolTip( tr( "Current save folder" ) );
-    ui->pathLine->setSizePolicy( QSizePolicy::Expanding, QSizePolicy::Fixed );
-    ui->pathLine->setFixedHeight( fontHeight > 24 ? fontHeight : 24 );
-
-    // Completer used to save search history
-    QCompleter *completer = new QCompleter( this );
-    QFileSystemModel *dirModel = new QFileSystemModel( completer );
-    dirModel->setRootPath( QString() );
-    completer->setModel( dirModel );
-    ui->pathLine->setCompleter( completer );
-
-    ui->browseButton->setType( IconButton::Browse );
-    ui->browseButton->setToolTip( tr( "Select save folder" ) );
+    QFontMetrics fmSystemFont( Utility::font( QFont::Bold ) );
+    const int fontHeight = fmSystemFont.height();
 
     ui->spinnerWidget->setFixedHeight( fontHeight > 25 ? fontHeight : 25 );
     ui->spinnerWidget->setVisible( false );
 
-    ui->combosContainer->setVisible( false );
-
-    ui->batchDownloadButton->setType( IconButton::Batch );
-    ui->batchDownloadButton->setToolTip( tr( "Download all tracks" ) );
-
-    ui->matchesMessage->setFont( Utility::font( QFont::Bold ) );
-
     ui->splitter->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Expanding );
 
     m_playerWidget->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Fixed );
-    
+
     ui->svgLed->setType( IconButton::Offline );
 }
 
@@ -242,13 +192,15 @@ void MainWindow::setupGuiLayout()
 
 void MainWindow::setupPaths()
 {
-    if( !QFile::exists( QStandardPaths::writableLocation( QStandardPaths::CacheLocation ) ) ) {
-        QDir dir;
-        dir.mkpath( QStandardPaths::writableLocation( QStandardPaths::CacheLocation ) );
-    }
+    const QString &cachePath = QStandardPaths::writableLocation( QStandardPaths::CacheLocation );
 
-    Utility::coversCachePath = QStandardPaths::writableLocation( QStandardPaths::CacheLocation ) + QDir::separator();
-    m_sessionFilePath = QStandardPaths::writableLocation( QStandardPaths::AppDataLocation ) + QDir::separator();
+    Utility::torrentsCachePath = cachePath + QDir::separator() + QLatin1String( "torrents" ) + QDir::separator();
+    Utility::resumeCachePath   = cachePath + QDir::separator() + QLatin1String( "resume" ) + QDir::separator();
+
+    QDir dir;
+    if( !dir.mkpath( Utility::torrentsCachePath ) || !dir.mkpath( Utility::resumeCachePath ) ) {
+        qWarning() << "GrooveOff ::" << "cannot create the cache directories under" << cachePath;
+    }
 }
 
 /*!
@@ -265,21 +217,6 @@ bool MainWindow::isOnline() const
         return true;
 
     return networkInfo->reachability() == QNetworkInformation::Reachability::Online;
-}
-
-void MainWindow::initPathLine()
-{
-    QSettings settings;
-
-    if( m_saveDestination ) {
-        ui->pathLine->setText( settings.value( QLatin1String( "destination" ),
-                                               QStandardPaths::writableLocation( QStandardPaths::MusicLocation )
-                                             ).toString() );
-        if( ui->pathLine->text().isEmpty() )
-            ui->pathLine->setText( QStandardPaths::writableLocation( QStandardPaths::MusicLocation ) );
-    } else {
-        ui->pathLine->setText( QStandardPaths::writableLocation( QStandardPaths::MusicLocation ) );
-    }
 }
 
 void MainWindow::setupMenus()
@@ -301,28 +238,15 @@ void MainWindow::setupConnections()
     connect( ac->getAction( "actionCompact" ), &QAction::triggered, this, &MainWindow::setCompactLayout );
     connect( ac->getAction( "actionWide" ), &QAction::triggered, this, &MainWindow::setWideLayout );
     connect( ac->getAction( "miniPlayer" ), &QAction::triggered, this, &MainWindow::setMiniPlayerLayout );
-    connect( ac->getAction( "actionNewToken" ), &QAction::triggered, this, &MainWindow::getToken );
-    connect( ac->getAction( "actionStopDownloads" ), &QAction::triggered, ui->downloadList, &DownloadList::abortAllDownloads );
-    connect( ac->getAction( "actionRemoveFailed" ), &QAction::triggered, ui->downloadList, &DownloadList::removeFailedAborted );
-    connect( ac->getAction( "actionClearDownloadList" ), &QAction::triggered, ui->downloadList, &DownloadList::removeDownloaded );
+    connect( ac->getAction( "actionRemoveFailed" ), &QAction::triggered, ui->downloadList, &DownloadList::removeErrored );
+    connect( ac->getAction( "actionClearDownloadList" ), &QAction::triggered, ui->downloadList, &DownloadList::removeAll );
     connect( ac->getAction( "actionAbout" ), &QAction::triggered, this, &MainWindow::about );
-
-//     connect( ac->getAction( "actionSaveSessionAs" ), SIGNAL(triggered()),
-//                                                     SLOT(saveSessionAs()) );
-// 
-//     connect( ac->getAction( "actionManageSessions" ), SIGNAL(triggered()),
-//                                                      SLOT(openSessionManager()) );
-
     connect( ac->getAction( "actionQtAbout" ), &QAction::triggered, qApp, &QApplication::aboutQt );
 
-    // gui widgets
-    connect( ui->searchButton, &SvgButton::buttonClicked, this, &MainWindow::beginSearch );
-    connect( ui->browseButton, &SvgButton::buttonClicked, this, &MainWindow::selectFolder );
-    connect( ui->searchLine, &QLineEdit::returnPressed, this, &MainWindow::beginSearch );
-    connect( ui->artistsCB, &QComboBox::activated, this, &MainWindow::artistChanged );
-    connect( ui->albumsCB, &QComboBox::activated, this, &MainWindow::albumChanged );
-    connect( ui->batchDownloadButton, &SvgButton::buttonClicked, this, &MainWindow::batchDownload );
-    connect( ui->pathLine, &QLineEdit::textChanged, this, &MainWindow::changeDestinationPath );
+    // Nothing is downloaded and no token is fetched any more. The menus are
+    // rebuilt around magnets and playlists later on.
+    ac->getAction( "actionNewToken" )->setVisible( false );
+    ac->getAction( "actionStopDownloads" )->setVisible( false );
 
     // network
     if( QNetworkInformation::loadDefaultBackend() && QNetworkInformation::instance() ) {
@@ -333,52 +257,26 @@ void MainWindow::setupConnections()
     } else {
         qWarning() << "GrooveOff ::" << "no QNetworkInformation backend available, assuming we are online";
     }
+
+    onlineStateChanged( isOnline() );
 }
 
 void MainWindow::loadSettings()
 {
     QSettings settings;
 
-    m_saveSession     = settings.value( QLatin1String( "saveSession" ), true ).toBool();
-    if( m_saveSession )
-        m_saveAborted = settings.value( QLatin1String( "saveAborted" ), false ).toBool();
-    else
-        m_saveAborted = true;
-    m_showHistory     = settings.value( QLatin1String( "saveSearches" ), false ).toBool();
-    if( m_showHistory ) {
-        m_searchSize = settings.value( QLatin1String( "historySize" ), 5 ).toInt();
-        if(m_searchList.isEmpty())
-            m_searchList << settings.value( QLatin1String( "searchTerms" ), QStringList() ).toStringList();
-        setupCompleter();
-    }
-    m_maxResults      = settings.value( QLatin1String( "numResults" ), 0 ).toInt();
-    m_loadCovers      = settings.value( QLatin1String( "loadCovers" ), true ).toBool();
-    if( m_loadCovers )
-        m_emptyCache = settings.value( QLatin1String( "emptyCache" ), false ).toBool();
-    else
-        m_emptyCache = true;
-    m_maxDownloads    = settings.value( QLatin1String( "maxDownloads" ), 5 ).toInt();
-    m_saveDestination = settings.value( QLatin1String( "saveDestination" ), true ).toBool();
-
-    //Naming Schema
-    Utility::namingSchema = settings.value( QLatin1String( "namingSchema" ),
-                                            QLatin1String( "%artist/%album/%track - %title" ) 
-                                          ).toString();
-                                          
     setGeometry( settings.value( QLatin1String( "windowGeometry" ), QRect( 100, 100, 350, 600 ) ).toRect() );
 }
 
 void MainWindow::loadBootSettings()
 {
     QSettings settings;
-    
-    m_guiLayout       = ( GuiLayout )settings.value( QLatin1String( "guiLayout" ), Compact ).toInt();
-    
-    m_sessionFileName = settings.value( QLatin1String( "sessionFile" ), QLatin1String( "default" ) ).toString();
-    
+
+    m_guiLayout = ( GuiLayout )settings.value( QLatin1String( "guiLayout" ), Compact ).toInt();
+
     ui->splitter->setOrientation( (Qt::Orientation )settings.value( QLatin1String( "splitterOrientation" ), Qt::Vertical ).toInt() );
     m_playerWidget->showElapsedTimerLabel( ui->splitter->orientation() == Qt::Vertical ? false : true );
-    
+
     const QList<int> &_sizes = settings.value( QLatin1String( "splitterSizes" ) ).value< QList<int> >();
 
     if( !_sizes.isEmpty() ) {
@@ -389,7 +287,7 @@ void MainWindow::loadBootSettings()
     The::audioEngine()->setMuted( settings.value( QLatin1String( "muted" ), false ).toBool() );
 
     m_playerWidget->setTimerState( (GrooveOff::TimerState )settings.value( QLatin1String( "timerState" ), GrooveOff::ElapsedState ).toInt() );
-    
+
     if( m_guiLayout == Mini )
         setMiniPlayerLayout();
     else
@@ -411,316 +309,68 @@ void MainWindow::saveSettings()
         settings.setValue( QLatin1String( "windowGeometry" ), rect );
     }
 
-    if( !m_showHistory )
-        settings.setValue( QLatin1String( "searchTerms" ), QStringList() );
-    else
-        settings.setValue( QLatin1String( "searchTerms" ), m_searchList );
-
-    if( m_saveDestination )
-        settings.setValue( QLatin1String( "destination" ), ui->pathLine->text() );
-    else
-        settings.setValue( QLatin1String( "destination" ), QString() );
-
     settings.setValue( QLatin1String( "timerState" ), m_playerWidget->getTimerState() );
     settings.setValue( QLatin1String( "muted" ), The::audioEngine()->isMuted() );
     settings.setValue( QLatin1String( "volume" ), The::audioEngine()->volume() );
     settings.setValue( QLatin1String( "guiLayout" ), m_guiLayout );
-    settings.setValue( QLatin1String( "sessionFile" ), m_sessionFileName );
 }
 
-void MainWindow::selectFolder()
+/*!
+  \brief loadCurrentPlaylist: fill the list from the playlist app_state points at
+  \return void
+*/
+void MainWindow::loadCurrentPlaylist()
 {
-    QString dir = QFileDialog::getExistingDirectory( this,
-                                                     tr( "Select Directory" ),
-                                                     ui->pathLine->text().isEmpty() ? QDir::homePath() : ui->pathLine->text(),
-                                                     QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks );
-
-    // be sure that a valid path was selected
-    if( QFile::exists( dir ) )
-        ui->pathLine->setText( dir );
-
-    changeDestinationPath();
-}
-
-void MainWindow::changeDestinationPath()
-{
-    Utility::destinationPath = ui->pathLine->text();
-    reloadItemsDownloadButtons();
-}
-
-void MainWindow::beginSearch()
-{
-    // stop a search if one operation is still in progress
-    if( m_searchInProgress )
+    if( !The::database()->isOpen() )
         return;
 
-    // abort search if search field is empty
-    if( ui->searchLine->text().isEmpty() )
+    PlaylistStore *playlists = The::playlistStore();
+
+    const qint64 playlistId = playlists->currentPlaylistId();
+    if( playlistId <= 0 )
         return;
 
-    // if save searches history append last search and remove oldest if history is full
-    if( m_showHistory ) {
-        if( m_searchList.count() >= m_searchSize )
-            m_searchList.removeFirst();
+    // disable temporarily AutoScroll
+    ui->downloadList->setAutoScroll( false );
+    ui->downloadList->removeAll();
 
-        m_searchList.append( ui->searchLine->text().toLower() );
-        m_searchList.removeDuplicates();
-
-        setupCompleter();
+    const QList<TrackInfoPtr> &tracks = playlists->tracks( playlistId );
+    for( const TrackInfoPtr &track : tracks ) {
+        addPlaylistItem( PlaylistItemPtr( new PlaylistItem( track ) ) );
     }
 
-    // flag that prevents multiple searches
-    m_searchInProgress = true;
+    ui->downloadList->setAutoScroll( true );
+    ui->downloadList->reloadPlaylist();
 
-    // some ui setups
-    ui->searchButton->setVisible( false );
-
-    ui->spinnerWidget->setVisible( true );
-    m_spinner->start( 0 );
-
-    // clear cover manager
-    m_coverManager->clear();
-
-    // clear listWidget
-    for( int i = ui->matchList->count() - 1; i >= 0; i-- ) {
-        QListWidgetItem *item = ui->matchList->takeItem( i );
-        ui->downloadList->removeItemWidget( item );
-        delete item;
-    }
-
-    // clear artists, albums containers
-    ui->artistsCB->clear();
-    ui->artistsCB->addItem( tr( "All Artists" ) );
-    ui->albumsCB->clear();
-    ui->albumsCB->addItem( tr( "All Albums" ) );
-    m_artistsAlbumsContainer.clear();
-    
-    ui->matchesMessage->setText( tr( "Querying..." ) );
-
-    m_songList = m_api->songs( ui->searchLine->text(), Utility::token );
-
-    connect( m_songList.data(), &SongList::finished, this, &MainWindow::searchFinished );
-    connect( m_songList.data(), &SongList::parseError, this, &MainWindow::searchError );
-    connect( m_songList.data(), &SongList::requestError, this, &MainWindow::searchError );
-
-    // force downloadList repaint to prevent blank items
-    ui->downloadList->repaint();
-}
-
-void MainWindow::getToken()
-{
-    ui->searchLine->setStyleSheet( QLatin1String( "background-color:#E7A2A9;" ) );
-
-    // some ui setups
-    ui->svgLed->setType( IconButton::Offline );
-    m_playerWidget->showMessage( tr( "Connecting..." ) );
-
-    m_token = m_api->token();
-
-    connect( m_token.data(), &Token::finished, this, &MainWindow::tokenRequestFinished );
-    connect( m_token.data(), &Token::parseError, this, &MainWindow::tokenRequestError );
-    connect( m_token.data(), &Token::requestError, this, &MainWindow::tokenRequestError );
-}
-
-void MainWindow::tokenRequestFinished()
-{
-    // the application is now free to perform a search
-    m_searchInProgress = false;
-    ui->searchButton->setButtonEnabled( true );
-
-    if( !m_token->isEmpty() ) {
-        ui->searchLine->setStyleSheet( QLatin1String( "" ) );
-
-        Utility::token = m_token->content();
-
-        m_playerWidget->showMessage( tr( "Connected to\nGrooveshark" ) );
-        ui->svgLed->setToolTip( tr( "You're connected to Grooveshark!" ) );
-        ui->svgLed->setType( IconButton::Online );
-        ui->matchList->setEnabled( true );
-
-        // start download of queued songs from last session
-        unqueue();
-    } else {
-        m_playerWidget->showMessage( tr( "Connection error!!" ) );
-        qDebug() << "GrooveOff ::" << "Token not received!!";
-        Utility::token.clear();
-    }
-}
-
-void MainWindow::tokenRequestError()
-{
-    m_playerWidget->showMessage( tr( "Connection error!!" ) );
-    qDebug() << "GrooveOff ::" << m_token->errorString();
-}
-
-void MainWindow::searchFinished()
-{
-    restoreSearch();
-
-    // check if last search returned results
-    if( m_songList->count() == 0 ) {
-        qDebug() << "GrooveOff ::" << "Empty result list";
-        ui->matchesMessage->setText( tr( "%n song(s) found", "", 0 ) );
+    // The track that was playing is selected but not started: pressing play
+    // picks it up where it was left.
+    const qint64 trackId = playlists->currentTrackId();
+    if( trackId <= 0 )
         return;
-    }
 
-    // 'elementsNumber' contains number of elements to display
-    const int elementsNumber = numberOfElementsToShow( m_songList->count() );
-
-    ui->combosContainer->setVisible( true );
-
-    QStringList artists;
-    QStringList albums;
-
-    ui->matchesMessage->setText( tr( "%n song(s) found", "", elementsNumber ) );
-
-    for( int i = 0; i < elementsNumber; i++ ) {
-        PlaylistItemPtr playlistItem( new PlaylistItem( m_songList->item( i ) ) );
-
-        // Decide if show cover arts
-        if( m_loadCovers && !QFile::exists( Utility::coversCachePath + m_songList->item( i )->coverArtFilename() ) ) {
-            m_coverManager->appendItem( playlistItem );
-        }
-
-        // build a MathItem with all required data
-        MatchItem *matchItem = new MatchItem( playlistItem, this );
-        QListWidgetItem *wItem = new QListWidgetItem;
-        ui->matchList->addItem( wItem );
-        ui->matchList->setItemWidget( wItem, matchItem );
-        wItem->setSizeHint( QSize( Utility::coverSize + Utility::marginSize * 2,Utility::coverSize + Utility::marginSize * 2 ) );
-        
-        connect( matchItem, &MatchItem::download, this, &MainWindow::downloadPlaylistItem );
-
-        // don't freeze gui inserting items
-        QCoreApplication::processEvents();
-        
-        appendArtistAlbum( m_songList->item( i ) );
-        
-        if( !m_songList->item( i )->artistName().isEmpty() )
-                artists << m_songList->item( i )->artistName();
-
-        if( !m_songList->item( i )->albumName().isEmpty() )
-            albums << m_songList->item( i )->albumName();
-    }
-
-    // removing duplicates
-    artists.removeDuplicates();
-    albums.removeDuplicates();
-
-    // sorting items
-    artists.sort();
-    albums.sort();
-
-    ui->artistsCB->addItems( artists );
-    ui->albumsCB->addItems( albums );
-    applyFilter();
-
-    // force downloadList repaint to prevent blank items
-    ui->downloadList->repaint();
-}
-
-void MainWindow::appendArtistAlbum(const SongPtr& song)
-{
-    if( m_artistsAlbumsContainer.keys().contains( song->artistName() ) ) {
-        QHash<QString, QStringList>::iterator iter = m_artistsAlbumsContainer.find( song->artistName() );
-        if( !iter.value().contains( song->albumName() ) )
-            iter.value() << song->albumName();
-    } else {
-        m_artistsAlbumsContainer[ song->artistName() ] = QStringList() << song->albumName();
-    }
-}
-
-
-int MainWindow::numberOfElementsToShow(int searchSize)
-{
-    if( m_maxResults == 0 ) // no results limit
-        return searchSize;
-    return qMin( m_maxResults, searchSize );
-}
-
-
-void MainWindow::searchError()
-{
-    qDebug() << "GrooveOff ::" << m_songList->errorString();
-    restoreSearch();
-}
-
-void MainWindow::downloadPlaylistItem( PlaylistItemPtr playlistItem )
-{
-    // check if item is already in queue
-    if( isItemQueued( playlistItem->song()->songID() ) ) {
-        if( !m_batchDownload ) {
-            QMessageBox::information( this, tr( "Attention" ), tr( "This song is already in queue." ), QMessageBox::Ok );
-        }
-        return;
-    }
-    
-    playlistItem->setPath( ui->pathLine->text() + QDir::separator() );
-    playlistItem->setNamingSchema( Utility::namingSchema );
-
-    // check if destination folder exists
-    if( !QDir( ui->pathLine->text() ).exists() ) {
-        QMessageBox::information( this, tr( "Attention" ), tr( "The destination folder does not exists.\nSelect a valid path" ), QMessageBox::Ok );
-        
-        // if a batch download is in progress show the message above then stop all downloads.
-        if( m_batchDownload )
-            m_stopBatchDownload = true;
-        
-        return;
-    }
-    
-    // check file existence
-    if( playlistItem->fileInfo().exists() ) {
-        if( m_batchDownload )
-            return;
-        
-        int ret = QMessageBox::question( this,
-                                         tr( "Overwrite File?" ),
-                                         tr( "A file named \"%1\" already exists. Are you sure you want to overwrite it?" ).arg( playlistItem->fileInfo().fileName() ),
-                                         QMessageBox::Yes | QMessageBox::Cancel,
-                                         QMessageBox::Cancel );
-        if( ret == QMessageBox::Yes ) {
-            QFile::remove( playlistItem->fileInfo().absoluteFilePath() );
-        } else {
-            return;
+    for( int i = 0; i < ui->downloadList->count(); ++i ) {
+        DownloadItem *item = qobject_cast<DownloadItem *>( ui->downloadList->itemWidget( ui->downloadList->item( i ) ) );
+        if( item && item->playlistItem()->track()->id() == trackId ) {
+            ui->downloadList->setCurrentRow( i );
+            break;
         }
     }
-
-    // check if destination folder is writable
-    if( !QFileInfo( ui->pathLine->text() ).isWritable() ) {
-        QMessageBox::information( this, 
-                                  tr( "Attention" ),
-                                  tr( "The destination folder is not writable.\n"
-                                          "Select a valid path" ),
-                                  QMessageBox::Ok );
-        
-        // if a batch download is in progress show the message above then stop all downloads.
-        if( m_batchDownload )
-            m_stopBatchDownload = true;
-        
-        return;
-    }
-
-    addDownloadItem( playlistItem );
 }
 
-
-void MainWindow::addDownloadItem( const PlaylistItemPtr &playlistItem )
+void MainWindow::savePlaybackState()
 {
-    // Creating path, if needed
-    if( !playlistItem->fileInfo().absoluteDir().exists() ) {
-        if( !playlistItem->fileInfo().absoluteDir().mkpath( playlistItem->fileInfo().absolutePath() ) ) {
-            if( !m_batchDownload ) {
-                QMessageBox::information( this,
-                                          tr( "Attention" ),
-                                          tr( "Can't create destination path:" ) + QLatin1String( "\n\n" ) + playlistItem->fileInfo().absolutePath() + QLatin1String( "\n\n" ) + tr( "Aborting..." ),
-                                          QMessageBox::Ok );
-            }
-            return;
-        }
-    }
+    if( !The::database()->isOpen() )
+        return;
 
-    // build a DownloadItem with all required data
+    const PlaylistItemPtr &current = The::audioEngine()->currentTrack();
+
+    The::playlistStore()->setPlaybackState( The::playlistStore()->currentPlaylistId(),
+                                            current && current->track() ? current->track()->id() : 0,
+                                            The::audioEngine()->currentTime() );
+}
+
+void MainWindow::addPlaylistItem( const PlaylistItemPtr &playlistItem )
+{
     DownloadItem *item = new DownloadItem( playlistItem, this );
 
     connect( item,             &DownloadItem::reloadPlaylist,
@@ -729,29 +379,12 @@ void MainWindow::addDownloadItem( const PlaylistItemPtr &playlistItem )
     connect( item,             &DownloadItem::removeMe,
              ui->downloadList, &DownloadList::removeItem );
 
-    connect( item, QOverload<>::of(&DownloadItem::downloadFinished),
-             this, &MainWindow::freeDownloadSlot );
-
-    connect( item, &DownloadItem::addToQueue,
-             this, &MainWindow::addItemToQueue );
-
-    if( !playlistItem->fileInfo().exists() ) {
-        // check if download m_queue is full
-        if( m_parallelDownloadsCount < m_maxDownloads && !m_token->isEmpty() ) {
-            m_parallelDownloadsCount++;
-            item->startDownload();
-        } else {
-            m_queue.append( item );
-        }
-    }
-
     QListWidgetItem *wi = new QListWidgetItem;
     ui->downloadList->addItem( wi );
     ui->downloadList->setItemWidget( wi, item );
-    ui->downloadList->setCurrentItem( wi );
     wi->setSizeHint( QSize( Utility::coverSize + Utility::marginSize * 2,
-                            Utility::coverSize + Utility::marginSize * 2 
-                          ) 
+                            Utility::coverSize + Utility::marginSize * 2
+                          )
                    );
 }
 
@@ -782,7 +415,7 @@ void MainWindow::setCompactLayout()
     settings.setValue( QLatin1String( "splitterOrientation" ), ui->splitter->orientation() );
 
     m_guiLayout = Compact;
-    
+
     ui->compactMenuButton->setVisible( false );
     menuBar()->setVisible( true );
 }
@@ -813,7 +446,7 @@ void MainWindow::setWideLayout()
     // save choice
     settings.setValue( QLatin1String( "splitterOrientation" ), ui->splitter->orientation() );
     m_guiLayout = Wide;
-    
+
     ui->compactMenuButton->setVisible( false );
     menuBar()->setVisible( true );
 }
@@ -836,7 +469,6 @@ void MainWindow::setMiniPlayerLayout()
     m_guiLayout = Mini;
 }
 
-
 void MainWindow::about()
 {
     AboutDialog dialog;
@@ -853,268 +485,22 @@ void MainWindow::configure()
 
 void MainWindow::onlineStateChanged( bool isOnline )
 {
-    if( isOnline ) { // when returning online get a new token
-        getToken();
+    if( isOnline ) {
+        ui->svgLed->setType( IconButton::Online );
+        ui->svgLed->setToolTip( tr( "Online" ) );
+        m_playerWidget->showMessage( tr( "Idle" ) );
     } else {
-        m_playerWidget->showMessage( tr( "Offline" ) );
-        ui->searchButton->setButtonEnabled( false );
+        // Tracks already in the cache still play: only reaching new peers needs
+        // the network.
         ui->svgLed->setType( IconButton::Offline );
-        ui->matchList->setEnabled( false );
+        ui->svgLed->setToolTip( tr( "Offline: only cached tracks can be played" ) );
+        m_playerWidget->showMessage( tr( "Offline" ) );
     }
-}
-
-void MainWindow::setupCompleter()
-{
-    QCompleter *completer = new QCompleter( m_searchList, this );
-    completer->setCaseSensitivity( Qt::CaseInsensitive );
-    ui->searchLine->setCompleter( completer );
 }
 
 void MainWindow::donate()
 {
     QDesktopServices::openUrl( QUrl( QLatin1String( "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=WJNETV7GLTKDG&item_name=" ) + tr( "Donation to Grooveoff's author" ) ) );
-}
-
-void MainWindow::applyFilter()
-{
-    QString artist = ui->artistsCB->currentText();
-    QString album = ui->albumsCB->currentText();
-
-    for( int i = 0; i < ui->matchList->count(); i++ ) {
-        QString itemArtist = ( (MatchItem * )ui->matchList->itemWidget( ui->matchList->item( i ) ) )->playlistItem()->song()->artistName();
-        QString itemAlbum  = ( (MatchItem * )ui->matchList->itemWidget( ui->matchList->item( i ) ) )->playlistItem()->song()->albumName();
-
-        if( ui->artistsCB->currentIndex() == 0  && ui->albumsCB->currentIndex() == 0 ) {
-            ui->matchList->setRowHidden( i, false );
-        } else if( ui->artistsCB->currentIndex() == 0 ) {
-            if( itemAlbum == album )
-                ui->matchList->setRowHidden( i, false );
-            else
-                ui->matchList->setRowHidden( i, true );
-        } else if( ui->albumsCB->currentIndex() == 0 ) {
-            if( itemArtist == artist )
-                ui->matchList->setRowHidden( i, false );
-            else
-                ui->matchList->setRowHidden( i, true );
-        } else {
-            if( itemArtist == artist && itemAlbum == album   )
-                ui->matchList->setRowHidden( i, false );
-            else
-                ui->matchList->setRowHidden( i, true );
-        }
-    }
-
-    ui->matchesMessage->setText( tr( "%n song(s) found", "", visibleItemsCount() ) );
-}
-
-// selecting an artist name in combobox triggers this routine
-void MainWindow::artistChanged()
-{
-    ui->albumsCB->clear();
-    ui->albumsCB->addItem( tr( "All Albums" ) );
-    ui->albumsCB->addItems( m_artistsAlbumsContainer[ ui->artistsCB->currentText() ] );
-
-    applyFilter();
-}
-
-// selecting an album name in combobox triggers this routine
-void MainWindow::albumChanged()
-{
-    applyFilter();
-}
-
-// this manages the queue; a download starts only when a download slot is available
-void MainWindow::unqueue()
-{
-    // this loop iterates for each free download slot
-    for( ; m_parallelDownloadsCount < m_maxDownloads; m_parallelDownloadsCount++ ) {
-        // check if m_queue is empty or item already queued
-        while( !m_queue.isEmpty() && ( (DownloadItem * )m_queue.at( 0 ) )->downloadState() != GrooveOff::QueuedState ) {
-            // discard item
-            m_queue.takeFirst();
-        }
-
-        if( m_queue.isEmpty() )
-            return;
-
-        // valid item found
-        ( (DownloadItem * )m_queue.at( 0 ) )->startDownload();
-        m_queue.takeFirst();
-    }
-}
-
-// adds a new item to the queue
-void MainWindow::addItemToQueue( DownloadItem* item )
-{
-    m_queue.append( item );
-    unqueue();
-}
-
-// decrease the counter and start a new download
-void MainWindow::freeDownloadSlot()
-{
-    m_parallelDownloadsCount--;
-    unqueue();
-}
-
-// returns true if download list contains a track with given id
-bool MainWindow::isItemQueued( const uint &id )
-{
-    // check if file is currently downloading
-    for( int i = 0; i < ui->downloadList->count(); i++ ) {
-        if( id == qobject_cast<DownloadItem *>( ui->downloadList->itemWidget( ui->downloadList->item( i ) ) )->playlistItem()->song()->songID() ) {
-            return true;
-        }
-    }
-    return false;
-}
-
-// returns the number of visible items
-// when tracks are filtered on author/album name, some of them are hidden
-// the return value is used on label near artists/albums combobox
-int MainWindow::visibleItemsCount()
-{
-    int count = 0;
-    for( int i = 0; i < ui->matchList->count(); i++ ) {
-        if( !ui->matchList->isRowHidden( i ) )
-            count++;
-    }
-
-    return count;
-}
-
-// each time a song is downloaded or removed this functions
-// calls an update for download button icon
-void MainWindow::reloadItemsDownloadButtons()
-{
-    for( int i = 0; i < ui->matchList->count(); i++ ) {
-        qobject_cast<MatchItem *>( ui->matchList->itemWidget( ui->matchList->item( i ) ) )->setDownloadIcon();
-    }
-}
-
-// this is called when clicking batch button ("download all" button)
-// this simply adds each filtered item to the queue
-// in batch mode all warning are suppressed, so if, f.i., a song already exists it is skipped,
-// without confirmation, like in normal mode
-void MainWindow::batchDownload()
-{
-    m_batchDownload = true;
-    m_stopBatchDownload = false;
-    for( int i = 0; i < ui->matchList->count(); i++ ) {
-        if( m_stopBatchDownload )
-            break;
-        if( !ui->matchList->item( i )->isHidden() )
-            downloadPlaylistItem( (( MatchItem * )ui->matchList->itemWidget( ui->matchList->item( i ) ) )->playlistItem() );
-    }
-    m_batchDownload = false;
-    m_stopBatchDownload = true;
-}
-
-void MainWindow::saveSessionAs()
-{
-//     bool ok;
-//     QString fileName = QInputDialog::getText( this, tr( "New Session" ),
-//                                          tr( "Session name:" ), QLineEdit::Normal,
-//                                          QDir::home().dirName(), &ok );
-//     // remove separators, if any
-//     fileName.remove( '/' );
-//     fileName.remove( '\\' );
-// 
-//     if ( ok && !fileName.isEmpty() ) {
-//         // save current session
-//         saveSession();
-//         // change session name
-//         m_sessionFileName = fileName;
-//     }
-}
-
-// save the current download list in current session file name
-void MainWindow::saveSession()
-{
-    if( !m_saveAborted ) {
-        ui->downloadList->removeFailedAborted();
-    }
-    
-    The::sessionReaderWriter()->write( m_sessionFilePath + m_sessionFileName + QLatin1String( ".xml" ),
-                                       ui->downloadList->playlistItems() );
-}
-
-// loads a session file
-void MainWindow::loadSession()
-{
-    // disable temporarily AutoScroll
-    ui->downloadList->setAutoScroll( false );
-
-    // remove old entries
-    ui->downloadList->abortAllDownloads();
-    ui->downloadList->removeDownloaded();
-    ui->downloadList->removeFailedAborted();
-
-    QList<PlaylistItemPtr> items = The::sessionReaderWriter()->read( m_sessionFilePath + m_sessionFileName + QLatin1String( ".xml" ) );
-
-    for( const PlaylistItemPtr &item : std::as_const(items) ) {
-        // Decide if show cover arts
-        if( m_loadCovers && !QFile::exists( Utility::coversCachePath + item->song()->coverArtFilename() ) ) {
-            m_coverManager->appendItem( item );
-        }
-        
-        addDownloadItem( item );
-    }
-
-    ui->downloadList->setAutoScroll( true );
-    ui->downloadList->reloadPlaylist();
-
-    // FIXME
-    // loadSessions();
-}
-
-// populates File menu with all sessions found on disk
-// each file will have a menu entry and a qaction
-void MainWindow::loadSessions()
-{
-    const QList< QAction * > sessionActions = The::actionCollection()->getMenu( "sessionsMenu" )->actions();
-    for( QAction *action : sessionActions ) {
-        The::actionCollection()->getMenu( "sessionsMenu" )->removeAction( action );
-        delete action;
-    }
-
-    QDir sessionPath( m_sessionFilePath );
-    QStringList sessions = sessionPath.entryList( QStringList() << "*.xml", QDir::Files, QDir::Name );
-
-    for( QString session : std::as_const(sessions) ) {
-        QAction *action = new QAction( session.remove( ".xml", Qt::CaseInsensitive ), The::actionCollection()->getMenu( "sessionsMenu" ) );
-        if( session == m_sessionFileName )
-            action->setFont( Utility::font( QFont::Bold ) );
-        The::actionCollection()->getMenu( "sessionsMenu" )->addAction( action );
-        
-        connect( action, &QAction::triggered, this, &MainWindow::loadSessionFile );
-    }
-}
-
-// this function is called when clicking a session entry in File menu
-void MainWindow::loadSessionFile()
-{
-    QAction *action = ( QAction * )QObject::sender();
-    QString fileName = action->text();
-    if( fileName != m_sessionFileName && QFile::exists( m_sessionFilePath + fileName + QLatin1String( ".xml" ) ) ) {
-        //FIXME ask if abort current downloads
-        saveSession();
-        ui->downloadList->abortAllDownloads();
-        ui->downloadList->removeDownloaded();
-        ui->downloadList->removeFailedAborted();
-        m_sessionFileName = fileName;
-
-        loadSession();
-    }
-}
-
-// resets status of some widgets
-void MainWindow::restoreSearch()
-{
-    m_searchInProgress = false;
-    ui->searchButton->setVisible( true );
-    ui->spinnerWidget->setVisible( false );
-    m_spinner->stop();
 }
 
 // intercept palette changes to modify the palette for svg images
@@ -1124,32 +510,14 @@ void MainWindow::changeEvent( QEvent *event )
         The::paletteHandler()->setPalette( palette() );
 }
 
-void MainWindow::openSessionManager()
-{
-    QPointer<SessionManager> manager = new SessionManager( m_sessionFilePath, this );
-    if( manager->exec() ) {
-        if( !QFile::exists( m_sessionFilePath + m_sessionFileName + QLatin1String( ".xml" ) ) ) {
-            if( The::audioEngine()->state() == GrooveOff::PlayerState::Playing || The::audioEngine()->state() == GrooveOff::PlayerState::Paused )
-                The::audioEngine()->stop();
-
-            m_sessionFileName = QLatin1String( "default" );
-        }
-
-        loadSession();
-    }
-    
-    delete manager;
-}
-
-// resize some widgets' height to that of the lineedit
+// resize some widgets' height to that of the header
 void MainWindow::resizeEvent( QResizeEvent *event )
 {
-    ui->svgLed->setFixedSize( QSize( ui->pathLine->height(), ui->pathLine->height() ) );
-    ui->searchButton->setFixedSize( QSize( ui->pathLine->height(), ui->pathLine->height() ) );
-    ui->compactMenuButton->setFixedSize( QSize( ui->pathLine->height(), ui->pathLine->height() ) );
-    ui->browseButton->setFixedSize( QSize( ui->pathLine->height(), ui->pathLine->height() ) );
-    ui->batchDownloadButton->setFixedSize( QSize( ui->pathLine->height(), ui->pathLine->height() ) );
-    ui->spinnerWidget->setFixedSize( QSize( ui->pathLine->height(), ui->pathLine->height() ) );
+    QFontMetrics fmSystemFont( Utility::font( QFont::Bold ) );
+    const int side = qMax( fmSystemFont.height(), 24 );
+
+    ui->svgLed->setFixedSize( QSize( side, side ) );
+    ui->compactMenuButton->setFixedSize( QSize( side, side ) );
+    ui->spinnerWidget->setFixedSize( QSize( side, side ) );
     QWidget::resizeEvent( event );
 }
-

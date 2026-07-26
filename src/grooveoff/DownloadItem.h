@@ -22,46 +22,43 @@
 
 #include "GrooveOffNamespace.h"
 #include "PlaylistItem.h"
-#include <../libgrooveshark/downloader.h>
 
 #include <QWidget>
-#include <qlistwidget.h>
-#include <QVariantMap>
-#include "GrooveOffNamespace.h"
 
 namespace Ui {
 class DownloadItem;
 }
 
-class QLabel;
-class QPushButton;
-class QProgressBar;
-class TimerButton;
-class QDir;
+class QEnterEvent;
 
+/**
+  * @class DownloadItem
+  * @short One track in a playlist.
+  *
+  * The progress bar no longer measures a download: it will show how much of
+  * the file is buffered out of the torrent. The name stays for now, the widget
+  * is renamed together with the rest of the interface.
+  */
 class DownloadItem : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit DownloadItem( const PlaylistItemPtr &playlistItemPtr, QWidget *parent = 0, const GrooveOff::Context &context = GrooveOff::Download );
-    virtual ~DownloadItem();
-    QString songFile();
+    explicit DownloadItem( const PlaylistItemPtr &playlistItemPtr, QWidget *parent = nullptr );
+    ~DownloadItem() override;
 
     inline const PlaylistItemPtr playlistItem() {
         return m_playlistItem;
     }
-    
-    inline GrooveOff::DownloadState downloadState() {
-        return m_downloadState;
-    }
-    
-    inline void setDownloadState(GrooveOff::DownloadState state) {
-        m_downloadState = state;
+
+    inline GrooveOff::TrackState trackState() {
+        return m_trackState;
     }
 
-    void startDownload();
-    void abortDownload();
+    void setTrackState( GrooveOff::TrackState state );
+
+    /** how much of the file is available, in bytes */
+    void setBuffered( qint64 bytesAvailable, qint64 bytesTotal );
 
     bool operator==( DownloadItem & ) const;
 
@@ -69,49 +66,37 @@ public Q_SLOTS:
     void setPlayerState( GrooveOff::PlayerState );
 
 Q_SIGNALS:
-    void downloadFinished();
-    void addToQueue( DownloadItem * );
     void pauseResumePlaying();
     void stateChangedSignal();
     void play( QString );
     void reloadPlaylist();
-    void removeMeFromSession( quint32 );
     void removeMe( DownloadItem * );
 
 protected:
-    virtual void leaveEvent ( QEvent * event );
-    virtual void enterEvent ( QEnterEvent * event );
+    void leaveEvent( QEvent *event ) override;
+    void enterEvent( QEnterEvent *event ) override;
 
 private Q_SLOTS:
-    void downloadFinished( bool ok );
-    void setProgress( const qint64 &bytesReceived, const qint64 &bytesTotal );
     void playSong() const;
     void timerButtonClicked();
     void removeSong();
-    void openFolder();
     void loadCover();
-    void stopDownload();
     void deleteItem();
-    void unqueueItem();
-    void queueItem();
 
 private:
-    Ui::DownloadItem *ui;
-    PlaylistItemPtr m_playlistItem;
-    GrooveOff::DownloadState m_downloadState;
+    Ui::DownloadItem      *ui;
+    PlaylistItemPtr        m_playlistItem;
+    GrooveOff::TrackState  m_trackState;
     GrooveOff::PlayerState m_playerState;
-    GrooveShark::DownloaderPtr m_downloader;
-    bool m_oneShot;
-    GrooveOff::Context m_context;
 
     void setupUi();
     void setupConnections();
     void stateChanged();
-    void removeEmptyFolder( QDir folder );
-    void setQueuedState();
-    void setDownloadingState();
-    void setFinishedState();
-    void setAbortedState();
+    void setDormantState();
+    void setIdleState();
+    void setBufferingState();
+    void setReadyState();
+    void setStalledState();
     void setErrorState();
 };
 

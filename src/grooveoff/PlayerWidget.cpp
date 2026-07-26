@@ -314,33 +314,29 @@ void PlayerWidget::sourceChanged()
 {
     const PlaylistItemPtr &track = The::audioEngine()->currentTrack();
     
-    const QString &title = track->song()->songName();
-    const QString &artist = track->song()->artistName();
-    const QString &album = track->song()->albumName();
-    const QString &coverName = track->song()->coverArtFilename();
+    const QString &title = track->displayTitle();
+    const QString &subtitle = track->displaySubtitle();
 
     ui->titleLabel->setText( title );
     ui->titleLabel->setToolTip( title );
 
-    ui->album_authorLabel->setText( artist + " - " + album );
-    ui->album_authorLabel->setToolTip( artist + " - " + album );
+    ui->album_authorLabel->setText( subtitle );
+    ui->album_authorLabel->setToolTip( subtitle );
 
-    if( !coverName.isEmpty()
-        && QFile::exists( Utility::coversCachePath + coverName )
-        && coverName != "0" )
-        ui->coverLabel->setPixmap( QPixmap( Utility::coversCachePath + coverName ) );
-    else
-        ui->coverLabel->setPixmap( QIcon::fromTheme( QLatin1String( "media-optical" ),
-                                                     QIcon( QLatin1String( ":/resources/media-optical.png" ) )
-                                                   ).pixmap( ui->coverLabel->size() ) );
+    // Covers will come from the picture frame of the buffered file; until then
+    // every track gets the generic one.
+    ui->coverLabel->setPixmap( QIcon::fromTheme( QLatin1String( "media-optical" ),
+                                                 QIcon( QLatin1String( ":/resources/media-optical.png" ) )
+                                               ).pixmap( ui->coverLabel->size() ) );
 
-    // Audio Properties
-    const TagLib::FileRef trackFileRef( QString( track->path() + track->fileName() ).toLatin1(), 
-                             true, 
-                             TagLib::AudioProperties::Average 
+    // Audio Properties, read off whatever is already on disk
+    const TagLib::FileRef trackFileRef( track->localPath().toLatin1(),
+                             true,
+                             TagLib::AudioProperties::Average
                            );
-    if( trackFileRef.isNull() ) {
-        qDebug() << "GrooveOff :: TagLib ::" << track->path() + track->fileName() << "is null";
+    if( trackFileRef.isNull() || !trackFileRef.audioProperties() ) {
+        qDebug() << "GrooveOff :: TagLib ::" << track->localPath() << "has no readable properties yet";
+        reloadPreviousNextButtons();
         return;
     }
 
@@ -376,14 +372,14 @@ void PlayerWidget::reloadPreviousNextButtons()
         ui->playPauseButton->setToolTip( tr( "Play" ) );
         if( The::audioEngine()->canGoNext() ) {
             const int currentRow = The::playlist()->row( The::audioEngine()->currentTrack() );
-            ui->nextButton->setToolTip( The::playlist()->item( currentRow + 1 )->song()->songName() );
+            ui->nextButton->setToolTip( The::playlist()->item( currentRow + 1 )->displayTitle() );
         } else {
             ui->nextButton->setToolTip( QString() );
         }
 
         if( The::audioEngine()->canGoPrevious() ) {
             const int currentRow = The::playlist()->row( The::audioEngine()->currentTrack() );
-            ui->previousButton->setToolTip( The::playlist()->item( currentRow - 1 )->song()->songName() );
+            ui->previousButton->setToolTip( The::playlist()->item( currentRow - 1 )->displayTitle() );
         } else {
             ui->previousButton->setToolTip( QString() );
         }

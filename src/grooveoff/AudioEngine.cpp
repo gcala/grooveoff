@@ -154,7 +154,10 @@ void AudioEngine::playItem( const PlaylistItemPtr &track)
 
     m_currentTrack = track;
     m_oldTrack = track;
-    m_mediaPlayer->setSource( QUrl::fromLocalFile( m_currentTrack->path() + QDir::separator() + m_currentTrack->fileName() ) );
+    // Straight off the sparse file in the torrent cache. This is the one line
+    // that becomes an http url once the stream server can serve pieces that
+    // have not arrived yet.
+    m_mediaPlayer->setSource( QUrl::fromLocalFile( m_currentTrack->localPath() ) );
     play();
 }
 

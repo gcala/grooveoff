@@ -20,9 +20,6 @@
 #ifndef UTILITY_H
 #define UTILITY_H
 
-#include "PlaylistItem.h"
-#include "../libgrooveshark/song.h"
-
 #include <QString>
 #include <QFont>
 #include <QStringList>
@@ -37,12 +34,12 @@ public:
     static const int buttonSize;
     static const int coverSize;
     static const int marginSize;
-    static const QByteArray userAgent;
-    static const QLatin1String host;
-    static QString coversCachePath;
-    static QString token;
-    static QString destinationPath;
-    static QString namingSchema;
+
+    /** where torrents keep their sparse files, one directory per info hash */
+    static QString torrentsCachePath;
+
+    /** where the fast resume blobs live, flat so that start up is one listing */
+    static QString resumeCachePath;
 
     static QString elidedText( const QString &text, const Qt::TextElideMode &elideMode, const int &width, const QFont::Weight &weight );
 

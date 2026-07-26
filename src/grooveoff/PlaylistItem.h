@@ -20,65 +20,69 @@
 #ifndef PLAYLISTITEM_H
 #define PLAYLISTITEM_H
 
-#include <QObject>
-#include <QFileInfo>
 #include "GrooveOffNamespace.h"
-#include <../libgrooveshark/song.h>
+#include "TrackInfo.h"
 
+#include <QObject>
+
+/**
+  * @class PlaylistItem
+  * @short A track as it appears in a list, with its playback state.
+  *
+  * Unlike TrackInfo it is not serialised by reflection: a QSharedPointer
+  * cannot be written to a QDataStream, which is what forced the old code to
+  * special case the song property. The stream operators below hand the work
+  * to TrackInfo instead, whose properties are all plain values.
+  */
 class PlaylistItem : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY( QString path READ path WRITE setPath )
-    Q_PROPERTY( QString namingSchema READ namingSchema WRITE setNamingSchema )
-    Q_PROPERTY( GrooveShark::SongPtr song READ song WRITE setSong )
 
 public:
-    explicit PlaylistItem ( const GrooveShark::SongPtr &song );
+    explicit PlaylistItem( const TrackInfoPtr &track );
     PlaylistItem();
     ~PlaylistItem();
 
-    QString path() const;
-    void setPath( const QString& path );
-    
-    GrooveShark::SongPtr song();
-    void setSong( const GrooveShark::SongPtr &song );
-    
-    QString namingSchema() const;
-    void setNamingSchema( const QString& schema );
+    TrackInfoPtr track() const;
+    void setTrack( const TrackInfoPtr &track );
 
-    QString fileName() const;
+    /**
+     * Where the file lives in the torrent cache. Until the stream server
+     * exists this is also what the player is given, which is why a fully
+     * cached track can already be played.
+     */
+    QString localPath() const;
+
+    /** what to show in a list row */
+    QString displayTitle() const;
+    QString displaySubtitle() const;
+
     void requireCoverReload();
     void setState( const GrooveOff::PlayerState &state );
-    
+
     inline bool isPlaying() {
         return m_state == GrooveOff::PlayerState::Playing;
     }
-    
+
     inline GrooveOff::PlayerState state() {
         return m_state;
     }
 
     bool operator==( PlaylistItem & ) const;
-    
-    QFileInfo fileInfo();
 
 Q_SIGNALS:
     void reloadCover();
     void stateChanged( GrooveOff::PlayerState );
 
-public Q_SLOTS:
-
 private:
     GrooveOff::PlayerState m_state;
-    GrooveShark::SongPtr m_song;
-    QString m_path;
-    QString m_namingSchema;
+    TrackInfoPtr           m_track;
 };
 
 typedef QSharedPointer<PlaylistItem> PlaylistItemPtr;
 
 QDataStream& operator<<( QDataStream& dataStream, const PlaylistItemPtr item );
-QDataStream& operator>>( QDataStream& dataStream, PlaylistItemPtr item ); // deprecated: throw( UserException )
+QDataStream& operator>>( QDataStream& dataStream, PlaylistItemPtr item );
 
 Q_DECLARE_METATYPE( PlaylistItemPtr )
 

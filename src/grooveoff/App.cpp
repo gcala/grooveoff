@@ -21,6 +21,9 @@
 #include "AudioEngine.h"
 #include "Playlist.h"
 #include "ActionCollection.h"
+#include "../db/Catalog.h"
+#include "../db/Database.h"
+#include "../db/PlaylistStore.h"
 
 #include <QLibraryInfo>
 #include <QTranslator>
@@ -112,6 +115,11 @@ App::~App()
     delete The::audioEngine();
     delete The::playlist();
     delete The::actionCollection();
+
+    // Persistence goes last: the window writes what was playing on its way out.
+    delete The::playlistStore();
+    delete The::catalog();
+    delete The::database();
 }
 
 void App::quit()

@@ -33,7 +33,7 @@
 static QByteArray idFromPlaylistItem( const PlaylistItemPtr item )
 {
     return QByteArray( "/org/grooveoff/tid_" ) +
-           QByteArray::number( item->song()->songID(), 16 ).rightJustified( 8, '0' );
+           QByteArray::number( item->track()->id(), 16 ).rightJustified( 8, '0' );
 }
 
 Mpris2PluginPlayerAdaptor::Mpris2PluginPlayerAdaptor( QObject *parent )
@@ -108,17 +108,15 @@ QVariantMap Mpris2PluginPlayerAdaptor::metadata() const
         return QVariantMap();
 
     PlaylistItemPtr track = m_engine->currentTrack();
-    const QString coverpath = Utility::coversCachePath + track->song()->coverArtFilename();
     QByteArray playingTrackFileId = idFromPlaylistItem( track );
 
     QVariantMap map;
     map[ QLatin1String( "mpris:length"  ) ] = qMax( m_engine->currentTrackTotalTime() * 1000 , qint64( 0 ) );
-    map[ QLatin1String( "mpris:artUrl"  ) ] = QUrl::fromLocalFile( coverpath ).toString();
-    map[ QLatin1String( "xesam:album"   ) ] = track->song()->albumName();
-    map[ QLatin1String( "xesam:artist"  ) ] = QStringList( track->song()->artistName() );
-    map[ QLatin1String( "xesam:title"   ) ] = track->song()->songName();
+    map[ QLatin1String( "xesam:album"   ) ] = track->track()->album();
+    map[ QLatin1String( "xesam:artist"  ) ] = QStringList( track->track()->artist() );
+    map[ QLatin1String( "xesam:title"   ) ] = track->displayTitle();
     map[ QLatin1String( "mpris:trackid" ) ] = QVariant::fromValue< QDBusObjectPath >( QDBusObjectPath( playingTrackFileId.constData() ) );
-    map[ QLatin1String( "xesam:url"     ) ] =  QUrl::fromLocalFile( track->path() + track->fileName() ).toString();
+    map[ QLatin1String( "xesam:url"     ) ] = QUrl::fromLocalFile( track->localPath() ).toString();
     return map;
 }
 

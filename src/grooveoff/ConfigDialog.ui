@@ -192,12 +192,6 @@
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_10">
             <item>
-             <widget class="NamingSchema" name="nowPlayingText"/>
-            </item>
-            <item>
-             <widget class="NamingElements" name="tagListWidget"/>
-            </item>
-            <item>
              <spacer name="verticalSpacer">
               <property name="orientation">
                <enum>Qt::Vertical</enum>
@@ -465,18 +459,6 @@
    </item>
   </layout>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>NamingSchema</class>
-   <extends>QLineEdit</extends>
-   <header location="global">widgets/NamingSchema.h</header>
-  </customwidget>
-  <customwidget>
-   <class>NamingElements</class>
-   <extends>QLineEdit</extends>
-   <header location="global">widgets/NamingElements.h</header>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>

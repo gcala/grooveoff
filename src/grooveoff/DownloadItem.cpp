@@ -21,71 +21,44 @@
 #include "widgets/TimerButton.h"
 #include "Utility.h"
 #include "ui_DownloadItem.h"
-#include <../libgrooveshark/apirequest.h>
 #include "AudioEngine.h"
 #include "Playlist.h"
 #include "MainWindow.h"
 
-#include <QLabel>
-#include <QProgressBar>
-#include <QPushButton>
-#include <QHBoxLayout>
-#include <QDir>
 #include <QDebug>
-#include <QDesktopServices>
-#include <QStandardPaths>
+#include <QFile>
 #include <QGraphicsDropShadowEffect>
 
-using namespace GrooveShark;
-
 /*!
-  \brief Class representing an item in download list
+  \brief Class representing a track in a playlist
 */
-DownloadItem::DownloadItem( const PlaylistItemPtr &playlistItemPtr, QWidget *parent, const GrooveOff::Context &context )
+DownloadItem::DownloadItem( const PlaylistItemPtr &playlistItemPtr, QWidget *parent )
     : QWidget( parent )
     , ui( new Ui::DownloadItem )
     , m_playlistItem( playlistItemPtr )
-    , m_oneShot( true )
-    , m_context( context )
+    , m_trackState( GrooveOff::DormantState )
+    , m_playerState( GrooveOff::PlayerState::Stopped )
 {
     ui->setupUi( this );
     setupUi();
     setupConnections();
 
-    if( m_context == GrooveOff::Track ) {
-        m_downloadState = GrooveOff::FinishedState;
-    } else {
-        if( QFile::exists( m_playlistItem->path() + m_playlistItem->fileName() ) ) {
-            downloadFinished( true );
-        }
-        else {
-            m_downloadState = GrooveOff::QueuedState;
-        }
-    }
+    // Whatever is already in the cache can be played straight away; everything
+    // else waits for its torrent to be woken up.
+    if( QFile::exists( m_playlistItem->localPath() ) )
+        m_trackState = GrooveOff::ReadyState;
 
-    m_playerState = GrooveOff::PlayerState::Stopped;
     stateChanged();
 }
 
-/*!
-  \brief DownloadItem: this is the DownloadItem destructor.
-*/
 DownloadItem::~DownloadItem()
 {
     if( ui->timerButton->isCountdownStarted() ) {
         ui->timerButton->stopCountdown();
-        if( m_context == GrooveOff::Track )
-            emit removeMeFromSession( m_playlistItem->song()->songID() );
-        else
-            removeSong();
+        removeSong();
     }
 
-    if( m_downloadState == GrooveOff::DownloadingState ) {
-        m_downloader->stopDownload();
-    }
-
-    if( m_context == GrooveOff::Download )
-        removeEmptyFolder( QFileInfo( m_playlistItem->path() + m_playlistItem->fileName() ).absoluteDir() );
+    delete ui;
 }
 
 /*!
@@ -98,7 +71,7 @@ void DownloadItem::setupUi()
     ui->coverLabel->setFixedSize( QSize( Utility::coverSize,Utility::coverSize ) );
     loadCover();
 
-    ui->coverLabel->setToolTip( m_playlistItem->fileName() );
+    ui->coverLabel->setToolTip( m_playlistItem->track()->filePath() );
 
     QGraphicsDropShadowEffect *coverShadow = new QGraphicsDropShadowEffect( this );
     coverShadow->setBlurRadius( 15.0 );
@@ -108,58 +81,37 @@ void DownloadItem::setupUi()
     ui->coverLabel->setGraphicsEffect( coverShadow );
 
     ui->titleLabel->setFont( Utility::font( QFont::Bold ) );
-    ui->titleLabel->setText( m_playlistItem->song()->songName() );
-    ui->titleLabel->setToolTip( m_playlistItem->song()->songName() );
+    ui->titleLabel->setText( m_playlistItem->displayTitle() );
+    ui->titleLabel->setToolTip( m_playlistItem->displayTitle() );
     ui->titleLabel->setSizePolicy( QSizePolicy::MinimumExpanding, QSizePolicy::Preferred ); // fix hidden label
 
-    ui->artist_albumLabel->setText( m_playlistItem->song()->artistName() + " - " + m_playlistItem->song()->albumName() );
-    ui->artist_albumLabel->setToolTip( m_playlistItem->song()->songName() );
+    ui->artist_albumLabel->setText( m_playlistItem->displaySubtitle() );
+    ui->artist_albumLabel->setToolTip( m_playlistItem->displaySubtitle() );
     ui->artist_albumLabel->setSizePolicy( QSizePolicy::MinimumExpanding, QSizePolicy::Preferred ); // fix hidden label
-    
+
     // set shadows
     ui->titleLabel->enableShadow( true );
     ui->artist_albumLabel->enableShadow( true );
-    
-    if( m_context == GrooveOff::Track ) {
-        ui->playWidget->setVisible( false );
-        ui->progressBar->setVisible( false );
-    } else {
-        ui->playButton->setButtonEnabled( false );
-        ui->playButton->setPlaying( false );
 
-        ui->progressBar->setMinimum( 0 );
-        ui->progressBar->setValue( 0 );
-        ui->progressBar->setFixedWidth( 100 );
-        ui->progressBar->setFixedHeight( 22 );
-    }
-    
+    ui->playButton->setButtonEnabled( false );
+    ui->playButton->setPlaying( false );
+
+    ui->progressBar->setMinimum( 0 );
+    ui->progressBar->setValue( 0 );
+    ui->progressBar->setFixedWidth( 100 );
+    ui->progressBar->setFixedHeight( 22 );
+
     ui->playButton->setType( IconButton::PlayPause );
     ui->playButton->setToolTip( tr( "Play" ) );
-    
-    ui->unqueueButton->setType( IconButton::Remove );
-    ui->unqueueButton->setToolTip( tr( "Remove track from queue" ) );
-    
-    ui->stopDownloadButton->setType( IconButton::Stop );
-    ui->stopDownloadButton->setToolTip( tr( "Stop track download" ) );
-    
+
     ui->deleteButton->setType( IconButton::Trash );
-    ui->deleteButton->setToolTip( tr( "Delete track from disk" ) );
-    
-    ui->queueButton->setType( IconButton::Redownload );
-    ui->queueButton->setToolTip( tr( "Redownload track" ) );
-    
-    ui->openFolderButton->setType( IconButton::Browse );
-    ui->openFolderButton->setToolTip( tr( "Open folder" ) );
-    
+    ui->deleteButton->setToolTip( tr( "Remove track from the playlist" ) );
+
     ui->infoIcon->setType( IconButton::Clock );
-    
+
     ui->timerButton->setFixedSize( QSize( Utility::buttonSize,Utility::buttonSize ) );
     ui->barsWidget->setFixedSize( QSize( Utility::buttonSize,Utility::buttonSize ) );
-    ui->unqueueButton->setFixedSize( QSize( Utility::buttonSize,Utility::buttonSize ) );
-    ui->stopDownloadButton->setFixedSize( QSize( Utility::buttonSize,Utility::buttonSize ) );
     ui->deleteButton->setFixedSize( QSize( Utility::buttonSize,Utility::buttonSize ) );
-    ui->queueButton->setFixedSize( QSize( Utility::buttonSize,Utility::buttonSize ) );
-    ui->openFolderButton->setFixedSize( QSize( Utility::buttonSize,Utility::buttonSize ) );
     ui->infoIcon->setFixedSize( QSize( Utility::buttonSize,Utility::buttonSize ) );
     ui->playButton->setFixedSize( QSize( Utility::buttonSize,Utility::buttonSize ) );
 
@@ -169,22 +121,22 @@ void DownloadItem::setupUi()
     ui->timerLayout->setContentsMargins( 0,4,0,4 );
     ui->infoIconLayout->setContentsMargins( 0,4,0,4 );
     ui->infoMessageLayout->setContentsMargins( 0,4,0,4 );
-    ui->openFolderLayout->setContentsMargins( 0,4,0,4 );
     ui->progressLayout->setContentsMargins( 0,4,0,4 );
-    ui->stopLayout->setContentsMargins( 0,4,0,4 );
     ui->deleteLayout->setContentsMargins( 0,4,0,4 );
-    ui->queueLayout->setContentsMargins( 0,4,0,4 );
-    ui->unqueueLayout->setContentsMargins( 0,4,0,4 );
     ui->playLayout->setContentsMargins( 0,4,0,4 );
     ui->songWidgetLayout->setContentsMargins( 1,1,0,2 );
     ui->songWidgetLayout->setHorizontalSpacing( 5 );
-    
+
     ui->timerWidget->setVisible( false );
     ui->deleteWidget->setVisible( false );
     ui->infoMessageWidget->setVisible( false );
+
+    // Buttons of the download era, gone with it. The .ui file is rewritten
+    // together with the rest of the interface.
     ui->openFolderWidget->setVisible( false );
     ui->unqueueWidget->setVisible( false );
     ui->queueWidget->setVisible( false );
+    ui->stopDownloadWidget->setVisible( false );
 }
 
 /*!
@@ -195,18 +147,26 @@ void DownloadItem::setupConnections()
 {
     connect( m_playlistItem.data(), &PlaylistItem::reloadCover, this, &DownloadItem::loadCover );
     connect( m_playlistItem.data(), &PlaylistItem::stateChanged, this, &DownloadItem::setPlayerState );
-    
-    if( m_context == GrooveOff::Download ) {
-        connect( ui->playButton, &SvgButton::buttonClicked, this, &DownloadItem::playSong );
-        connect( ui->openFolderButton, &SvgButton::buttonClicked, this, &DownloadItem::openFolder );
-    }
 
+    connect( ui->playButton, &SvgButton::buttonClicked, this, &DownloadItem::playSong );
     connect( ui->timerButton, &TimerButton::clicked, this, &DownloadItem::timerButtonClicked );
     connect( ui->timerButton, &TimerButton::countdownFinished, this, &DownloadItem::removeSong );
-    connect( ui->unqueueButton, &SvgButton::buttonClicked, this, &DownloadItem::unqueueItem );
-    connect( ui->stopDownloadButton, &SvgButton::buttonClicked, this, &DownloadItem::stopDownload );
     connect( ui->deleteButton, &SvgButton::buttonClicked, this, &DownloadItem::deleteItem );
-    connect( ui->queueButton, &SvgButton::buttonClicked, this, &DownloadItem::queueItem );
+}
+
+void DownloadItem::setTrackState( GrooveOff::TrackState state )
+{
+    if( m_trackState == state )
+        return;
+
+    m_trackState = state;
+    stateChanged();
+}
+
+void DownloadItem::setBuffered( qint64 bytesAvailable, qint64 bytesTotal )
+{
+    ui->progressBar->setMaximum( bytesTotal > 0 ? bytesTotal : 1 );
+    ui->progressBar->setValue( bytesAvailable );
 }
 
 /*!
@@ -217,48 +177,66 @@ void DownloadItem::stateChanged()
 {
     emit stateChangedSignal();
 
-    switch( m_downloadState ) {
-        case GrooveOff::QueuedState:
-            setQueuedState();
+    switch( m_trackState ) {
+        case GrooveOff::DormantState:
+            setDormantState();
             break;
-            
-        case GrooveOff::DownloadingState:
-            setDownloadingState();
+
+        case GrooveOff::IdleState:
+            setIdleState();
             break;
-            
-        case GrooveOff::FinishedState:
-            setFinishedState(); 
+
+        case GrooveOff::BufferingState:
+            setBufferingState();
             break;
-            
-        case GrooveOff::AbortedState:
-            setAbortedState();
+
+        case GrooveOff::ReadyState:
+            setReadyState();
             break;
-            
+
+        case GrooveOff::StalledState:
+            setStalledState();
+            break;
+
         default: // error state
             setErrorState();
     }
-    
+
     update();
 }
 
-void DownloadItem::setQueuedState()
+void DownloadItem::setDormantState()
 {
     ui->animationWidget->setVisible( false );
     ui->barsWidget->stopAnimation();
-    ui->stopDownloadWidget->setVisible( false );
-    ui->playWidget->setVisible( false );
     ui->progressWidget->setVisible( false );
-    
-    ui->infoIconWidget->setVisible( true );
-    ui->infoIcon->setType( IconButton::Clock );
-    
-    ui->infoMessage->setText( tr( "Queued" ) );
+
+    // Playable in the sense that pressing play wakes the torrent up.
+    ui->playWidget->setVisible( true );
+    ui->playButton->setButtonEnabled( true );
+
+    ui->infoIconWidget->setVisible( false );
 }
 
-void DownloadItem::setDownloadingState()
+void DownloadItem::setIdleState()
+{
+    ui->animationWidget->setVisible( false );
+    ui->barsWidget->stopAnimation();
+    ui->progressWidget->setVisible( false );
+
+    ui->playWidget->setVisible( true );
+    ui->playButton->setButtonEnabled( true );
+
+    ui->infoIconWidget->setVisible( true );
+    ui->infoIcon->setType( IconButton::Clock );
+    ui->infoMessage->setText( tr( "Not buffered" ) );
+}
+
+void DownloadItem::setBufferingState()
 {
     ui->infoIconWidget->setVisible( false );
-    
+    ui->progressWidget->setVisible( true );
+
     if( m_playerState == GrooveOff::PlayerState::Stopped ) {
         ui->playWidget->setVisible( true );
         ui->animationWidget->setVisible( false );
@@ -272,51 +250,41 @@ void DownloadItem::setDownloadingState()
         ui->animationWidget->setVisible( true );
         ui->barsWidget->stopAnimation();
     }
-    
-    ui->progressWidget->setVisible( true );
-    ui->stopDownloadWidget->setVisible( true );
-    ui->infoMessageWidget->setVisible(false);
 }
 
-void DownloadItem::setFinishedState()
+void DownloadItem::setReadyState()
 {
-    ui->stopDownloadWidget->setVisible( false );
     ui->progressWidget->setVisible( false );
     ui->infoIconWidget->setVisible( false );
-    
-    if( m_context == GrooveOff::Track ) {
-        ui->playWidget->setVisible( false );
+
+    ui->playButton->setButtonEnabled( true );
+
+    if( m_playerState == GrooveOff::PlayerState::Stopped ) {
+        ui->playWidget->setVisible( true );
         ui->animationWidget->setVisible( false );
+        ui->barsWidget->stopAnimation();
+    } else if( m_playerState == GrooveOff::PlayerState::Playing ) {
+        ui->playWidget->setVisible( false );
+        ui->animationWidget->setVisible( true );
+        ui->barsWidget->startAnimation();
     } else {
-        ui->playButton->setButtonEnabled( true );
-        if( m_playerState == GrooveOff::PlayerState::Stopped ) {
-            ui->playWidget->setVisible( true );
-            ui->animationWidget->setVisible( false );
-            ui->barsWidget->stopAnimation();
-        } else if( m_playerState == GrooveOff::PlayerState::Playing ) {
-            ui->playWidget->setVisible( false );
-            ui->animationWidget->setVisible( true );
-            ui->barsWidget->startAnimation();
-        } else {
-            ui->playWidget->setVisible( false );
-            ui->animationWidget->setVisible( true );
-            ui->barsWidget->stopAnimation();
-        }
+        ui->playWidget->setVisible( false );
+        ui->animationWidget->setVisible( true );
+        ui->barsWidget->stopAnimation();
     }
 }
 
-void DownloadItem::setAbortedState()
+void DownloadItem::setStalledState()
 {
-    ui->playWidget->setVisible( false );
     ui->animationWidget->setVisible( false );
     ui->barsWidget->stopAnimation();
-    ui->progressWidget->setVisible( false );
-    ui->stopDownloadWidget->setVisible( false );
-    
-    ui->infoMessage->setText( tr( "Aborted" ) );
-    
-    ui->infoIcon->setType( IconButton::Aborted );
+    ui->progressWidget->setVisible( true );
+    ui->playWidget->setVisible( false );
+
+    // Not an error: the swarm may well wake up.
+    ui->infoIcon->setType( IconButton::Clock );
     ui->infoIconWidget->setVisible( true );
+    ui->infoMessage->setText( tr( "Waiting for peers" ) );
 }
 
 void DownloadItem::setErrorState()
@@ -325,85 +293,11 @@ void DownloadItem::setErrorState()
     ui->animationWidget->setVisible( false );
     ui->barsWidget->stopAnimation();
     ui->progressWidget->setVisible( false );
-    
-    ui->stopDownloadWidget->setVisible( false );
-    
-    ui->infoMessage->setText( tr( "Network or Server error" ) );
-    
+
+    ui->infoMessage->setText( tr( "Track not available" ) );
+
     ui->infoIcon->setType( IconButton::Warning );
     ui->infoIconWidget->setVisible( true );
-}
-
-
-/*!
-  \brief startDownload: start song download
-  \return void
-*/
-void DownloadItem::startDownload()
-{
-    m_oneShot = true;
-    m_downloadState = GrooveOff::DownloadingState;
-    stateChanged();
-    
-    m_downloader = ApiRequest::instance()->downloadSong( m_playlistItem->path(),
-                                                         m_playlistItem->fileName(),
-                                                         m_playlistItem->song()->songID(),
-                                                         Utility::token );
-
-    connect( m_downloader.data(), &Downloader::progress,
-             this, &DownloadItem::setProgress );
-
-    connect( m_downloader.data(), &Downloader::downloadCompleted,
-             this, QOverload<bool>::of(&DownloadItem::downloadFinished) );
-
-//    qDebug() << "GrooveOff ::" << "Started download of" << m_playlistItem->song()->songName();
-}
-
-/*!
-  \brief downloadFinished: slot called once cover download finished
-  \param ok: status of cover download
-  \return void
-*/
-void DownloadItem::downloadFinished( bool ok )
-{
-    //...and show others if download was successful
-    if( ok ) {
-        m_downloadState = GrooveOff::FinishedState;
-//        qDebug() << "GrooveOff ::" << "Finished downloading" << m_playlistItem->song()->songName();
-        emit reloadPlaylist();
-    } else {
-        removeEmptyFolder( QFileInfo( m_playlistItem->path() + m_playlistItem->fileName() ).absoluteDir() );
-        m_downloadState = GrooveOff::ErrorState;
-        qDebug() << "GrooveOff :: Error downloading" << m_playlistItem->song()->songName() << "::" << m_downloader->errorString();
-    }
-
-    stateChanged();
-
-    emit downloadFinished();
-    
-    if( The::mainWindow() )
-        The::mainWindow()->reloadItemsDownloadButtons();
-}
-
-/*!
-  \brief setProgress: update progressbar
-  \param bytesReceived: number of bytes received
-  \param bytesTotal: number of total bytes
-  \return void
-*/
-void DownloadItem::setProgress( const qint64 &bytesReceived, const qint64 &bytesTotal )
-{
-    if( m_oneShot ) {
-        if( The::mainWindow() )
-            The::mainWindow()->reloadItemsDownloadButtons();
-        m_oneShot = false;
-    }
-    // enable play button if downloaded at least 1MiB
-    if( bytesReceived > 1024*1024 )
-        ui->playButton->setButtonEnabled( true );
-
-    ui->progressBar->setValue( bytesReceived );
-    ui->progressBar->setMaximum( bytesTotal );
 }
 
 /*!
@@ -426,94 +320,33 @@ void DownloadItem::timerButtonClicked()
     ui->deleteWidget->setVisible( true );
 }
 
-void DownloadItem::queueItem()
-{
-    m_downloadState = GrooveOff::QueuedState;
-    stateChanged();
-    emit addToQueue( this );
-}
-
 void DownloadItem::deleteItem()
 {
-    if( m_context == GrooveOff::Download ) {
-        //check if file exists before starting countdown
-        if( !QFile::exists( songFile() ) ) {
-            qDebug() << "GrooveOff ::"  << songFile() << "not found";
-            emit removeMe( this );
-            emit reloadPlaylist();
-            return;
-        }
-    }
-    
     ui->timerWidget->setVisible( true );
-    ui->timerButton->setToolTip( tr( "Abort deletion" ) );
+    ui->timerButton->setToolTip( tr( "Abort removal" ) );
     ui->timerButton->startCountdown();
     ui->deleteWidget->setVisible( false );
 }
 
-void DownloadItem::stopDownload()
-{
-    m_downloader->stopDownload();
-    ui->progressBar->setValue( 0 );
-    m_downloadState = GrooveOff::AbortedState;
-    stateChanged();
-}
-
-void DownloadItem::unqueueItem()
-{
-    m_downloadState = GrooveOff::AbortedState;
-    stateChanged();
-}
-
-
 bool DownloadItem::operator==( DownloadItem& right ) const
 {
-    if( m_playlistItem->song()->songID() == right.playlistItem()->song()->songID() )
-        return true;
-    return false;
+    return *m_playlistItem == *right.playlistItem();
 }
 
-
 /*!
-  \brief removeSong: remove a song
+  \brief removeSong: take the track out of the playlist
   \return void
 */
 void DownloadItem::removeSong()
 {
-    if( m_context == GrooveOff::Track ) {
-        emit removeMeFromSession( m_playlistItem->song()->songID() );
-        return;
-    }
-
+    // Nothing is deleted from disk here: the cache decides on its own when to
+    // let go of the bytes, and the track stays in the catalogue.
     The::audioEngine()->removingTrack( m_playlistItem );
     The::playlist()->removeItem( m_playlistItem );
 
-    if( QFile::exists( songFile() ) ) {
-        if( !QFile::remove( songFile() ) )
-            qDebug() << "GrooveOff ::"  << "Error removing" << songFile();
-    } else {
-        qDebug() << "GrooveOff ::"  << songFile() << "not found";
-    }
-
-    removeEmptyFolder( QFileInfo( m_playlistItem->path() + m_playlistItem->fileName() ).absoluteDir() );
-
     emit removeMe( this );
-    
-    if( The::mainWindow() )
-        The::mainWindow()->reloadItemsDownloadButtons();
-    
     emit reloadPlaylist();
 }
-
-/*!
-  \brief songFile: return absolute song file name
-  \return string
-*/
-QString DownloadItem::songFile()
-{
-    return m_playlistItem->path() + m_playlistItem->fileName();
-}
-
 
 /*!
   \brief enterEvent: manage mouse movement
@@ -521,28 +354,10 @@ QString DownloadItem::songFile()
 */
 void DownloadItem::enterEvent( QEnterEvent* event )
 {
-    switch( m_downloadState ) {
-        case GrooveOff::FinishedState:
-            ui->infoMessageWidget->setVisible( false );
-            ui->deleteWidget->setVisible( !ui->timerButton->isCountdownStarted() );
-            if( m_context == GrooveOff::Download )
-                ui->openFolderWidget->setVisible( true );
-            break;
-        case GrooveOff::QueuedState:
-            ui->infoMessageWidget->setVisible( true );
-            ui->unqueueWidget->setVisible( true );
-            ui->openFolderWidget->setVisible( false );
-            break;
-        case GrooveOff::AbortedState:
-        case GrooveOff::ErrorState:
-            ui->openFolderWidget->setVisible( false );
-            ui->infoMessageWidget->setVisible( true );
-            ui->queueWidget->setVisible( true );
-            ui->unqueueWidget->setVisible( false );
-            break;
-        default:
-            break;
-    }
+    ui->deleteWidget->setVisible( !ui->timerButton->isCountdownStarted() );
+
+    if( m_trackState != GrooveOff::ReadyState && m_trackState != GrooveOff::DormantState )
+        ui->infoMessageWidget->setVisible( true );
 
     QWidget::enterEvent( event );
 }
@@ -553,27 +368,8 @@ void DownloadItem::enterEvent( QEnterEvent* event )
 */
 void DownloadItem::leaveEvent( QEvent* event )
 {
-    switch( m_downloadState ) {
-        case GrooveOff::FinishedState:
-            ui->deleteWidget->setVisible( false );
-            if( m_context == GrooveOff::Download )
-                ui->openFolderWidget->setVisible( false );
-            break;
-        case GrooveOff::QueuedState:
-            ui->infoMessageWidget->setVisible( false );
-            ui->unqueueWidget->setVisible( false );
-            ui->queueWidget->setVisible( false );
-            break;
-        case GrooveOff::AbortedState:
-        case GrooveOff::ErrorState:
-            ui->infoMessageWidget->setVisible( false );
-            ui->queueWidget->setVisible( false );
-            ui->unqueueWidget->setVisible( false );
-            break;
-        default:
-            //do nothing
-            break;
-    }
+    ui->deleteWidget->setVisible( false );
+    ui->infoMessageWidget->setVisible( false );
 
     QWidget::leaveEvent( event );
 }
@@ -589,59 +385,11 @@ void DownloadItem::setPlayerState( GrooveOff::PlayerState state )
     stateChanged();
 }
 
-/*!
-  \brief openFolder: open folder containing downloaded song
-  \return void
-*/
-void DownloadItem::openFolder()
-{
-    QFileInfo fileInfo( m_playlistItem->path() + m_playlistItem->fileName() );
-    QDesktopServices::openUrl( QUrl( QLatin1String( "file://" ) + fileInfo.absolutePath(), QUrl::TolerantMode ) );
-}
-
 void DownloadItem::loadCover()
 {
-    if( !m_playlistItem->song()->coverArtFilename().isEmpty()
-        && QFile::exists( Utility::coversCachePath + m_playlistItem->song()->coverArtFilename() )
-        && m_playlistItem->song()->coverArtFilename() != "0" )
-        ui->coverLabel->setPixmap( QPixmap( Utility::coversCachePath + m_playlistItem->song()->coverArtFilename() ) );
-    else
-        ui->coverLabel->setPixmap( QIcon::fromTheme( QLatin1String( "media-optical" ),
-                                                     QIcon( QLatin1String( ":/resources/media-optical.png" ) )
-                                                   ).pixmap( Utility::coverSize ) );
-}
-
-void DownloadItem::abortDownload()
-{
-    if( m_downloadState == GrooveOff::DownloadingState ) {
-        m_downloader->stopDownload();
-        ui->progressBar->setValue( 0 );
-    }
-
-    m_downloadState = GrooveOff::AbortedState;
-    stateChanged();
-
-    // FIXME: seems that file remove is slower than this call
-    // and the icon is updated as expected
-    if( The::mainWindow() )
-        The::mainWindow()->reloadItemsDownloadButtons();
-
-    removeEmptyFolder( QFileInfo( m_playlistItem->path() + m_playlistItem->fileName() ).absoluteDir() );
-}
-
-void DownloadItem::removeEmptyFolder( QDir folder )
-{
-    if( !folder.exists() )
-        return;
-    
-    if( folder.path() == QStandardPaths::writableLocation( QStandardPaths::MusicLocation ) ||
-       folder.path() == Utility::destinationPath
-    )
-        return;
-
-    if( folder.entryList( QDir::NoDotAndDotDot ).count() == 0 ) {
-        folder.rmdir( folder.path() );
-        if( folder.cdUp() )
-            removeEmptyFolder( folder );
-    }
+    // Covers used to come from a Grooveshark cdn. They will come from the
+    // ID3v2 picture frame once tags are read off the buffered file.
+    ui->coverLabel->setPixmap( QIcon::fromTheme( QLatin1String( "media-optical" ),
+                                                 QIcon( QLatin1String( ":/resources/media-optical.png" ) )
+                                               ).pixmap( Utility::coverSize ) );
 }
