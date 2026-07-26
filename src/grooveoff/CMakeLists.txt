@@ -15,6 +15,7 @@ set(grooveoff_SRCS main.cpp
                    PlaylistAction.cpp
                    PlaylistItem.cpp
                    SettingsItem.cpp
+                   TrackInfo.cpp
                    Utility.cpp
                    SvgHandler.cpp
                    SvgTinter.cpp
@@ -35,6 +36,9 @@ set(grooveoff_SRCS main.cpp
                    widgets/Spinner.cpp
                    widgets/SessionList.cpp
                    widgets/TrackList.cpp
+                   ../db/Database.cpp
+                   ../db/Catalog.cpp
+                   ../db/PlaylistStore.cpp
                    dbus/mpris.cpp
                    dbus/mpris2/Mpris2PluginRootAdaptor.cpp
                    dbus/mpris2/Mpris2PluginPlayerAdaptor.cpp
@@ -75,6 +79,7 @@ target_link_libraries(grooveoff PRIVATE
                       Qt6::Gui
                       Qt6::Widgets
                       Qt6::Network
+                      Qt6::Sql
                       Qt6::Xml
                       Qt6::Svg
                       Qt6::DBus
