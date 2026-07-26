@@ -96,6 +96,21 @@ public:
 
     void cancelPreparation();
 
+    /**
+     * Takes the opening of the next track with whatever bandwidth is left
+     * over, so that the gap between two tracks is not spent waiting. What it
+     * mostly hides is not the transfer but the time to resolve a magnet and
+     * find peers, which is why it is worth doing across torrents too.
+     */
+    void prefetch( const QString &infoHash, int fileIndex );
+
+    /**
+     * Drops it, priorities and deadlines included. Called at every change of
+     * track: without it, ten skips leave ten files downloading at once and a
+     * cache full of music nobody listened to.
+     */
+    void cancelPrefetch();
+
 Q_SIGNALS:
     /** the opening buffer of a prepared track is in */
     void trackPlayable( const QString &infoHash, int fileIndex );

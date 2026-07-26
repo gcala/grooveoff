@@ -251,6 +251,7 @@ void MainWindow::setupConnections()
     connect( The::torrentSession(), &TorrentSession::metadataReady, this, &MainWindow::onMetadataReady );
     connect( The::torrentSession(), &TorrentSession::statsUpdated,  this, &MainWindow::onTorrentStats );
     connect( The::torrentSession(), &TorrentSession::torrentError,  this, &MainWindow::onTorrentError );
+    connect( The::torrentSession(), &TorrentSession::storageError,  this, &MainWindow::onStorageError );
 
     // The catalogue is told a resume file exists so that the next start knows
     // it can reopen this torrent without the network.
@@ -287,13 +288,33 @@ void MainWindow::setupConnections()
         switch( state ) {
             case GrooveOff::PlayerState::Buffering:
                 item->setTrackState( GrooveOff::BufferingState );
+                m_stallTimer->start();
                 break;
             case GrooveOff::PlayerState::Error:
                 item->setTrackState( GrooveOff::ErrorState );
+                m_stallTimer->stop();
                 break;
             default:
                 item->setTrackState( GrooveOff::ReadyState );
+                m_stallTimer->stop();
         }
+    } );
+
+    // Buffering that goes on long enough stops being buffering and becomes
+    // waiting: the row says so rather than spinning for ever with nothing to
+    // show. It is not an error — a swarm can wake up — so nothing is given up.
+    m_stallTimer = new QTimer( this );
+    m_stallTimer->setInterval( 20000 );
+    m_stallTimer->setSingleShot( true );
+
+    connect( m_stallTimer, &QTimer::timeout, this, [this] {
+        const PlaylistItemPtr current = The::audioEngine()->currentTrack();
+        if( !current )
+            return;
+
+        DownloadItem *item = rowFor( current->track() );
+        if( item && item->trackState() == GrooveOff::BufferingState )
+            item->setTrackState( GrooveOff::StalledState );
     } );
 
     // network
@@ -671,11 +692,41 @@ DownloadItem* MainWindow::rowFor( const TrackInfoPtr &track ) const
 
 void MainWindow::onTorrentError( const QString &infoHash, const QString &message )
 {
-    Q_UNUSED( infoHash )
-
     // Errors on a torrent are ordinary, not exceptional: a modal in the middle
     // of listening would be the most annoying thing this application could do.
     m_playerWidget->showMessage( message );
+
+    // A torrent that never produced a file list has no selector to open, and
+    // waiting for one would leave the row hanging.
+    m_awaitingSelection.remove( infoHash );
+
+    for( int i = 0; i < ui->downloadList->count(); ++i ) {
+        DownloadItem *item = qobject_cast<DownloadItem *>( ui->downloadList->itemWidget( ui->downloadList->item( i ) ) );
+        if( item && item->playlistItem()->track()
+            && item->playlistItem()->track()->infoHash() == infoHash ) {
+            item->setTrackState( GrooveOff::ErrorState );
+        }
+    }
+}
+
+/*!
+  \brief onStorageError: the one interruption worth making
+
+  Everything else goes to the status bar, because a network that comes and
+  goes is the normal weather of a torrent. A cache that cannot be written to
+  is different: nothing will play until somebody does something about it, so
+  saying it quietly would only mean saying it to nobody.
+*/
+void MainWindow::onStorageError( const QString &infoHash, const QString &message )
+{
+    Q_UNUSED( infoHash )
+
+    QMessageBox::critical( this,
+                           tr( "Attention" ),
+                           tr( "The cache could not be written to:" ) + QLatin1String( "\n\n" )
+                               + message + QLatin1String( "\n\n" )
+                               + tr( "Nothing will play until there is room for it." ),
+                           QMessageBox::Ok );
 }
 
 void MainWindow::refreshRowsOf( const QString &infoHash )

@@ -76,6 +76,13 @@ const int updateIntervalMs = 1000;
 /** the shortest interval between two automatic resume writes of one torrent */
 const qint64 resumeMinIntervalMs = 30000;
 
+/**
+ * How long a magnet is given to produce a file list before the user is told it
+ * will not. The torrent is not removed: a swarm that is silent now may answer
+ * later, and a row that vanishes on its own is a row the user has lost.
+ */
+const qint64 metadataTimeoutMs = 60000;
+
 QString hexString( const lt::sha1_hash &hash )
 {
     return QString::fromLatin1( QByteArray( hash.data(), int( hash.size() ) ).toHex() );
@@ -177,6 +184,9 @@ public:
 
     /** when each torrent last wrote its resume blob, epoch milliseconds */
     QHash<QString, qint64> lastResumeSave;
+
+    /** torrents still waiting for their file list, and since when */
+    QHash<QString, qint64> awaitingMetadata;
 
     QTimer *updateTimer = nullptr;
 
@@ -301,6 +311,7 @@ void TorrentSession::Private::publishMetadata( const QString &infoHash, const lt
         return;
 
     published.insert( infoHash );
+    awaitingMetadata.remove( infoHash );
 
     const lt::file_storage &files = info->layout();
 
@@ -381,6 +392,7 @@ void TorrentSession::Private::handleAlert( const lt::alert *alert )
         }
 
         handles.insert( infoHash, added->handle );
+        awaitingMetadata.insert( infoHash, QDateTime::currentMSecsSinceEpoch() );
         emit q->torrentAdded( infoHash );
 
         // A .torrent, or a magnet reopened from its resume file, arrives with
@@ -463,7 +475,7 @@ void TorrentSession::Private::handleAlert( const lt::alert *alert )
     }
 
     if( const auto *fileError = lt::alert_cast<lt::file_error_alert>( alert ) ) {
-        emit q->torrentError( infoHashFor( fileError->handle ),
+        emit q->storageError( infoHashFor( fileError->handle ),
                               QString::fromStdString( fileError->error.message() ) );
         return;
     }
@@ -574,6 +586,7 @@ void TorrentSession::shutdown()
     d->handles.clear();
     d->pendingAdds.clear();
     d->published.clear();
+    d->awaitingMetadata.clear();
     d->magnets.clear();
     d->uploaded.clear();
 }
@@ -754,6 +767,7 @@ void TorrentSession::remove( const QString &infoHash, bool deleteFiles )
 
     d->pendingAdds.remove( infoHash );
     d->published.remove( infoHash );
+    d->awaitingMetadata.remove( infoHash );
     d->uploaded.remove( infoHash );
 
     // A resume file whose data are gone is worse than no resume file at all:
@@ -877,6 +891,20 @@ void TorrentSession::setFilePriority( const QString &infoHash, int fileIndex, Fi
     handle.value().file_priority( lt::file_index_t { fileIndex }, value );
 }
 
+TorrentSession::FilePriority TorrentSession::filePriority( const QString &infoHash, int fileIndex ) const
+{
+    const auto handle = d->handles.constFind( infoHash );
+    if( handle == d->handles.constEnd() )
+        return SkipFile;
+
+    const lt::download_priority_t priority = handle.value().file_priority( lt::file_index_t { fileIndex } );
+
+    if( priority == lt::dont_download )
+        return SkipFile;
+
+    return priority >= lt::top_priority ? TopFile : NormalFile;
+}
+
 void TorrentSession::setPieceDeadline( const QString &infoHash, int piece, int milliseconds )
 {
     const auto handle = d->handles.constFind( infoHash );
@@ -938,6 +966,22 @@ void TorrentSession::drainAlerts()
 
 void TorrentSession::postUpdates()
 {
-    if( d->session && !d->handles.isEmpty() )
-        d->session->post_torrent_updates();
+    if( !d->session || d->handles.isEmpty() )
+        return;
+
+    d->session->post_torrent_updates();
+
+    // A magnet that never resolves has to say so at some point, or the row
+    // waits for ever with nothing to show for it. The torrent stays where it
+    // is: this is a report, not a removal.
+    const qint64 now = QDateTime::currentMSecsSinceEpoch();
+    const QList<QString> waiting = d->awaitingMetadata.keys();
+
+    for( const QString &infoHash : waiting ) {
+        if( now - d->awaitingMetadata.value( infoHash ) < metadataTimeoutMs )
+            continue;
+
+        d->awaitingMetadata.remove( infoHash );
+        emit torrentError( infoHash, tr( "Could not get the track list of this torrent." ) );
+    }
 }

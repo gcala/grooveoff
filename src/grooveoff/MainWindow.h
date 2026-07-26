@@ -36,6 +36,7 @@ class QPushButton;
 class QLineEdit;
 class QListWidget;
 class QSplitter;
+class QTimer;
 class QBoxLayout;
 
 //Custom
@@ -90,6 +91,9 @@ private Q_SLOTS:
 
     void onTorrentStats( const QString &infoHash, int peers, int seeds, qint64 rate, qint64 bytesDone );
     void onTorrentError( const QString &infoHash, const QString &message );
+
+    /** the disk said no, which is the one thing worth a modal */
+    void onStorageError( const QString &infoHash, const QString &message );
 
     /** asks what of the torrent goes into its playlist, and remembers the answer */
     void chooseTracksOf( const QString &infoHash );
@@ -157,6 +161,9 @@ private:
      * one woken up to play a track must not stop to ask questions.
      */
     QSet<QString> m_awaitingSelection;
+
+    /** turns a buffering that never ends into a row that says it is waiting */
+    QTimer *m_stallTimer;
 
     Mpris *m_mpris;
 

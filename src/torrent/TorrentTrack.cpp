@@ -45,12 +45,20 @@ const int deadlineStepMs = 100;
  */
 const int tailDeadlineMs = 3000;
 
+/**
+ * How far away a background piece is wanted. It is not a delay: it is how
+ * libtorrent is told "take this with the bandwidth that is left over", which
+ * is what set_piece_deadline is for.
+ */
+const int backgroundDeadlineMs = 30000;
+
 } // namespace
 
-TorrentTrack::TorrentTrack( const QString &infoHash, int fileIndex, QObject *parent )
+TorrentTrack::TorrentTrack( const QString &infoHash, int fileIndex, Mode mode, QObject *parent )
     : QObject( parent )
     , m_infoHash( infoHash )
     , m_fileIndex( fileIndex )
+    , m_mode( mode )
     , m_size( The::torrentSession()->fileSize( infoHash, fileIndex ) )
     , m_windowFirst( -1 )
     , m_windowLast( -1 )
@@ -58,14 +66,25 @@ TorrentTrack::TorrentTrack( const QString &infoHash, int fileIndex, QObject *par
     if( !isValid() )
         return;
 
-    // The track being read never gives way to anything else.
-    The::torrentSession()->setFilePriority( m_infoHash, m_fileIndex, TorrentSession::TopFile );
+    // The track being listened to never gives way; the one after it takes what
+    // is left.
+    The::torrentSession()->setFilePriority( m_infoHash, m_fileIndex,
+                                            m_mode == Foreground ? TorrentSession::TopFile
+                                                                 : TorrentSession::NormalFile );
 
     const TorrentSession::PieceLocation tail = The::torrentSession()->locate( m_infoHash, m_fileIndex, m_size - 1 );
-    if( tail.piece >= 0 )
-        The::torrentSession()->setPieceDeadline( m_infoHash, tail.piece, tailDeadlineMs );
+    if( tail.piece >= 0 ) {
+        The::torrentSession()->setPieceDeadline( m_infoHash, tail.piece,
+                                                 m_mode == Foreground ? tailDeadlineMs
+                                                                      : backgroundDeadlineMs );
+    }
 
     wantAt( 0 );
+}
+
+TorrentTrack::Mode TorrentTrack::mode() const
+{
+    return m_mode;
 }
 
 TorrentTrack::~TorrentTrack()
@@ -173,7 +192,12 @@ void TorrentTrack::armWindow( qint64 offset )
         if( location.piece < 0 || location.pieceEnd <= cursor )
             break;
 
-        The::torrentSession()->setPieceDeadline( m_infoHash, location.piece, deadlineStepMs * step );
+        // Short and growing for the track being listened to; far away for the
+        // one being taken in the background, and growing there too so that its
+        // own order is kept.
+        The::torrentSession()->setPieceDeadline( m_infoHash, location.piece,
+                                                 ( m_mode == Foreground ? 0 : backgroundDeadlineMs )
+                                                 + deadlineStepMs * step );
 
         if( m_windowFirst < 0 )
             m_windowFirst = location.piece;

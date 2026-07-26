@@ -41,8 +41,24 @@ class TorrentTrack : public QObject
     Q_OBJECT
 
 public:
-    TorrentTrack( const QString &infoHash, int fileIndex, QObject *parent = nullptr );
+    /**
+     * A foreground track is the one being listened to and never gives way. A
+     * background one is the next in the list, taken with whatever bandwidth is
+     * left over: normal priority instead of top, and deadlines far enough away
+     * that libtorrent treats them as "when you can". Getting these two the
+     * wrong way round gives a track that stutters while the network is fine,
+     * which is a symptom that sends you looking anywhere but here.
+     */
+    enum Mode {
+        Foreground,
+        Background
+    };
+
+    TorrentTrack( const QString &infoHash, int fileIndex,
+                  Mode mode = Foreground, QObject *parent = nullptr );
     ~TorrentTrack() override;
+
+    Mode mode() const;
 
     QString infoHash() const;
     int fileIndex() const;
@@ -82,6 +98,7 @@ private:
 
     QString m_infoHash;
     int     m_fileIndex;
+    Mode    m_mode;
     qint64  m_size;
 
     /** the pieces the current deadlines cover, both ends included */

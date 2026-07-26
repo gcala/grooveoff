@@ -181,6 +181,13 @@ public:
     void setFilePriority( const QString &infoHash, int fileIndex, FilePriority priority );
 
     /**
+     * What libtorrent thinks of this file right now. Worth having beyond the
+     * tests: a track that stutters while the network is fine is nearly always
+     * a priority that ended up the wrong way round.
+     */
+    FilePriority filePriority( const QString &infoHash, int fileIndex ) const;
+
+    /**
      * Asks for a piece within @p milliseconds. This is not sequential download:
      * libtorrent orders the peers by expected delivery time and re-requests
      * what falls behind. It is the primitive streaming is built on.
@@ -205,6 +212,13 @@ public:
 Q_SIGNALS:
     void torrentAdded( const QString &infoHash );
     void torrentError( const QString &infoHash, const QString &message );
+
+    /**
+     * The disk said no. Told apart from the other errors on purpose: a torrent
+     * that cannot reach its peers is ordinary, a cache that cannot be written
+     * to stops everything and is the one thing worth interrupting somebody for.
+     */
+    void storageError( const QString &infoHash, const QString &message );
 
     /** the file list of a torrent, every file of it, audio or not */
     void metadataReady( const QString &infoHash, const QString &name, const QList<TrackInfoPtr> &tracks );

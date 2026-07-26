@@ -170,11 +170,23 @@ private:
     /** hands the torrent of @p track to the session and remembers to play it */
     void wakeTorrentFor( const PlaylistItemPtr &track );
 
+    /**
+     * Once the current track is past its middle, brings up the beginning of
+     * the next one with whatever bandwidth is left over. What this mostly
+     * hides is not the transfer: it is the tens of seconds it takes to resolve
+     * a magnet and find peers, which is why it is worth doing even when the
+     * next track lives in another torrent.
+     */
+    void maybePrefetchNext();
+
     PlaylistItemPtr        m_currentTrack;
     PlaylistItemPtr        m_oldTrack;
 
     /** what to play as soon as the file list of its torrent comes back */
     PlaylistItemPtr        m_pendingTrack;
+
+    /** what is being taken in the background, so that it is asked for once */
+    PlaylistItemPtr        m_prefetchingTrack;
 
     GrooveOff::PlayerState m_state;
 

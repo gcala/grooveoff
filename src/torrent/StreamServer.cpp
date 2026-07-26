@@ -140,7 +140,8 @@ public:
     void fail( PendingRead *read, int code, const QByteArray &reason, const QByteArray &extraHeader = QByteArray() );
     void close( PendingRead *read );
 
-    TorrentTrack* trackFor( const QString &infoHash, int fileIndex, QString *key );
+    TorrentTrack* trackFor( const QString &infoHash, int fileIndex,
+                            TorrentTrack::Mode mode, QString *key );
     void releaseTrack( const QString &key );
 
     /** emits trackPlayable and lets the preparation go once the opening is in */
@@ -160,6 +161,9 @@ public:
     QString preparedKey;
     QString preparedHash;
     int     preparedIndex = -1;
+
+    /** and the one being taken in the background, at most one at a time */
+    QString prefetchedKey;
 
     QTimer *sweepTimer = nullptr;
 };
@@ -275,7 +279,7 @@ void StreamServer::Private::serve( PendingRead *read )
     // A torrent that is not in the session cannot be read from. Waking it up is
     // the caller's business, not the server's: it is the lazy reactivation, and
     // it belongs where the track was asked for.
-    read->track = trackFor( infoHash, fileIndex, &read->trackKey );
+    read->track = trackFor( infoHash, fileIndex, TorrentTrack::Foreground, &read->trackKey );
     if( !read->track ) {
         fail( read, 404, "Not Found" );
         return;
@@ -446,7 +450,8 @@ void StreamServer::Private::close( PendingRead *read )
     socket->deleteLater();
 }
 
-TorrentTrack* StreamServer::Private::trackFor( const QString &infoHash, int fileIndex, QString *key )
+TorrentTrack* StreamServer::Private::trackFor( const QString &infoHash, int fileIndex,
+                                               TorrentTrack::Mode mode, QString *key )
 {
     if( !The::torrentSession()->hasMetadata( infoHash ) )
         return nullptr;
@@ -454,8 +459,23 @@ TorrentTrack* StreamServer::Private::trackFor( const QString &infoHash, int file
     const QString trackKey = infoHash + QLatin1Char( '/' ) + QString::number( fileIndex );
 
     auto entry = tracks.find( trackKey );
+
+    // The track that was being taken in the background is now the one being
+    // listened to: it has to be built again, or it would keep the modest
+    // priority and the distant deadlines it was given as a spare.
+    if( entry != tracks.end()
+        && entry.value().track->mode() != mode
+        && entry.value().readers == 0 ) {
+        delete entry.value().track;
+        tracks.erase( entry );
+        entry = tracks.end();
+
+        if( prefetchedKey == trackKey )
+            prefetchedKey.clear();
+    }
+
     if( entry == tracks.end() ) {
-        TorrentTrack *track = new TorrentTrack( infoHash, fileIndex, q );
+        TorrentTrack *track = new TorrentTrack( infoHash, fileIndex, mode, q );
         if( !track->isValid() ) {
             delete track;
             return nullptr;
@@ -705,7 +725,7 @@ void StreamServer::prepare( const QString &infoHash, int fileIndex )
     cancelPreparation();
 
     QString key;
-    if( !d->trackFor( infoHash, fileIndex, &key ) )
+    if( !d->trackFor( infoHash, fileIndex, TorrentTrack::Foreground, &key ) )
         return;
 
     d->preparedKey   = key;
@@ -727,4 +747,31 @@ void StreamServer::cancelPreparation()
     d->preparedKey.clear();
     d->preparedHash.clear();
     d->preparedIndex = -1;
+}
+
+void StreamServer::prefetch( const QString &infoHash, int fileIndex )
+{
+    if( !isRunning() )
+        return;
+
+    const QString wanted = infoHash + QLatin1Char( '/' ) + QString::number( fileIndex );
+    if( d->prefetchedKey == wanted )
+        return;
+
+    cancelPrefetch();
+
+    QString key;
+    if( !d->trackFor( infoHash, fileIndex, TorrentTrack::Background, &key ) )
+        return;
+
+    d->prefetchedKey = key;
+}
+
+void StreamServer::cancelPrefetch()
+{
+    if( d->prefetchedKey.isEmpty() )
+        return;
+
+    d->releaseTrack( d->prefetchedKey );
+    d->prefetchedKey.clear();
 }

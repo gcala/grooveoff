@@ -26,6 +26,7 @@
 #include <QAudioOutput>
 #include <QDir>
 #include <QDebug>
+#include <QSettings>
 
 namespace The {
     static AudioEngine* s_AudioEngine_instance = 0;
@@ -77,6 +78,13 @@ void AudioEngine::setupConnections()
     // list to arrive.
     connect( The::torrentSession(), &TorrentSession::metadataReady, this,
              [this]( const QString &infoHash, const QString &, const QList<TrackInfoPtr> & ) {
+        // The torrent may have been woken for the next track rather than for
+        // this one: then there is nothing to play, only something to take.
+        if( m_prefetchingTrack && m_prefetchingTrack->track()
+            && m_prefetchingTrack->track()->infoHash() == infoHash ) {
+            The::streamServer()->prefetch( infoHash, m_prefetchingTrack->track()->fileIndex() );
+        }
+
         if( !m_pendingTrack || !m_pendingTrack->track() || m_pendingTrack->track()->infoHash() != infoHash )
             return;
 
@@ -119,6 +127,44 @@ void AudioEngine::setupConnections()
 void AudioEngine::onPositionChanged( qint64 time )
 {
     emit seeked( time, false );
+
+    maybePrefetchNext();
+}
+
+void AudioEngine::maybePrefetchNext()
+{
+    if( !isPlaying() || !m_oldTrack )
+        return;
+
+    // Past the middle, and not before: a listener who skips in the first half
+    // is a listener who was not going to hear the next track anyway.
+    const qint64 total = m_mediaPlayer->duration();
+    if( total <= 0 || m_mediaPlayer->position() * 2 < total )
+        return;
+
+    if( !canGoNext() )
+        return;
+
+    const PlaylistItemPtr next = The::playlist()->item( The::playlist()->row( m_oldTrack ) + 1 );
+    if( !next || !next->track() || next == m_prefetchingTrack )
+        return;
+
+    QSettings settings;
+    if( !settings.value( QLatin1String( "prefetchNext" ), true ).toBool() )
+        return;
+
+    const TrackInfoPtr &info = next->track();
+    m_prefetchingTrack = next;
+
+    // A sleeping torrent is woken here rather than at the change of track: the
+    // handshake and the dht lookup are the slow part, and they happen while
+    // the current track is still playing.
+    if( !The::torrentSession()->hasMetadata( info->infoHash() ) ) {
+        The::torrentSession()->reopen( info->infoHash(), info->magnetUri() );
+        return;
+    }
+
+    The::streamServer()->prefetch( info->infoHash(), info->fileIndex() );
 }
 
 void AudioEngine::onSourceChanged()
@@ -204,6 +250,8 @@ void AudioEngine::playItem( const PlaylistItemPtr &track)
     // Skipping this is how ten skips become ten downloads and a cache full of
     // music nobody listened to.
     The::streamServer()->cancelPreparation();
+    The::streamServer()->cancelPrefetch();
+    m_prefetchingTrack.clear();
 
     if( track && track->track()
         && !The::torrentSession()->hasMetadata( track->track()->infoHash() ) ) {

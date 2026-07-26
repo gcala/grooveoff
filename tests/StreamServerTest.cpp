@@ -57,6 +57,7 @@ private Q_SLOTS:
 
     void listensOnTheLoopbackOnly();
     void tellsWhenATrackCanBePlayed();
+    void neverLetsThePrefetchOutrankWhatIsPlaying();
     void servesTheWholeFile();
     void servesARange();
     void servesASuffixRange();
@@ -223,6 +224,11 @@ void StreamServerTest::tellsWhenATrackCanBePlayed()
     QVERIFY( !The::streamServer()->isPlayable( QString( 40, QLatin1Char( 'a' ) ), 0 ) );
     QVERIFY( !The::streamServer()->isPlayable( m_infoHash, 99 ) );
 
+    // Nothing has asked for this track yet, so it is where every file of a
+    // torrent rests: at dont_download. Adding a torrent costs the metadata and
+    // nothing else.
+    QCOMPARE( The::torrentSession()->filePriority( m_infoHash, 0 ), TorrentSession::SkipFile );
+
     // A track whose head is already in the cache is playable at once, and
     // saying so has to be immediate: waiting for a piece that has already
     // arrived would leave it silent for ever.
@@ -232,6 +238,31 @@ void StreamServerTest::tellsWhenATrackCanBePlayed()
     QCOMPARE( playable.count(), 1 );
     QCOMPARE( playable.first().at( 0 ).toString(), m_infoHash );
     QCOMPARE( playable.first().at( 1 ).toInt(), 0 );
+}
+
+void StreamServerTest::neverLetsThePrefetchOutrankWhatIsPlaying()
+{
+    TorrentSession *session = The::torrentSession();
+
+    // Setting a priority is asynchronous — the call is handed to libtorrent's
+    // own thread — so every one of these is waited for rather than read back
+    // on the next line.
+    The::streamServer()->cancelPrefetch();
+    The::streamServer()->cancelPreparation();
+
+    // Taken in the background it is wanted, but only with the bandwidth that
+    // is left over.
+    The::streamServer()->prefetch( m_infoHash, 0 );
+    QTRY_COMPARE( session->filePriority( m_infoHash, 0 ), TorrentSession::NormalFile );
+
+    // And when it becomes the track being listened to it is promoted, rather
+    // than keeping the modest priority it was given as a spare. Getting this
+    // one wrong gives a track that stutters while the network is fine.
+    The::streamServer()->cancelPrefetch();
+    The::streamServer()->prepare( m_infoHash, 0 );
+    QTRY_COMPARE( session->filePriority( m_infoHash, 0 ), TorrentSession::TopFile );
+
+    The::streamServer()->cancelPreparation();
 }
 
 void StreamServerTest::servesTheWholeFile()
