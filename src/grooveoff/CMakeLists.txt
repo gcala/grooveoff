@@ -15,7 +15,6 @@ set(grooveoff_SRCS main.cpp
                    PlaylistAction.cpp
                    PlaylistItem.cpp
                    SettingsItem.cpp
-                   TrackInfo.cpp
                    Utility.cpp
                    SvgHandler.cpp
                    SvgTinter.cpp
@@ -36,9 +35,6 @@ set(grooveoff_SRCS main.cpp
                    widgets/Spinner.cpp
                    widgets/SessionList.cpp
                    widgets/TrackList.cpp
-                   ../db/Database.cpp
-                   ../db/Catalog.cpp
-                   ../db/PlaylistStore.cpp
                    dbus/mpris.cpp
                    dbus/mpris2/Mpris2PluginRootAdaptor.cpp
                    dbus/mpris2/Mpris2PluginPlayerAdaptor.cpp
@@ -86,7 +82,8 @@ target_link_libraries(grooveoff PRIVATE
                       Qt6::Multimedia
                       KDAB::kdsingleapplication
                       TagLib::tag
-                      LibtorrentRasterbar::torrent-rasterbar)
+                      LibtorrentRasterbar::torrent-rasterbar
+                      grooveoff_core)
 
 install(TARGETS grooveoff RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(FILES ${grooveoff_I18N}

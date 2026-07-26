@@ -24,6 +24,7 @@ find_package(Qt6 6.5 REQUIRED COMPONENTS
              Svg
              DBus
              Multimedia
+             Test
              LinguistTools
 )
 
@@ -50,4 +51,11 @@ find_package(KDSingleApplication-qt6 REQUIRED)
 # Handle Translations, pick all grooveoff_* files from translations directory.
 file(GLOB TRANSLATIONS ${CMAKE_SOURCE_DIR}/translations/grooveoff_*.ts)
 
+# Defines BUILD_TESTING, on by default; packagers can switch it off.
+include(CTest)
+
 add_subdirectory(src)
+
+if(BUILD_TESTING)
+    add_subdirectory(tests)
+endif()
