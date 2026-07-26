@@ -60,6 +60,12 @@ public:
     /** how much of the file is available, in bytes */
     void setBuffered( qint64 bytesAvailable, qint64 bytesTotal );
 
+    /** what the swarm looks like, for the row that is being listened to */
+    void setPeerInfo( int peers, int seeds );
+
+    /** takes up the tags and the cover once they became readable */
+    void refreshLabels();
+
     bool operator==( DownloadItem & ) const;
 
 public Q_SLOTS:
@@ -72,9 +78,13 @@ Q_SIGNALS:
     void reloadPlaylist();
     void removeMe( DownloadItem * );
 
+    /** the user refused this file for good, which is not the same as removing it */
+    void excludeRequested( DownloadItem * );
+
 protected:
     void leaveEvent( QEvent *event ) override;
     void enterEvent( QEnterEvent *event ) override;
+    void contextMenuEvent( QContextMenuEvent *event ) override;
 
 private Q_SLOTS:
     void playSong() const;

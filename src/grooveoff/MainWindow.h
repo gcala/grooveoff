@@ -27,6 +27,7 @@
 
 #include <QPointer>
 #include <QMainWindow>
+#include <QSet>
 #include "GrooveOffNamespace.h"
 
 //Qt
@@ -90,6 +91,18 @@ private Q_SLOTS:
     void onTorrentStats( const QString &infoHash, int peers, int seeds, qint64 rate, qint64 bytesDone );
     void onTorrentError( const QString &infoHash, const QString &message );
 
+    /** asks what of the torrent goes into its playlist, and remembers the answer */
+    void chooseTracksOf( const QString &infoHash );
+
+    /** the sticky refusal, as opposed to taking a row out of the playlist */
+    void excludeTrack( DownloadItem *item );
+
+    /** writes the rows, in the order they are in, into the open playlist */
+    void savePlaylistOrder();
+
+    /** reads the tags of a track whose head has just arrived */
+    void readTagsOf( const QString &infoHash, int fileIndex );
+
     void setCompactLayout();
     void setWideLayout();
     void setMiniPlayerLayout();
@@ -133,8 +146,17 @@ private:
     /** brings the rows of one torrent out of the dormant state */
     void refreshRowsOf( const QString &infoHash );
 
+    /** the row showing this track, if it is in the open playlist */
+    DownloadItem* rowFor( const TrackInfoPtr &track ) const;
+
     /** adds a magnet or a .torrent, and says so when it will not go in */
     void addTorrentSource( const QString &source );
+
+    /**
+     * Torrents the user has just added by hand. Only those open the selector:
+     * one woken up to play a track must not stop to ask questions.
+     */
+    QSet<QString> m_awaitingSelection;
 
     Mpris *m_mpris;
 

@@ -36,10 +36,13 @@
 #include "../db/Catalog.h"
 #include "../db/Database.h"
 #include "../db/PlaylistStore.h"
+#include "TrackSelector.h"
+#include "TrackTags.h"
 #include "../torrent/StreamServer.h"
 #include "../torrent/TorrentSession.h"
 
 #include <QFileDialog>
+#include <QTimer>
 
 #include <QLabel>
 #include <QMenu>
@@ -127,6 +130,14 @@ MainWindow::MainWindow( QWidget *parent )
 
 MainWindow::~MainWindow()
 {
+    // First of all, and not as a precaution: the child widgets are destroyed
+    // before this object's own QObject destructor runs, so a signal arriving in
+    // between finds handlers that reach into a ui that is already half gone.
+    // PlayerWidget stops the player as it goes, which is exactly such a signal.
+    disconnect( The::audioEngine(),  nullptr, this, nullptr );
+    disconnect( The::torrentSession(), nullptr, this, nullptr );
+    disconnect( The::streamServer(),   nullptr, this, nullptr );
+
     delete The::paletteHandler();
     delete The::svgHandler();
 
@@ -155,19 +166,13 @@ void MainWindow::setupUi()
     ui->compactMenuButton->setToolTip( tr( "Main menu" ) );
     ui->compactMenuButton->setMenu( m_compactMainMenu );
 
-    // The search line becomes the magnet field, which is the least invasive
-    // change the .ui can take: same widget, same layout, another meaning. The
-    // rest of these go away for good when the interface is rewritten, and
-    // doing that twice would be wasted work.
+    // The search line is the magnet field: same widget, same layout, another
+    // meaning. Everything else the search era needed — the result list, the
+    // artist and album filters, the destination folder — is gone from the .ui.
     ui->label3->setText( tr( "Magnet" ) );
     ui->searchLine->setPlaceholderText( tr( "Paste a magnet link and press enter" ) );
     ui->searchLine->setClearButtonEnabled( true );
     ui->searchButton->setVisible( false );
-    ui->label4->setVisible( false );
-    ui->pathLine->setVisible( false );
-    ui->browseButton->setVisible( false );
-    ui->combosContainer->setVisible( false );
-    ui->matchList->setVisible( false );
 
     QFontMetrics fmSystemFont( Utility::font( QFont::Bold ) );
     const int fontHeight = fmSystemFont.height();
@@ -252,6 +257,43 @@ void MainWindow::setupConnections()
     connect( The::torrentSession(), &TorrentSession::resumeDataSaved, this,
              []( const QString &infoHash ) {
         The::catalog()->setHasResume( infoHash, true );
+    } );
+
+    // The head of a file is where its tags are, so this is the first moment at
+    // which asking the file what it is called gets an answer.
+    connect( The::streamServer(), &StreamServer::trackPlayable, this, &MainWindow::readTagsOf );
+
+    // And again when a track starts, because a track whose head was already in
+    // the cache never had to wait and so was never announced as playable.
+    connect( The::audioEngine(), &AudioEngine::sourceChanged, this, [this] {
+        const PlaylistItemPtr current = The::audioEngine()->currentTrack();
+        if( current && current->track() )
+            readTagsOf( current->track()->infoHash(), current->track()->fileIndex() );
+    } );
+
+    // The row of the track being listened to follows the player: it is the one
+    // place where waiting has to be visible, because it is the one the user is
+    // looking at when nothing happens.
+    connect( The::audioEngine(), &AudioEngine::stateChanged, this,
+             [this]( GrooveOff::PlayerState state ) {
+        const PlaylistItemPtr current = The::audioEngine()->currentTrack();
+        if( !current )
+            return;
+
+        DownloadItem *item = rowFor( current->track() );
+        if( !item )
+            return;
+
+        switch( state ) {
+            case GrooveOff::PlayerState::Buffering:
+                item->setTrackState( GrooveOff::BufferingState );
+                break;
+            case GrooveOff::PlayerState::Error:
+                item->setTrackState( GrooveOff::ErrorState );
+                break;
+            default:
+                item->setTrackState( GrooveOff::ReadyState );
+        }
     } );
 
     // network
@@ -423,7 +465,13 @@ void MainWindow::addTorrentSource( const QString &source )
     }
 
     ui->searchLine->clear();
+    m_awaitingSelection.insert( infoHash );
     m_playerWidget->showMessage( tr( "Reading the track list…" ) );
+
+    // A torrent whose file list is already in hand posts no alert, so the
+    // selector has to be opened here instead of waiting for one.
+    if( The::torrentSession()->hasMetadata( infoHash ) && m_awaitingSelection.remove( infoHash ) )
+        QTimer::singleShot( 0, this, [this, infoHash] { chooseTracksOf( infoHash ); } );
 }
 
 /*!
@@ -431,7 +479,7 @@ void MainWindow::addTorrentSource( const QString &source )
 
   Every file is stored, audio or not: an extension nobody thought of would
   otherwise become a track that simply is not there, with no way to tell why.
-  What goes into the playlist is the audio, minus whatever was excluded before.
+  What goes into the playlist is then up to the user, through the selector.
 */
 void MainWindow::onMetadataReady( const QString &infoHash, const QString &name, const QList<TrackInfoPtr> &tracks )
 {
@@ -445,22 +493,100 @@ void MainWindow::onMetadataReady( const QString &infoHash, const QString &name, 
     catalog->addTracks( tracks );
     catalog->touch( infoHash );
 
-    const qint64 playlistId = The::playlistStore()->torrentPlaylistId( infoHash );
+    refreshRowsOf( infoHash );
+
+    if( !m_awaitingSelection.remove( infoHash ) ) {
+        // A torrent woken up to play something, not one just added: it keeps
+        // the playlist it had and does not steal the view.
+        m_playerWidget->showMessage( name );
+        return;
+    }
+
+    // Out of the alert handler before opening a modal: the dialog spins its own
+    // event loop, and doing that in the middle of draining libtorrent's alerts
+    // is asking for trouble that only shows up under load.
+    QTimer::singleShot( 0, this, [this, infoHash] { chooseTracksOf( infoHash ); } );
+}
+
+void MainWindow::chooseTracksOf( const QString &infoHash )
+{
+    Catalog *catalog = The::catalog();
+    PlaylistStore *playlists = The::playlistStore();
+
+    const qint64 playlistId = playlists->torrentPlaylistId( infoHash );
     if( playlistId <= 0 )
         return;
 
-    // A torrent already known keeps the list it had: reopening it must not
-    // undo an exclusion or a removal made last time.
-    if( The::playlistStore()->tracks( playlistId ).isEmpty() )
-        The::playlistStore()->appendTracks( playlistId, catalog->tracks( infoHash ) );
+    // Everything, excluded and non audio included: hiding them here is what
+    // makes a missing track impossible to explain.
+    const QList<TrackInfoPtr> all = catalog->tracks( infoHash, false, true );
 
-    if( The::playlistStore()->currentPlaylistId() != playlistId ) {
-        The::playlistStore()->setPlaybackState( playlistId, 0, 0 );
-        loadCurrentPlaylist();
+    QList<qint64> chosen;
+    for( const TrackInfoPtr &track : playlists->tracks( playlistId ) )
+        chosen << track->id();
+
+    TrackSelector selector( catalog->name( infoHash ), all, chosen, this );
+
+    if( selector.exec() != QDialog::Accepted ) {
+        // The torrent stays in the catalogue — it may be chosen from later —
+        // but with nothing queued there is no reason to keep announcing it.
+        if( playlists->tracks( playlistId ).isEmpty() )
+            The::torrentSession()->remove( infoHash, false );
+
+        return;
     }
 
+    // Ticking a file that had been refused is how a refusal is taken back.
+    for( const TrackInfoPtr &track : selector.readmittedTracks() )
+        catalog->setExcluded( track->id(), false );
+
+    playlists->setTracks( playlistId, selector.selectedTracks() );
+    playlists->setPlaybackState( playlistId, 0, 0 );
+
+    loadCurrentPlaylist();
     refreshRowsOf( infoHash );
-    m_playerWidget->showMessage( name );
+}
+
+/*!
+  \brief excludeTrack: the refusal that sticks
+
+  Taking a row out of the playlist and refusing a file are two different
+  things, and conflating them is the mistake that has the user pressing select
+  all and watching the same three tracks come back for ever.
+*/
+void MainWindow::excludeTrack( DownloadItem *item )
+{
+    if( !item || !item->playlistItem()->track() )
+        return;
+
+    const TrackInfoPtr track = item->playlistItem()->track();
+
+    The::catalog()->setExcluded( track->id(), true );
+
+    The::audioEngine()->removingTrack( item->playlistItem() );
+    The::playlist()->removeItem( item->playlistItem() );
+    ui->downloadList->removeItem( item );
+
+    savePlaylistOrder();
+}
+
+void MainWindow::savePlaylistOrder()
+{
+    if( !The::database()->isOpen() )
+        return;
+
+    const qint64 playlistId = The::playlistStore()->currentPlaylistId();
+    if( playlistId <= 0 )
+        return;
+
+    QList<TrackInfoPtr> tracks;
+    for( int i = 0; i < ui->downloadList->count(); ++i ) {
+        DownloadItem *item = qobject_cast<DownloadItem *>( ui->downloadList->itemWidget( ui->downloadList->item( i ) ) );
+        if( item && item->playlistItem()->track() )
+            tracks << item->playlistItem()->track();
+    }
+
+    The::playlistStore()->setTracks( playlistId, tracks );
 }
 
 void MainWindow::onTorrentStats( const QString &infoHash, int peers, int seeds, qint64 rate, qint64 bytesDone )
@@ -469,14 +595,78 @@ void MainWindow::onTorrentStats( const QString &infoHash, int peers, int seeds, 
 
     The::catalog()->setBytesDone( infoHash, bytesDone );
 
-    // Red with nobody to talk to, yellow with peers, green with a seed: the
-    // difference the user actually feels is whether anything is coming in.
-    if( peers == 0 )
-        ui->svgLed->setType( IconButton::Offline );
-    else
-        ui->svgLed->setType( IconButton::Online );
+    const PlaylistItemPtr current = The::audioEngine()->currentTrack();
+    if( !current || !current->track() || current->track()->infoHash() != infoHash )
+        return;
 
-    ui->svgLed->setToolTip( tr( "%n peer(s)", "", peers ) + QLatin1String( ", " ) + tr( "%n seed(s)", "", seeds ) );
+    // The led follows the torrent being listened to, not the network as a
+    // whole: whether a machine is online says nothing about whether this track
+    // has anybody to get its bytes from.
+    ui->svgLed->setType( peers == 0 ? IconButton::Offline : IconButton::Online );
+    ui->svgLed->setToolTip( tr( "%n peer(s)", "", peers ) + QLatin1String( ", " )
+                            + tr( "%n seed(s)", "", seeds ) );
+
+    DownloadItem *item = rowFor( current->track() );
+    if( !item )
+        return;
+
+    item->setPeerInfo( peers, seeds );
+    item->setBuffered( The::torrentSession()->bufferedBytes( infoHash, current->track()->fileIndex() ),
+                       current->track()->fileSize() );
+}
+
+/*!
+  \brief readTagsOf: takes what the file says about itself, once it can
+
+  Tags live at the head of a file, so this is called when that head has
+  arrived and not before: asking a hole what it is called gets no answer, and
+  the row would keep the file name for ever.
+*/
+void MainWindow::readTagsOf( const QString &infoHash, int fileIndex )
+{
+    const TrackInfoPtr track = The::catalog()->track( infoHash, fileIndex );
+    if( !track )
+        return;
+
+    if( !TrackTags::read( track ) )
+        return;
+
+    The::catalog()->updateTags( track );
+
+    DownloadItem *item = rowFor( track );
+    if( !item )
+        return;
+
+    // The row holds its own copy of the track, so the tags are copied onto it
+    // rather than the row being rebuilt: a rebuild would lose the state it is
+    // showing at the very moment it starts playing.
+    const TrackInfoPtr shown = item->playlistItem()->track();
+    shown->setTitle( track->title() );
+    shown->setArtist( track->artist() );
+    shown->setAlbum( track->album() );
+    shown->setTrackNum( track->trackNum() );
+    shown->setYear( track->year() );
+
+    item->refreshLabels();
+}
+
+DownloadItem* MainWindow::rowFor( const TrackInfoPtr &track ) const
+{
+    if( !track )
+        return nullptr;
+
+    for( int i = 0; i < ui->downloadList->count(); ++i ) {
+        DownloadItem *item = qobject_cast<DownloadItem *>( ui->downloadList->itemWidget( ui->downloadList->item( i ) ) );
+        if( !item || !item->playlistItem()->track() )
+            continue;
+
+        if( item->playlistItem()->track()->infoHash() == track->infoHash()
+            && item->playlistItem()->track()->fileIndex() == track->fileIndex() ) {
+            return item;
+        }
+    }
+
+    return nullptr;
 }
 
 void MainWindow::onTorrentError( const QString &infoHash, const QString &message )
@@ -526,6 +716,12 @@ void MainWindow::addPlaylistItem( const PlaylistItemPtr &playlistItem )
 
     connect( item,             &DownloadItem::removeMe,
              ui->downloadList, &DownloadList::removeItem );
+
+    // After the list has taken the row out, not before: what is written is
+    // what is on screen.
+    connect( item, &DownloadItem::removeMe, this, &MainWindow::savePlaylistOrder );
+
+    connect( item, &DownloadItem::excludeRequested, this, &MainWindow::excludeTrack );
 
     QListWidgetItem *wi = new QListWidgetItem;
     ui->downloadList->addItem( wi );

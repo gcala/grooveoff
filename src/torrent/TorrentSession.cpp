@@ -843,6 +843,24 @@ bool TorrentSession::havePiece( const QString &infoHash, int piece ) const
     return handle.value().have_piece( lt::piece_index_t { piece } );
 }
 
+qint64 TorrentSession::bufferedBytes( const QString &infoHash, int fileIndex ) const
+{
+    const qint64 size = fileSize( infoHash, fileIndex );
+    if( size <= 0 )
+        return 0;
+
+    qint64 offset = 0;
+    while( offset < size ) {
+        const PieceLocation location = locate( infoHash, fileIndex, offset );
+        if( location.piece < 0 || !havePiece( infoHash, location.piece ) )
+            break;
+
+        offset = location.pieceEnd;
+    }
+
+    return offset;
+}
+
 void TorrentSession::setFilePriority( const QString &infoHash, int fileIndex, FilePriority priority )
 {
     const auto handle = d->handles.constFind( infoHash );

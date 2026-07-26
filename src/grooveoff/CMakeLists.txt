@@ -12,12 +12,13 @@ set(grooveoff_SRCS main.cpp
                    PlaylistAction.cpp
                    PlaylistItem.cpp
                    SettingsItem.cpp
+                   TrackSelector.cpp
+                   TrackTags.cpp
                    Utility.cpp
                    SvgHandler.cpp
                    SvgTinter.cpp
                    PaletteHandler.cpp
                    widgets/SvgButton.cpp
-                   widgets/ElidedComboBox.cpp
                    widgets/PlayAnimationWidget.cpp
                    widgets/ElidedLabel.cpp
                    widgets/TimerButton.cpp
@@ -37,6 +38,7 @@ set(grooveoff_UI DownloadItem.ui
                  MainWindow.ui
                  ConfigDialog.ui
                  SettingsItem.ui
+                 TrackSelector.ui
                  AboutDialog.ui)
 
 # handled by AUTORCC

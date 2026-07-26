@@ -171,6 +171,13 @@ public:
      */
     bool havePiece( const QString &infoHash, int piece ) const;
 
+    /**
+     * How much of the file can be read from its start without meeting a hole.
+     * That, and not the bytes scattered around it, is what a listener is going
+     * to hear, so it is what the progress of a row means.
+     */
+    qint64 bufferedBytes( const QString &infoHash, int fileIndex ) const;
+
     void setFilePriority( const QString &infoHash, int fileIndex, FilePriority priority );
 
     /**

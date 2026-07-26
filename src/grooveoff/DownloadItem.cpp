@@ -26,9 +26,14 @@
 #include "MainWindow.h"
 #include "../torrent/TorrentSession.h"
 
+#include "TrackTags.h"
+
+#include <QContextMenuEvent>
 #include <QDebug>
 #include <QFile>
 #include <QGraphicsDropShadowEffect>
+#include <QLocale>
+#include <QMenu>
 
 /*!
   \brief Class representing a track in a playlist
@@ -136,13 +141,6 @@ void DownloadItem::setupUi()
     ui->timerWidget->setVisible( false );
     ui->deleteWidget->setVisible( false );
     ui->infoMessageWidget->setVisible( false );
-
-    // Buttons of the download era, gone with it. The .ui file is rewritten
-    // together with the rest of the interface.
-    ui->openFolderWidget->setVisible( false );
-    ui->unqueueWidget->setVisible( false );
-    ui->queueWidget->setVisible( false );
-    ui->stopDownloadWidget->setVisible( false );
 }
 
 /*!
@@ -171,8 +169,25 @@ void DownloadItem::setTrackState( GrooveOff::TrackState state )
 
 void DownloadItem::setBuffered( qint64 bytesAvailable, qint64 bytesTotal )
 {
-    ui->progressBar->setMaximum( bytesTotal > 0 ? bytesTotal : 1 );
-    ui->progressBar->setValue( bytesAvailable );
+    // The bar counts in kilobytes: a QProgressBar works on ints, and a forty
+    // megabyte flac would overflow one.
+    ui->progressBar->setMaximum( bytesTotal > 0 ? int( bytesTotal / 1024 ) : 1 );
+    ui->progressBar->setValue( int( bytesAvailable / 1024 ) );
+
+    ui->progressBar->setToolTip( tr( "%1 of %2 buffered" )
+                                     .arg( QLocale().formattedDataSize( bytesAvailable ),
+                                           QLocale().formattedDataSize( bytesTotal ) ) );
+}
+
+void DownloadItem::setPeerInfo( int peers, int seeds )
+{
+    if( m_trackState != GrooveOff::BufferingState && m_trackState != GrooveOff::StalledState )
+        return;
+
+    ui->infoMessage->setText( peers == 0 ? tr( "Waiting for peers" )
+                                         : tr( "%n peer(s)", "", peers )
+                                           + QLatin1String( ", " )
+                                           + tr( "%n seed(s)", "", seeds ) );
 }
 
 /*!
@@ -240,7 +255,10 @@ void DownloadItem::setIdleState()
 
 void DownloadItem::setBufferingState()
 {
-    ui->infoIconWidget->setVisible( false );
+    // The bar measures the buffer, not a download: what it fills up with is
+    // how much of the track can be listened to without waiting again.
+    ui->infoIconWidget->setVisible( true );
+    ui->infoIcon->setType( IconButton::Clock );
     ui->progressWidget->setVisible( true );
 
     if( m_playerState == GrooveOff::PlayerState::Stopped ) {
@@ -355,6 +373,36 @@ void DownloadItem::removeSong()
 }
 
 /*!
+  \brief contextMenuEvent: the two removals, told apart
+
+  Taking a track out of a playlist and refusing a file are different acts with
+  different consequences the next time round, so they are two entries and never
+  one. The bin button on the row is the first of the two.
+*/
+void DownloadItem::contextMenuEvent( QContextMenuEvent *event )
+{
+    QMenu menu( this );
+
+    QAction *playAction = menu.addAction( QIcon::fromTheme( QLatin1String( "media-playback-start" ) ),
+                                          tr( "Play" ) );
+    menu.addSeparator();
+    QAction *removeAction = menu.addAction( QIcon::fromTheme( QLatin1String( "list-remove" ) ),
+                                            tr( "Remove from the playlist" ) );
+    QAction *excludeAction = menu.addAction( QIcon::fromTheme( QLatin1String( "edit-delete" ) ),
+                                             tr( "Exclude this track" ) );
+    excludeAction->setToolTip( tr( "Keeps it out of this torrent's playlist until you say otherwise" ) );
+
+    const QAction *chosen = menu.exec( event->globalPos() );
+
+    if( chosen == playAction )
+        playSong();
+    else if( chosen == removeAction )
+        removeSong();
+    else if( chosen == excludeAction )
+        emit excludeRequested( this );
+}
+
+/*!
   \brief enterEvent: manage mouse movement
   \return void
 */
@@ -391,10 +439,39 @@ void DownloadItem::setPlayerState( GrooveOff::PlayerState state )
     stateChanged();
 }
 
+/*!
+  \brief refreshLabels: takes up the tags read off the file
+
+  Called once the head of the file is in the cache, which is the first moment
+  at which there is anything to read. Until then a row shows the file name,
+  which is a poor title but never a wrong one.
+*/
+void DownloadItem::refreshLabels()
+{
+    ui->titleLabel->setText( m_playlistItem->displayTitle() );
+    ui->titleLabel->setToolTip( m_playlistItem->displayTitle() );
+
+    ui->artist_albumLabel->setText( m_playlistItem->displaySubtitle() );
+    ui->artist_albumLabel->setToolTip( m_playlistItem->displaySubtitle() );
+
+    loadCover();
+}
+
 void DownloadItem::loadCover()
 {
-    // Covers used to come from a Grooveshark cdn. They will come from the
-    // ID3v2 picture frame once tags are read off the buffered file.
+    // The picture frame of the file itself. Covers used to come from a
+    // Grooveshark cdn that no longer exists, and there is no other source that
+    // would not mean asking a stranger what the user is listening to.
+    const QImage cover = TrackTags::cover( m_playlistItem->localPath() );
+
+    if( !cover.isNull() ) {
+        ui->coverLabel->setPixmap( QPixmap::fromImage( cover ).scaled( Utility::coverSize,
+                                                                       Utility::coverSize,
+                                                                       Qt::KeepAspectRatio,
+                                                                       Qt::SmoothTransformation ) );
+        return;
+    }
+
     ui->coverLabel->setPixmap( QIcon::fromTheme( QLatin1String( "media-optical" ),
                                                  QIcon( QLatin1String( ":/resources/media-optical.png" ) )
                                                ).pixmap( Utility::coverSize ) );
