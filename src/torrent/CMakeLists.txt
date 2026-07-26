@@ -2,10 +2,13 @@
 # harness can drive it without a gui. Static for the same reason as
 # grooveoff_core: the installed product stays a single executable.
 add_library(grooveoff_torrent STATIC
-            TorrentSession.cpp)
+            TorrentSession.cpp
+            TorrentTrack.cpp
+            StreamServer.cpp)
 
 target_link_libraries(grooveoff_torrent PUBLIC
                       Qt6::Core
+                      Qt6::Network
                       grooveoff_core
                       PRIVATE
                       LibtorrentRasterbar::torrent-rasterbar)

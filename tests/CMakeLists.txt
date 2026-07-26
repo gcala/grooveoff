@@ -18,6 +18,18 @@ target_link_libraries(torrenttest PRIVATE
 
 add_test(NAME torrent COMMAND torrenttest)
 
+# Same trick, one step further: the content is written into the cache the
+# session uses, so every piece is there and the http side can be tested whole
+# without a single peer.
+add_executable(streamtest StreamServerTest.cpp)
+
+target_link_libraries(streamtest PRIVATE
+                      grooveoff_torrent
+                      LibtorrentRasterbar::torrent-rasterbar
+                      Qt6::Test)
+
+add_test(NAME stream COMMAND streamtest)
+
 # Hand driven, needs a swarm and a pair of eyes: built so that it cannot rot,
 # never run by ctest.
 add_executable(torrentcli TorrentCli.cpp)

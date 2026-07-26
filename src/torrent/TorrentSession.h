@@ -75,6 +75,20 @@ public:
         int uploadRateLimit  = -1;
     };
 
+    /** what a byte of a file falls into, in the piece grid of its torrent */
+    struct PieceLocation
+    {
+        int    piece    = -1;
+        /** offset in the file just past that piece, so a reader knows where to stop */
+        qint64 pieceEnd = 0;
+    };
+
+    enum FilePriority {
+        SkipFile,     /**< dont_download: the resting state of every file */
+        NormalFile,   /**< what the next track gets while the current one plays */
+        TopFile       /**< the track being listened to, which never gives way */
+    };
+
     /**
      * Creates the session under @p cacheRoot, which holds torrents/, resume/
      * and session.dat. Everything below it can be deleted by hand without
@@ -135,6 +149,43 @@ public:
 
     /** asks for the resume data of one torrent; the write happens on the alert */
     void requestResumeData( const QString &infoHash );
+
+    // --- reading a file out of a torrent ------------------------------------
+
+    /** whether the file list of this torrent is known, hence whether it can be read */
+    bool hasMetadata( const QString &infoHash ) const;
+
+    /** where the file lives on disk, whether or not any of its bytes are there yet */
+    QString filePath( const QString &infoHash, int fileIndex ) const;
+
+    qint64 fileSize( const QString &infoHash, int fileIndex ) const;
+
+    PieceLocation locate( const QString &infoHash, int fileIndex, qint64 fileOffset ) const;
+
+    /**
+     * True once the piece has arrived and passed its hash check, which is the
+     * only moment at which reading those bytes off the sparse file is honest.
+     */
+    bool havePiece( const QString &infoHash, int piece ) const;
+
+    void setFilePriority( const QString &infoHash, int fileIndex, FilePriority priority );
+
+    /**
+     * Asks for a piece within @p milliseconds. This is not sequential download:
+     * libtorrent orders the peers by expected delivery time and re-requests
+     * what falls behind. It is the primitive streaming is built on.
+     */
+    void setPieceDeadline( const QString &infoHash, int piece, int milliseconds );
+
+    /**
+     * Takes one piece back out of the hurry. Preferred to clearing them all,
+     * which would also drop the deadlines of a second file of the same torrent
+     * — the prefetched track, once there is one.
+     */
+    void resetPieceDeadline( const QString &infoHash, int piece );
+
+    /** for when a whole torrent stops being interesting */
+    void clearPieceDeadlines( const QString &infoHash );
 
     /** bytes sent to peers since the session started; expected to stay at zero */
     qint64 totalUpload() const;

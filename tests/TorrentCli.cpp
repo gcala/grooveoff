@@ -22,7 +22,10 @@
     session has to be provable before there is any interface to prove it with.
 
         torrentcli <magnet uri | file.torrent | info hash> [--cache DIR]
-                   [--seconds N] [--offline]
+                   [--seconds N] [--offline] [--serve INDEX]
+
+    With --serve it starts the stream server and prints the url of that file
+    of the torrent, which is what curl and vlc are then pointed at.
 
     What it prints is what the plan asks to be checked: the file list of a
     torrent, and the fact that having the list costs no content at all.
@@ -34,6 +37,7 @@
     that no amount of staring at the code can replace.
 */
 
+#include "torrent/StreamServer.h"
 #include "torrent/TorrentSession.h"
 
 #include <QCommandLineParser>
@@ -93,9 +97,14 @@ int main( int argc, char **argv )
                                       QLatin1String( "60" ) );
     QCommandLineOption offlineOption( QLatin1String( "offline" ),
                                       QLatin1String( "No dht, no port mapping, loopback only." ) );
+    QCommandLineOption serveOption( QLatin1String( "serve" ),
+                                    QLatin1String( "Serve this file of the torrent over http." ),
+                                    QLatin1String( "index" ),
+                                    QLatin1String( "-1" ) );
     parser.addOption( cacheOption );
     parser.addOption( secondsOption );
     parser.addOption( offlineOption );
+    parser.addOption( serveOption );
     parser.process( application );
 
     if( parser.positionalArguments().isEmpty() ) {
@@ -106,12 +115,18 @@ int main( int argc, char **argv )
     const QString source    = parser.positionalArguments().first();
     const QString cacheRoot = parser.value( cacheOption );
     const int     seconds   = parser.value( secondsOption ).toInt();
+    const int     serveIndex = parser.value( serveOption ).toInt();
 
     TorrentSession *session = The::torrentSession();
 
     if( !session->start( cacheRoot, parser.isSet( offlineOption ) ? TorrentSession::Offline
                                                                   : TorrentSession::Connected ) ) {
         out << "cannot start the session under " << cacheRoot << Qt::endl;
+        return 1;
+    }
+
+    if( serveIndex >= 0 && !The::streamServer()->start() ) {
+        out << "cannot start the stream server" << Qt::endl;
         return 1;
     }
 
@@ -130,7 +145,7 @@ int main( int argc, char **argv )
     } );
 
     QObject::connect( session, &TorrentSession::metadataReady,
-                      []( const QString &infoHash, const QString &name, const QList<TrackInfoPtr> &tracks ) {
+                      [serveIndex]( const QString &infoHash, const QString &name, const QList<TrackInfoPtr> &tracks ) {
         out << "metadata   " << name << " (" << infoHash << "), " << tracks.count() << " files" << Qt::endl;
         for( const TrackInfoPtr &track : tracks ) {
             out << QString::asprintf( "  %4d  %10lld  %s  ",
@@ -139,6 +154,11 @@ int main( int argc, char **argv )
                                       track->isAudio() ? "audio" : "     " )
                 << track->filePath() << Qt::endl;
         }
+
+        // The url can only be printed now: before the metadata there is no
+        // file to point at.
+        if( serveIndex >= 0 )
+            out << "url        " << The::streamServer()->urlFor( infoHash, serveIndex ).toString() << Qt::endl;
     } );
 
     QObject::connect( session, &TorrentSession::statsUpdated,
@@ -187,6 +207,7 @@ int main( int argc, char **argv )
     const int result = application.exec();
 
     out << Qt::endl;
+    The::streamServer()->stop();
     session->shutdown();
 
     // The number that matters: adding a torrent buys the metadata, and the

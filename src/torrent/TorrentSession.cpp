@@ -38,6 +38,7 @@
 #include <libtorrent/fingerprint.hpp>
 #include <libtorrent/load_torrent.hpp>
 #include <libtorrent/magnet_uri.hpp>
+#include <libtorrent/peer_request.hpp>
 #include <libtorrent/read_resume_data.hpp>
 #include <libtorrent/session.hpp>
 #include <libtorrent/session_params.hpp>
@@ -761,6 +762,121 @@ void TorrentSession::requestResumeData( const QString &infoHash )
     const auto handle = d->handles.constFind( infoHash );
     if( handle != d->handles.constEnd() )
         d->saveResumeData( handle.value() );
+}
+
+bool TorrentSession::hasMetadata( const QString &infoHash ) const
+{
+    const auto handle = d->handles.constFind( infoHash );
+    return handle != d->handles.constEnd() && handle.value().is_valid() && handle.value().torrent_file();
+}
+
+QString TorrentSession::filePath( const QString &infoHash, int fileIndex ) const
+{
+    const auto handle = d->handles.constFind( infoHash );
+    if( handle == d->handles.constEnd() )
+        return QString();
+
+    const std::shared_ptr<const lt::torrent_info> info = handle.value().torrent_file();
+    if( !info || fileIndex < 0 || fileIndex >= info->num_files() )
+        return QString();
+
+    const std::string savePath = QDir( d->torrentsPath ).absoluteFilePath( infoHash ).toStdString();
+    return QString::fromStdString( info->layout().file_path( lt::file_index_t { fileIndex }, savePath ) );
+}
+
+qint64 TorrentSession::fileSize( const QString &infoHash, int fileIndex ) const
+{
+    const auto handle = d->handles.constFind( infoHash );
+    if( handle == d->handles.constEnd() )
+        return 0;
+
+    const std::shared_ptr<const lt::torrent_info> info = handle.value().torrent_file();
+    if( !info || fileIndex < 0 || fileIndex >= info->num_files() )
+        return 0;
+
+    return info->layout().file_size( lt::file_index_t { fileIndex } );
+}
+
+TorrentSession::PieceLocation TorrentSession::locate( const QString &infoHash,
+                                                      int fileIndex,
+                                                      qint64 fileOffset ) const
+{
+    PieceLocation location;
+
+    const auto handle = d->handles.constFind( infoHash );
+    if( handle == d->handles.constEnd() )
+        return location;
+
+    const std::shared_ptr<const lt::torrent_info> info = handle.value().torrent_file();
+    if( !info || fileIndex < 0 || fileIndex >= info->num_files() )
+        return location;
+
+    const lt::file_storage &files = info->layout();
+    const lt::file_index_t index { fileIndex };
+    const qint64 size = files.file_size( index );
+
+    if( fileOffset < 0 || fileOffset >= size )
+        return location;
+
+    // map_file answers with the piece, the offset inside it and the length
+    // left. What a reader needs on top of the piece number is where that piece
+    // ends in file coordinates, so that it can read up to there and stop.
+    const lt::peer_request request = files.map_file( index, fileOffset, 0 );
+
+    location.piece    = static_cast<int>( request.piece );
+    location.pieceEnd = qMin( fileOffset + ( info->piece_length() - request.start ), size );
+
+    return location;
+}
+
+bool TorrentSession::havePiece( const QString &infoHash, int piece ) const
+{
+    const auto handle = d->handles.constFind( infoHash );
+    if( handle == d->handles.constEnd() || piece < 0 )
+        return false;
+
+    return handle.value().have_piece( lt::piece_index_t { piece } );
+}
+
+void TorrentSession::setFilePriority( const QString &infoHash, int fileIndex, FilePriority priority )
+{
+    const auto handle = d->handles.constFind( infoHash );
+    if( handle == d->handles.constEnd() )
+        return;
+
+    lt::download_priority_t value = lt::dont_download;
+    switch( priority ) {
+        case NormalFile: value = lt::default_priority; break;
+        case TopFile:    value = lt::top_priority;     break;
+        case SkipFile:   break;
+    }
+
+    handle.value().file_priority( lt::file_index_t { fileIndex }, value );
+}
+
+void TorrentSession::setPieceDeadline( const QString &infoHash, int piece, int milliseconds )
+{
+    const auto handle = d->handles.constFind( infoHash );
+    if( handle == d->handles.constEnd() || piece < 0 )
+        return;
+
+    handle.value().set_piece_deadline( lt::piece_index_t { piece }, milliseconds );
+}
+
+void TorrentSession::resetPieceDeadline( const QString &infoHash, int piece )
+{
+    const auto handle = d->handles.constFind( infoHash );
+    if( handle == d->handles.constEnd() || piece < 0 )
+        return;
+
+    handle.value().reset_piece_deadline( lt::piece_index_t { piece } );
+}
+
+void TorrentSession::clearPieceDeadlines( const QString &infoHash )
+{
+    const auto handle = d->handles.constFind( infoHash );
+    if( handle != d->handles.constEnd() )
+        handle.value().clear_piece_deadlines();
 }
 
 qint64 TorrentSession::totalUpload() const
