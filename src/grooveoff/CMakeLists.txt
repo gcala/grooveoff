@@ -60,8 +60,8 @@ target_link_libraries(grooveoff PRIVATE
                       Qt6::Multimedia
                       KDAB::kdsingleapplication
                       TagLib::tag
-                      LibtorrentRasterbar::torrent-rasterbar
-                      grooveoff_core)
+                      grooveoff_core
+                      grooveoff_torrent)
 
 install(TARGETS grooveoff RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(FILES ${grooveoff_I18N}
