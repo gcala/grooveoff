@@ -80,7 +80,10 @@ DownloadItem::~DownloadItem()
 */
 void DownloadItem::setupUi()
 {
-    ui->coverLabel->setScaledContents( true );
+    // The scaling is done on the pixmap, keeping its shape: scaledContents
+    // would stretch it to the square of the label, and album art is not always
+    // square.
+    ui->coverLabel->setAlignment( Qt::AlignCenter );
     ui->coverLabel->setFixedSize( QSize( Utility::coverSize,Utility::coverSize ) );
     loadCover();
 
@@ -494,8 +497,6 @@ void DownloadItem::refreshLabels()
 
     ui->artist_albumLabel->setText( m_playlistItem->displaySubtitle() );
     ui->artist_albumLabel->setToolTip( m_playlistItem->displaySubtitle() );
-
-    loadCover();
 }
 
 void DownloadItem::loadCover()

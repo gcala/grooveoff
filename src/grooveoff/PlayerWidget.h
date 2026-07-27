@@ -61,6 +61,9 @@ protected:
     virtual void changeEvent ( QEvent * event );
 
 private Q_SLOTS:
+    /** the picture frame of the file, or the generic disc until there is one */
+    void loadCover();
+
     void tick( qint64 elapsedTime, bool userSeek );
     void stateChanged( GrooveOff::PlayerState state );
     void toggleTimeLabel();
@@ -80,6 +83,12 @@ private:
     bool m_updatingSeekSlider; // tells a programmatic slider update from a user one
     QTimer *m_timer;
     QGraphicsDropShadowEffect *m_coverShadow;
+
+    /**
+     * Kept so that it can be dropped: it hangs off the track being played, and
+     * the next track is a different object with a signal of its own.
+     */
+    QMetaObject::Connection m_coverConnection;
 
     //Methods
     void setupConnections();

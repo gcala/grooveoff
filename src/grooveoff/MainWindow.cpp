@@ -773,6 +773,11 @@ void MainWindow::readTagsOf( const QString &infoHash, int fileIndex )
     shown->setYear( track->year() );
 
     item->refreshLabels();
+
+    // The cover goes out over the track's own signal rather than being set on
+    // the row: the player is looking at the same track and needs it too, and a
+    // signal is the only way of saying it once to whoever is showing it.
+    item->playlistItem()->requireCoverReload();
 }
 
 /*!

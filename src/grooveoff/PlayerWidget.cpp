@@ -22,6 +22,7 @@
 #include "Utility.h"
 #include "AudioEngine.h"
 #include "Playlist.h"
+#include "TrackTags.h"
 
 #include <QDir>
 #include <QTime>
@@ -130,7 +131,11 @@ void PlayerWidget::setupLabels()
     ui->bitrateLabel->setToolTip( tr( "Bit Rate" ) );
     ui->samplerateLabel->setToolTip( tr( "Sample Rate" ) );
     
-    ui->coverLabel->setScaledContents( true );
+    // Not scaledContents: that stretches the picture to the label, and album
+    // art is not always square — the covers of a real torrent turned out to be
+    // 382 by 336. The pixmap is scaled keeping its shape and centred in what is
+    // left over.
+    ui->coverLabel->setAlignment( Qt::AlignCenter );
 }
 
 void PlayerWidget::setupButtonsType()
@@ -353,11 +358,13 @@ void PlayerWidget::sourceChanged()
     ui->album_authorLabel->setText( subtitle );
     ui->album_authorLabel->setToolTip( subtitle );
 
-    // Covers will come from the picture frame of the buffered file; until then
-    // every track gets the generic one.
-    ui->coverLabel->setPixmap( QIcon::fromTheme( QLatin1String( "media-optical" ),
-                                                 QIcon( QLatin1String( ":/resources/media-optical.png" ) )
-                                               ).pixmap( ui->coverLabel->size() ) );
+    // The cover is read again for this track, and the widget starts listening
+    // to it: the head of a file can arrive after the music has started, and
+    // what the row learns then the player has to learn too.
+    disconnect( m_coverConnection );
+    m_coverConnection = connect( track.data(), &PlaylistItem::reloadCover,
+                                 this, &PlayerWidget::loadCover );
+    loadCover();
 
     // Read off whatever is already on disk, and cheaply: Fast rather than
     // Average, because for a vbr mp3 Average means scanning the whole file, and
@@ -387,6 +394,33 @@ void PlayerWidget::sourceChanged()
     
     // refresh previous/next buttons state
     reloadPreviousNextButtons();
+}
+
+/*!
+  \brief loadCover: the same picture the row shows, read the same way
+
+  It comes out of the file itself, because the cdn the covers used to come from
+  closed with the rest of Grooveshark and there is no other source that would
+  not mean telling a stranger what is being listened to. Before the head of the
+  file is in the cache there is nothing to read, so the generic disc stands in —
+  and it is also what a file with no picture frame keeps for good.
+*/
+void PlayerWidget::loadCover()
+{
+    const PlaylistItemPtr track = The::audioEngine()->currentTrack();
+
+    const QImage cover = track ? TrackTags::cover( track->localPath() ) : QImage();
+
+    if( !cover.isNull() ) {
+        ui->coverLabel->setPixmap( QPixmap::fromImage( cover ).scaled( ui->coverLabel->size(),
+                                                                       Qt::KeepAspectRatio,
+                                                                       Qt::SmoothTransformation ) );
+        return;
+    }
+
+    ui->coverLabel->setPixmap( QIcon::fromTheme( QLatin1String( "media-optical" ),
+                                                 QIcon( QLatin1String( ":/resources/media-optical.png" ) )
+                                               ).pixmap( ui->coverLabel->size() ) );
 }
 
 void PlayerWidget::playNext() const
