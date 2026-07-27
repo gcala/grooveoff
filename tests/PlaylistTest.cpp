@@ -56,6 +56,7 @@ private Q_SLOTS:
     void keepingTheTracksOnlyHidesTheTorrent();
     void theHiddenTorrentGoesWithItsLastTrack();
     void removingEverythingTakesTheTracksWithIt();
+    void forgetsTheOpenPlaylistWhenItIsRemoved();
 
     void refusesTracksDroppedOnATorrentPlaylist();
     void acceptsTracksDroppedOnACustomPlaylist();
@@ -212,6 +213,47 @@ void PlaylistTest::removingEverythingTakesTheTracksWithIt()
     // The list itself is not a casualty: it is empty, not gone.
     QVERIFY( m_playlists->playlist( m_customId ).isValid() );
     QCOMPARE( m_playlists->visiblePlaylists().count(), 1 );
+}
+
+/*!
+  What the window shows is the playlist app_state points at, so a playlist that
+  has been removed must stop being that one. The schema promises it with an
+  ON DELETE SET NULL and nothing was checking the promise; if it ever went, the
+  window would ask for the tracks of a list that no longer exists, get none, and
+  have no reason to empty itself — the rows of the removed playlist would stay
+  on screen until the next start.
+*/
+void PlaylistTest::forgetsTheOpenPlaylistWhenItIsRemoved()
+{
+    QVERIFY( m_playlists->setPlaybackState( m_customId, 0, 0 ) );
+    QCOMPARE( m_playlists->currentPlaylistId(), m_customId );
+
+    QVERIFY( m_playlists->removeCustomPlaylist( m_customId ) );
+    QCOMPARE( m_playlists->currentPlaylistId(), qint64( 0 ) );
+
+    // And by the other road, which reaches app_state through two cascades
+    // rather than one: the torrent takes its playlist, the playlist takes the
+    // reference, and the track that was playing goes the same way.
+    const QString hashC = QStringLiteral( "cccc000000000000000000000000000000000003" );
+    QVERIFY( m_catalog->addTorrent( hashC, QLatin1String( "magnet:?xt=urn:btih:" ) + hashC,
+                                    QStringLiteral( "Album C" ) ) );
+
+    const QList<TrackInfoPtr> tracksC = { makeTrack( hashC, 0, QStringLiteral( "Album C/01.mp3" ) ) };
+    QVERIFY( m_catalog->addTracks( tracksC ) );
+
+    const qint64 playlistC = m_playlists->torrentPlaylistId( hashC );
+    QVERIFY( playlistC > 0 );
+    QVERIFY( m_playlists->setTracks( playlistC, tracksC ) );
+
+    QVERIFY( m_playlists->setPlaybackState( playlistC, tracksC.first()->id(), 12000 ) );
+    QCOMPARE( m_playlists->currentPlaylistId(), playlistC );
+    QCOMPARE( m_playlists->currentTrackId(), tracksC.first()->id() );
+
+    QVERIFY( m_catalog->removeTorrent( hashC ) );
+
+    QCOMPARE( m_playlists->currentPlaylistId(), qint64( 0 ) );
+    QCOMPARE( m_playlists->currentTrackId(), qint64( 0 ) );
+    QVERIFY( m_playlists->visiblePlaylists().isEmpty() );
 }
 
 PlaylistList* PlaylistTest::buildSidebar( qint64 torrentPlaylistId, qint64 customPlaylistId ) const

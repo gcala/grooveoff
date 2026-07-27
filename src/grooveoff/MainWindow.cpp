@@ -467,12 +467,22 @@ void MainWindow::loadCurrentPlaylist()
     PlaylistStore *playlists = The::playlistStore();
 
     const qint64 playlistId = playlists->currentPlaylistId();
-    if( playlistId <= 0 )
-        return;
 
     // disable temporarily AutoScroll
     ui->downloadList->setAutoScroll( false );
     ui->downloadList->removeAll();
+
+    // No playlist open is a state to be shown, not a reason to do nothing.
+    // Returning here before emptying the list is what left the tracks of the
+    // last playlist on screen after it was removed: the sidebar was empty, the
+    // rows were still there, and they went only at the next start — which reads
+    // as a removal that did not work rather than one that did.
+    if( playlistId <= 0 ) {
+        ui->downloadList->setAutoScroll( true );
+        ui->downloadList->reloadPlaylist();
+        m_playerWidget->showMessage( tr( "Idle" ) );
+        return;
+    }
 
     const QList<TrackInfoPtr> &tracks = playlists->tracks( playlistId );
     for( const TrackInfoPtr &track : tracks ) {
