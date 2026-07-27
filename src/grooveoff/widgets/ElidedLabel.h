@@ -48,7 +48,10 @@ public:
 
     // QLabel overrides
     void setText(const QString &);
-    
+
+    //! An elided label is one line: its height cannot depend on its width.
+    bool hasHeightForWidth() const override;
+
     // set shadow flag
     void enableShadow(bool ok);
 

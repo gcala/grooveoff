@@ -89,6 +89,28 @@ void ElidedLabel::paintEvent(QPaintEvent* e)
                fontMetrics().elidedText(text(), m_elideMode, width(), Qt::TextShowMnemonic));
 }
 
+/*!
+  \brief hasHeightForWidth: no, and saying otherwise moves the widgets around
+
+  Word wrap sets this flag on the size policy, and the flag travels: a layout
+  that holds a label claiming a height-for-width asks for that instead of the
+  size hint. In a QStackedWidget it is worse than useless, because the stacked
+  layout answers heightForWidth for the page on show while its size hint is the
+  largest of all the pages — so the height changes with the page, and the player
+  bar grew and shrank as the message came and went.
+
+  Elision is what this class does *instead* of wrapping: whatever the width, the
+  text is one line. So the honest answer is no, and giving it here means no
+  wordWrap left on in a .ui file can bring the flag back.
+*/
+bool ElidedLabel::hasHeightForWidth() const
+{
+    if(m_elideMode == Qt::ElideNone)
+        return QLabel::hasHeightForWidth();
+
+    return false;
+}
+
 void ElidedLabel::enableShadow(bool ok)
 {
     m_drawShadow = ok;
