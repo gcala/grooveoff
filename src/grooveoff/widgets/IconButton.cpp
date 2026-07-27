@@ -29,6 +29,7 @@ IconButton::IconButton( QWidget *parent )
     , m_type( Empty )
 {
     m_anim.step = 0;
+    m_anim.steps = 0;
     m_anim.timer = 0;
     setSizePolicy( QSizePolicy::Fixed, QSizePolicy::Fixed );
 
@@ -46,8 +47,16 @@ void IconButton::setIcon( const QImage &img, int steps )
     m_icon = img;
     m_oldIcon = steps ? m_buffer.image : QImage();
 
-    if ( m_anim.timer )
+    // Forgetting the id after killing it is what produced the "timer id is not
+    // valid for object" warnings at every change of track: a second setIcon
+    // with no animation left the dead id in place, and the third tried to kill
+    // it again. Harmless, but it is noise in a log where the interesting lines
+    // are already hard enough to find.
+    if ( m_anim.timer ) {
         killTimer( m_anim.timer );
+        m_anim.timer = 0;
+    }
+
     if ( steps )
         m_anim.timer = startTimer( 40 );
     else

@@ -48,40 +48,45 @@ ElidedLabel::ElidedLabel(const QString& text, Qt::TextElideMode elideMode, QWidg
     setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
 }
 
+/*!
+  \brief setText: sets the text, and nothing else
+
+  What used to be here did two more things, and both of them were somebody
+  else's business. It reset the size policy, undoing whatever the container had
+  asked for — DownloadItem sets one deliberately, with a comment reading "fix
+  hidden label", which is what fighting this looks like from the outside. And it
+  hid and showed the widget again to make the drop shadow repaint, which is a
+  layout round trip to achieve what update() achieves.
+*/
 void ElidedLabel::setText(const QString& text)
 {
     QLabel::setText(text);
-    cacheElidedText(geometry().width());
-    setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
-    if(m_drawShadow) {
-        setVisible(false);
-        setVisible(true);
-    }
+    update();
 }
 
-void ElidedLabel::cacheElidedText(int w)
-{
-    m_cachedElidedText = fontMetrics().elidedText(text(), m_elideMode, w, Qt::TextShowMnemonic);
-}
+/*!
+  \brief paintEvent: the text is elided here, against the width it really has
 
+  It used to be elided in setText, against whatever geometry the widget happened
+  to have at that moment, and kept in a cache refreshed only by a resize. Called
+  while the label was squeezed — which in a track row happens the moment the
+  info message appears beside it — that cached an empty string, and with no
+  resize afterwards to correct it the label stayed blank for good. The title of
+  a track vanished the first time its tags were read, and never came back.
+
+  Eliding at paint time cannot go stale: there is no width but the current one.
+*/
 void ElidedLabel::paintEvent(QPaintEvent* e)
 {
     if(m_elideMode == Qt::ElideNone) {
         QLabel::paintEvent(e);
-    } else {
-        QPainter p(this);
-        p.drawText(0, 0,
-                   geometry().width(),
-                   geometry().height(),
-                   alignment(),
-                   m_cachedElidedText);
+        return;
     }
-}
 
-void ElidedLabel::resizeEvent(QResizeEvent* e)
-{
-    QLabel::resizeEvent(e);
-    cacheElidedText(e->size().width());
+    QPainter p(this);
+    p.drawText(rect(),
+               alignment(),
+               fontMetrics().elidedText(text(), m_elideMode, width(), Qt::TextShowMnemonic));
 }
 
 void ElidedLabel::enableShadow(bool ok)

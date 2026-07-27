@@ -54,15 +54,12 @@ public:
 
 protected:
     virtual void paintEvent(QPaintEvent* );
-    virtual void resizeEvent(QResizeEvent* );
+
     virtual void changeEvent ( QEvent * event );
 
-    //! Cache the elided text so as to not recompute it every paint event
-    void cacheElidedText(int w);
 
 private:
     Qt::TextElideMode m_elideMode;
-    QString m_cachedElidedText;
     bool m_drawShadow;
     QGraphicsDropShadowEffect *m_shadowEffect;
 };
