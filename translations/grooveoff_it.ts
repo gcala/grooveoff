@@ -1,60 +1,68 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.0" language="it_IT">
+<TS version="2.1" language="it_IT">
 <context>
     <name>AboutDialog</name>
     <message>
-        <location filename="../src/grooveoff/AboutDialog.ui" line="14"/>
+        <location filename="../src/grooveoff/AboutDialog.ui" line="+14"/>
         <source>About GrooveOff</source>
         <translation>Informazioni su GrooveOff</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/AboutDialog.ui" line="192"/>
+        <location line="+178"/>
         <source>Close</source>
         <translation>Chiudi</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/AboutDialog.cpp" line="55"/>
+        <location filename="../src/grooveoff/AboutDialog.cpp" line="+80"/>
         <source>GrooveOff</source>
         <translation>GrooveOff</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/AboutDialog.cpp" line="57"/>
+        <location line="+2"/>
         <source>Version </source>
         <translation>Versione </translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/AboutDialog.cpp" line="61"/>
+        <location line="+4"/>
         <source>Offline Grooveshark.com music.</source>
         <translation>Salva la musica di Grooveshark.com.</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/AboutDialog.cpp" line="62"/>
+        <location line="+1"/>
         <source>GrooveOff can access the huge Grooveshark database through its &lt;a href=&quot;http://developers.grooveshark.com/docs/public_api/v3/&quot;&gt;public api&lt;/a&gt;.</source>
         <translation>GrooveOff accede all&apos;enorme database di Grooveshark attaverso la sua &lt;a href=&quot;http://developers.grooveshark.com/docs/public_api/v3/&quot;&gt;api pubblica&lt;/a&gt;.</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/AboutDialog.cpp" line="63"/>
-        <source>&lt;b&gt;Author&lt;/b&gt;: </source>
-        <translation>&lt;b&gt;Autore&lt;/b&gt;: </translation>
+        <location line="+4"/>
+        <source>Author:</source>
+        <translation>Autore:</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/AboutDialog.cpp" line="64"/>
-        <source>&lt;b&gt;License&lt;/b&gt;: </source>
-        <translation>&lt;b&gt;Licenza&lt;/b&gt;: </translation>
+        <location line="+1"/>
+        <source>License:</source>
+        <translation>Licenza:</translation>
     </message>
-    <message utf8="true">
-        <location filename="../src/grooveoff/AboutDialog.cpp" line="66"/>
+    <message>
+        <source>&lt;b&gt;Author&lt;/b&gt;: </source>
+        <translation type="vanished">&lt;b&gt;Autore&lt;/b&gt;: </translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;License&lt;/b&gt;: </source>
+        <translation type="vanished">&lt;b&gt;Licenza&lt;/b&gt;: </translation>
+    </message>
+    <message>
+        <location line="+2"/>
         <source>GrooveOff is not affiliated with Grooveshark™ and has not been reviewed or officially approved by Grooveshark.com. The author is not responsible for any violations this application does to Grooveshark&apos;s TOS. The author is not related to Grooveshark™ in any way! Support the Artists You Like by Buying Their Music.</source>
         <translation>GrooveOff non è affiliato a Grooveshark™ e non è stato sottoposto a verifica o approvazione ufficiale da parte di Grooveshark.com. L&apos;autore non è responsabile per eventuali violazioni ai termini d&apos;uso di Grooveshark. L&apos;autore non è coinvolto in alcun modo con Grooveshark™! Supporta i tuoi artisti preferiti acquistando la loro musica.</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/AboutDialog.cpp" line="104"/>
+        <location line="+21"/>
         <source>Donation to Grooveoff&apos;s author</source>
         <translation>Donazione all&apos;autore di Grooveoff</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/AboutDialog.cpp" line="65"/>
+        <location line="-22"/>
         <source>Disclaimer:</source>
         <translation>Dichiarazione di non responsabilità:</translation>
     </message>
@@ -62,112 +70,164 @@
 <context>
     <name>ActionCollection</name>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="56"/>
+        <location filename="../src/grooveoff/ActionCollection.cpp" line="+59"/>
         <source>&amp;Exit</source>
         <translation>&amp;Esci</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="172"/>
+        <location line="+148"/>
         <source>Close GrooveOff</source>
         <translation>Chiudi GrooveOff</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="63"/>
+        <location line="-141"/>
         <source>&amp;Donate</source>
         <translation>&amp;Dona</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="173"/>
+        <location line="+142"/>
         <source>Donate with PayPal</source>
         <translation>Dona con PayPal</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="86"/>
+        <location line="-119"/>
         <source>&amp;Compact Layout</source>
         <translation>Disposizione &amp;compatta</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="94"/>
+        <location line="+8"/>
         <source>&amp;Wide Layout</source>
         <translation>Disposizione &amp;estesa</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="102"/>
+        <location line="+8"/>
         <source>&amp;Mini Player</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="117"/>
+        <location line="+8"/>
+        <source>&amp;Open torrent...</source>
+        <translation>&amp;Apri torrent...</translation>
+    </message>
+    <message>
+        <location line="+7"/>
         <source>&amp;Stop all downloads</source>
         <translation>Ferma &amp;tutti gli scaricamenti</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="124"/>
+        <location line="+7"/>
         <source>&amp;Remove canceled/failed downloads</source>
         <translation>Rimuovi gli scaricamenti &amp;cancellati/falliti</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="176"/>
         <source>Removes all finished downloads preserving files on disk</source>
-        <translation>Rimuove tutti gli scaricamenti terminati preservando i file su disco</translation>
+        <translation type="vanished">Rimuove tutti gli scaricamenti terminati preservando i file su disco</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="75"/>
+        <location line="-49"/>
         <source>Configure &amp;GrooveOff...</source>
         <translation>Configura &amp;GrooveOff...</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="110"/>
         <source>Get &amp;new token...</source>
-        <translation>Ottieni &amp;nuovo token...</translation>
+        <translation type="vanished">Ottieni &amp;nuovo token...</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="131"/>
+        <location line="+56"/>
         <source>Clear &amp;finished</source>
         <translation>Elimina &amp;terminati</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="138"/>
+        <location line="+7"/>
+        <source>&amp;New playlist...</source>
+        <translation>&amp;Nuova playlist...</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Re&amp;name playlist...</source>
+        <translation>Ri&amp;nomina playlist...</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Re&amp;move playlist...</source>
+        <translation>Ri&amp;muovi playlist...</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>&amp;Empty the cache</source>
+        <translation>&amp;Svuota la cache</translation>
+    </message>
+    <message>
+        <location line="+7"/>
         <source>&amp;About GrooveOff</source>
         <translation>&amp;Informazioni su GrooveOff</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="146"/>
+        <location line="+8"/>
         <source>About &amp;Qt</source>
         <translation>Informazioni su &amp;Qt</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="190"/>
-        <source>&amp;Playlist</source>
-        <translation>&amp;Scaletta</translation>
+        <location line="+34"/>
+        <source>Add a .torrent file as a playlist</source>
+        <translation>Aggiunge un file .torrent come playlist</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="194"/>
+        <location line="+1"/>
+        <source>Empties the list, leaving the catalogue alone</source>
+        <translation>Svuota la lista senza toccare il catalogo</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Deletes the downloaded data, leaving the playlists alone</source>
+        <translation>Cancella i dati scaricati senza toccare le playlist</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>A list of your own, filled by dragging tracks into it</source>
+        <translation>Una lista tua, che riempi trascinandoci dentro i brani</translation>
+    </message>
+    <message>
+        <location line="+18"/>
+        <source>&amp;Tracks</source>
+        <translation>&amp;Brani</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>&amp;Playlists</source>
+        <translation>&amp;Playlist</translation>
+    </message>
+    <message>
+        <source>&amp;Playlist</source>
+        <translation type="vanished">&amp;Scaletta</translation>
+    </message>
+    <message>
+        <location line="+7"/>
         <source>&amp;File</source>
         <translation>&amp;File</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="212"/>
+        <location line="+18"/>
         <source>&amp;Downloads</source>
         <translation>&amp;Scaricamenti</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="223"/>
+        <location line="+11"/>
         <source>&amp;View</source>
         <translation>&amp;Visualizza</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="229"/>
+        <location line="+6"/>
         <source>&amp;Settings</source>
         <translation>&amp;Impostazioni</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="233"/>
+        <location line="+6"/>
         <source>&amp;Help</source>
         <translation>&amp;Aiuto</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ActionCollection.cpp" line="252"/>
+        <location line="+20"/>
         <source>Main Menu</source>
         <translation>Menu principale</translation>
     </message>
@@ -175,368 +235,767 @@
 <context>
     <name>ConfigDialog</name>
     <message>
-        <location filename="../src/grooveoff/ConfigDialog.ui" line="14"/>
+        <location filename="../src/grooveoff/ConfigDialog.ui" line="+14"/>
         <source>Configure - GrooveOff</source>
         <translation>Configura - GrooveOff</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ConfigDialog.ui" line="50"/>
-        <location filename="../src/grooveoff/ConfigDialog.cpp" line="146"/>
         <source>General</source>
-        <translation>Generale</translation>
+        <translation type="vanished">Generale</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ConfigDialog.ui" line="84"/>
         <source>Session</source>
-        <translation>Sessione</translation>
+        <translation type="vanished">Sessione</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ConfigDialog.ui" line="90"/>
         <source>Save and restore session</source>
-        <translation>Salva e ripristina la sessione</translation>
+        <translation type="vanished">Salva e ripristina la sessione</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ConfigDialog.ui" line="100"/>
         <source>Save also failed/aborted</source>
-        <translation>Salva anche falliti/annullati</translation>
+        <translation type="vanished">Salva anche falliti/annullati</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ConfigDialog.ui" line="116"/>
         <source>History</source>
-        <translation>Cronologia</translation>
+        <translation type="vanished">Cronologia</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ConfigDialog.ui" line="122"/>
         <source>Save searches history</source>
-        <translation>Salva cronologia ricerche</translation>
+        <translation type="vanished">Salva cronologia ricerche</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ConfigDialog.ui" line="140"/>
         <source>History size:</source>
-        <translation>Dimensione cronologia:</translation>
+        <translation type="vanished">Dimensione cronologia:</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ConfigDialog.ui" line="175"/>
         <source>Destination</source>
-        <translation>Cartella di salvataggio</translation>
+        <translation type="vanished">Cartella di salvataggio</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ConfigDialog.ui" line="181"/>
         <source>Save last destination path</source>
-        <translation>Ricorda l&apos;ultima cartella di salvataggio</translation>
+        <translation type="vanished">Ricorda l&apos;ultima cartella di salvataggio</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ConfigDialog.ui" line="191"/>
         <source>Naming pattern</source>
-        <translation>Schema nome</translation>
+        <translation type="vanished">Schema nome</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ConfigDialog.ui" line="234"/>
-        <location filename="../src/grooveoff/ConfigDialog.cpp" line="147"/>
         <source>Performance</source>
-        <translation>Prestazioni</translation>
+        <translation type="vanished">Prestazioni</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ConfigDialog.ui" line="268"/>
         <source>Covers</source>
-        <translation>Copertine</translation>
+        <translation type="vanished">Copertine</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ConfigDialog.ui" line="274"/>
         <source>Load covers</source>
-        <translation>Scarica copertine</translation>
+        <translation type="vanished">Scarica copertine</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ConfigDialog.ui" line="284"/>
         <source>Empty covers cache on exit</source>
-        <translation>Svuota la cache delle copertine all&apos;uscita</translation>
+        <translation type="vanished">Svuota la cache delle copertine all&apos;uscita</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ConfigDialog.ui" line="294"/>
         <source>Results</source>
-        <translation>Risultati</translation>
+        <translation type="vanished">Risultati</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ConfigDialog.ui" line="308"/>
         <source>Limit search results:</source>
-        <translation>Limita i risultati di ricerca:</translation>
+        <translation type="vanished">Limita i risultati di ricerca:</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ConfigDialog.ui" line="343"/>
         <source>(0 means unlimited results)</source>
-        <translation>(0 significa risultati illimitati)</translation>
+        <translation type="vanished">(0 significa risultati illimitati)</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ConfigDialog.ui" line="356"/>
         <source>Downloads</source>
-        <translation>Scaricamenti</translation>
+        <translation type="vanished">Scaricamenti</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ConfigDialog.ui" line="364"/>
         <source>Max simultaneous downloads:</source>
-        <translation>Numero massimo di scaricamenti simultanei:</translation>
+        <translation type="vanished">Numero massimo di scaricamenti simultanei:</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ConfigDialog.ui" line="426"/>
+        <location line="+36"/>
+        <location filename="../src/grooveoff/ConfigDialog.cpp" line="+111"/>
+        <source>Playback</source>
+        <translation>Riproduzione</translation>
+    </message>
+    <message>
+        <location line="+34"/>
+        <source>Startup</source>
+        <translation>Avvio</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Restore the track that was playing, paused</source>
+        <translation>Ripristina il brano che era in riproduzione, in pausa</translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>Buffering</source>
+        <translation>Buffer</translation>
+    </message>
+    <message>
+        <location line="+14"/>
+        <source>Audio to keep ahead of the player:</source>
+        <translation>Audio da tenere avanti al lettore:</translation>
+    </message>
+    <message>
+        <location line="+13"/>
+        <source> s</source>
+        <translation> s</translation>
+    </message>
+    <message>
+        <location line="+31"/>
+        <source>Bring up the next track while the current one plays</source>
+        <translation>Prepara il brano successivo mentre suona quello attuale</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Without this the playlist stops at every change of track, waiting for the next torrent to find its peers.</source>
+        <translation>Senza, la playlist si ferma a ogni cambio di brano, in attesa che il torrent successivo trovi i suoi peer.</translation>
+    </message>
+    <message>
+        <location line="+44"/>
+        <location filename="../src/grooveoff/ConfigDialog.cpp" line="+1"/>
+        <source>Cache</source>
+        <translation>Cache</translation>
+    </message>
+    <message>
+        <location line="+34"/>
+        <source>Disk space</source>
+        <translation>Spazio su disco</translation>
+    </message>
+    <message>
+        <location line="+14"/>
+        <source>Keep at most:</source>
+        <translation>Conserva al massimo:</translation>
+    </message>
+    <message>
+        <location line="+13"/>
+        <source> MB</source>
+        <translation> MB</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>No limit</source>
+        <translation>Nessun limite</translation>
+    </message>
+    <message>
+        <location line="+38"/>
+        <source>When the cache is full the least recently played torrents are thrown away. Nothing leaves your playlists: a track whose data are gone is simply fetched again the next time you play it.</source>
+        <translation>Quando la cache è piena vengono buttati via i torrent ascoltati meno di recente. Dalle playlist non esce niente: un brano di cui spariscono i dati viene semplicemente riscaricato la volta dopo che lo riproduci.</translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>Empty the cache when GrooveOff closes</source>
+        <translation>Svuota la cache alla chiusura di GrooveOff</translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>Empty the cache now</source>
+        <translation>Svuota la cache adesso</translation>
+    </message>
+    <message>
+        <location line="+53"/>
+        <location filename="../src/grooveoff/ConfigDialog.cpp" line="+1"/>
+        <source>Network</source>
+        <translation>Rete</translation>
+    </message>
+    <message>
+        <location line="+34"/>
+        <source>Ports</source>
+        <translation>Porte</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Torrent port:</source>
+        <translation>Porta dei torrent:</translation>
+    </message>
+    <message>
+        <location line="+26"/>
+        <source>Local player port:</source>
+        <translation>Porta del lettore locale:</translation>
+    </message>
+    <message>
+        <location line="+13"/>
+        <source>Automatic</source>
+        <translation>Automatica</translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>The local player port is only reachable from this machine. Leave it automatic unless something else needs a fixed one.</source>
+        <translation>La porta del lettore locale è raggiungibile solo da questa macchina. Lasciala automatica, a meno che qualcos’altro non ne richieda una fissa.</translation>
+    </message>
+    <message>
+        <location line="+13"/>
+        <source>Bandwidth</source>
+        <translation>Banda</translation>
+    </message>
+    <message>
+        <location line="+12"/>
+        <source>Download limit:</source>
+        <translation>Limite in scaricamento:</translation>
+    </message>
+    <message>
+        <location line="+13"/>
+        <source> KB/s</source>
+        <translation> KB/s</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Unlimited</source>
+        <translation>Illimitato</translation>
+    </message>
+    <message>
+        <location line="+29"/>
+        <source>Proxy</source>
+        <translation>Proxy</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Taking part in a swarm shows your address to every other peer, and refusing to upload does not change that. A proxy is the only setting here that hides it: peer and tracker connections both go through it.</source>
+        <translation>Partecipare a uno swarm mostra il tuo indirizzo a tutti gli altri peer, e rifiutarsi di caricare non cambia niente. Il proxy è l’unica impostazione qui che lo nasconde: ci passano sia le connessioni ai peer sia quelle ai tracker.</translation>
+    </message>
+    <message>
+        <location line="+12"/>
+        <source>Type:</source>
+        <translation>Tipo:</translation>
+    </message>
+    <message>
+        <location line="+14"/>
+        <source>None</source>
+        <translation>Nessuno</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>SOCKS5</source>
+        <translation>SOCKS5</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>HTTP</source>
+        <translation>HTTP</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Host:</source>
+        <translation>Host:</translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>Port:</source>
+        <translation>Porta:</translation>
+    </message>
+    <message>
+        <location line="+31"/>
+        <source>Ports, bandwidth and proxy take effect the next time GrooveOff starts.</source>
+        <translation>Porte, banda e proxy hanno effetto al prossimo avvio di GrooveOff.</translation>
+    </message>
+    <message>
+        <location line="+31"/>
         <source>Default values</source>
         <translation>Valori predefiniti</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ConfigDialog.ui" line="446"/>
+        <location line="+20"/>
         <source>OK</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ConfigDialog.ui" line="453"/>
+        <location line="+7"/>
         <source>Apply</source>
         <translation>Applica</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ConfigDialog.ui" line="460"/>
+        <location line="+7"/>
         <source>Cancel</source>
         <translation>Annulla</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ConfigDialog.cpp" line="71"/>
         <source>%title</source>
-        <translation>%titolo</translation>
+        <translation type="vanished">%titolo</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ConfigDialog.cpp" line="73"/>
         <source>%artist</source>
-        <translation>%artista</translation>
+        <translation type="vanished">%artista</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ConfigDialog.cpp" line="75"/>
         <source>%album</source>
-        <translation>%album</translation>
+        <translation type="vanished">%album</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ConfigDialog.cpp" line="77"/>
         <source>%track</source>
-        <translation>%traccia</translation>
+        <translation type="vanished">%traccia</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ConfigDialog.cpp" line="79"/>
         <source>%time</source>
-        <translation>%durata</translation>
+        <translation type="vanished">%durata</translation>
+    </message>
+    <message>
+        <location filename="../src/grooveoff/ConfigDialog.cpp" line="+150"/>
+        <source>Empty the cache</source>
+        <translation>Svuota la cache</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Delete the downloaded data of every torrent?</source>
+        <translation>Cancellare i dati scaricati di tutti i torrent?</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Your playlists are not touched: the tracks will be fetched again the next time you play them.</source>
+        <translation>Le tue playlist non vengono toccate: i brani verranno riscaricati la prossima volta che li riproduci.</translation>
+    </message>
+    <message>
+        <location line="+16"/>
+        <source>In the cache now: %1</source>
+        <translation>Adesso in cache: %1</translation>
     </message>
 </context>
 <context>
     <name>DownloadItem</name>
     <message>
-        <location filename="../src/grooveoff/DownloadItem.cpp" line="136"/>
+        <location filename="../src/grooveoff/DownloadItem.cpp" line="+118"/>
+        <location line="+271"/>
         <source>Play</source>
         <translation>Riproduci</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/DownloadItem.cpp" line="151"/>
+        <location line="-268"/>
+        <source>Remove track from the playlist</source>
+        <translation>Toglie il brano dalla playlist</translation>
+    </message>
+    <message>
+        <location line="+58"/>
+        <source>%1 of %2 buffered</source>
+        <translation>%1 di %2 nel buffer</translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <location line="+124"/>
+        <source>Waiting for peers</source>
+        <translation>In attesa di peer</translation>
+    </message>
+    <message numerus="yes">
+        <location line="-123"/>
+        <source>%n peer(s)</source>
+        <translation>
+            <numerusform>%n peer</numerusform>
+            <numerusform>%n peer</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location line="+2"/>
+        <source>%n seed(s)</source>
+        <translation>
+            <numerusform>%n seed</numerusform>
+            <numerusform>%n seed</numerusform>
+        </translation>
+    </message>
+    <message>
+        <location line="+63"/>
+        <source>Not buffered</source>
+        <translation>Buffer vuoto</translation>
+    </message>
+    <message>
+        <location line="+68"/>
+        <source>Track not available</source>
+        <translation>Brano non disponibile</translation>
+    </message>
+    <message>
+        <location line="+29"/>
+        <source>Abort removal</source>
+        <translation>Annulla la rimozione</translation>
+    </message>
+    <message>
+        <location line="+43"/>
+        <source>Add to playlist</source>
+        <translation>Aggiungi a playlist</translation>
+    </message>
+    <message>
+        <location line="+12"/>
+        <source>Add to playlist (none yet)</source>
+        <translation>Aggiungi a playlist (nessuna)</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>Remove from the playlist</source>
+        <translation>Togli dalla playlist</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Exclude this track</source>
+        <translation>Escludi questo brano</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Keeps it out of this torrent&apos;s playlist until you say otherwise</source>
+        <translation>Lo tiene fuori dalla playlist di questo torrent finché non dici altrimenti</translation>
+    </message>
+    <message>
         <source>Open folder</source>
-        <translation>Apri cartella</translation>
+        <translation type="vanished">Apri cartella</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/DownloadItem.cpp" line="253"/>
         <source>Queued</source>
-        <translation>In coda</translation>
+        <translation type="vanished">In coda</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/DownloadItem.cpp" line="139"/>
         <source>Remove track from queue</source>
-        <translation>Rimuovi traccia dalla coda</translation>
+        <translation type="vanished">Rimuovi traccia dalla coda</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/DownloadItem.cpp" line="142"/>
         <source>Stop track download</source>
-        <translation>Ferma scaricamento traccia</translation>
+        <translation type="vanished">Ferma scaricamento traccia</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/DownloadItem.cpp" line="145"/>
         <source>Delete track from disk</source>
-        <translation>Elimina la traccia dal disco</translation>
+        <translation type="vanished">Elimina la traccia dal disco</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/DownloadItem.cpp" line="148"/>
         <source>Redownload track</source>
-        <translation>Scarica nuovamente la traccia</translation>
+        <translation type="vanished">Scarica nuovamente la traccia</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/DownloadItem.cpp" line="332"/>
         <source>Aborted</source>
-        <translation>Annullato</translation>
+        <translation type="vanished">Annullato</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/DownloadItem.cpp" line="353"/>
         <source>Network or Server error</source>
-        <translation>Errore di rete o del server</translation>
+        <translation type="vanished">Errore di rete o del server</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/DownloadItem.cpp" line="477"/>
         <source>Abort deletion</source>
-        <translation>Annulla eliminazione</translation>
+        <translation type="vanished">Annulla eliminazione</translation>
     </message>
 </context>
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="236"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="+125"/>
+        <source>The database could not be opened:</source>
+        <translation>Non è stato possibile aprire il database:</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Playlists will not be remembered.</source>
+        <translation>Le playlist non verranno ricordate.</translation>
+    </message>
+    <message>
+        <location line="+39"/>
         <source>GrooveOff</source>
         <translation>GrooveOff</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="241"/>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="578"/>
+        <location line="+2"/>
+        <source>Music streaming from torrents</source>
+        <translation>Musica in streaming dai torrent</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <location line="+1143"/>
+        <source>Idle</source>
+        <translation>Fermo</translation>
+    </message>
+    <message>
+        <location line="-1134"/>
+        <source>Magnet</source>
+        <translation>Magnet</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Paste a magnet link and press enter</source>
+        <translation>Incolla un magnet e premi invio</translation>
+    </message>
+    <message>
+        <location line="+324"/>
+        <source>Open a torrent</source>
+        <translation>Apri un torrent</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Torrents (*.torrent)</source>
+        <translation>Torrent (*.torrent)</translation>
+    </message>
+    <message>
+        <location line="+21"/>
+        <source>Reading the track list…</source>
+        <translation>Lettura dell’elenco dei brani…</translation>
+    </message>
+    <message numerus="yes">
+        <location line="+141"/>
+        <source>%n peer(s)</source>
+        <translation>
+            <numerusform>%n peer</numerusform>
+            <numerusform>%n peer</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location line="+1"/>
+        <source>%n seed(s)</source>
+        <translation>
+            <numerusform>%n seed</numerusform>
+            <numerusform>%n seed</numerusform>
+        </translation>
+    </message>
+    <message>
+        <location line="+58"/>
+        <source>The cache is already empty.</source>
+        <translation>La cache è già vuota.</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Empty the cache</source>
+        <translation>Svuota la cache</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Free %1 of downloaded data?</source>
+        <translation>Liberare %1 di dati scaricati?</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Your playlists are not touched: the tracks will be fetched again the next time you play them.</source>
+        <translation>Le tue playlist non vengono toccate: i brani verranno riscaricati la prossima volta che li riproduci.</translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>%1 freed.</source>
+        <translation>Liberati %1.</translation>
+    </message>
+    <message>
+        <location line="+56"/>
+        <source>The cache could not be written to:</source>
+        <translation>Non è stato possibile scrivere nella cache:</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Nothing will play until there is room for it.</source>
+        <translation>Non suonerà niente finché non ci sarà spazio.</translation>
+    </message>
+    <message numerus="yes">
+        <location line="+51"/>
+        <source>%n track(s)</source>
+        <translation>
+            <numerusform>%n brano</numerusform>
+            <numerusform>%n brani</numerusform>
+        </translation>
+    </message>
+    <message>
+        <location line="+33"/>
+        <location line="+3"/>
+        <source>New playlist</source>
+        <translation>Nuova playlist</translation>
+    </message>
+    <message>
+        <location line="-2"/>
+        <location line="+34"/>
+        <source>Name:</source>
+        <translation>Nome:</translation>
+    </message>
+    <message>
+        <location line="-16"/>
+        <source>Drag tracks into «%1» to fill it.</source>
+        <translation>Trascina dei brani in «%1» per riempirla.</translation>
+    </message>
+    <message>
+        <location line="+15"/>
+        <source>Rename playlist</source>
+        <translation>Rinomina playlist</translation>
+    </message>
+    <message>
+        <location line="+34"/>
+        <source>Remove playlist</source>
+        <translation>Rimuovi playlist</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Remove the playlist «%1»?</source>
+        <translation>Rimuovere la playlist «%1»?</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>The tracks themselves stay where they are: this only removes the list.</source>
+        <translation>I brani restano dove sono: questo toglie soltanto la lista.</translation>
+    </message>
+    <message>
+        <location line="+20"/>
+        <location line="+30"/>
+        <source>Remove torrent</source>
+        <translation>Rimuovi torrent</translation>
+    </message>
+    <message>
+        <location line="-29"/>
+        <location line="+30"/>
+        <source>Remove «%1»?</source>
+        <translation>Rimuovere «%1»?</translation>
+    </message>
+    <message>
+        <location line="-28"/>
+        <source>Its tracks and its downloaded data go with it. Adding the magnet again brings it back.</source>
+        <translation>Se ne vanno i suoi brani e i suoi dati scaricati. Riaggiungendo il magnet torna.</translation>
+    </message>
+    <message numerus="yes">
+        <location line="+29"/>
+        <source>%n track(s) of this torrent are used in your own playlists: %1.</source>
+        <translation>
+            <numerusform>%n brano di questo torrent è usato nelle tue playlist: %1.</numerusform>
+            <numerusform>%n brani di questo torrent sono usati nelle tue playlist: %1.</numerusform>
+        </translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Remove everything</source>
+        <translation>Rimuovi tutto</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Keep those tracks</source>
+        <translation>Conserva quei brani</translation>
+    </message>
+    <message numerus="yes">
+        <location line="+84"/>
+        <source>%n track(s) added to «%1».</source>
+        <translation>
+            <numerusform>%n brano aggiunto a «%1».</numerusform>
+            <numerusform>%n brani aggiunti a «%1».</numerusform>
+        </translation>
+    </message>
+    <message>
+        <location line="+213"/>
+        <source>Online</source>
+        <translation>In rete</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Offline: only cached tracks can be played</source>
+        <translation>Fuori rete: si possono riprodurre solo i brani in cache</translation>
+    </message>
+    <message>
         <source>Connecting...</source>
-        <translation>Connessione...</translation>
+        <translation type="vanished">Connessione...</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="264"/>
         <source>Current save folder</source>
-        <translation>Cartella di salvataggio corrente</translation>
+        <translation type="vanished">Cartella di salvataggio corrente</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="246"/>
         <source>Search:</source>
-        <translation>Cerca:</translation>
+        <translation type="vanished">Cerca:</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="239"/>
         <source>Offline Grooveshark.com music</source>
-        <translation>Salva la musica di Grooveshark.com</translation>
+        <translation type="vanished">Salva la musica di Grooveshark.com</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="250"/>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="251"/>
         <source>Search for songs, artists, genres, playlists</source>
-        <translation>Cerca canzoni, artisti, generi, playlist</translation>
+        <translation type="vanished">Cerca canzoni, artisti, generi, playlist</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="255"/>
         <source>Start search</source>
-        <translation>Inizia ricerca</translation>
+        <translation type="vanished">Inizia ricerca</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="258"/>
+        <location line="-1145"/>
         <source>Main menu</source>
         <translation>Menu principale</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="261"/>
         <source>Save in:</source>
-        <translation>Salva in:</translation>
+        <translation type="vanished">Salva in:</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="274"/>
         <source>Select save folder</source>
-        <translation>Seleziona cartella di salvataggio</translation>
+        <translation type="vanished">Seleziona cartella di salvataggio</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="282"/>
         <source>Download all tracks</source>
-        <translation>Scarica tutte le tracce</translation>
+        <translation type="vanished">Scarica tutte le tracce</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="487"/>
         <source>Select Directory</source>
-        <translation>Seleziona cartella</translation>
+        <translation type="vanished">Seleziona cartella</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="547"/>
         <source>All Artists</source>
-        <translation>Tutti gli artisti</translation>
+        <translation type="vanished">Tutti gli artisti</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="549"/>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="1020"/>
         <source>All Albums</source>
-        <translation>Tutti gli album</translation>
+        <translation type="vanished">Tutti gli album</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="552"/>
         <source>Querying...</source>
-        <translation>In attesa...</translation>
+        <translation type="vanished">In attesa...</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="606"/>
         <source>Connected to
 Grooveshark</source>
-        <translation>Connesso a
+        <translation type="vanished">Connesso a
 Grooveshark</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="607"/>
         <source>You&apos;re connected to Grooveshark!</source>
-        <translation>Sei connesso a Grooveshark!</translation>
+        <translation type="vanished">Sei connesso a Grooveshark!</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="614"/>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="622"/>
         <source>Connection error!!</source>
-        <translation>Errore di connessione!!</translation>
+        <translation type="vanished">Errore di connessione!!</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="737"/>
         <source>This song is already in queue.</source>
-        <translation>Questa canzone è già in coda.</translation>
+        <translation type="vanished">Questa canzone è già in coda.</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="788"/>
         <source>The destination folder is not writable.
 Select a valid path</source>
-        <translation>La cartella di destinazione non è scrivibile.
+        <translation type="vanished">La cartella di destinazione non è scrivibile.
 Seleziona un percorso valido</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="981"/>
+        <location line="+1152"/>
         <source>Donation to Grooveoff&apos;s author</source>
         <translation>Donazione all&apos;autore di Grooveoff</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="736"/>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="755"/>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="787"/>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="815"/>
+        <location line="-1201"/>
+        <location line="+677"/>
         <source>Attention</source>
         <translation>Attenzione</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="756"/>
         <source>The destination folder does not exists.
 Select a valid path</source>
-        <translation>La cartella di destinazione non esiste.
+        <translation type="vanished">La cartella di destinazione non esiste.
 Selezionare un percorso valido</translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/grooveoff/MainWindow.cpp" line="633"/>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="650"/>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="1013"/>
         <source>%n song(s) found</source>
-        <translation>
+        <translation type="vanished">
             <numerusform>%n brano trovato</numerusform>
             <numerusform>%n brani trovati</numerusform>
         </translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="773"/>
         <source>Overwrite File?</source>
-        <translation>Sovrascrivere il file?</translation>
+        <translation type="vanished">Sovrascrivere il file?</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="774"/>
         <source>A file named &quot;%1&quot; already exists. Are you sure you want to overwrite it?</source>
-        <translation>Un file chiamato «%1» esiste già. Sei sicuro di volerlo sovrascrivere?</translation>
+        <translation type="vanished">Un file chiamato «%1» esiste già. Sei sicuro di volerlo sovrascrivere?</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="816"/>
         <source>Can&apos;t create destination path:</source>
-        <translation>Non posso creare la cartella di destinazione:</translation>
+        <translation type="vanished">Non posso creare la cartella di destinazione:</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="816"/>
         <source>Aborting...</source>
-        <translation>Annullo...</translation>
+        <translation type="vanished">Annullo...</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="965"/>
+        <location line="+518"/>
         <source>Offline</source>
         <translation>Non in linea</translation>
     </message>
@@ -544,37 +1003,154 @@ Selezionare un percorso valido</translation>
 <context>
     <name>MatchItem</name>
     <message>
-        <location filename="../src/grooveoff/MatchItem.cpp" line="117"/>
         <source>Download again</source>
-        <translation>Scarica di nuovo</translation>
+        <translation type="vanished">Scarica di nuovo</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/MatchItem.cpp" line="120"/>
         <source>Download</source>
-        <translation>Scarica</translation>
+        <translation type="vanished">Scarica</translation>
     </message>
 </context>
 <context>
     <name>PlayerWidget</name>
     <message>
-        <location filename="../src/grooveoff/PlayerWidget.cpp" line="101"/>
+        <location filename="../src/grooveoff/PlayerWidget.cpp" line="+130"/>
         <source>Bit Rate</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/PlayerWidget.cpp" line="102"/>
+        <location line="+1"/>
         <source>Sample Rate</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/PlayerWidget.cpp" line="207"/>
+        <location line="+103"/>
         <source>Pause</source>
         <translation>Pausa</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/PlayerWidget.cpp" line="349"/>
+        <location line="+138"/>
         <source>Play</source>
         <translation>Riproduci</translation>
+    </message>
+</context>
+<context>
+    <name>SvgButton</name>
+    <message>
+        <location filename="../src/grooveoff/widgets/SvgButton.cpp" line="+189"/>
+        <source>Pause</source>
+        <translation>Pausa</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Play</source>
+        <translation>Riproduci</translation>
+    </message>
+</context>
+<context>
+    <name>TorrentSession</name>
+    <message>
+        <location filename="../src/torrent/TorrentSession.cpp" line="+684"/>
+        <location line="+35"/>
+        <location line="+41"/>
+        <source>The torrent session is not running.</source>
+        <translation>La sessione torrent non è in funzione.</translation>
+    </message>
+    <message>
+        <location line="-61"/>
+        <source>The magnet link carries no info hash.</source>
+        <translation>Il magnet non contiene nessun info hash.</translation>
+    </message>
+    <message>
+        <location line="+31"/>
+        <source>The torrent file holds no metadata.</source>
+        <translation>Il file torrent non contiene metadati.</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>The torrent file carries no info hash.</source>
+        <translation>Il file torrent non contiene nessun info hash.</translation>
+    </message>
+    <message>
+        <location line="+50"/>
+        <source>Neither resume data nor a magnet link for this torrent.</source>
+        <translation>Per questo torrent non ci sono né dati di ripresa né un magnet.</translation>
+    </message>
+    <message>
+        <location line="+294"/>
+        <source>Could not get the track list of this torrent.</source>
+        <translation>Non è stato possibile ottenere l’elenco dei brani di questo torrent.</translation>
+    </message>
+</context>
+<context>
+    <name>TrackSelector</name>
+    <message>
+        <location filename="../src/grooveoff/TrackSelector.ui" line="+14"/>
+        <source>Choose the tracks</source>
+        <translation>Scegli i brani</translation>
+    </message>
+    <message>
+        <location line="+21"/>
+        <source>Show all files</source>
+        <translation>Mostra tutti i file</translation>
+    </message>
+    <message>
+        <location line="+19"/>
+        <source>File</source>
+        <translation>File</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Size</source>
+        <translation>Dimensione</translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>Select all</source>
+        <translation>Seleziona tutto</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Select none</source>
+        <translation>Deseleziona tutto</translation>
+    </message>
+    <message>
+        <location filename="../src/grooveoff/TrackSelector.cpp" line="+48"/>
+        <source>Filter</source>
+        <translation>Filtro</translation>
+    </message>
+    <message>
+        <location line="+15"/>
+        <source>No file of this torrent has a known audio extension.</source>
+        <translation>Nessun file di questo torrent ha un’estensione audio riconosciuta.</translation>
+    </message>
+    <message>
+        <location line="+45"/>
+        <source>Excluded. Tick it to let it back in.</source>
+        <translation>Escluso. Spuntalo per riammetterlo.</translation>
+    </message>
+    <message numerus="yes">
+        <location line="+70"/>
+        <source>%n track(s)</source>
+        <translation>
+            <numerusform>%n brano</numerusform>
+            <numerusform>%n brani</numerusform>
+        </translation>
+    </message>
+</context>
+<context>
+    <name>VolumeDial</name>
+    <message>
+        <location filename="../src/grooveoff/widgets/VolumeDial.cpp" line="+335"/>
+        <location line="+39"/>
+        <source>Muted</source>
+        <translation>Muto</translation>
+    </message>
+    <message>
+        <location line="-39"/>
+        <location line="+39"/>
+        <source>Volume: %1</source>
+        <translation>Volume: %1</translation>
     </message>
 </context>
 </TS>

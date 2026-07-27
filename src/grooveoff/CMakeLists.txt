@@ -43,12 +43,26 @@ set(grooveoff_UI DownloadItem.ui
 # handled by AUTORCC
 set(grooveoff_RCS ${CMAKE_SOURCE_DIR}/grooveoff.qrc)
 
-qt_add_translation(grooveoff_I18N ${TRANSLATIONS})
-
 qt_add_executable(grooveoff ${grooveoff_SRCS}
                             ${grooveoff_UI}
-                            ${grooveoff_RCS}
-                            ${grooveoff_I18N})
+                            ${grooveoff_RCS})
+
+# qt_add_translations rather than the bare qt_add_translation: besides compiling
+# the .ts files it generates the update_translations and release_translations
+# targets, so refreshing the catalogues is
+#
+#     cmake --build build-cmake --target update_translations
+#
+# instead of going to look for lupdate by hand and remembering its arguments.
+#
+# The .qm files are embedded under :/i18n rather than installed beside the
+# binary. What they replace was a path built out of applicationDirPath and a
+# guess at the install prefix, which meant an application run from the build
+# directory had no translations at all and one installed anywhere unexpected
+# quietly had none either.
+qt_add_translations(grooveoff
+                    TS_FILES ${TRANSLATIONS}
+                    LUPDATE_OPTIONS -locations relative)
 
 target_link_libraries(grooveoff PRIVATE
                       Qt6::Core
@@ -65,8 +79,6 @@ target_link_libraries(grooveoff PRIVATE
                       grooveoff_torrent)
 
 install(TARGETS grooveoff RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
-install(FILES ${grooveoff_I18N}
-        DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/apps/grooveoff/translations/)
 install(FILES ${CMAKE_SOURCE_DIR}/grooveoff.desktop
         DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/applications)
 install(FILES ${CMAKE_SOURCE_DIR}/resources/default-theme.svg

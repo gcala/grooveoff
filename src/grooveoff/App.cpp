@@ -37,10 +37,6 @@
 #include <QStandardPaths>
 #include <QTranslator>
 
-#include <utility>
-
-#define SHARE_PATH "/../share/apps/grooveoff"
-
 App::App( int & argc, char ** argv ):
     QApplication( argc, argv )
     , m_appTranslator( new QTranslator( this ) )
@@ -58,37 +54,38 @@ App::App( int & argc, char ** argv ):
     setWindowIcon( QIcon( QLatin1String( ":/resources/grooveoff.png" ) ) );
 }
 
+/*!
+  \brief loadTranslations: the interface in the language of the system
+
+  The catalogues are compiled into the binary under :/i18n by
+  qt_add_translations, so there is no path to build and nothing to find. What
+  this replaces walked uiLanguages by hand against a directory derived from
+  applicationDirPath, which answered nothing at all when the application was run
+  from anywhere but its install prefix.
+
+  Nothing is done when there is no catalogue for the language, and that is not
+  an error: the strings in the source are English, so English is what shows.
+*/
 void App::loadTranslations()
 {
-    QStringList uiLanguages = QLocale::system().uiLanguages(); // enabled languages
+    const QLocale locale;
 
-    // the path to translations
-    const QString &appTrPath = QCoreApplication::applicationDirPath()
-            + QLatin1String( SHARE_PATH "/translations" );
-
-    for (const QString &uiLanguage : std::as_const(uiLanguages)) {
-        const QString locale = QLocale(uiLanguage).name();
-        if ( m_appTranslator->load( QLatin1String( "grooveoff_" ) + locale, appTrPath ) ) {
-            installTranslator( m_appTranslator );
-
-            // the path to qt translations
-            const QString &qtTrPath = QLibraryInfo::path( QLibraryInfo::TranslationsPath );
-            // translation file name
-            const QString &qtTrFile = QLatin1String( "qt_" ) + locale;
-            // Binary installer puts Qt tr files into creatorTrPath
-            if ( m_qtTranslator->load( qtTrFile, qtTrPath ) || m_qtTranslator->load( qtTrFile, appTrPath ) ) {
-                installTranslator( m_qtTranslator );
-                setProperty( "qtc_locale", locale );
-            }
-            break;
-        } else if ( locale == QLatin1String( "C" ) /* overrideLanguage == "English" */) {
-            // use built-in
-            break;
-        } else if ( locale.startsWith( QLatin1String( "en" ) ) /* "English" is built-in */) {
-            // use built-in
-            break;
-        }
+    if( m_appTranslator->load( locale, QLatin1String( "grooveoff" ), QLatin1String( "_" ),
+                               QLatin1String( ":/i18n" ) ) ) {
+        installTranslator( m_appTranslator );
+        qDebug() << "GrooveOff ::" << "interface language" << m_appTranslator->language();
+    } else {
+        // Worth saying out loud: "the interface is in English" is the one report
+        // that has no other symptom to go on.
+        qDebug() << "GrooveOff ::" << "no translation for" << locale.name() << "- using the source strings";
     }
+
+    // Qt's own strings — the buttons of the file dialog, the standard messages
+    // — come from where Qt installed them, and are missing rather than wrong
+    // when the system has no translations package.
+    if( m_qtTranslator->load( locale, QLatin1String( "qt" ), QLatin1String( "_" ),
+                              QLibraryInfo::path( QLibraryInfo::TranslationsPath ) ) )
+        installTranslator( m_qtTranslator );
 }
 
 void App::start()
