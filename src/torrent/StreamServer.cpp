@@ -21,6 +21,8 @@
 #include "TorrentSession.h"
 #include "TorrentTrack.h"
 
+#include "../grooveoff/Settings.h"
+
 #include <QDebug>
 #include <QElapsedTimer>
 #include <QFile>
@@ -584,7 +586,7 @@ bool StreamServer::start()
         return true;
 
     QSettings settings;
-    const quint16 wanted = static_cast<quint16>( settings.value( QLatin1String( "streamPort" ), 0 ).toUInt() );
+    const quint16 wanted = static_cast<quint16>( settings.value( Settings::streamPort, Settings::streamPortDefault ).toUInt() );
 
     d->server = new QTcpServer( this );
 

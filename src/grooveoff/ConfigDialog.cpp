@@ -20,8 +20,24 @@
 #include "ConfigDialog.h"
 #include "ui_ConfigDialog.h"
 #include "SettingsItem.h"
+#include "Settings.h"
 
+#include "../torrent/CacheManager.h"
+
+#include <QComboBox>
+#include <QLineEdit>
+#include <QLocale>
+#include <QMessageBox>
 #include <QSettings>
+
+namespace {
+    /** the order of the entries of the proxy combo, and of nothing else */
+    enum ProxyRow {
+        NoProxy = 0,
+        Socks5Proxy = 1,
+        HttpProxy = 2
+    };
+}
 
 /*!
   \brief ConfigDialog: this is the ConfigDialog constructor.
@@ -30,22 +46,18 @@
 ConfigDialog::ConfigDialog( QWidget *parent )
     : QDialog( parent )
     , ui( new Ui::ConfigDialog )
-    , configChanged(false)
+    , configChanged( false )
 {
     ui->setupUi( this );
     setupConnections();
     setupGraphicElements();
     setupSettingCategories();
-    setupTagElements();
 
     loadSettings();
 
     ui->applyButton->setEnabled( false );
-    // be sure that settings opens with general page
+    // be sure that settings opens with the first page
     ui->stackedWidget->setCurrentIndex( 0 );
-    
-    ui->historySize->setMinimum( 1 );
-    ui->historySize->setMaximum( 10 );
 }
 
 void ConfigDialog::setupConnections()
@@ -62,10 +74,14 @@ void ConfigDialog::setupConnections()
         connect( spinbox, &QSpinBox::valueChanged, this, &ConfigDialog::onConfigChanged );
     }
 
+    connect( ui->proxyType, &QComboBox::currentIndexChanged, this, &ConfigDialog::onConfigChanged );
+    connect( ui->proxyHost, &QLineEdit::textEdited, this, &ConfigDialog::onConfigChanged );
+
     connect( ui->cancelButton, &QPushButton::clicked, this, &ConfigDialog::close );
     connect( ui->restoreButton, &QPushButton::clicked, this, &ConfigDialog::restoreDefaults );
     connect( ui->applyButton, &QPushButton::clicked, this, &ConfigDialog::saveSettings );
     connect( ui->okButton, &QPushButton::clicked, this, &ConfigDialog::okClicked );
+    connect( ui->emptyCacheButton, &QPushButton::clicked, this, &ConfigDialog::emptyCacheNow );
     connect( ui->contentsWidget, &QListWidget::currentRowChanged, this, &ConfigDialog::switchPage );
 }
 
@@ -77,71 +93,56 @@ void ConfigDialog::setupGraphicElements()
 
     ui->okButton->setIcon( QIcon::fromTheme( QLatin1String( "dialog-ok" ), QIcon( ":/resources/dialog-ok.png" ) ) );
     ui->restoreButton->setIcon( QIcon::fromTheme( QLatin1String( "document-revert" ), QIcon( ":/resources/document-revert.png" ) ) );
-    
-    ui->generalPageIcon->setPixmap( QPixmap( QLatin1String( ":/resources/grooveoff.png" ) ) );
-    ui->generalPageIcon->setScaledContents(true);
 
-    ui->performancePageIcon->setPixmap( QIcon::fromTheme( QLatin1String( "preferences-system-performance" ), 
-                                                          QIcon::fromTheme( QLatin1String( "software-update-available" ), QIcon( QLatin1String( ":/resources/preferences-system-performance.png" ) ) ) ).pixmap( 22,22 ) );
-    ui->performancePageIcon->setScaledContents( true );
+    ui->playbackPageIcon->setPixmap( QPixmap( QLatin1String( ":/resources/grooveoff.png" ) ) );
+    ui->playbackPageIcon->setScaledContents( true );
+
+    ui->cachePageIcon->setPixmap( QIcon::fromTheme( QLatin1String( "drive-harddisk" ),
+                                                    QIcon( QLatin1String( ":/resources/preferences-system-performance.png" ) ) ).pixmap( 22, 22 ) );
+    ui->cachePageIcon->setScaledContents( true );
+
+    ui->networkPageIcon->setPixmap( QIcon::fromTheme( QLatin1String( "network-workgroup" ),
+                                                      QIcon( QLatin1String( ":/resources/preferences-system-performance.png" ) ) ).pixmap( 22, 22 ) );
+    ui->networkPageIcon->setScaledContents( true );
 }
 
 void ConfigDialog::setupSettingCategories()
 {
-    QString generalString = tr( "General" );
-    QString performanceString = tr( "Performance" );
+    const QString playbackString = tr( "Playback" );
+    const QString cacheString    = tr( "Cache" );
+    const QString networkString  = tr( "Network" );
 
     QFont boldFont;
     boldFont.setBold( true );
     QFontMetrics fmText( boldFont );
 
-    // adapat column width to translated strings
-    int maxWidth = qMax(fmText.horizontalAdvance( generalString ), fmText.horizontalAdvance( performanceString ));
+    // adapt column width to translated strings
+    int maxWidth = qMax( fmText.horizontalAdvance( playbackString ),
+                         qMax( fmText.horizontalAdvance( cacheString ),
+                               fmText.horizontalAdvance( networkString ) ) );
 
     ui->contentsWidget->setFixedWidth( maxWidth + 20 /*margin*/ );
-    
-    SettingsItem *generalItem = new SettingsItem( generalString, "", this ); // empty icon name is default for application own icon
-    SettingsItem *performanceItem = new SettingsItem( performanceString, QLatin1String( "preferences-system-performance" ), this );
 
-    QListWidgetItem *generalWidget = new QListWidgetItem();
-    ui->contentsWidget->addItem( generalWidget );
-    ui->contentsWidget->setItemWidget( generalWidget, generalItem );
-    generalWidget->setSizeHint( QSize( maxWidth,80 ) );
+    // empty icon name is default for application own icon
+    SettingsItem *playbackItem = new SettingsItem( playbackString, "", this );
+    SettingsItem *cacheItem    = new SettingsItem( cacheString, QLatin1String( "drive-harddisk" ), this );
+    SettingsItem *networkItem  = new SettingsItem( networkString, QLatin1String( "network-workgroup" ), this );
 
-    QListWidgetItem *performanceWidget = new QListWidgetItem();
-    ui->contentsWidget->addItem( performanceWidget );
-    ui->contentsWidget->setItemWidget( performanceWidget, performanceItem );
-    performanceWidget->setSizeHint( QSize(maxWidth,80 ) );
+    const QList<SettingsItem *> items = { playbackItem, cacheItem, networkItem };
 
-    ui->contentsWidget->setCurrentItem( generalWidget );
+    QListWidgetItem *first = nullptr;
+    for( SettingsItem *item : items ) {
+        QListWidgetItem *widget = new QListWidgetItem();
+        ui->contentsWidget->addItem( widget );
+        ui->contentsWidget->setItemWidget( widget, item );
+        widget->setSizeHint( QSize( maxWidth, 80 ) );
+
+        if( !first )
+            first = widget;
+    }
+
+    ui->contentsWidget->setCurrentItem( first );
 }
-
-
-void ConfigDialog::setupTagElements()
-{
-    m_tagNames << QLatin1String( "%title" ) 
-               << QLatin1String( "%artist" )
-               << QLatin1String( "%album" )
-               << QLatin1String( "%track" );
-    // xgettext: no-c-format
-    m_localizedTagNames << tr( "%title" )
-                        // xgettext: no-c-format
-                        << tr( "%artist" )
-                        // xgettext: no-c-format
-                        << tr( "%album" )
-                        // xgettext: no-c-format
-                        << tr( "%track" );
-    // xgettext: no-c-format
-    m_localizedTimeTagName = tr("%time" );
-
-    QStringList itemsIcons;
-    itemsIcons << QLatin1String( "view-media-lyrics" )   //%title
-               << QLatin1String( "view-media-artist" )   //%artist
-               << QLatin1String( "view-media-playlist" ) //%album
-               << QLatin1String( "media-optical" );      //%track
-
-}
-
 
 /*!
   \brief restoreDefaults: restore default settings
@@ -151,16 +152,23 @@ void ConfigDialog::restoreDefaults()
 {
     configChanged = true;
     ui->applyButton->setEnabled( true );
-    ui->saveSearches->setChecked( false );
-    ui->saveSession->setChecked( true );
-    ui->historySize->setEnabled( false );
-    ui->saveDestination->setChecked( true );
-    ui->label_3->setEnabled( false );
-    ui->loadCovers->setChecked( true );
-    ui->emptyCache->setChecked( false );
-    ui->saveAborted->setChecked( false );
-    ui->numResults->setValue( 0 );
-    ui->maxDownloads->setValue( 5 );
+
+    ui->restorePlayback->setChecked( Settings::restorePlaybackDefault );
+    ui->prefetchNext->setChecked( Settings::prefetchNextDefault );
+    ui->bufferSeconds->setValue( Settings::bufferSecondsDefault );
+
+    ui->cacheSize->setValue( Settings::cacheSizeDefault );
+    ui->emptyCacheOnExit->setChecked( Settings::emptyCacheOnExitDefault );
+
+    ui->listenPort->setValue( Settings::listenPortDefault );
+    ui->streamPort->setValue( Settings::streamPortDefault );
+    ui->downloadRateLimit->setValue( Settings::downloadRateLimitDefault );
+
+    ui->proxyType->setCurrentIndex( NoProxy );
+    ui->proxyHost->clear();
+    ui->proxyPort->setValue( Settings::proxyPortDefault );
+
+    updateEnabledState();
 }
 
 /*!
@@ -170,22 +178,35 @@ void ConfigDialog::saveSettings()
 {
     configChanged = false;
     ui->applyButton->setEnabled( false );
+
     QSettings settings;
-    settings.setValue( QLatin1String( "saveSearches" ), ui->saveSearches->isChecked() );
-    settings.setValue( QLatin1String( "saveSession" ), ui->saveSession->isChecked() );
-    if( ui->saveSession->isChecked() )
-        settings.setValue( QLatin1String( "saveAborted" ), ui->saveAborted->isChecked() );
-    else
-        settings.setValue( QLatin1String("saveAborted" ), false );
-    settings.setValue( QLatin1String( "historySize" ), ui->historySize->value() );
-    settings.setValue( QLatin1String( "loadCovers" ), ui->loadCovers->isChecked() );
-    if( ui->loadCovers->isChecked() )
-        settings.setValue( QLatin1String("emptyCache"), ui->emptyCache->isChecked() );
-    else
-        settings.setValue( QLatin1String( "emptyCache" ), true );
-    settings.setValue( QLatin1String( "numResults" ), ui->numResults->value() );
-    settings.setValue( QLatin1String( "maxDownloads" ), ui->maxDownloads->value() );
-    settings.setValue( QLatin1String( "saveDestination" ), ui->saveDestination->isChecked() );
+
+    settings.setValue( Settings::restorePlayback, ui->restorePlayback->isChecked() );
+    settings.setValue( Settings::prefetchNext, ui->prefetchNext->isChecked() );
+    settings.setValue( Settings::bufferSeconds, ui->bufferSeconds->value() );
+
+    settings.setValue( Settings::cacheSize, ui->cacheSize->value() );
+    settings.setValue( Settings::emptyCacheOnExit, ui->emptyCacheOnExit->isChecked() );
+
+    settings.setValue( Settings::listenPort, ui->listenPort->value() );
+    settings.setValue( Settings::streamPort, ui->streamPort->value() );
+    settings.setValue( Settings::downloadRateLimit, ui->downloadRateLimit->value() );
+
+    QString proxyType = Settings::proxyTypeNone;
+    if( ui->proxyType->currentIndex() == Socks5Proxy )
+        proxyType = Settings::proxyTypeSocks5;
+    else if( ui->proxyType->currentIndex() == HttpProxy )
+        proxyType = Settings::proxyTypeHttp;
+
+    settings.setValue( Settings::proxyType, proxyType );
+    settings.setValue( Settings::proxyHost, ui->proxyHost->text().trimmed() );
+    settings.setValue( Settings::proxyPort, ui->proxyPort->value() );
+
+    // A cache ceiling that has just come down means something has to go, and it
+    // has to go now rather than at the next check: the user lowered it because
+    // they want the space back.
+    The::cacheManager()->enforceLimit();
+    showCacheUsage();
 }
 
 /*!
@@ -213,16 +234,52 @@ void ConfigDialog::onConfigChanged()
 {
     configChanged = true;
     ui->applyButton->setEnabled( true );
-    if( ui->saveSearches->isChecked() ) {
-        ui->historySize->setEnabled( true );
-        ui->label_3->setEnabled( true );
-    } else {
-        ui->historySize->setEnabled( false );
-        ui->label_3->setEnabled( false );
-    }
-    
-    ui->emptyCache->setEnabled( ui->loadCovers->isChecked() );
-    ui->saveAborted->setEnabled( ui->saveSession->isChecked() );
+
+    updateEnabledState();
+}
+
+void ConfigDialog::updateEnabledState()
+{
+    const bool proxied = ui->proxyType->currentIndex() != NoProxy;
+
+    ui->proxyHostLabel->setEnabled( proxied );
+    ui->proxyHost->setEnabled( proxied );
+    ui->proxyPortLabel->setEnabled( proxied );
+    ui->proxyPort->setEnabled( proxied );
+
+    ui->prefetchHint->setEnabled( ui->prefetchNext->isChecked() );
+}
+
+/*!
+  \brief emptyCacheNow: the bytes go, the catalogue stays
+
+  Worth confirming even though nothing is lost for good, because "empty the
+  cache" reads like something irreversible; the message says what it really
+  costs, which is fetching those tracks again.
+*/
+void ConfigDialog::emptyCacheNow()
+{
+    const int answer = QMessageBox::question( this,
+                                              tr( "Empty the cache" ),
+                                              tr( "Delete the downloaded data of every torrent?" )
+                                                  + QLatin1String( "\n\n" )
+                                                  + tr( "Your playlists are not touched: the tracks will "
+                                                        "be fetched again the next time you play them." ),
+                                              QMessageBox::Yes | QMessageBox::No,
+                                              QMessageBox::No );
+
+    if( answer != QMessageBox::Yes )
+        return;
+
+    The::cacheManager()->emptyCache();
+    showCacheUsage();
+}
+
+void ConfigDialog::showCacheUsage()
+{
+    const qint64 used = The::cacheManager()->usage();
+
+    ui->cacheUsage->setText( tr( "In the cache now: %1" ).arg( QLocale().formattedDataSize( used ) ) );
 }
 
 /*!
@@ -232,33 +289,29 @@ void ConfigDialog::onConfigChanged()
 void ConfigDialog::loadSettings()
 {
     QSettings settings;
-    ui->saveSession->setChecked( settings.value(QLatin1String( "saveSession" ), true ).toBool() );
-    
-    if( ui->saveSession->isChecked() ) {
-        ui->saveAborted->setEnabled( true );
-        ui->saveAborted->setChecked( settings.value( QLatin1String( "saveAborted" ), false ).toBool() );
-    } else
-        ui->saveAborted->setEnabled( false );
-    
-    ui->saveSearches->setChecked( settings.value( QLatin1String( "saveSearches" ),false ).toBool() );
-    
-    if( !ui->saveSearches->isChecked() ) {
-        ui->historySize->setEnabled( false );
-        ui->label_3->setEnabled( false );
-    }
-    
-    ui->historySize->setValue( settings.value( QLatin1String( "historySize" ), 0 ).toInt() );
-    ui->loadCovers->setChecked( settings.value( QLatin1String( "loadCovers" ), true ).toBool() );
-    
-    if( ui->loadCovers->isChecked() ) {
-        ui->emptyCache->setEnabled( true );
-        ui->emptyCache->setChecked( settings.value( QLatin1String( "emptyCache" ), false ).toBool() );
-    } else
-        ui->emptyCache->setEnabled( false );
-    
-    ui->numResults->setValue( settings.value( QLatin1String( "numResults" ), 0 ).toInt() );
-    ui->maxDownloads->setValue( settings.value( QLatin1String( "maxDownloads" ), 5 ).toInt() );
-    ui->saveDestination->setChecked( settings.value( QLatin1String( "saveDestination" ), true ).toBool() );
 
-    //Naming Schema
+    ui->restorePlayback->setChecked( settings.value( Settings::restorePlayback, Settings::restorePlaybackDefault ).toBool() );
+    ui->prefetchNext->setChecked( settings.value( Settings::prefetchNext, Settings::prefetchNextDefault ).toBool() );
+    ui->bufferSeconds->setValue( settings.value( Settings::bufferSeconds, Settings::bufferSecondsDefault ).toInt() );
+
+    ui->cacheSize->setValue( settings.value( Settings::cacheSize, Settings::cacheSizeDefault ).toInt() );
+    ui->emptyCacheOnExit->setChecked( settings.value( Settings::emptyCacheOnExit, Settings::emptyCacheOnExitDefault ).toBool() );
+
+    ui->listenPort->setValue( settings.value( Settings::listenPort, Settings::listenPortDefault ).toInt() );
+    ui->streamPort->setValue( settings.value( Settings::streamPort, Settings::streamPortDefault ).toInt() );
+    ui->downloadRateLimit->setValue( settings.value( Settings::downloadRateLimit, Settings::downloadRateLimitDefault ).toInt() );
+
+    const QString proxyType = settings.value( Settings::proxyType, Settings::proxyTypeNone ).toString();
+    if( proxyType == Settings::proxyTypeSocks5 )
+        ui->proxyType->setCurrentIndex( Socks5Proxy );
+    else if( proxyType == Settings::proxyTypeHttp )
+        ui->proxyType->setCurrentIndex( HttpProxy );
+    else
+        ui->proxyType->setCurrentIndex( NoProxy );
+
+    ui->proxyHost->setText( settings.value( Settings::proxyHost ).toString() );
+    ui->proxyPort->setValue( settings.value( Settings::proxyPort, Settings::proxyPortDefault ).toInt() );
+
+    updateEnabledState();
+    showCacheUsage();
 }

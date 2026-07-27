@@ -19,6 +19,8 @@
 
 #include "TorrentSession.h"
 
+#include "../grooveoff/Settings.h"
+
 #include <../config-version.h>
 
 #include <QDateTime>
@@ -132,6 +134,7 @@ public:
 
     /** the pack is rebuilt at every start, so the stored one never goes stale */
     lt::settings_pack defaultSettings( Mode mode ) const;
+    void applyProxy( lt::settings_pack &pack ) const;
 
     void applyDefaults( lt::add_torrent_params &params, const QString &infoHash ) const;
 
@@ -145,6 +148,13 @@ public:
     QString infoHashFor( const lt::torrent_handle &handle ) const;
 
     QString resumeFileFor( const QString &infoHash ) const;
+
+    /**
+     * Where the files of a torrent being deleted live, by every hash it could
+     * come back under. Emptied by torrent_deleted_alert, which is the only
+     * moment at which the directory is certainly nobody's any more.
+     */
+    QHash<QString, QString> pendingDeletes;
 
     void handleAlert( const lt::alert *alert );
 
@@ -215,7 +225,7 @@ lt::settings_pack TorrentSession::Private::defaultSettings( Mode mode ) const
     pack.set_int( lt::settings_pack::unchoke_slots_limit, 0 );
     pack.set_int( lt::settings_pack::upload_rate_limit, 1024 );
 
-    const int downloadLimit = settings.value( QLatin1String( "downloadRateLimit" ), 0 ).toInt();
+    const int downloadLimit = settings.value( Settings::downloadRateLimit, Settings::downloadRateLimitDefault ).toInt();
     pack.set_int( lt::settings_pack::download_rate_limit, downloadLimit * 1024 );
 
     const lt::alert_category_t categories = lt::alert_category::status
@@ -238,14 +248,52 @@ lt::settings_pack TorrentSession::Private::defaultSettings( Mode mode ) const
     pack.set_bool( lt::settings_pack::enable_natpmp, connected );
 
     if( connected ) {
-        const int port = settings.value( QLatin1String( "listenPort" ), 6881 ).toInt();
+        const int port = settings.value( Settings::listenPort, Settings::listenPortDefault ).toInt();
         pack.set_str( lt::settings_pack::listen_interfaces,
                       QStringLiteral( "0.0.0.0:%1,[::]:%1" ).arg( port ).toStdString() );
     } else {
         pack.set_str( lt::settings_pack::listen_interfaces, "127.0.0.1:0" );
     }
 
+    applyProxy( pack );
+
     return pack;
+}
+
+/*!
+  \brief applyProxy: routes the traffic through a proxy, when there is one
+
+  This is the only setting in the whole application that actually hides the
+  address from the swarm, which is why the two lines at the bottom matter more
+  than the three at the top: without proxy_peer_connections and
+  proxy_tracker_connections libtorrent sends part of the traffic straight out,
+  and a proxy that covers half the connections is worse than none — it is the
+  same exposure with the confidence of being covered.
+*/
+void TorrentSession::Private::applyProxy( lt::settings_pack &pack ) const
+{
+    QSettings settings;
+    const QString type = settings.value( Settings::proxyType, Settings::proxyTypeNone ).toString();
+    const QString host = settings.value( Settings::proxyHost ).toString();
+
+    if( type == Settings::proxyTypeNone || host.isEmpty() )
+        return;
+
+    pack.set_int( lt::settings_pack::proxy_type,
+                  type == Settings::proxyTypeSocks5 ? lt::settings_pack::socks5
+                                                    : lt::settings_pack::http );
+    pack.set_str( lt::settings_pack::proxy_hostname, host.toStdString() );
+    pack.set_int( lt::settings_pack::proxy_port,
+                  settings.value( Settings::proxyPort, Settings::proxyPortDefault ).toInt() );
+
+    pack.set_bool( lt::settings_pack::proxy_peer_connections, true );
+    pack.set_bool( lt::settings_pack::proxy_tracker_connections, true );
+
+    // A proxy that leaks the address through a dht lookup or a local
+    // announcement is not a proxy. Losing the dht costs some magnets; getting
+    // it wrong costs the thing the proxy was turned on for.
+    pack.set_bool( lt::settings_pack::proxy_hostnames, true );
+    pack.set_bool( lt::settings_pack::enable_lsd, false );
 }
 
 void TorrentSession::Private::applyDefaults( lt::add_torrent_params &params, const QString &infoHash ) const
@@ -477,6 +525,29 @@ void TorrentSession::Private::handleAlert( const lt::alert *alert )
     if( const auto *fileError = lt::alert_cast<lt::file_error_alert>( alert ) ) {
         emit q->storageError( infoHashFor( fileError->handle ),
                               QString::fromStdString( fileError->error.message() ) );
+        return;
+    }
+
+    if( const auto *deleted = lt::alert_cast<lt::torrent_deleted_alert>( alert ) ) {
+        // libtorrent takes away the files and the directories it made inside
+        // the save path, and leaves the save path itself: it did not create it.
+        // Waiting for this alert rather than deleting the tree along with the
+        // torrent is what keeps us off the disk thread while it is still on it
+        // — and an empty directory per evicted torrent is cruft that nothing
+        // else would ever come back for.
+        //
+        // The path is looked up rather than derived: by now the handle is gone
+        // from the map, and a hybrid torrent may not answer with the same hash
+        // the directory was named after.
+        QString directory;
+        if( deleted->info_hashes.has_v1() )
+            directory = pendingDeletes.take( hexString( deleted->info_hashes.v1 ) );
+        if( directory.isEmpty() && deleted->info_hashes.has_v2() )
+            directory = pendingDeletes.take( hexString( deleted->info_hashes.get( lt::protocol_version::V2 ) ) );
+
+        if( !directory.isEmpty() )
+            QDir( directory ).removeRecursively();
+
         return;
     }
 }
@@ -762,8 +833,19 @@ void TorrentSession::remove( const QString &infoHash, bool deleteFiles )
         return;
 
     const lt::torrent_handle handle = d->handles.take( infoHash );
-    if( handle.is_valid() )
+    if( handle.is_valid() ) {
+        if( deleteFiles ) {
+            const QString directory = QDir( d->torrentsPath ).absoluteFilePath( infoHash );
+            const lt::info_hash_t hashes = handle.info_hashes();
+
+            if( hashes.has_v1() )
+                d->pendingDeletes.insert( hexString( hashes.v1 ), directory );
+            if( hashes.has_v2() )
+                d->pendingDeletes.insert( hexString( hashes.get( lt::protocol_version::V2 ) ), directory );
+        }
+
         d->session->remove_torrent( handle, deleteFiles ? lt::session::delete_files : lt::remove_flags_t() );
+    }
 
     d->pendingAdds.remove( infoHash );
     d->published.remove( infoHash );

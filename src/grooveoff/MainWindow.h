@@ -107,6 +107,9 @@ private Q_SLOTS:
     /** reads the tags of a track whose head has just arrived */
     void readTagsOf( const QString &infoHash, int fileIndex );
 
+    /** throws the cached bytes away, keeping every playlist as it is */
+    void emptyCache();
+
     void setCompactLayout();
     void setWideLayout();
     void setMiniPlayerLayout();

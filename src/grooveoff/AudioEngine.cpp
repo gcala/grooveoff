@@ -19,6 +19,8 @@
 
 #include "AudioEngine.h"
 #include "Playlist.h"
+#include "Settings.h"
+#include "../torrent/CacheManager.h"
 #include "../torrent/StreamServer.h"
 #include "../torrent/TorrentSession.h"
 
@@ -150,11 +152,18 @@ void AudioEngine::maybePrefetchNext()
         return;
 
     QSettings settings;
-    if( !settings.value( QLatin1String( "prefetchNext" ), true ).toBool() )
+    if( !settings.value( Settings::prefetchNext, Settings::prefetchNextDefault ).toBool() )
+        return;
+
+    // Prefetched bytes are a guess, and a cache near its ceiling does not pay
+    // for guesses: the prefetch is dropped rather than compensated with an
+    // eviction, which would throw away something that was actually heard.
+    if( !The::cacheManager()->hasRoomForPrefetch() )
         return;
 
     const TrackInfoPtr &info = next->track();
     m_prefetchingTrack = next;
+    The::cacheManager()->setPrefetchedTorrent( info->infoHash() );
 
     // A sleeping torrent is woken here rather than at the change of track: the
     // handshake and the dht lookup are the slow part, and they happen while
@@ -252,6 +261,12 @@ void AudioEngine::playItem( const PlaylistItemPtr &track)
     The::streamServer()->cancelPreparation();
     The::streamServer()->cancelPrefetch();
     m_prefetchingTrack.clear();
+    The::cacheManager()->setPrefetchedTorrent( QString() );
+
+    // What is being listened to is what the eviction may never take, so the
+    // cache is told before anything is asked for rather than after.
+    The::cacheManager()->setPlayingTorrent( track && track->track() ? track->track()->infoHash()
+                                                                   : QString() );
 
     if( track && track->track()
         && !The::torrentSession()->hasMetadata( track->track()->infoHash() ) ) {

@@ -31,7 +31,7 @@ class ConfigDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit ConfigDialog( QWidget *parent = 0 );
+    explicit ConfigDialog( QWidget *parent = nullptr );
 
 private Q_SLOTS:
     void restoreDefaults();
@@ -40,18 +40,23 @@ private Q_SLOTS:
     void switchPage( int );
     void onConfigChanged();
 
+    /** throws the cached bytes away now, without waiting for a restart */
+    void emptyCacheNow();
+
 private:
     Ui::ConfigDialog *ui;
-    QStringList m_tagNames;
-    QStringList m_localizedTagNames;
-    QString m_localizedTimeTagName;
 
     bool configChanged;
     void loadSettings();
     void setupConnections();
-    void setupTagElements();
     void setupGraphicElements();
     void setupSettingCategories();
+
+    /** greys the proxy fields out when there is no proxy to configure */
+    void updateEnabledState();
+
+    /** how much of the disk the cache holds right now, in the label */
+    void showCacheUsage();
 };
 
 #endif // CONFIGDIALOG_H

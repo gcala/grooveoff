@@ -135,6 +135,13 @@ void ActionCollection::initActions()
                                                     this
                                                   );
     
+    QAction *actionEmptyCache = new QAction( QIcon::fromTheme( QLatin1String( "edit-clear-history" ),
+                                                               QIcon( QLatin1String( ":/resources/edit-clear" ) )
+                                                             ),
+                                             tr( "&Empty the cache" ),
+                                             this
+                                           );
+
     QAction *actionAbout = new QAction( QIcon::fromTheme( QLatin1String( "help-about" ),
                                                           QIcon( QLatin1String( ":/resources/help-about.png" ) )
                                                         ),
@@ -164,6 +171,7 @@ void ActionCollection::initActions()
     m_actionCollection[ QLatin1String( "actionStopDownloads" ) ] = actionStopDownloads;
     m_actionCollection[ QLatin1String( "actionRemoveFailed" ) ] = actionRemoveFailed;
     m_actionCollection[ QLatin1String( "actionClearDownloadList" ) ] = actionClearDownloadList;
+    m_actionCollection[ QLatin1String( "actionEmptyCache" ) ] = actionEmptyCache;
     m_actionCollection[ QLatin1String( "actionAbout" ) ] = actionAbout;
     m_actionCollection[ QLatin1String( "actionQtAbout" ) ] = actionQtAbout;
     
@@ -178,6 +186,7 @@ void ActionCollection::initActions()
 //     actionSaveSessionAs->setToolTip( tr( "Save Session As..." ) );
     actionOpenTorrent->setToolTip( tr( "Add a .torrent file as a playlist" ) );
     actionClearDownloadList->setToolTip( tr( "Empties the list, leaving the catalogue alone" ) );
+    actionEmptyCache->setToolTip( tr( "Deletes the downloaded data, leaving the playlists alone" ) );
     
     // set actions shortcuts
     actionClose->setShortcut( QKeySequence( Qt::CTRL | Qt::Key_Q ) );
@@ -231,6 +240,8 @@ QMenuBar* ActionCollection::createMenuBar( QWidget *parent )
     m_menuCollection[ QLatin1String( "viewMenu" ) ] = viewMenu;
 
     QMenu* settingsMenu = new QMenu( tr( "&Settings" ), menuBar );
+    settingsMenu->addAction( m_actionCollection[ QLatin1String( "actionEmptyCache" ) ] );
+    settingsMenu->addSeparator();
     settingsMenu->addAction( m_actionCollection[ QLatin1String( "actionConfigure" ) ] );
     m_menuCollection[ QLatin1String( "settingsMenu" ) ] = settingsMenu;
 
@@ -267,6 +278,7 @@ QMenu* ActionCollection::createCompactMenu( QWidget *parent )
     compactMenu->addAction( m_actionCollection[ QLatin1String( "actionWide" ) ] );
     compactMenu->addAction( m_actionCollection[ QLatin1String( "miniPlayer" ) ] );
     compactMenu->addSeparator();
+    compactMenu->addAction( m_actionCollection[ QLatin1String( "actionEmptyCache" ) ] );
     compactMenu->addAction( m_actionCollection[ QLatin1String( "actionConfigure" ) ] );
     compactMenu->addSeparator();
     compactMenu->addAction( m_actionCollection[ QLatin1String( "actionAbout" ) ] );

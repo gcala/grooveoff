@@ -4,7 +4,8 @@
 add_library(grooveoff_torrent STATIC
             TorrentSession.cpp
             TorrentTrack.cpp
-            StreamServer.cpp)
+            StreamServer.cpp
+            CacheManager.cpp)
 
 target_link_libraries(grooveoff_torrent PUBLIC
                       Qt6::Core

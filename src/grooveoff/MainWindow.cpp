@@ -38,6 +38,8 @@
 #include "../db/PlaylistStore.h"
 #include "TrackSelector.h"
 #include "TrackTags.h"
+#include "Settings.h"
+#include "../torrent/CacheManager.h"
 #include "../torrent/StreamServer.h"
 #include "../torrent/TorrentSession.h"
 
@@ -50,6 +52,7 @@
 #include <QAction>
 #include <QHBoxLayout>
 #include <QGridLayout>
+#include <QLocale>
 #include <QSettings>
 #include <QSplitter>
 #include <QListView>
@@ -241,6 +244,7 @@ void MainWindow::setupConnections()
     connect( ac->getAction( "actionAbout" ), &QAction::triggered, this, &MainWindow::about );
     connect( ac->getAction( "actionQtAbout" ), &QAction::triggered, qApp, &QApplication::aboutQt );
     connect( ac->getAction( "actionOpenTorrent" ), &QAction::triggered, this, &MainWindow::openTorrentFile );
+    connect( ac->getAction( "actionEmptyCache" ), &QAction::triggered, this, &MainWindow::emptyCache );
 
     // Nothing is downloaded any more, so there is nothing to stop. The menus
     // are rebuilt around playlists later on.
@@ -259,6 +263,11 @@ void MainWindow::setupConnections()
              []( const QString &infoHash ) {
         The::catalog()->setHasResume( infoHash, true );
     } );
+
+    // A torrent whose bytes were thrown away is not an error and nothing is
+    // missing: its rows go back to Dormant and are fetched again at the next
+    // play, which is what a cache is for.
+    connect( The::cacheManager(), &CacheManager::evicted, this, &MainWindow::refreshRowsOf );
 
     // The head of a file is where its tags are, so this is the first moment at
     // which asking the file what it is called gets an answer.
@@ -413,6 +422,10 @@ void MainWindow::loadCurrentPlaylist()
 
     // The track that was playing is selected but not started: pressing play
     // picks it up where it was left.
+    QSettings settings;
+    if( !settings.value( Settings::restorePlayback, Settings::restorePlaybackDefault ).toBool() )
+        return;
+
     const qint64 trackId = playlists->currentTrackId();
     if( trackId <= 0 )
         return;
@@ -437,6 +450,12 @@ void MainWindow::loadCurrentPlaylist()
 void MainWindow::wakeLastUsedTorrent()
 {
     if( !The::torrentSession()->isRunning() )
+        return;
+
+    // Nothing is being brought back, so there is nothing worth announcing to a
+    // tracker before the user has asked for anything.
+    QSettings settings;
+    if( !settings.value( Settings::restorePlayback, Settings::restorePlaybackDefault ).toBool() )
         return;
 
     const qint64 trackId = The::playlistStore()->currentTrackId();
@@ -669,6 +688,41 @@ void MainWindow::readTagsOf( const QString &infoHash, int fileIndex )
     shown->setYear( track->year() );
 
     item->refreshLabels();
+}
+
+/*!
+  \brief emptyCache: the bytes go, the playlists stay
+
+  Worth a confirmation even though nothing is lost for good, because emptying a
+  cache sounds irreversible; the question says what it actually costs, which is
+  fetching those tracks again the next time they are played.
+*/
+void MainWindow::emptyCache()
+{
+    const qint64 used = The::cacheManager()->usage();
+
+    if( used <= 0 ) {
+        statusBar()->showMessage( tr( "The cache is already empty." ), 4000 );
+        return;
+    }
+
+    const int answer = QMessageBox::question( this,
+                                              tr( "Empty the cache" ),
+                                              tr( "Free %1 of downloaded data?" )
+                                                  .arg( QLocale().formattedDataSize( used ) )
+                                                  + QLatin1String( "\n\n" )
+                                                  + tr( "Your playlists are not touched: the tracks will "
+                                                        "be fetched again the next time you play them." ),
+                                              QMessageBox::Yes | QMessageBox::No,
+                                              QMessageBox::No );
+
+    if( answer != QMessageBox::Yes )
+        return;
+
+    The::cacheManager()->emptyCache();
+
+    statusBar()->showMessage( tr( "%1 freed." ).arg( QLocale().formattedDataSize( used - The::cacheManager()->usage() ) ),
+                              4000 );
 }
 
 DownloadItem* MainWindow::rowFor( const TrackInfoPtr &track ) const

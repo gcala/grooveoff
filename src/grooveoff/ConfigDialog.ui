@@ -31,7 +31,7 @@
        <property name="currentIndex">
         <number>0</number>
        </property>
-       <widget class="QWidget" name="generalSettingsPage">
+       <widget class="QWidget" name="playbackSettingsPage">
         <layout class="QVBoxLayout" name="verticalLayout_7">
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -47,12 +47,12 @@
               </font>
              </property>
              <property name="text">
-              <string>General</string>
+              <string>Playback</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="generalPageIcon">
+            <widget class="QLabel" name="playbackPageIcon">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
                <horstretch>0</horstretch>
@@ -79,25 +79,15 @@
           </layout>
          </item>
          <item>
-          <widget class="QGroupBox" name="groupBox_6">
+          <widget class="QGroupBox" name="startupBox">
            <property name="title">
-            <string>Session</string>
+            <string>Startup</string>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_9">
             <item>
-             <widget class="QCheckBox" name="saveSession">
+             <widget class="QCheckBox" name="restorePlayback">
               <property name="text">
-               <string>Save and restore session</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="saveAborted">
-              <property name="styleSheet">
-               <string notr="true">margin-left: 16px;</string>
-              </property>
-              <property name="text">
-               <string>Save also failed/aborted</string>
+               <string>Restore the track that was playing, paused</string>
               </property>
              </widget>
             </item>
@@ -105,31 +95,15 @@
           </widget>
          </item>
          <item>
-          <widget class="QGroupBox" name="groupBox">
-           <property name="font">
-            <font>
-             <weight>50</weight>
-             <bold>false</bold>
-            </font>
-           </property>
+          <widget class="QGroupBox" name="bufferingBox">
            <property name="title">
-            <string>History</string>
+            <string>Buffering</string>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_2">
             <item>
-             <widget class="QCheckBox" name="saveSearches">
-              <property name="text">
-               <string>Save searches history</string>
-              </property>
-             </widget>
-            </item>
-            <item>
              <layout class="QHBoxLayout" name="horizontalLayout_4">
-              <property name="leftMargin">
-               <number>15</number>
-              </property>
               <item>
-               <widget class="QLabel" name="label_3">
+               <widget class="QLabel" name="bufferSecondsLabel">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
                   <horstretch>0</horstretch>
@@ -137,17 +111,29 @@
                  </sizepolicy>
                 </property>
                 <property name="text">
-                 <string>History size:</string>
+                 <string>Audio to keep ahead of the player:</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QSpinBox" name="historySize">
+               <widget class="QSpinBox" name="bufferSeconds">
                 <property name="maximumSize">
                  <size>
-                  <width>100</width>
+                  <width>120</width>
                   <height>16777215</height>
                  </size>
+                </property>
+                <property name="suffix">
+                 <string> s</string>
+                </property>
+                <property name="minimum">
+                 <number>1</number>
+                </property>
+                <property name="maximum">
+                 <number>120</number>
+                </property>
+                <property name="value">
+                 <number>10</number>
                 </property>
                </widget>
               </item>
@@ -166,19 +152,23 @@
               </item>
              </layout>
             </item>
-           </layout>
-          </widget>
-         </item>
-         <item>
-          <widget class="QGroupBox" name="groupBox_4">
-           <property name="title">
-            <string>Destination</string>
-           </property>
-           <layout class="QVBoxLayout" name="verticalLayout_6">
             <item>
-             <widget class="QCheckBox" name="saveDestination">
+             <widget class="QCheckBox" name="prefetchNext">
               <property name="text">
-               <string>Save last destination path</string>
+               <string>Bring up the next track while the current one plays</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="prefetchHint">
+              <property name="text">
+               <string>Without this the playlist stops at every change of track, waiting for the next torrent to find its peers.</string>
+              </property>
+              <property name="wordWrap">
+               <bool>true</bool>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">margin-left: 20px;</string>
               </property>
              </widget>
             </item>
@@ -186,30 +176,21 @@
           </widget>
          </item>
          <item>
-          <widget class="QGroupBox" name="groupBox_7">
-           <property name="title">
-            <string>Naming pattern</string>
+          <spacer name="verticalSpacer">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
            </property>
-           <layout class="QVBoxLayout" name="verticalLayout_10">
-            <item>
-             <spacer name="verticalSpacer">
-              <property name="orientation">
-               <enum>Qt::Vertical</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>20</width>
-                <height>40</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-           </layout>
-          </widget>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
          </item>
         </layout>
        </widget>
-       <widget class="QWidget" name="performanceSettingsPage">
+       <widget class="QWidget" name="cacheSettingsPage">
         <layout class="QVBoxLayout" name="verticalLayout_5">
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_5">
@@ -225,12 +206,12 @@
               </font>
              </property>
              <property name="text">
-              <string>Performance</string>
+              <string>Cache</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="performancePageIcon">
+            <widget class="QLabel" name="cachePageIcon">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
                <horstretch>0</horstretch>
@@ -257,41 +238,15 @@
           </layout>
          </item>
          <item>
-          <widget class="QGroupBox" name="groupBox_2">
+          <widget class="QGroupBox" name="cacheBox">
            <property name="title">
-            <string>Covers</string>
+            <string>Disk space</string>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_3">
             <item>
-             <widget class="QCheckBox" name="loadCovers">
-              <property name="text">
-               <string>Load covers</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="emptyCache">
-              <property name="styleSheet">
-               <string notr="true">margin-left: 16px;</string>
-              </property>
-              <property name="text">
-               <string>Empty covers cache on exit</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </widget>
-         </item>
-         <item>
-          <widget class="QGroupBox" name="groupBox_3">
-           <property name="title">
-            <string>Results</string>
-           </property>
-           <layout class="QVBoxLayout" name="verticalLayout_4">
-            <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_6">
+             <layout class="QHBoxLayout" name="horizontalLayout_8">
               <item>
-               <widget class="QLabel" name="label_4">
+               <widget class="QLabel" name="cacheSizeLabel">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
                   <horstretch>0</horstretch>
@@ -299,20 +254,32 @@
                  </sizepolicy>
                 </property>
                 <property name="text">
-                 <string>Limit search results:</string>
+                 <string>Keep at most:</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QSpinBox" name="numResults">
+               <widget class="QSpinBox" name="cacheSize">
                 <property name="maximumSize">
                  <size>
-                  <width>100</width>
+                  <width>140</width>
                   <height>16777215</height>
                  </size>
                 </property>
+                <property name="suffix">
+                 <string> MB</string>
+                </property>
+                <property name="specialValueText">
+                 <string>No limit</string>
+                </property>
                 <property name="maximum">
-                 <number>999</number>
+                 <number>1048576</number>
+                </property>
+                <property name="singleStep">
+                 <number>256</number>
+                </property>
+                <property name="value">
+                 <number>2048</number>
                 </property>
                </widget>
               </item>
@@ -332,51 +299,40 @@
              </layout>
             </item>
             <item>
-             <widget class="QLabel" name="label_5">
+             <widget class="QLabel" name="cacheUsage">
               <property name="text">
-               <string>(0 means unlimited results)</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignCenter</set>
+               <string/>
               </property>
              </widget>
             </item>
-           </layout>
-          </widget>
-         </item>
-         <item>
-          <widget class="QGroupBox" name="groupBox_5">
-           <property name="title">
-            <string>Downloads</string>
-           </property>
-           <layout class="QVBoxLayout" name="verticalLayout_8">
             <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_7">
+             <widget class="QLabel" name="cacheHint">
+              <property name="text">
+               <string>When the cache is full the least recently played torrents are thrown away. Nothing leaves your playlists: a track whose data are gone is simply fetched again the next time you play it.</string>
+              </property>
+              <property name="wordWrap">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="emptyCacheOnExit">
+              <property name="text">
+               <string>Empty the cache when GrooveOff closes</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_9">
               <item>
-               <widget class="QLabel" name="label_6">
+               <widget class="QPushButton" name="emptyCacheButton">
                 <property name="text">
-                 <string>Max simultaneous downloads:</string>
+                 <string>Empty the cache now</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QSpinBox" name="maxDownloads">
-                <property name="maximumSize">
-                 <size>
-                  <width>100</width>
-                  <height>16777215</height>
-                 </size>
-                </property>
-                <property name="minimum">
-                 <number>1</number>
-                </property>
-                <property name="value">
-                 <number>5</number>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <spacer name="horizontalSpacer_4">
+               <spacer name="horizontalSpacer_5">
                 <property name="orientation">
                  <enum>Qt::Horizontal</enum>
                 </property>
@@ -390,21 +346,309 @@
               </item>
              </layout>
             </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <spacer name="verticalSpacer_2">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>238</width>
+             <height>60</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="networkSettingsPage">
+        <layout class="QVBoxLayout" name="verticalLayout_11">
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_10">
+           <property name="bottomMargin">
+            <number>10</number>
+           </property>
+           <item>
+            <widget class="QLabel" name="label_7">
+             <property name="font">
+              <font>
+               <weight>75</weight>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>Network</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="networkPageIcon">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>22</width>
+               <height>22</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>22</width>
+               <height>22</height>
+              </size>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="portsBox">
+           <property name="title">
+            <string>Ports</string>
+           </property>
+           <layout class="QFormLayout" name="formLayout">
+            <item row="0" column="0">
+             <widget class="QLabel" name="listenPortLabel">
+              <property name="text">
+               <string>Torrent port:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QSpinBox" name="listenPort">
+              <property name="maximumSize">
+               <size>
+                <width>140</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="minimum">
+               <number>1024</number>
+              </property>
+              <property name="maximum">
+               <number>65535</number>
+              </property>
+              <property name="value">
+               <number>6881</number>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="streamPortLabel">
+              <property name="text">
+               <string>Local player port:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QSpinBox" name="streamPort">
+              <property name="maximumSize">
+               <size>
+                <width>140</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="specialValueText">
+               <string>Automatic</string>
+              </property>
+              <property name="maximum">
+               <number>65535</number>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0" colspan="2">
+             <widget class="QLabel" name="streamPortHint">
+              <property name="text">
+               <string>The local player port is only reachable from this machine. Leave it automatic unless something else needs a fixed one.</string>
+              </property>
+              <property name="wordWrap">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="bandwidthBox">
+           <property name="title">
+            <string>Bandwidth</string>
+           </property>
+           <layout class="QHBoxLayout" name="horizontalLayout_11">
             <item>
-             <spacer name="verticalSpacer_2">
+             <widget class="QLabel" name="downloadRateLabel">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Download limit:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QSpinBox" name="downloadRateLimit">
+              <property name="maximumSize">
+               <size>
+                <width>160</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="suffix">
+               <string> KB/s</string>
+              </property>
+              <property name="specialValueText">
+               <string>Unlimited</string>
+              </property>
+              <property name="maximum">
+               <number>102400</number>
+              </property>
+              <property name="singleStep">
+               <number>50</number>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_6">
               <property name="orientation">
-               <enum>Qt::Vertical</enum>
+               <enum>Qt::Horizontal</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
-                <width>238</width>
-                <height>137</height>
+                <width>40</width>
+                <height>20</height>
                </size>
               </property>
              </spacer>
             </item>
            </layout>
           </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="proxyBox">
+           <property name="title">
+            <string>Proxy</string>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_12">
+            <item>
+             <widget class="QLabel" name="proxyHint">
+              <property name="text">
+               <string>Taking part in a swarm shows your address to every other peer, and refusing to upload does not change that. A proxy is the only setting here that hides it: peer and tracker connections both go through it.</string>
+              </property>
+              <property name="wordWrap">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <layout class="QFormLayout" name="formLayout_2">
+              <item row="0" column="0">
+               <widget class="QLabel" name="proxyTypeLabel">
+                <property name="text">
+                 <string>Type:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QComboBox" name="proxyType">
+                <property name="maximumSize">
+                 <size>
+                  <width>160</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <item>
+                 <property name="text">
+                  <string>None</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>SOCKS5</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>HTTP</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QLabel" name="proxyHostLabel">
+                <property name="text">
+                 <string>Host:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QLineEdit" name="proxyHost"/>
+              </item>
+              <item row="2" column="0">
+               <widget class="QLabel" name="proxyPortLabel">
+                <property name="text">
+                 <string>Port:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <widget class="QSpinBox" name="proxyPort">
+                <property name="maximumSize">
+                 <size>
+                  <width>160</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="minimum">
+                 <number>1</number>
+                </property>
+                <property name="maximum">
+                 <number>65535</number>
+                </property>
+                <property name="value">
+                 <number>1080</number>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="restartHint">
+           <property name="text">
+            <string>Ports, bandwidth and proxy take effect the next time GrooveOff starts.</string>
+           </property>
+           <property name="wordWrap">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="verticalSpacer_3">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
          </item>
         </layout>
        </widget>

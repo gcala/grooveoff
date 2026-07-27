@@ -68,6 +68,9 @@ private:
     /** starts the torrent session and the local stream server, in that order */
     void startTorrentEngine();
 
+    /** honours emptyCacheOnExit, which is off unless somebody turned it on */
+    void emptyCacheIfAsked();
+
     QPointer<MainWindow>    m_mainWindow;
     QTranslator            *m_appTranslator;
     QTranslator            *m_qtTranslator;

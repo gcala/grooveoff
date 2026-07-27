@@ -20,6 +20,8 @@
 #include "TorrentTrack.h"
 #include "TorrentSession.h"
 
+#include "../grooveoff/Settings.h"
+
 #include <QSettings>
 
 namespace {
@@ -172,7 +174,7 @@ void TorrentTrack::armWindow( qint64 offset )
         The::torrentSession()->resetPieceDeadline( m_infoHash, piece );
 
     QSettings settings;
-    const qint64 windowBytes = qMax( 1, settings.value( QLatin1String( "bufferSeconds" ), 10 ).toInt() )
+    const qint64 windowBytes = qMax( 1, settings.value( Settings::bufferSeconds, Settings::bufferSecondsDefault ).toInt() )
                                * assumedBytesPerSecond;
 
     m_windowFirst = -1;

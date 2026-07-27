@@ -21,16 +21,19 @@
 #include "AudioEngine.h"
 #include "Playlist.h"
 #include "ActionCollection.h"
+#include "Settings.h"
 #include "Utility.h"
 #include "../db/Catalog.h"
 #include "../db/Database.h"
 #include "../db/PlaylistStore.h"
+#include "../torrent/CacheManager.h"
 #include "../torrent/StreamServer.h"
 #include "../torrent/TorrentSession.h"
 
 #include <QDebug>
 #include <QDir>
 #include <QLibraryInfo>
+#include <QSettings>
 #include <QStandardPaths>
 #include <QTranslator>
 
@@ -148,6 +151,9 @@ App::~App()
     // shutdown saves the resume data of every torrent, and it is the window
     // that writes what came back into the catalogue.
     The::streamServer()->stop();
+
+    emptyCacheIfAsked();
+
     The::torrentSession()->shutdown();
 
     delete mainWindow();
@@ -155,6 +161,7 @@ App::~App()
     delete The::playlist();
     delete The::actionCollection();
 
+    delete The::cacheManager();
     delete The::streamServer();
     delete The::torrentSession();
 
@@ -162,6 +169,30 @@ App::~App()
     delete The::playlistStore();
     delete The::catalog();
     delete The::database();
+}
+
+/*!
+  \brief emptyCacheIfAsked: throws the cache away on the way out, if asked to
+
+  Off by default: a cache that survives is the difference between pressing play
+  and hearing something, and pressing play and waiting for a swarm. The setting
+  exists for metered connections and shared machines, where the trade goes the
+  other way.
+
+  It runs before the session is shut down, so that libtorrent deletes the files
+  of the torrents it holds itself, and after the stream server has stopped, so
+  that nothing is reading them. Nothing is playing at this point either, which
+  is why the torrent being listened to — normally spared — is spared from
+  nothing here.
+*/
+void App::emptyCacheIfAsked()
+{
+    QSettings settings;
+    if( !settings.value( Settings::emptyCacheOnExit, Settings::emptyCacheOnExitDefault ).toBool() )
+        return;
+
+    The::cacheManager()->setPlayingTorrent( QString() );
+    The::cacheManager()->emptyCache();
 }
 
 void App::quit()
