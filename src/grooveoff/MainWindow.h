@@ -171,6 +171,9 @@ private:
     void loadBootSettings();
     void saveSettings();
 
+    /** the saved split, when it matches the splitter this window actually has */
+    void restoreSplitterSizes();
+
     /** rebuilds the list from the playlist app_state points at */
     void loadCurrentPlaylist();
     void savePlaybackState();

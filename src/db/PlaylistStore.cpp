@@ -436,8 +436,14 @@ qint64 PlaylistStore::currentPositionMs() const
 bool PlaylistStore::setPlaybackState( qint64 playlistId, qint64 trackId, qint64 positionMs )
 {
     QSqlQuery query( The::database()->connection() );
-    query.prepare( QStringLiteral( "UPDATE app_state SET playlist_id = :playlist, track_id = :track,"
-                                   " position_ms = :position WHERE id = 1" ) );
+    // An upsert and not an UPDATE: the row is a singleton the writer has no
+    // business assuming somebody else created. An UPDATE that matches nothing
+    // reports success, so getting this wrong loses what was playing without a
+    // word anywhere.
+    query.prepare( QStringLiteral( "INSERT INTO app_state ( id, playlist_id, track_id, position_ms )"
+                                   " VALUES ( 1, :playlist, :track, :position )"
+                                   " ON CONFLICT( id ) DO UPDATE SET playlist_id = :playlist,"
+                                   " track_id = :track, position_ms = :position" ) );
     query.bindValue( QStringLiteral( ":playlist" ), playlistId > 0 ? QVariant( playlistId ) : QVariant() );
     query.bindValue( QStringLiteral( ":track" ), trackId > 0 ? QVariant( trackId ) : QVariant() );
     query.bindValue( QStringLiteral( ":position" ), positionMs );

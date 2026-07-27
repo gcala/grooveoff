@@ -38,7 +38,6 @@
 #include "../db/PlaylistStore.h"
 #include "TrackSelector.h"
 #include "TrackTags.h"
-#include "Roles.h"
 #include "Settings.h"
 #include "widgets/PlaylistList.h"
 #include "../torrent/CacheManager.h"
@@ -180,6 +179,13 @@ void MainWindow::setupUi()
     ui->searchLine->setPlaceholderText( tr( "Paste a magnet link and press enter" ) );
     ui->searchLine->setClearButtonEnabled( true );
     ui->searchButton->setVisible( false );
+
+    // No pane may go to zero, by dragging or otherwise. A collapsed track list
+    // looks exactly like a playlist that did not load, and there is nothing on
+    // screen to tell whoever is looking which of the two it is.
+    ui->splitter->setChildrenCollapsible( false );
+    ui->splitter->setStretchFactor( 0, 0 );
+    ui->splitter->setStretchFactor( 1, 1 );
 
     QFontMetrics fmSystemFont( Utility::font( QFont::Bold ) );
     const int fontHeight = fmSystemFont.height();
@@ -373,11 +379,7 @@ void MainWindow::loadBootSettings()
     ui->splitter->setOrientation( (Qt::Orientation )settings.value( QLatin1String( "splitterOrientation" ), Qt::Vertical ).toInt() );
     m_playerWidget->showElapsedTimerLabel( ui->splitter->orientation() == Qt::Vertical ? false : true );
 
-    const QList<int> &_sizes = settings.value( QLatin1String( "splitterSizes" ) ).value< QList<int> >();
-
-    if( !_sizes.isEmpty() ) {
-        ui->splitter->setSizes( _sizes );
-    }
+    restoreSplitterSizes();
 
     The::audioEngine()->setVolume( settings.value( QLatin1String( "volume" ), 50 ).toInt() );
     The::audioEngine()->setMuted( settings.value( QLatin1String( "muted" ), false ).toBool() );
@@ -415,6 +417,33 @@ void MainWindow::saveSettings()
   \brief loadCurrentPlaylist: fill the list from the playlist app_state points at
   \return void
 */
+/*!
+  \brief restoreSplitterSizes: the saved split, but only when it still fits
+
+  A list saved when the splitter had a different number of panes is not a
+  shorter version of this one. Applied as it is, the panes it says nothing
+  about end up at zero — and since what gets saved on the way out is whatever
+  is on screen, a track list that once ended up with no height keeps no height
+  for ever after. That is not a hypothetical: the sidebar arriving beside a
+  list that had been alone in the splitter did exactly this.
+*/
+void MainWindow::restoreSplitterSizes()
+{
+    QSettings settings;
+    const QList<int> sizes = settings.value( QLatin1String( "splitterSizes" ) ).value< QList<int> >();
+
+    if( sizes.count() == ui->splitter->count() && !sizes.contains( 0 ) ) {
+        ui->splitter->setSizes( sizes );
+        return;
+    }
+
+    // Enough for the sidebar to show a handful of names, and the rest to the
+    // tracks. A fixed number rather than a fraction because this runs before
+    // the splitter has been laid out, so its own size is not worth asking for;
+    // the stretch factors then give every later pixel to the track list.
+    ui->splitter->setSizes( { 200, qMax( ui->splitter->height() - 200, 200 ) } );
+}
+
 void MainWindow::loadCurrentPlaylist()
 {
     if( !The::database()->isOpen() )
@@ -594,6 +623,7 @@ void MainWindow::chooseTracksOf( const QString &infoHash )
         if( playlists->tracks( playlistId ).isEmpty() )
             The::torrentSession()->remove( infoHash, false );
 
+        m_playerWidget->showMessage( catalog->name( infoHash ) );
         return;
     }
 
@@ -607,6 +637,11 @@ void MainWindow::chooseTracksOf( const QString &infoHash )
     loadPlaylists();
     loadCurrentPlaylist();
     refreshRowsOf( infoHash );
+
+    // Whatever happens, the message stops saying the track list is being read:
+    // it was read, and leaving that sentence there is the interface claiming to
+    // be busy with something it finished several clicks ago.
+    m_playerWidget->showMessage( catalog->name( infoHash ) );
 }
 
 /*!
@@ -858,6 +893,12 @@ void MainWindow::loadPlaylists()
     }
 
     ui->playlistList->selectPlaylist( open );
+
+    // Playlists but nothing open — a database whose playback row went missing,
+    // or a first start right after one was made — would show a full sidebar
+    // beside an empty list, which reads as something having failed to load.
+    if( open <= 0 && ui->playlistList->count() > 0 )
+        openPlaylist( ui->playlistList->item( 0 ) );
 }
 
 void MainWindow::openPlaylist( QListWidgetItem *row )
@@ -1220,11 +1261,7 @@ void MainWindow::setCompactLayout()
         ui->searchWidgets->setVisible( true );
         setMaximumHeight( 16777215 );
         ui->splitter->setOrientation( (Qt::Orientation )settings.value( QLatin1String( "splitterOrientation" ), Qt::Vertical ).toInt() );
-        QList<int> _sizes = settings.value( QLatin1String( "splitterSizes" ) ).value< QList<int> >();
-
-        if( !_sizes.isEmpty() ) {
-            ui->splitter->setSizes( _sizes );
-        }
+        restoreSplitterSizes();
 
         const QRect &rect = settings.value( QLatin1String( "windowGeometry" ), QRect( 100, 100, 350, 600 ) ).toRect();
         setGeometry( geometry().x(), geometry().y(), geometry().width(), rect.height() );
@@ -1252,11 +1289,7 @@ void MainWindow::setWideLayout()
         ui->searchWidgets->setVisible( true );
         setMaximumHeight( 16777215 );
         ui->splitter->setOrientation( ( Qt::Orientation )settings.value( QLatin1String( "splitterOrientation" ), Qt::Vertical ).toInt() );
-        QList<int> _sizes = settings.value( QLatin1String( "splitterSizes" ) ).value< QList<int> >();
-
-        if( !_sizes.isEmpty() ) {
-            ui->splitter->setSizes( _sizes );
-        }
+        restoreSplitterSizes();
 
         const QRect &rect = settings.value( QLatin1String( "windowGeometry" ), QRect( 100,100,350,600 ) ).toRect();
         setGeometry( geometry().x(), geometry().y(), geometry().width(), rect.height() );

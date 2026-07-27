@@ -157,7 +157,20 @@ bool Database::open()
         return false;
     }
 
-    return migrate();
+    if( !migrate() )
+        return false;
+
+    // The single row of app_state is an invariant of the schema, not a value:
+    // everything that reads what was playing assumes it is there, and an UPDATE
+    // against a table where it is not succeeds while changing nothing. That
+    // failure has no symptom of its own — the application simply opens with an
+    // empty track list — so the row is made sure of here rather than trusted to
+    // the migration that created it once.
+    QSqlQuery ensure( m_db );
+    if( !ensure.exec( QStringLiteral( "INSERT OR IGNORE INTO app_state ( id, position_ms ) VALUES ( 1, 0 )" ) ) )
+        qWarning() << "GrooveOff ::" << "cannot ensure the app_state row:" << ensure.lastError().text();
+
+    return true;
 }
 
 bool Database::checkIntegrity()

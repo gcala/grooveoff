@@ -24,6 +24,7 @@
 
 #include <QCoreApplication>
 #include <QFile>
+#include <QSqlQuery>
 #include <QStandardPaths>
 #include <QTest>
 
@@ -54,6 +55,7 @@ private Q_SLOTS:
     void cacheEvictionKeepsTheCatalogue();
     void remembersWhatWasPlaying();
     void customPlaylistRemoval();
+    void survivesALostPlaybackRow();
 
 private:
     Catalog*       m_catalog  = nullptr;
@@ -256,6 +258,34 @@ void DatabaseTest::customPlaylistRemoval()
 
     // A torrent playlist belongs to its torrent and is removed with it.
     QVERIFY( !m_playlists->removeCustomPlaylist( m_playlists->torrentPlaylistId( m_hashB ) ) );
+}
+
+/*!
+  \brief survivesALostPlaybackRow: the singleton row is the writer's business
+
+  Reaching for QSqlQuery is against the rule that no QSql type leaves src/db,
+  and it is the reason this case had no test until it cost somebody their track
+  list: there is no way through the public interface to take the row away, and
+  what happens when it is gone is exactly what needed checking. An UPDATE that
+  matches nothing reports success, so the application opened with an empty list
+  and nothing anywhere said why.
+*/
+void DatabaseTest::survivesALostPlaybackRow()
+{
+    QSqlQuery query( The::database()->connection() );
+    QVERIFY( query.exec( QStringLiteral( "DELETE FROM app_state" ) ) );
+
+    QCOMPARE( m_playlists->currentPlaylistId(), qint64( 0 ) );
+
+    const qint64 playlistId = m_playlists->createCustomPlaylist( QStringLiteral( "Again" ) );
+    QVERIFY( playlistId > 0 );
+
+    // The writer puts the row back rather than assuming somebody else did.
+    QVERIFY( m_playlists->setPlaybackState( playlistId, 0, 0 ) );
+
+    QCOMPARE( m_playlists->currentPlaylistId(), playlistId );
+    QCOMPARE( m_playlists->currentTrackId(), qint64( 0 ) );
+    QCOMPARE( m_playlists->currentPositionMs(), qint64( 0 ) );
 }
 
 QTEST_MAIN( DatabaseTest )
