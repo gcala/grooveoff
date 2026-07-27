@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.21)
 # Information to update before to release this package.
 project(grooveoff
         VERSION 0.2.0
-        DESCRIPTION "Offline Grooveshark.com music"
+        DESCRIPTION "Music streaming from torrents"
         LANGUAGES CXX
 )
 set(GROOVEOFF_VERSION ${PROJECT_VERSION})

@@ -1,9 +1,9 @@
 [Desktop Entry]
 Name=GrooveOff
-GenericName=Grooveshark Client
-GenericName[it]=Client per Grooveshark
-Comment=Offline Grooveshark.com music
-Comment[it]=Salva la musica di Grooveshark.com
+GenericName=Music Player
+GenericName[it]=Lettore musicale
+Comment=Music streaming from torrents
+Comment[it]=Musica in streaming dai torrent
 Exec=grooveoff
 Terminal=false
 Type=Application

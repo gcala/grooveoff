@@ -3,10 +3,12 @@ INSTALL
 
 Requirements:
 
-  Qt 6.5 or later (Core, Gui, Widgets, Network, Xml, Svg, DBus, Multimedia,
-                   LinguistTools)
+  Qt 6.5 or later (Core, Gui, Widgets, Network, Sql, Svg, DBus, Multimedia,
+                   Test, LinguistTools)
   a QtMultimedia backend (ffmpeg is the default one)
   TagLib 2.0 or later
+  libtorrent-rasterbar 2.0 or later
+  the boost headers (libtorrent's own headers include them)
   KDSingleApplication (Qt 6 build)
   CMake 3.21 or later
 
@@ -15,3 +17,10 @@ extract downloaded archive and enter the application folder, then:
 cmake -S . -B build -DCMAKE_INSTALL_PREFIX=/usr
 cmake --build build
 cmake --install build (as root)
+
+The test suite is built unless BUILD_TESTING is switched off, and is run with:
+
+cd build && ctest
+
+None of the tests touches the network: the ones that need a torrent build their
+own and run the session in offline mode.
