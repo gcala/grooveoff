@@ -35,6 +35,7 @@ class QLabel;
 class QPushButton;
 class QLineEdit;
 class QListWidget;
+class QListWidgetItem;
 class QSplitter;
 class QTimer;
 class QBoxLayout;
@@ -110,6 +111,34 @@ private Q_SLOTS:
     /** throws the cached bytes away, keeping every playlist as it is */
     void emptyCache();
 
+    // --- the sidebar --------------------------------------------------------
+
+    /** rebuilds the sidebar from what the store says is worth showing */
+    void loadPlaylists();
+
+    /** the user chose another playlist: it becomes the open one */
+    void openPlaylist( QListWidgetItem *row );
+
+    void newPlaylist();
+    void renamePlaylist();
+
+    /**
+     * The one operation of this whole application that can delete something the
+     * user made by hand, so it asks first and says what is at stake.
+     */
+    void removePlaylist();
+
+    void showPlaylistMenu( const QPoint &position );
+
+    /** tracks dragged onto a playlist of the sidebar */
+    void addTracksToPlaylist( qint64 playlistId, const QList<qint64> &trackIds );
+
+    /** the same thing from the row's own menu, one track at a time */
+    void addTrackToPlaylist( DownloadItem *item, qint64 playlistId );
+
+    /** a drag that landed back in the track list: an order, not a move */
+    void reorderTracks( const QList<int> &rows, int targetRow );
+
     void setCompactLayout();
     void setWideLayout();
     void setMiniPlayerLayout();
@@ -158,6 +187,12 @@ private:
 
     /** adds a magnet or a .torrent, and says so when it will not go in */
     void addTorrentSource( const QString &source );
+
+    /** plain yes or no, then everything goes: rows, files and resume */
+    void removeTorrentEverywhere( const QString &infoHash );
+
+    /** whether the open playlist is one the user built by hand */
+    bool openPlaylistIsCustom() const;
 
     /**
      * Torrents the user has just added by hand. Only those open the selector:

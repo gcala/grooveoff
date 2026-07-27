@@ -24,6 +24,7 @@
 #include "AudioEngine.h"
 #include "Playlist.h"
 #include "MainWindow.h"
+#include "../db/PlaylistStore.h"
 #include "../torrent/TorrentSession.h"
 
 #include "TrackTags.h"
@@ -33,6 +34,7 @@
 #include <QFile>
 #include <QGraphicsDropShadowEffect>
 #include <QLocale>
+#include <QHash>
 #include <QMenu>
 
 /*!
@@ -385,12 +387,35 @@ void DownloadItem::contextMenuEvent( QContextMenuEvent *event )
 
     QAction *playAction = menu.addAction( QIcon::fromTheme( QLatin1String( "media-playback-start" ) ),
                                           tr( "Play" ) );
+
+    // Every custom playlist, this one included when it is the open one: adding
+    // a track twice to a list made by hand is a choice, not a mistake to stop.
+    QHash<const QAction *, qint64> playlistOf;
+    QMenu *addMenu = menu.addMenu( QIcon::fromTheme( QLatin1String( "list-add" ) ),
+                                   tr( "Add to playlist" ) );
+
+    const QList<PlaylistStore::PlaylistInfo> playlists = The::playlistStore()->visiblePlaylists();
+    for( const PlaylistStore::PlaylistInfo &playlist : playlists ) {
+        if( playlist.kind != PlaylistStore::CustomPlaylist )
+            continue;
+
+        playlistOf.insert( addMenu->addAction( playlist.name ), playlist.id );
+    }
+
+    addMenu->setEnabled( !playlistOf.isEmpty() );
+    if( playlistOf.isEmpty() )
+        addMenu->setTitle( tr( "Add to playlist (none yet)" ) );
+
     menu.addSeparator();
     QAction *removeAction = menu.addAction( QIcon::fromTheme( QLatin1String( "list-remove" ) ),
                                             tr( "Remove from the playlist" ) );
-    QAction *excludeAction = menu.addAction( QIcon::fromTheme( QLatin1String( "edit-delete" ) ),
-                                             tr( "Exclude this track" ) );
-    excludeAction->setToolTip( tr( "Keeps it out of this torrent's playlist until you say otherwise" ) );
+
+    QAction *excludeAction = nullptr;
+    if( !m_inCustomPlaylist ) {
+        excludeAction = menu.addAction( QIcon::fromTheme( QLatin1String( "edit-delete" ) ),
+                                        tr( "Exclude this track" ) );
+        excludeAction->setToolTip( tr( "Keeps it out of this torrent's playlist until you say otherwise" ) );
+    }
 
     const QAction *chosen = menu.exec( event->globalPos() );
 
@@ -398,8 +423,15 @@ void DownloadItem::contextMenuEvent( QContextMenuEvent *event )
         playSong();
     else if( chosen == removeAction )
         removeSong();
-    else if( chosen == excludeAction )
+    else if( excludeAction && chosen == excludeAction )
         emit excludeRequested( this );
+    else if( chosen && playlistOf.contains( chosen ) )
+        emit addToPlaylistRequested( this, playlistOf.value( chosen ) );
+}
+
+void DownloadItem::setInCustomPlaylist( bool custom )
+{
+    m_inCustomPlaylist = custom;
 }
 
 /*!

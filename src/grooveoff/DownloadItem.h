@@ -66,6 +66,14 @@ public:
     /** takes up the tags and the cover once they became readable */
     void refreshLabels();
 
+    /**
+     * Which kind of playlist this row is being shown in. It decides one thing
+     * only: excluding a file is a refusal aimed at its torrent, so the entry is
+     * not offered while looking at a list the user built by hand, where the
+     * track is there because it was put there on purpose.
+     */
+    void setInCustomPlaylist( bool custom );
+
     bool operator==( DownloadItem & ) const;
 
 public Q_SLOTS:
@@ -80,6 +88,9 @@ Q_SIGNALS:
 
     /** the user refused this file for good, which is not the same as removing it */
     void excludeRequested( DownloadItem * );
+
+    /** copy this track into a custom playlist, leaving it where it is */
+    void addToPlaylistRequested( DownloadItem *, qint64 playlistId );
 
 protected:
     void leaveEvent( QEvent *event ) override;
@@ -98,6 +109,7 @@ private:
     PlaylistItemPtr        m_playlistItem;
     GrooveOff::TrackState  m_trackState;
     GrooveOff::PlayerState m_playerState;
+    bool                   m_inCustomPlaylist = false;
 
     void setupUi();
     void setupConnections();

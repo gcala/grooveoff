@@ -38,7 +38,9 @@
 #include "../db/PlaylistStore.h"
 #include "TrackSelector.h"
 #include "TrackTags.h"
+#include "Roles.h"
 #include "Settings.h"
+#include "widgets/PlaylistList.h"
 #include "../torrent/CacheManager.h"
 #include "../torrent/StreamServer.h"
 #include "../torrent/TorrentSession.h"
@@ -52,6 +54,7 @@
 #include <QAction>
 #include <QHBoxLayout>
 #include <QGridLayout>
+#include <QInputDialog>
 #include <QLocale>
 #include <QSettings>
 #include <QSplitter>
@@ -125,6 +128,7 @@ MainWindow::MainWindow( QWidget *parent )
                                QMessageBox::Ok );
     }
 
+    loadPlaylists();
     loadCurrentPlaylist();
     wakeLastUsedTorrent();
 
@@ -245,6 +249,20 @@ void MainWindow::setupConnections()
     connect( ac->getAction( "actionQtAbout" ), &QAction::triggered, qApp, &QApplication::aboutQt );
     connect( ac->getAction( "actionOpenTorrent" ), &QAction::triggered, this, &MainWindow::openTorrentFile );
     connect( ac->getAction( "actionEmptyCache" ), &QAction::triggered, this, &MainWindow::emptyCache );
+    connect( ac->getAction( "actionNewPlaylist" ), &QAction::triggered, this, &MainWindow::newPlaylist );
+    connect( ac->getAction( "actionRenamePlaylist" ), &QAction::triggered, this, &MainWindow::renamePlaylist );
+    connect( ac->getAction( "actionRemovePlaylist" ), &QAction::triggered, this, &MainWindow::removePlaylist );
+
+    // currentItemChanged rather than itemClicked, so that the keyboard opens a
+    // playlist too. Selecting a row from the code blocks the signal, or every
+    // rebuild of the sidebar would reopen the list that is already open.
+    connect( ui->playlistList, &QListWidget::currentItemChanged, this,
+             [this]( QListWidgetItem *current, QListWidgetItem * ) { openPlaylist( current ); } );
+
+    connect( ui->playlistList, &QWidget::customContextMenuRequested, this, &MainWindow::showPlaylistMenu );
+    connect( ui->playlistList, &PlaylistList::tracksDropped, this, &MainWindow::addTracksToPlaylist );
+
+    connect( ui->downloadList, &DownloadList::reorderRequested, this, &MainWindow::reorderTracks );
 
     // Nothing is downloaded any more, so there is nothing to stop. The menus
     // are rebuilt around playlists later on.
@@ -533,6 +551,9 @@ void MainWindow::onMetadataReady( const QString &infoHash, const QString &name, 
     catalog->addTracks( tracks );
     catalog->touch( infoHash );
 
+    // A torrent that was hidden and has just been added again is back in the
+    // sidebar, and one added for the first time appears there now.
+    loadPlaylists();
     refreshRowsOf( infoHash );
 
     if( !m_awaitingSelection.remove( infoHash ) ) {
@@ -583,6 +604,7 @@ void MainWindow::chooseTracksOf( const QString &infoHash )
     playlists->setTracks( playlistId, selector.selectedTracks() );
     playlists->setPlaybackState( playlistId, 0, 0 );
 
+    loadPlaylists();
     loadCurrentPlaylist();
     refreshRowsOf( infoHash );
 }
@@ -800,6 +822,336 @@ void MainWindow::refreshRowsOf( const QString &infoHash )
     }
 }
 
+/*!
+  \brief loadPlaylists: the sidebar, of both kinds at once
+
+  A list born from a torrent and one built by hand are the same thing here — an
+  ordered list of tracks — so they share a table, a query and a row. What tells
+  them apart is the icon and, when it matters, what removing them means.
+*/
+void MainWindow::loadPlaylists()
+{
+    if( !The::database()->isOpen() )
+        return;
+
+    const qint64 open = The::playlistStore()->currentPlaylistId();
+
+    ui->playlistList->clear();
+
+    const QList<PlaylistStore::PlaylistInfo> playlists = The::playlistStore()->visiblePlaylists();
+    for( const PlaylistStore::PlaylistInfo &playlist : playlists ) {
+        QListWidgetItem *row = new QListWidgetItem( playlist.name );
+
+        row->setData( PlaylistRoles::Id, playlist.id );
+        row->setData( PlaylistRoles::Kind, static_cast<int>( playlist.kind ) );
+        row->setData( PlaylistRoles::InfoHash, playlist.infoHash );
+
+        row->setIcon( playlist.kind == PlaylistStore::CustomPlaylist
+                      ? QIcon::fromTheme( QLatin1String( "view-media-playlist" ),
+                                          QIcon( QLatin1String( ":/resources/Playlist.png" ) ) )
+                      : QIcon::fromTheme( QLatin1String( "network-workgroup" ),
+                                          QIcon( QLatin1String( ":/resources/grooveoff.png" ) ) ) );
+
+        row->setToolTip( tr( "%n track(s)", "", playlist.trackCount ) );
+
+        ui->playlistList->addItem( row );
+    }
+
+    ui->playlistList->selectPlaylist( open );
+}
+
+void MainWindow::openPlaylist( QListWidgetItem *row )
+{
+    if( !row || !The::database()->isOpen() )
+        return;
+
+    const qint64 playlistId = row->data( PlaylistRoles::Id ).toLongLong();
+    if( playlistId <= 0 || playlistId == The::playlistStore()->currentPlaylistId() )
+        return;
+
+    // Where the listening had got to belongs to the playlist being left, and it
+    // has to be written before app_state points somewhere else.
+    savePlaybackState();
+
+    The::playlistStore()->setPlaybackState( playlistId, 0, 0 );
+
+    loadCurrentPlaylist();
+}
+
+void MainWindow::newPlaylist()
+{
+    if( !The::database()->isOpen() )
+        return;
+
+    bool accepted = false;
+    const QString name = QInputDialog::getText( this,
+                                                tr( "New playlist" ),
+                                                tr( "Name:" ),
+                                                QLineEdit::Normal,
+                                                tr( "New playlist" ),
+                                                &accepted ).trimmed();
+
+    if( !accepted || name.isEmpty() )
+        return;
+
+    const qint64 playlistId = The::playlistStore()->createCustomPlaylist( name );
+    if( playlistId <= 0 )
+        return;
+
+    savePlaybackState();
+    The::playlistStore()->setPlaybackState( playlistId, 0, 0 );
+
+    loadPlaylists();
+    loadCurrentPlaylist();
+
+    m_playerWidget->showMessage( tr( "Drag tracks into «%1» to fill it." ).arg( name ) );
+}
+
+void MainWindow::renamePlaylist()
+{
+    const qint64 playlistId = ui->playlistList->currentPlaylistId();
+    if( playlistId <= 0 )
+        return;
+
+    const PlaylistStore::PlaylistInfo playlist = The::playlistStore()->playlist( playlistId );
+    if( !playlist.isValid() )
+        return;
+
+    bool accepted = false;
+    const QString name = QInputDialog::getText( this,
+                                                tr( "Rename playlist" ),
+                                                tr( "Name:" ),
+                                                QLineEdit::Normal,
+                                                playlist.name,
+                                                &accepted ).trimmed();
+
+    if( !accepted || name.isEmpty() || name == playlist.name )
+        return;
+
+    The::playlistStore()->rename( playlistId, name );
+    loadPlaylists();
+}
+
+/*!
+  \brief removePlaylist: the only operation here that can destroy the user's work
+
+  A custom playlist is a list and nothing else: dropping it leaves every track
+  in the catalogue. A torrent playlist is the torrent, so dropping it is a
+  question about the torrent — and the answer depends on whether tracks of it
+  have been put into lists made by hand, because those are not ours to throw
+  away without asking.
+*/
+void MainWindow::removePlaylist()
+{
+    const qint64 playlistId = ui->playlistList->currentPlaylistId();
+    if( playlistId <= 0 || !The::database()->isOpen() )
+        return;
+
+    const PlaylistStore::PlaylistInfo playlist = The::playlistStore()->playlist( playlistId );
+    if( !playlist.isValid() )
+        return;
+
+    if( playlist.kind == PlaylistStore::CustomPlaylist ) {
+        const int answer = QMessageBox::question( this,
+                                                  tr( "Remove playlist" ),
+                                                  tr( "Remove the playlist «%1»?" ).arg( playlist.name )
+                                                      + QLatin1String( "\n\n" )
+                                                      + tr( "The tracks themselves stay where they are: "
+                                                            "this only removes the list." ),
+                                                  QMessageBox::Yes | QMessageBox::No,
+                                                  QMessageBox::No );
+
+        if( answer != QMessageBox::Yes )
+            return;
+
+        The::playlistStore()->removeCustomPlaylist( playlistId );
+
+        loadPlaylists();
+        loadCurrentPlaylist();
+        return;
+    }
+
+    const QString infoHash = playlist.infoHash;
+    const QList<Catalog::PlaylistReference> references = The::catalog()->customPlaylistReferences( infoHash );
+
+    if( references.isEmpty() ) {
+        const int answer = QMessageBox::question( this,
+                                                  tr( "Remove torrent" ),
+                                                  tr( "Remove «%1»?" ).arg( playlist.name )
+                                                      + QLatin1String( "\n\n" )
+                                                      + tr( "Its tracks and its downloaded data go with it. "
+                                                            "Adding the magnet again brings it back." ),
+                                                  QMessageBox::Yes | QMessageBox::No,
+                                                  QMessageBox::No );
+
+        if( answer != QMessageBox::Yes )
+            return;
+
+        removeTorrentEverywhere( infoHash );
+
+        loadPlaylists();
+        loadCurrentPlaylist();
+        return;
+    }
+
+    // Somebody put tracks of this torrent into lists of their own. Saying how
+    // many and which is the whole point of this dialog: without the numbers
+    // there is no way to choose between the two ways that are not Cancel.
+    int trackCount = 0;
+    QStringList names;
+    for( const Catalog::PlaylistReference &reference : references ) {
+        trackCount += reference.trackCount;
+        names << reference.name;
+    }
+
+    QMessageBox box( this );
+    box.setIcon( QMessageBox::Warning );
+    box.setWindowTitle( tr( "Remove torrent" ) );
+    box.setText( tr( "Remove «%1»?" ).arg( playlist.name ) );
+    box.setInformativeText( tr( "%n track(s) of this torrent are used in your own playlists: %1.",
+                                "", trackCount ).arg( names.join( QLatin1String( ", " ) ) ) );
+
+    QPushButton *removeAll = box.addButton( tr( "Remove everything" ), QMessageBox::DestructiveRole );
+    QPushButton *keepTracks = box.addButton( tr( "Keep those tracks" ), QMessageBox::AcceptRole );
+    box.addButton( QMessageBox::Cancel );
+    box.setDefaultButton( keepTracks );
+
+    box.exec();
+
+    if( box.clickedButton() == removeAll ) {
+        removeTorrentEverywhere( infoHash );
+    } else if( box.clickedButton() == keepTracks ) {
+        // Hidden, not removed: the torrent leaves the sidebar, its tracks stay
+        // where they were put and go on playing, and its data follow the
+        // ordinary rules of the cache. Adding the same magnet again brings it
+        // back with the selection and the exclusions it had.
+        The::catalog()->hideTorrent( infoHash );
+    } else {
+        return;
+    }
+
+    loadPlaylists();
+    loadCurrentPlaylist();
+}
+
+void MainWindow::removeTorrentEverywhere( const QString &infoHash )
+{
+    // Removing from the catalogue, which is not evicting from the cache: this
+    // one takes the rows with it, on purpose, because it is what was asked for.
+    const PlaylistItemPtr current = The::audioEngine()->currentTrack();
+    if( current && current->track() && current->track()->infoHash() == infoHash ) {
+        The::audioEngine()->stop();
+        The::cacheManager()->setPlayingTorrent( QString() );
+    }
+
+    The::torrentSession()->remove( infoHash, true );
+    The::catalog()->removeTorrent( infoHash );
+}
+
+void MainWindow::showPlaylistMenu( const QPoint &position )
+{
+    const qint64 playlistId = ui->playlistList->playlistAt( position );
+
+    // The menu acts on the row it was opened over, so that row becomes the
+    // current one first: otherwise a right click somewhere and a Remove would
+    // take away whatever happened to be selected before.
+    if( playlistId > 0 )
+        ui->playlistList->selectPlaylist( playlistId );
+
+    ActionCollection *ac = The::actionCollection();
+
+    QMenu menu( this );
+    menu.addAction( ac->getAction( "actionNewPlaylist" ) );
+
+    if( playlistId > 0 ) {
+        menu.addSeparator();
+        menu.addAction( ac->getAction( "actionRenamePlaylist" ) );
+        menu.addAction( ac->getAction( "actionRemovePlaylist" ) );
+    }
+
+    menu.exec( ui->playlistList->mapToGlobal( position ) );
+}
+
+void MainWindow::addTracksToPlaylist( qint64 playlistId, const QList<qint64> &trackIds )
+{
+    if( playlistId <= 0 || trackIds.isEmpty() || !The::database()->isOpen() )
+        return;
+
+    const PlaylistStore::PlaylistInfo playlist = The::playlistStore()->playlist( playlistId );
+    if( !playlist.isValid() || playlist.kind != PlaylistStore::CustomPlaylist )
+        return;
+
+    QList<TrackInfoPtr> tracks;
+    for( qint64 trackId : trackIds ) {
+        const TrackInfoPtr track = The::catalog()->track( trackId );
+        if( track )
+            tracks << track;
+    }
+
+    if( tracks.isEmpty() || !The::playlistStore()->appendTracks( playlistId, tracks ) )
+        return;
+
+    loadPlaylists();
+
+    if( playlistId == The::playlistStore()->currentPlaylistId() )
+        loadCurrentPlaylist();
+
+    m_playerWidget->showMessage( tr( "%n track(s) added to «%1».", "", tracks.count() )
+                                 .arg( playlist.name ) );
+}
+
+void MainWindow::addTrackToPlaylist( DownloadItem *item, qint64 playlistId )
+{
+    if( !item || !item->playlistItem()->track() )
+        return;
+
+    addTracksToPlaylist( playlistId, { item->playlistItem()->track()->id() } );
+}
+
+/*!
+  \brief reorderTracks: a drag inside the list is an order, not a move
+
+  The rows are not moved by the view, and that is the point: each carries a
+  widget put there with setItemWidget, which a view that removes and reinserts
+  rows knows nothing about. The new order is written and the list rebuilt from
+  it, through the same path that builds it in the first place.
+*/
+void MainWindow::reorderTracks( const QList<int> &rows, int targetRow )
+{
+    const qint64 playlistId = The::playlistStore()->currentPlaylistId();
+    if( playlistId <= 0 || rows.isEmpty() )
+        return;
+
+    QList<TrackInfoPtr> tracks;
+    for( int i = 0; i < ui->downloadList->count(); ++i ) {
+        DownloadItem *item = qobject_cast<DownloadItem *>( ui->downloadList->itemWidget( ui->downloadList->item( i ) ) );
+        if( !item || !item->playlistItem()->track() )
+            return;
+
+        tracks << item->playlistItem()->track();
+    }
+
+    const QList<int> order = Utility::reorderedIndexes( tracks.count(), rows, targetRow );
+    if( order.count() != tracks.count() )
+        return;
+
+    QList<TrackInfoPtr> reordered;
+    for( int index : order )
+        reordered << tracks.at( index );
+
+    The::playlistStore()->setTracks( playlistId, reordered );
+
+    loadCurrentPlaylist();
+}
+
+bool MainWindow::openPlaylistIsCustom() const
+{
+    const PlaylistStore::PlaylistInfo playlist =
+        The::playlistStore()->playlist( The::playlistStore()->currentPlaylistId() );
+
+    return playlist.isValid() && playlist.kind == PlaylistStore::CustomPlaylist;
+}
+
 void MainWindow::savePlaybackState()
 {
     if( !The::database()->isOpen() )
@@ -807,8 +1159,19 @@ void MainWindow::savePlaybackState()
 
     const PlaylistItemPtr &current = The::audioEngine()->currentTrack();
 
+    // Nothing playing is not the same as nothing to remember, and writing a
+    // zero here would be the second: the track of the last session comes back
+    // selected and paused, so closing the window without pressing play would
+    // throw away the very thing that had just been restored. One restart later
+    // there would be nothing left to come back to.
+    //
+    // What does forget the track is opening another playlist, which says so
+    // itself by writing the new playlist with no track in it.
+    if( !current || !current->track() )
+        return;
+
     The::playlistStore()->setPlaybackState( The::playlistStore()->currentPlaylistId(),
-                                            current && current->track() ? current->track()->id() : 0,
+                                            current->track()->id(),
                                             The::audioEngine()->currentTime() );
 }
 
@@ -828,7 +1191,17 @@ void MainWindow::addPlaylistItem( const PlaylistItemPtr &playlistItem )
 
     connect( item, &DownloadItem::excludeRequested, this, &MainWindow::excludeTrack );
 
+    connect( item, &DownloadItem::addToPlaylistRequested, this, &MainWindow::addTrackToPlaylist );
+
+    item->setInCustomPlaylist( openPlaylistIsCustom() );
+
     QListWidgetItem *wi = new QListWidgetItem;
+
+    // The row carries the id as well as the widget: a drag leaves the widget
+    // behind and takes the item's data with it.
+    if( playlistItem->track() )
+        wi->setData( SongRoles::TrackId, playlistItem->track()->id() );
+
     ui->downloadList->addItem( wi );
     ui->downloadList->setItemWidget( wi, item );
     wi->setSizeHint( QSize( Utility::coverSize + Utility::marginSize * 2,

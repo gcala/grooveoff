@@ -24,9 +24,15 @@
 #include "AudioEngine.h"
 #include "ActionCollection.h"
 #include "PlaylistAction.h"
+#include "Roles.h"
 
 #include <QDir>
+
+#include <algorithm>
 #include <QMenu>
+#include <QDragEnterEvent>
+#include <QDropEvent>
+#include <QMimeData>
 
 #define ITEM( x )  ( (DownloadItem * )itemWidget( item( x ) ) )
 
@@ -40,9 +46,9 @@ void DownloadList::reloadPlaylist()
 {
     The::playlist()->clear();
     
-    const QList< QAction * > playlistActions = The::actionCollection()->getMenu( "playlistMenu" )->actions();
+    const QList< QAction * > playlistActions = The::actionCollection()->getMenu( "tracksMenu" )->actions();
     for( QAction *action : playlistActions ) {
-        The::actionCollection()->getMenu( "playlistMenu" )->removeAction( action );
+        The::actionCollection()->getMenu( "tracksMenu" )->removeAction( action );
         delete action;
     }
 
@@ -53,8 +59,8 @@ void DownloadList::reloadPlaylist()
             continue;
 
         The::playlist()->appendItem( ITEM( i )->playlistItem() );
-        PlaylistAction *action = new PlaylistAction( ITEM( i )->playlistItem(), The::actionCollection()->getMenu( "playlistMenu" ) );
-        The::actionCollection()->getMenu( "playlistMenu" )->addAction( (QAction *)action );
+        PlaylistAction *action = new PlaylistAction( ITEM( i )->playlistItem(), The::actionCollection()->getMenu( "tracksMenu" ) );
+        The::actionCollection()->getMenu( "tracksMenu" )->addAction( (QAction *)action );
 
         connect( action, &QAction::triggered, this, &DownloadList::actionTriggered );
     }
@@ -122,6 +128,82 @@ void DownloadList::removeItem( DownloadItem* downItem )
             delete it;
         }
     }
+}
+
+QStringList DownloadList::mimeTypes() const
+{
+    return QListWidget::mimeTypes() << QString( GrooveOffMime::tracks );
+}
+
+QMimeData* DownloadList::mimeData( const QList<QListWidgetItem *> &items ) const
+{
+    QMimeData *data = QListWidget::mimeData( items );
+    if( !data )
+        return nullptr;
+
+    QList<qint64> ids;
+    for( const QListWidgetItem *item : items ) {
+        const qint64 id = item->data( SongRoles::TrackId ).toLongLong();
+        if( id > 0 )
+            ids << id;
+    }
+
+    if( ids.isEmpty() )
+        return data;
+
+    data->setData( GrooveOffMime::tracks, GrooveOffMime::encodeTracks( ids ) );
+
+    return data;
+}
+
+void DownloadList::dragEnterEvent( QDragEnterEvent *event )
+{
+    // Only its own tracks: a list belongs to one playlist, and a track dragged
+    // in from somewhere else would have to come from a playlist that is not
+    // open, which there is no way to be looking at.
+    if( event->source() == this && event->mimeData()->hasFormat( GrooveOffMime::tracks ) )
+        event->acceptProposedAction();
+    else
+        event->ignore();
+}
+
+void DownloadList::dragMoveEvent( QDragMoveEvent *event )
+{
+    if( event->source() != this ) {
+        event->ignore();
+        return;
+    }
+
+    // The base class draws the drop indicator, which is the only thing telling
+    // the user where the row is about to land.
+    QListWidget::dragMoveEvent( event );
+}
+
+void DownloadList::dropEvent( QDropEvent *event )
+{
+    // The drag came from here, so the selection is what is being dragged, and
+    // reading it back is exact where decoding the payload would not be.
+    QList<int> rows;
+    const QList<QListWidgetItem *> dragged = selectedItems();
+    for( const QListWidgetItem *item : dragged )
+        rows << row( item );
+
+    if( event->source() != this || rows.isEmpty() ) {
+        event->ignore();
+        return;
+    }
+
+    std::sort( rows.begin(), rows.end() );
+
+    const QModelIndex index = indexAt( event->position().toPoint() );
+
+    int targetRow = index.isValid() ? index.row() : count();
+    if( index.isValid() && dropIndicatorPosition() == QAbstractItemView::BelowItem )
+        ++targetRow;
+
+    event->acceptProposedAction();
+
+    emit reorderRequested( rows, targetRow );
 }
 
 void DownloadList::actionTriggered()

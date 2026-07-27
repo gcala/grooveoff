@@ -145,26 +145,10 @@ bool CacheManager::evict( const QString &infoHash )
     if( infoHash.isEmpty() )
         return false;
 
-    TorrentSession *session = The::torrentSession();
-
-    // Two ways for the bytes to go, and which one applies depends on whether
-    // the session holds the torrent. libtorrent deletes the files of a torrent
-    // it knows, on its own thread; one that was never reopened after start up
-    // is a directory nobody but us would ever remove.
-    const bool awake = session->isActive( infoHash );
-
-    session->remove( infoHash, true );
-
-    if( !awake ) {
-        QDir directory( QDir( session->torrentsPath() ).absoluteFilePath( infoHash ) );
-        if( directory.exists() && !directory.removeRecursively() )
-            qDebug() << "GrooveOff ::" << "could not delete the cache directory of" << infoHash;
-
-        // Belt and braces: the session skips this when it is not running, and a
-        // resume blob whose data are gone makes libtorrent recheck files that
-        // do not exist any more.
-        QFile::remove( QDir( session->resumePath() ).absoluteFilePath( infoHash + QLatin1String( ".resume" ) ) );
-    }
+    // The bytes and the resume blob, whether or not the session ever reopened
+    // this torrent: which of the two ways they go is the session's business,
+    // since it is the session that owns the layout of the cache.
+    The::torrentSession()->remove( infoHash, true );
 
     // clearData, never removeTorrent. The bytes are the cache, the rows are the
     // catalogue, and a track the user put in a playlist has to survive the disk

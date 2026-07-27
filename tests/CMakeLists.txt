@@ -41,6 +41,23 @@ target_link_libraries(cachetest PRIVATE
 
 add_test(NAME cache COMMAND cachetest)
 
+# Removing a torrent is the one operation that can destroy what the user made
+# by hand, and it does so silently, so both ways out of it are followed to the
+# end and asked what is left.
+add_executable(playlisttest PlaylistTest.cpp
+                            ../src/grooveoff/Utility.cpp
+                            ../src/grooveoff/widgets/PlaylistList.cpp)
+
+target_link_libraries(playlisttest PRIVATE
+                      grooveoff_core
+                      Qt6::Widgets
+                      Qt6::Test)
+
+target_include_directories(playlisttest PRIVATE ${CMAKE_SOURCE_DIR}/src/grooveoff)
+
+add_test(NAME playlist COMMAND playlisttest)
+set_tests_properties(playlist PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+
 # The selector is compiled into the test rather than linked from the
 # executable: the gui is one binary and splitting it into a library to test one
 # dialog would cost more than it gives.

@@ -135,6 +135,27 @@ void ActionCollection::initActions()
                                                     this
                                                   );
     
+    QAction *actionNewPlaylist = new QAction( QIcon::fromTheme( QLatin1String( "list-add" ),
+                                                               QIcon( QLatin1String( ":/resources/emblem-new.png" ) )
+                                                             ),
+                                             tr( "&New playlist..." ),
+                                             this
+                                           );
+
+    QAction *actionRenamePlaylist = new QAction( QIcon::fromTheme( QLatin1String( "edit-rename" ),
+                                                                   QIcon( QLatin1String( ":/resources/edit-rename.png" ) )
+                                                                 ),
+                                                 tr( "Re&name playlist..." ),
+                                                 this
+                                               );
+
+    QAction *actionRemovePlaylist = new QAction( QIcon::fromTheme( QLatin1String( "edit-delete" ),
+                                                                   QIcon( QLatin1String( ":/resources/edit-delete.png" ) )
+                                                                 ),
+                                                 tr( "Re&move playlist..." ),
+                                                 this
+                                               );
+
     QAction *actionEmptyCache = new QAction( QIcon::fromTheme( QLatin1String( "edit-clear-history" ),
                                                                QIcon( QLatin1String( ":/resources/edit-clear" ) )
                                                              ),
@@ -171,6 +192,9 @@ void ActionCollection::initActions()
     m_actionCollection[ QLatin1String( "actionStopDownloads" ) ] = actionStopDownloads;
     m_actionCollection[ QLatin1String( "actionRemoveFailed" ) ] = actionRemoveFailed;
     m_actionCollection[ QLatin1String( "actionClearDownloadList" ) ] = actionClearDownloadList;
+    m_actionCollection[ QLatin1String( "actionNewPlaylist" ) ] = actionNewPlaylist;
+    m_actionCollection[ QLatin1String( "actionRenamePlaylist" ) ] = actionRenamePlaylist;
+    m_actionCollection[ QLatin1String( "actionRemovePlaylist" ) ] = actionRemovePlaylist;
     m_actionCollection[ QLatin1String( "actionEmptyCache" ) ] = actionEmptyCache;
     m_actionCollection[ QLatin1String( "actionAbout" ) ] = actionAbout;
     m_actionCollection[ QLatin1String( "actionQtAbout" ) ] = actionQtAbout;
@@ -187,10 +211,12 @@ void ActionCollection::initActions()
     actionOpenTorrent->setToolTip( tr( "Add a .torrent file as a playlist" ) );
     actionClearDownloadList->setToolTip( tr( "Empties the list, leaving the catalogue alone" ) );
     actionEmptyCache->setToolTip( tr( "Deletes the downloaded data, leaving the playlists alone" ) );
+    actionNewPlaylist->setToolTip( tr( "A list of your own, filled by dragging tracks into it" ) );
     
     // set actions shortcuts
     actionClose->setShortcut( QKeySequence( Qt::CTRL | Qt::Key_Q ) );
     actionOpenTorrent->setShortcut( QKeySequence( Qt::CTRL | Qt::Key_O ) );
+    actionNewPlaylist->setShortcut( QKeySequence( Qt::CTRL | Qt::Key_N ) );
 }
 
 QMenuBar* ActionCollection::createMenuBar( QWidget *parent )
@@ -200,9 +226,19 @@ QMenuBar* ActionCollection::createMenuBar( QWidget *parent )
 //     QMenu* sessionsMenu = new QMenu( tr( "&Load Session" ), menuBar );
 //     m_menuCollection[ QLatin1String( "sessionsMenu" ) ] = sessionsMenu;
 
-    QMenu* playlistMenu = new QMenu( tr( "&Playlist" ), menuBar );
-    playlistMenu->setIcon( QIcon( QLatin1String( ":/resources/Playlist.png" ) ) );
-    m_menuCollection[ QLatin1String( "playlistMenu" ) ] = playlistMenu;
+    // The tracks of the list that is open, as one entry each: it is a way of
+    // jumping to a track without the mouse, not a list of playlists. It used to
+    // be called the playlist menu, back when there was only ever one list.
+    QMenu* tracksMenu = new QMenu( tr( "&Tracks" ), menuBar );
+    tracksMenu->setIcon( QIcon( QLatin1String( ":/resources/Playlist.png" ) ) );
+    m_menuCollection[ QLatin1String( "tracksMenu" ) ] = tracksMenu;
+
+    QMenu* playlistsMenu = new QMenu( tr( "&Playlists" ), menuBar );
+    playlistsMenu->addAction( m_actionCollection[ QLatin1String( "actionNewPlaylist" ) ] );
+    playlistsMenu->addSeparator();
+    playlistsMenu->addAction( m_actionCollection[ QLatin1String( "actionRenamePlaylist" ) ] );
+    playlistsMenu->addAction( m_actionCollection[ QLatin1String( "actionRemovePlaylist" ) ] );
+    m_menuCollection[ QLatin1String( "playlistsMenu" ) ] = playlistsMenu;
 
     QMenu* fileMenu = new QMenu( tr( "&File" ), menuBar );
     fileMenu->addAction( m_actionCollection[ QLatin1String( "actionOpenTorrent" ) ] );
@@ -214,7 +250,7 @@ QMenuBar* ActionCollection::createMenuBar( QWidget *parent )
     // fileMenu->addAction( m_actionCollection[ QLatin1String( "actionManageSessions" ) ] );
     // fileMenu->addSeparator();
     
-    fileMenu->addMenu(playlistMenu);
+    fileMenu->addMenu(tracksMenu);
     fileMenu->addSeparator();
     
     fileMenu->addAction( m_actionCollection[ QLatin1String( "actionDonate" ) ] );
@@ -251,6 +287,7 @@ QMenuBar* ActionCollection::createMenuBar( QWidget *parent )
     m_menuCollection[ QLatin1String( "helpMenu" ) ] = helpMenu;
 
     menuBar->addMenu( fileMenu );
+    menuBar->addMenu( playlistsMenu );
     menuBar->addMenu( downloadsMenu );
     menuBar->addMenu( viewMenu );
     menuBar->addMenu( settingsMenu );
@@ -272,7 +309,8 @@ QMenu* ActionCollection::createCompactMenu( QWidget *parent )
 //     compactMenu->addAction( m_actionCollection[ QLatin1String( "actionRemoveFailed" ) ] );
 //     compactMenu->addAction( m_actionCollection[ QLatin1String( "actionClearDownloadList" ) ] );
 //     compactMenu->addSeparator();
-    compactMenu->addMenu( m_menuCollection[ QLatin1String( "playlistMenu" ) ] );
+    compactMenu->addMenu( m_menuCollection[ QLatin1String( "tracksMenu" ) ] );
+    compactMenu->addMenu( m_menuCollection[ QLatin1String( "playlistsMenu" ) ] );
     compactMenu->addSeparator();
     compactMenu->addAction( m_actionCollection[ QLatin1String( "actionCompact" ) ] );
     compactMenu->addAction( m_actionCollection[ QLatin1String( "actionWide" ) ] );

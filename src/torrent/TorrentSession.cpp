@@ -829,13 +829,13 @@ bool TorrentSession::hasResume( const QString &infoHash ) const
 
 void TorrentSession::remove( const QString &infoHash, bool deleteFiles )
 {
-    if( !d->session )
-        return;
+    const QString directory = QDir( d->torrentsPath ).absoluteFilePath( infoHash );
 
-    const lt::torrent_handle handle = d->handles.take( infoHash );
-    if( handle.is_valid() ) {
+    const lt::torrent_handle handle = d->session ? d->handles.take( infoHash ) : lt::torrent_handle();
+    const bool held = handle.is_valid();
+
+    if( held ) {
         if( deleteFiles ) {
-            const QString directory = QDir( d->torrentsPath ).absoluteFilePath( infoHash );
             const lt::info_hash_t hashes = handle.info_hashes();
 
             if( hashes.has_v1() )
@@ -852,10 +852,24 @@ void TorrentSession::remove( const QString &infoHash, bool deleteFiles )
     d->awaitingMetadata.remove( infoHash );
     d->uploaded.remove( infoHash );
 
+    if( !deleteFiles )
+        return;
+
+    // A torrent the session holds has its files unlinked by libtorrent on its
+    // own disk thread, and the empty save path follows on torrent_deleted_alert.
+    // One that was never reopened is a directory nobody else would ever come
+    // back for, so it goes now.
+    //
+    // This lives here, and not in whoever asked, because the two callers are
+    // deliberately kept apart: evicting from the cache and removing from the
+    // catalogue are different acts with different consequences. What they do
+    // share is the layout of the disk, and that belongs to the session.
+    if( !held && QDir( directory ).exists() )
+        QDir( directory ).removeRecursively();
+
     // A resume file whose data are gone is worse than no resume file at all:
     // libtorrent would recheck files that do not exist any more.
-    if( deleteFiles )
-        QFile::remove( d->resumeFileFor( infoHash ) );
+    QFile::remove( d->resumeFileFor( infoHash ) );
 }
 
 void TorrentSession::requestResumeData( const QString &infoHash )

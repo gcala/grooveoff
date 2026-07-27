@@ -136,9 +136,23 @@
       <property name="orientation">
        <enum>Qt::Vertical</enum>
       </property>
+      <widget class="PlaylistList" name="playlistList">
+       <property name="contextMenuPolicy">
+        <enum>Qt::CustomContextMenu</enum>
+       </property>
+       <property name="alternatingRowColors">
+        <bool>true</bool>
+       </property>
+      </widget>
       <widget class="DownloadList" name="downloadList">
        <property name="dragDropMode">
-        <enum>QAbstractItemView::InternalMove</enum>
+        <enum>QAbstractItemView::DragDrop</enum>
+       </property>
+       <property name="defaultDropAction">
+        <enum>Qt::MoveAction</enum>
+       </property>
+       <property name="selectionMode">
+        <enum>QAbstractItemView::ExtendedSelection</enum>
        </property>
       </widget>
      </widget>
@@ -158,6 +172,11 @@
   <widget class="QStatusBar" name="statusbar" />
  </widget>
  <customwidgets>
+  <customwidget>
+   <class>PlaylistList</class>
+   <extends>QListWidget</extends>
+   <header location="global">widgets/PlaylistList.h</header>
+  </customwidget>
   <customwidget>
    <class>DownloadList</class>
    <extends>QListWidget</extends>

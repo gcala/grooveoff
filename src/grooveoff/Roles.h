@@ -20,6 +20,13 @@
 #ifndef ROLES_H
 #define ROLES_H
 
+#include <QByteArray>
+#include <QDataStream>
+#include <QIODevice>
+#include <QLatin1String>
+#include <QList>
+#include <QMimeData>
+
 namespace SongRoles
 {
     enum roles
@@ -30,8 +37,64 @@ namespace SongRoles
         Year,
         Cover,
         Id,
-        CoverPix
+        CoverPix,
+
+        /**
+         * The catalogue id of the track this row shows. The row carries it, and
+         * not only the DownloadItem inside it, because a drag leaves the widget
+         * behind and takes the item's data with it.
+         */
+        TrackId
     };
+}
+
+namespace PlaylistRoles
+{
+    enum roles
+    {
+        Id = 200,
+        Kind,
+        InfoHash    /**< empty for a custom playlist */
+    };
+}
+
+/**
+ * @namespace GrooveOffMime
+ * @short What a drag of tracks carries: their catalogue ids and nothing else.
+ *
+ * Ids rather than serialised tracks, and that is worth a line. A dropped track
+ * has to end up pointing at the same row of the catalogue the dragged one came
+ * from — that is the whole point of one table of tracks with the playlists
+ * pointing into it — and a copy of the metadata travelling along would be a
+ * second truth that starts drifting the moment the tags are read off the file.
+ */
+namespace GrooveOffMime
+{
+    inline const QLatin1String tracks( "application/x-grooveoff-tracks" );
+
+    inline QByteArray encodeTracks( const QList<qint64> &trackIds )
+    {
+        QByteArray payload;
+        QDataStream stream( &payload, QIODevice::WriteOnly );
+        stream << trackIds;
+
+        return payload;
+    }
+
+    /** empty when the drag came from somewhere that is not this application */
+    inline QList<qint64> decodeTracks( const QMimeData *data )
+    {
+        QList<qint64> trackIds;
+
+        if( !data || !data->hasFormat( tracks ) )
+            return trackIds;
+
+        QByteArray payload = data->data( tracks );
+        QDataStream stream( &payload, QIODevice::ReadOnly );
+        stream >> trackIds;
+
+        return trackIds;
+    }
 }
 
 #endif // ROLES_H

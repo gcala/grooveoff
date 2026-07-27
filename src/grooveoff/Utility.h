@@ -20,6 +20,7 @@
 #ifndef UTILITY_H
 #define UTILITY_H
 
+#include <QList>
 #include <QString>
 #include <QFont>
 #include <QStringList>
@@ -40,6 +41,18 @@ public:
 
     /** where the fast resume blobs live, flat so that start up is one listing */
     static QString resumeCachePath;
+
+    /**
+     * Where @p count rows end up when the ones at @p rows are dropped just
+     * before @p targetRow: the answer is the new order, as indexes into the old
+     * one.
+     *
+     * It lives here, away from the widget that asks for it, because it is the
+     * one part of a drag that is arithmetic rather than interface — and the one
+     * part where an off-by-one is invisible until somebody drags a track down
+     * by one place and watches it not move.
+     */
+    static QList<int> reorderedIndexes( int count, const QList<int> &rows, int targetRow );
 
     static QString elidedText( const QString &text, const Qt::TextElideMode &elideMode, const int &width, const QFont::Weight &weight );
 

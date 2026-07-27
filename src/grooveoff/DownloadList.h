@@ -36,6 +36,7 @@ public:
 
     QList< PlaylistItemPtr > playlistItems() const;
 
+
 public Q_SLOTS:
     void reloadPlaylist();
 
@@ -47,7 +48,34 @@ public Q_SLOTS:
 
     void removeItemsFromState( GrooveOff::TrackState state );
     void removeItem(DownloadItem *item);
-    
+
+Q_SIGNALS:
+    /**
+     * These rows were dropped back into this list, and belong at @p targetRow.
+     * The move is reported rather than performed, and that is deliberate: the
+     * rows carry a widget each, set with setItemWidget, and letting the view
+     * move them means letting it destroy and recreate rows whose widget it
+     * knows nothing about. Writing the new order and rebuilding the list from
+     * it goes through the one path that is already right.
+     *
+     * Rows and not track ids, because a custom playlist may legitimately hold
+     * the same track twice, and moving one copy must not move the other.
+     */
+    void reorderRequested( const QList<int> &rows, int targetRow );
+
+protected:
+    /**
+     * The catalogue ids of the dragged tracks, added to what QListWidget puts
+     * there anyway. Both formats travel together: the sidebar reads ours, and
+     * Qt's own is what makes the view draw the drag at all.
+     */
+    QMimeData* mimeData( const QList<QListWidgetItem *> &items ) const override;
+    QStringList mimeTypes() const override;
+
+    void dragEnterEvent( QDragEnterEvent *event ) override;
+    void dragMoveEvent( QDragMoveEvent *event ) override;
+    void dropEvent( QDropEvent *event ) override;
+
 private Q_SLOTS:
     void actionTriggered();
 };
