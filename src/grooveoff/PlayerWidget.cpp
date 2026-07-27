@@ -345,10 +345,33 @@ void PlayerWidget::showMessage( const QString& message )
     ui->messageLabel->setText( message );
 }
 
+/*!
+  \brief sourceChanged: another track, so another thing to listen to
+
+  The head of a file can arrive well after the music has started, and until it
+  does there are no tags to read: the bar showed the file name, track number
+  and all, beside a row that already had the title. So what the track says
+  about itself is not read once here — the widget subscribes to it.
+*/
 void PlayerWidget::sourceChanged()
 {
     const PlaylistItemPtr &track = The::audioEngine()->currentTrack();
-    
+    if( !track )
+        return;
+
+    disconnect( m_trackConnection );
+    m_trackConnection = connect( track.data(), &PlaylistItem::refreshNeeded,
+                                 this, &PlayerWidget::showTrackInfo );
+
+    showTrackInfo();
+}
+
+void PlayerWidget::showTrackInfo()
+{
+    const PlaylistItemPtr track = The::audioEngine()->currentTrack();
+    if( !track )
+        return;
+
     const QString &title = track->displayTitle();
     const QString &subtitle = track->displaySubtitle();
 
@@ -358,12 +381,6 @@ void PlayerWidget::sourceChanged()
     ui->album_authorLabel->setText( subtitle );
     ui->album_authorLabel->setToolTip( subtitle );
 
-    // The cover is read again for this track, and the widget starts listening
-    // to it: the head of a file can arrive after the music has started, and
-    // what the row learns then the player has to learn too.
-    disconnect( m_coverConnection );
-    m_coverConnection = connect( track.data(), &PlaylistItem::reloadCover,
-                                 this, &PlayerWidget::loadCover );
     loadCover();
 
     // Read off whatever is already on disk, and cheaply: Fast rather than

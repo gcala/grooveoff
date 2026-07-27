@@ -782,12 +782,12 @@ void MainWindow::readTagsOf( const QString &infoHash, int fileIndex )
     shown->setTrackNum( track->trackNum() );
     shown->setYear( track->year() );
 
-    item->refreshLabels();
-
-    // The cover goes out over the track's own signal rather than being set on
-    // the row: the player is looking at the same track and needs it too, and a
-    // signal is the only way of saying it once to whoever is showing it.
-    item->playlistItem()->requireCoverReload();
+    // Announced on the track rather than set on the row: the player bar is
+    // looking at the same object and needs the same news, and a signal is the
+    // only way of saying it once to everybody who is showing it. Setting it on
+    // the row is what left the bar with the file name — track number and all —
+    // beside a row that had the title.
+    item->playlistItem()->requireRefresh();
 }
 
 /*!

@@ -57,7 +57,14 @@ public:
     QString displayTitle() const;
     QString displaySubtitle() const;
 
-    void requireCoverReload();
+    /**
+     * The file has said what it is — tags, picture, the lot — and whoever is
+     * showing this track has to draw it again. One signal rather than one per
+     * field: the row and the player bar are looking at the same object and both
+     * of them would otherwise learn half of it.
+     */
+    void requireRefresh();
+
     void setState( const GrooveOff::PlayerState &state );
 
     inline bool isPlaying() {
@@ -71,7 +78,7 @@ public:
     bool operator==( PlaylistItem & ) const;
 
 Q_SIGNALS:
-    void reloadCover();
+    void refreshNeeded();
     void stateChanged( GrooveOff::PlayerState );
 
 private:

@@ -154,7 +154,7 @@ void DownloadItem::setupUi()
 */
 void DownloadItem::setupConnections()
 {
-    connect( m_playlistItem.data(), &PlaylistItem::reloadCover, this, &DownloadItem::loadCover );
+    connect( m_playlistItem.data(), &PlaylistItem::refreshNeeded, this, &DownloadItem::refreshLabels );
     connect( m_playlistItem.data(), &PlaylistItem::stateChanged, this, &DownloadItem::setPlayerState );
 
     connect( ui->playButton, &SvgButton::buttonClicked, this, &DownloadItem::playSong );
@@ -497,6 +497,8 @@ void DownloadItem::refreshLabels()
 
     ui->artist_albumLabel->setText( m_playlistItem->displaySubtitle() );
     ui->artist_albumLabel->setToolTip( m_playlistItem->displaySubtitle() );
+
+    loadCover();
 }
 
 void DownloadItem::loadCover()

@@ -61,6 +61,9 @@ protected:
     virtual void changeEvent ( QEvent * event );
 
 private Q_SLOTS:
+    /** everything the track says about itself, as often as it says it */
+    void showTrackInfo();
+
     /** the picture frame of the file, or the generic disc until there is one */
     void loadCover();
 
@@ -88,7 +91,7 @@ private:
      * Kept so that it can be dropped: it hangs off the track being played, and
      * the next track is a different object with a signal of its own.
      */
-    QMetaObject::Connection m_coverConnection;
+    QMetaObject::Connection m_trackConnection;
 
     //Methods
     void setupConnections();

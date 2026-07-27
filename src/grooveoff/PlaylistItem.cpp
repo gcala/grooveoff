@@ -44,9 +44,9 @@ bool PlaylistItem::operator==( PlaylistItem& right ) const
     return m_track && right.track() && *m_track == *right.track();
 }
 
-void PlaylistItem::requireCoverReload()
+void PlaylistItem::requireRefresh()
 {
-    emit reloadCover();
+    emit refreshNeeded();
 }
 
 TrackInfoPtr PlaylistItem::track() const
