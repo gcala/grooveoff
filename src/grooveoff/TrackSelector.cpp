@@ -21,6 +21,7 @@
 #include "ui_TrackSelector.h"
 #include "Roles.h"
 
+#include <QHeaderView>
 #include <QLocale>
 #include <QPushButton>
 #include <QTreeWidgetItem>
@@ -43,6 +44,15 @@ TrackSelector::TrackSelector( const QString &torrentName,
     , m_hasAudio( false )
 {
     ui->setupUi( this );
+
+    // The last column stretches by default, which here gave almost the whole
+    // dialog to four digits and a unit while the file names — the one thing
+    // being chosen between — were elided down to "Carpent…". A size needs the
+    // width of a size; everything left over belongs to the name.
+    QHeaderView *header = ui->fileList->header();
+    header->setStretchLastSection( false );
+    header->setSectionResizeMode( 0, QHeaderView::Stretch );
+    header->setSectionResizeMode( 1, QHeaderView::ResizeToContents );
 
     ui->headerLabel->setText( torrentName );
     ui->filterLine->setPlaceholderText( tr( "Filter" ) );
@@ -110,8 +120,6 @@ void TrackSelector::fill()
 
         item->setHidden( !isVisible( item ) );
     }
-
-    ui->fileList->resizeColumnToContents( 1 );
 }
 
 bool TrackSelector::isVisible( const QTreeWidgetItem *item ) const

@@ -40,6 +40,9 @@
    </item>
    <item>
     <widget class="QTreeWidget" name="fileList">
+     <property name="alternatingRowColors">
+      <bool>true</bool>
+     </property>
      <property name="rootIsDecorated">
       <bool>false</bool>
      </property>
