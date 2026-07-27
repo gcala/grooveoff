@@ -57,6 +57,8 @@ private Q_SLOTS:
 
     void listensOnTheLoopbackOnly();
     void tellsWhenATrackCanBePlayed();
+    void refusesToStartOnTheHeadAlone();
+    void neverServesBytesFromAHole();
     void neverLetsThePrefetchOutrankWhatIsPlaying();
     void servesTheWholeFile();
     void servesARange();
@@ -68,8 +70,13 @@ private Q_SLOTS:
     void refusesAnUnknownTorrent();
 
 private:
-    /** one request, one response, driven by the event loop so the server can run */
-    QByteArray http( const QByteArray &request );
+    /**
+     * One request, one response, driven by the event loop so the server can
+     * run. The timeout is a parameter because two of these are meant to hang:
+     * a read that stops at a hole never finishes, and waiting the full ten
+     * seconds twice to prove it costs more than the proof is worth.
+     */
+    QByteArray http( const QByteArray &request, int timeoutMs = 10000 );
 
     QByteArray requestFor( const QByteArray &method, const QByteArray &target, const QByteArray &host,
                            const QByteArray &extraHeaders = QByteArray() ) const;
@@ -77,9 +84,13 @@ private:
     static QByteArray headOf( const QByteArray &response );
     static QByteArray bodyOf( const QByteArray &response );
 
+    /** a second torrent whose file is on disk only as far as its first pieces */
+    QString buildPartialTorrent();
+
     QTemporaryDir m_root;
     QString       m_cacheRoot;
     QString       m_infoHash;
+    QString       m_partialHash;
     QByteArray    m_content;
     QUrl          m_url;
 };
@@ -169,7 +180,7 @@ QByteArray StreamServerTest::requestFor( const QByteArray &method, const QByteAr
            "\r\n";
 }
 
-QByteArray StreamServerTest::http( const QByteArray &request )
+QByteArray StreamServerTest::http( const QByteArray &request, int timeoutMs )
 {
     QTcpSocket socket;
     QByteArray response;
@@ -184,7 +195,7 @@ QByteArray StreamServerTest::http( const QByteArray &request )
 
     socket.connectToHost( QHostAddress::LocalHost, The::streamServer()->port() );
 
-    const int timeout = 10000;
+    const int timeout = timeoutMs;
     QElapsedTimer clock;
     clock.start();
     while( !done && clock.elapsed() < timeout )
@@ -238,6 +249,141 @@ void StreamServerTest::tellsWhenATrackCanBePlayed()
     QCOMPARE( playable.count(), 1 );
     QCOMPARE( playable.first().at( 0 ).toString(), m_infoHash );
     QCOMPARE( playable.first().at( 1 ).toInt(), 0 );
+}
+
+QString StreamServerTest::buildPartialTorrent()
+{
+    const QString staging = m_root.filePath( QLatin1String( "partial" ) );
+    const QString album   = staging + QLatin1String( "/Half Album" );
+    if( !QDir().mkpath( album ) )
+        return QString();
+
+    QFile source( album + QLatin1String( "/01 - meta.mp3" ) );
+    if( !source.open( QIODevice::WriteOnly ) )
+        return QString();
+    source.write( m_content );
+    source.close();
+
+    std::vector<lt::create_file_entry> files = lt::list_files( album.toStdString() );
+    lt::create_torrent torrent( std::move( files ), 16 * 1024 );
+
+    lt::error_code error;
+    lt::set_piece_hashes( torrent, staging.toStdString(), error );
+    if( error )
+        return QString();
+
+    const std::vector<char> buffer = torrent.generate_buf();
+
+    const QString torrentFile = m_root.filePath( QLatin1String( "partial.torrent" ) );
+    QFile file( torrentFile );
+    if( !file.open( QIODevice::WriteOnly ) )
+        return QString();
+    file.write( buffer.data(), qint64( buffer.size() ) );
+    file.close();
+
+    const lt::add_torrent_params parsed = lt::load_torrent_file( torrentFile.toStdString() );
+    const lt::sha1_hash hash = parsed.ti->info_hashes().get_best();
+    const QString infoHash = QString::fromLatin1( QByteArray( hash.data(), int( hash.size() ) ).toHex() );
+
+    // Only the first two pieces go into the cache. That is what a track looks
+    // like a moment after somebody pressed play on it, and it is precisely the
+    // state the gate has to refuse.
+    const QString target = m_cacheRoot + QLatin1String( "/torrents/" ) + infoHash + QLatin1String( "/Half Album" );
+    if( !QDir().mkpath( target ) )
+        return QString();
+
+    QFile head( target + QLatin1String( "/01 - meta.mp3" ) );
+    if( !head.open( QIODevice::WriteOnly ) )
+        return QString();
+    head.write( m_content.left( 32 * 1024 ) );
+    head.close();
+
+    QSignalSpy metadata( The::torrentSession(), &TorrentSession::metadataReady );
+    if( The::torrentSession()->addTorrentFile( torrentFile ) != infoHash || !metadata.wait( 5000 ) )
+        return QString();
+
+    return infoHash;
+}
+
+/*!
+  \brief refusesToStartOnTheHeadAlone: one piece is not a buffer
+
+  The regression this stands in front of was not theoretical. The gate used to
+  ask for the head piece and nothing else, and on a torrent with half megabyte
+  pieces the head of a flac is about five seconds of music: the player started,
+  ran out, and the listener got a track that stuttered twice and then died with
+  an i/o error while the swarm was working perfectly well.
+*/
+void StreamServerTest::refusesToStartOnTheHeadAlone()
+{
+    m_partialHash = buildPartialTorrent();
+    QVERIFY( !m_partialHash.isEmpty() );
+
+    QTRY_VERIFY_WITH_TIMEOUT( The::torrentSession()->havePiece( m_partialHash, 0 ), 15000 );
+
+    // The head is there — and it is still not enough to start on.
+    QVERIFY( The::torrentSession()->bufferedBytes( m_partialHash, 0 ) > 0 );
+    QVERIFY( !The::streamServer()->isPlayable( m_partialHash, 0 ) );
+
+    // Asking for it does not answer yes either: it waits, which is the whole
+    // difference between a track that buffers and one that fails.
+    QSignalSpy playable( The::streamServer(), &StreamServer::trackPlayable );
+    The::streamServer()->prepare( m_partialHash, 0 );
+    QCOMPARE( playable.count(), 0 );
+
+    The::streamServer()->cancelPreparation();
+
+    // The complete one, by contrast, is playable at once — the gate is a floor
+    // and not a rule against starting.
+    QVERIFY( The::streamServer()->isPlayable( m_infoHash, 0 ) );
+}
+
+/*!
+  \brief neverServesBytesFromAHole: what is sent is what arrived, or nothing
+
+  The cache is made of sparse files, so a hole reads back as zeros rather than
+  as a short read: nothing about a QFile says which of its bytes are real. The
+  only honest gate is have_piece, and a mistake in the arithmetic that decides
+  where a verified piece ends does not look like a bug in the server — it looks
+  like a corrupt track, which is what the player then reports.
+
+  So the whole answer is compared against the original, byte for byte, for a
+  file that is only partly there. Whatever comes back must be a prefix of the
+  real thing: short is a wait, wrong is a lie.
+*/
+void StreamServerTest::neverServesBytesFromAHole()
+{
+    QVERIFY( !m_partialHash.isEmpty() );
+
+    const QUrl url = The::streamServer()->urlFor( m_partialHash, 0 );
+    QVERIFY( !url.isEmpty() );
+
+    const QByteArray host = "127.0.0.1:" + QByteArray::number( The::streamServer()->port() );
+    const QByteArray response = http( requestFor( "GET",
+                                                  url.toEncoded( QUrl::RemoveScheme | QUrl::RemoveAuthority ),
+                                                  host ),
+                                      3000 );
+
+    const QByteArray body = bodyOf( response );
+
+    // Not one byte more than what is really on disk.
+    const qint64 buffered = The::torrentSession()->bufferedBytes( m_partialHash, 0 );
+    QVERIFY2( body.size() <= buffered,
+              qPrintable( QStringLiteral( "served %1 bytes with only %2 buffered" )
+                          .arg( body.size() ).arg( buffered ) ) );
+
+    // And every byte of it the right one.
+    QCOMPARE( body, m_content.left( body.size() ) );
+
+    // A range that starts inside the hole has nothing to answer with, and says
+    // so by waiting rather than by inventing zeros.
+    const QByteArray tail = http( requestFor( "GET",
+                                              url.toEncoded( QUrl::RemoveScheme | QUrl::RemoveAuthority ),
+                                              host,
+                                              "Range: bytes=" + QByteArray::number( m_content.size() - 1024 ) + "-\r\n" ),
+                                              3000 );
+
+    QVERIFY( bodyOf( tail ).isEmpty() );
 }
 
 void StreamServerTest::neverLetsThePrefetchOutrankWhatIsPlaying()

@@ -111,6 +111,14 @@ private:
     GrooveOff::PlayerState m_playerState;
     bool                   m_inCustomPlaylist = false;
 
+    /**
+     * Whether the whole file is in the cache, hence whether the bar has
+     * anything left to say. True until told otherwise on purpose: a row nobody
+     * has measured has nothing to show, and starting at false would put an
+     * empty bar on every row of the list the moment its torrent woke up.
+     */
+    bool                   m_fullyBuffered = true;
+
     void setupUi();
     void setupConnections();
     void stateChanged();

@@ -314,6 +314,21 @@ void MainWindow::setupConnections()
         if( !current )
             return;
 
+        // The listening has moved on, so whatever the previous row was showing
+        // was about a moment that has passed. Left alone it stays there for
+        // good — a track that stumbled on its last frames kept saying it was
+        // unavailable long after it had finished playing, with the next one
+        // already going.
+        if( m_playingTrack && m_playingTrack != current->track() ) {
+            if( DownloadItem *previous = rowFor( m_playingTrack ) ) {
+                previous->setTrackState( The::torrentSession()->hasMetadata( m_playingTrack->infoHash() )
+                                         ? GrooveOff::ReadyState
+                                         : GrooveOff::DormantState );
+            }
+        }
+
+        m_playingTrack = current->track();
+
         DownloadItem *item = rowFor( current->track() );
         if( !item )
             return;
@@ -695,6 +710,19 @@ void MainWindow::onTorrentStats( const QString &infoHash, int peers, int seeds, 
     const PlaylistItemPtr current = The::audioEngine()->currentTrack();
     if( !current || !current->track() || current->track()->infoHash() != infoHash )
         return;
+
+    // Bytes are still coming in, so the wait is buffering rather than a stall,
+    // and the clock that would call it one goes back to the start. A slow swarm
+    // is not a silent one, and a row saying it is waiting while its own
+    // progress bar fills would be the interface contradicting itself.
+    if( infoHash != m_lastStatsHash )
+        m_lastBytesDone = -1;
+
+    if( bytesDone > m_lastBytesDone && m_stallTimer->isActive() )
+        m_stallTimer->start();
+
+    m_lastStatsHash = infoHash;
+    m_lastBytesDone = bytesDone;
 
     // The led follows the torrent being listened to, not the network as a
     // whole: whether a machine is online says nothing about whether this track

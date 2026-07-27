@@ -89,6 +89,7 @@ private:
     void setupLabels();
     void setupButtonsType();
     void setErrorState();
+    void setBufferingState();
     void setPlayingState();
     void setStoppedState();
     void setPausedState();

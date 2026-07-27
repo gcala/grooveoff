@@ -179,6 +179,15 @@ void DownloadItem::setBuffered( qint64 bytesAvailable, qint64 bytesTotal )
     ui->progressBar->setToolTip( tr( "%1 of %2 buffered" )
                                      .arg( QLocale().formattedDataSize( bytesAvailable ),
                                            QLocale().formattedDataSize( bytesTotal ) ) );
+
+    m_fullyBuffered = bytesTotal > 0 && bytesAvailable >= bytesTotal;
+
+    // While a track streams, how far ahead of the player the file has got is
+    // the one thing worth looking at, and hiding it the moment playback starts
+    // takes it away exactly then. It goes when there is nothing left to say —
+    // when the whole file is in the cache — and not a second earlier.
+    if( m_trackState == GrooveOff::ReadyState )
+        ui->progressWidget->setVisible( !m_fullyBuffered );
 }
 
 void DownloadItem::setPeerInfo( int peers, int seeds )
@@ -280,7 +289,7 @@ void DownloadItem::setBufferingState()
 
 void DownloadItem::setReadyState()
 {
-    ui->progressWidget->setVisible( false );
+    ui->progressWidget->setVisible( !m_fullyBuffered );
     ui->infoIconWidget->setVisible( false );
 
     ui->playButton->setButtonEnabled( true );

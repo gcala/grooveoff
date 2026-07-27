@@ -60,6 +60,15 @@ public:
 
     Mode mode() const;
 
+    /**
+     * How many bytes of a file are worth @p seconds of listening. A guess, and
+     * a deliberately generous one: it assumes more bitrate than nearly any
+     * music has, so the answer errs towards buffering too much rather than too
+     * little. Shared with the gate in front of the player so that the amount
+     * waited for and the amount asked for are the same number.
+     */
+    static qint64 bytesForSeconds( int seconds );
+
     QString infoHash() const;
     int fileIndex() const;
 

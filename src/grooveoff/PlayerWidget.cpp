@@ -201,6 +201,10 @@ void PlayerWidget::stateChanged( GrooveOff::PlayerState state )
         setErrorState();
         break;
         
+    case GrooveOff::PlayerState::Buffering:
+        setBufferingState();
+        break;
+
     case GrooveOff::PlayerState::Playing:
         setPlayingState();
         break;
@@ -223,6 +227,28 @@ void PlayerWidget::setErrorState()
 {
     ui->stackedWidget->setCurrentIndex( 0 );
     ui->playPauseButton->setPlaying( false );
+}
+
+/*!
+  \brief setBufferingState: waiting is a state of its own, and it has to show
+
+  Without this the widget kept whatever was on it, which after adding a torrent
+  was the torrent's name — so pressing play on a track left the name of its
+  album on the status bar and a Play button that looked like nothing had
+  happened. Filling a buffer is the one moment when there is genuinely nothing
+  else to report, and it is exactly then that saying nothing reads as broken.
+*/
+void PlayerWidget::setBufferingState()
+{
+    const PlaylistItemPtr track = The::audioEngine()->currentTrack();
+
+    showMessage( track && track->track()
+                 ? tr( "Buffering %1…" ).arg( track->displayTitle() )
+                 : tr( "Buffering…" ) );
+
+    ui->playPauseButton->setButtonEnabled( true );
+    ui->playPauseButton->setPlaying( true );
+    ui->playPauseButton->setToolTip( tr( "Pause" ) );
 }
 
 void PlayerWidget::setPlayingState()
@@ -302,6 +328,10 @@ void PlayerWidget::toggleTimeLabel()
 
 void PlayerWidget::showMessage( const QString& message )
 {
+    // The message hides the player, so it goes away again by itself — but only
+    // when there is a player underneath to go back to. A message shown while
+    // nothing plays is all there is to look at and stays until something
+    // replaces it.
     if( The::audioEngine()->state() == GrooveOff::PlayerState::Playing || The::audioEngine()->state() == GrooveOff::PlayerState::Paused ) {
         m_timer->setSingleShot( true );
         m_timer->start( 3000 );
@@ -329,10 +359,17 @@ void PlayerWidget::sourceChanged()
                                                  QIcon( QLatin1String( ":/resources/media-optical.png" ) )
                                                ).pixmap( ui->coverLabel->size() ) );
 
-    // Audio Properties, read off whatever is already on disk
-    const TagLib::FileRef trackFileRef( track->localPath().toLatin1(),
+    // Read off whatever is already on disk, and cheaply: Fast rather than
+    // Average, because for a vbr mp3 Average means scanning the whole file, and
+    // scanning one made mostly of holes spends the time to arrive at a wrong
+    // answer. Flac and the rest answer from the header either way.
+    //
+    // encodeName rather than toLatin1: a path this application did not choose
+    // and cannot rename, out of a torrent somebody else made, is the last place
+    // to assume the alphabet.
+    const TagLib::FileRef trackFileRef( QFile::encodeName( track->localPath() ).constData(),
                              true,
-                             TagLib::AudioProperties::Average
+                             TagLib::AudioProperties::Fast
                            );
     if( trackFileRef.isNull() || !trackFileRef.audioProperties() ) {
         qDebug() << "GrooveOff :: TagLib ::" << track->localPath() << "has no readable properties yet";

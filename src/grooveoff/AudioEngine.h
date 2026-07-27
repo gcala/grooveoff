@@ -137,6 +137,15 @@ Q_SIGNALS:
 
 private Q_SLOTS:
     void onPositionChanged( qint64 time );
+
+    /**
+     * Holds the player back when the file stops being far enough ahead of it,
+     * and lets it go again when it is. Without this a swarm slower than the
+     * bitrate does not make a track wait, it makes ffmpeg read into a piece
+     * that has not arrived, give up, and report a corrupt stream — which is
+     * what a slow torrent looked like from the outside.
+     */
+    void checkBuffer();
     void onMediaStatusChanged( QMediaPlayer::MediaStatus status );
     void onSourceChanged();
     void onFinished();
@@ -191,6 +200,19 @@ private:
     GrooveOff::PlayerState m_state;
 
     QMediaPlayer* m_mediaPlayer;
+
+    /** whether the track had all but finished when the player gave up on it */
+    bool reachedTheEnd() const;
+
+    /** whether the pause on screen is ours, waiting for bytes, or the user's */
+    bool m_waitingForBuffer = false;
+
+    /**
+     * Where the track had got to the last time anybody looked. The player
+     * reports no position once it has stopped, and telling a track that failed
+     * from one that simply ran out needs to know how far it got.
+     */
+    qint64 m_lastPosition = 0;
     QAudioOutput* m_audioOutput;
 
     int m_volume;

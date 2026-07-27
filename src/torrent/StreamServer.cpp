@@ -126,6 +126,9 @@ public:
         : q( server )
     {}
 
+    /** how much each torrent had last time it said, so progress can be seen */
+    QHash<QString, qint64> lastBytesDone;
+
     /** a track and the reads that hold it alive */
     struct TrackEntry
     {
@@ -632,6 +635,26 @@ bool StreamServer::start()
         d->checkPreparation();
     } );
 
+    // A read stopped on a piece that has not come is only in trouble if nothing
+    // is coming at all. While the torrent is still taking bytes in, the wait is
+    // buffering and the clock goes back to zero: what the timeout is there to
+    // catch is a swarm that has gone silent, not one that is merely slow, and
+    // cutting the stream of a slow one turns a stutter into a dead track.
+    connect( The::torrentSession(), &TorrentSession::statsUpdated, this,
+             [this]( const QString &infoHash, int, int, qint64, qint64 bytesDone ) {
+        if( bytesDone <= d->lastBytesDone.value( infoHash, -1 ) )
+            return;
+
+        d->lastBytesDone.insert( infoHash, bytesDone );
+
+        const QList<QTcpSocket*> sockets = d->reads.keys();
+        for( QTcpSocket *socket : sockets ) {
+            PendingRead *read = d->reads.value( socket );
+            if( read && read->waitingForPiece && read->track && read->track->infoHash() == infoHash )
+                read->waiting.restart();
+        }
+    } );
+
     if( !d->sweepTimer ) {
         d->sweepTimer = new QTimer( this );
         d->sweepTimer->setInterval( sweepIntervalMs );
@@ -710,13 +733,31 @@ bool StreamServer::isPlayable( const QString &infoHash, int fileIndex ) const
     if( size <= 0 )
         return false;
 
-    // The head and nothing more. The tail is asked for at the same time, by
-    // TorrentTrack, because ffmpeg probes it — but waiting for it here would
-    // hold a forty megabyte flac hostage to a piece at the far end of it,
-    // while a piece it has to wait for is a wait and not an error.
+    // The head first: without the beginning of the file there is nothing for
+    // ffmpeg to recognise, and handing it a url too early is not a wait but an
+    // i/o error it never recovers from.
     const TorrentSession::PieceLocation head = session->locate( infoHash, fileIndex, 0 );
 
-    return session->havePiece( infoHash, head.piece );
+    if( !session->havePiece( infoHash, head.piece ) )
+        return false;
+
+    // And then enough of it to listen to. The head alone is one piece, which on
+    // a torrent with half megabyte pieces is five seconds of a flac: the player
+    // starts, runs out, and what the listener gets is a track that stutters and
+    // then dies. What is waited for here is the same number of seconds the
+    // deadlines ask for, so the buffer is filled and kept filled by one policy
+    // rather than two that disagree.
+    //
+    // The tail is not waited for, and that is not an oversight: TorrentTrack
+    // asks for it at the same time because ffmpeg probes it, but holding a
+    // seventeen megabyte flac hostage to a piece at its far end would be a
+    // track that never starts on a slow swarm.
+    QSettings settings;
+    const qint64 wanted = qMin( size,
+                                TorrentTrack::bytesForSeconds( settings.value( Settings::bufferSeconds,
+                                                                               Settings::bufferSecondsDefault ).toInt() ) );
+
+    return session->bufferedBytes( infoHash, fileIndex ) >= wanted;
 }
 
 void StreamServer::prepare( const QString &infoHash, int fileIndex )

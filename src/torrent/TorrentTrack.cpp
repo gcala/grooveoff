@@ -84,6 +84,11 @@ TorrentTrack::TorrentTrack( const QString &infoHash, int fileIndex, Mode mode, Q
     wantAt( 0 );
 }
 
+qint64 TorrentTrack::bytesForSeconds( int seconds )
+{
+    return qMax( 1, seconds ) * assumedBytesPerSecond;
+}
+
 TorrentTrack::Mode TorrentTrack::mode() const
 {
     return m_mode;
@@ -174,8 +179,8 @@ void TorrentTrack::armWindow( qint64 offset )
         The::torrentSession()->resetPieceDeadline( m_infoHash, piece );
 
     QSettings settings;
-    const qint64 windowBytes = qMax( 1, settings.value( Settings::bufferSeconds, Settings::bufferSecondsDefault ).toInt() )
-                               * assumedBytesPerSecond;
+    const qint64 windowBytes = bytesForSeconds( settings.value( Settings::bufferSeconds,
+                                                                Settings::bufferSecondsDefault ).toInt() );
 
     m_windowFirst = -1;
     m_windowLast  = -1;

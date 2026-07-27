@@ -206,6 +206,13 @@ private:
     /** turns a buffering that never ends into a row that says it is waiting */
     QTimer *m_stallTimer;
 
+    /** the track the rows are being marked for, so the last one can be let go */
+    TrackInfoPtr m_playingTrack;
+
+    /** what the torrent being listened to had last time, to see it progressing */
+    QString m_lastStatsHash;
+    qint64  m_lastBytesDone = -1;
+
     Mpris *m_mpris;
 
     static QPointer< MainWindow > s_instance;

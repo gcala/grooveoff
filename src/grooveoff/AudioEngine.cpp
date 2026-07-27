@@ -115,6 +115,12 @@ void AudioEngine::setupConnections()
             play();
     } );
 
+    // The buffer is checked off the statistics as well as off the position: a
+    // player we have paused reports no position at all, so this is the only
+    // thing that can tell it to go again.
+    connect( The::torrentSession(), &TorrentSession::statsUpdated, this,
+             [this]( const QString &, int, int, qint64, qint64 ) { checkBuffer(); } );
+
     connect( The::torrentSession(), &TorrentSession::torrentError, this,
              [this]( const QString &infoHash, const QString &message ) {
         if( !m_pendingTrack || !m_pendingTrack->track() || m_pendingTrack->track()->infoHash() != infoHash )
@@ -128,9 +134,108 @@ void AudioEngine::setupConnections()
 
 void AudioEngine::onPositionChanged( qint64 time )
 {
+    m_lastPosition = time;
+
     emit seeked( time, false );
 
+    checkBuffer();
     maybePrefetchNext();
+}
+
+/*!
+  \brief checkBuffer: waiting is a thing a player does, dying is not
+
+  A torrent slower than the bitrate of what it holds will run the player out of
+  bytes, and there is nothing to be done about that: it is the structural limit
+  of the whole idea. What can be done is to meet it properly. Left alone,
+  ffmpeg reads into a piece that has not arrived, waits, gives up, and reports
+  a stream it could not demux — so a slow swarm looks exactly like a corrupt
+  file, and the track ends up marked as unavailable when nothing is wrong with
+  it.
+
+  So the player is paused before it gets there and started again when the file
+  is far enough ahead. How far is read off the same setting as everything else
+  about buffering, and the pause is ours: pressing play while we are holding it
+  hands control back, because somebody who insists is entitled to whatever
+  comes out.
+*/
+/*!
+  \brief reachedTheEnd: whether the track got where it was going
+
+  The last frames of a stream are where a decoder is likeliest to complain: it
+  reads a little past what is there, finds a fragment of a frame and says the
+  data are invalid. That is a stream ending, not a track failing — and calling
+  it a failure marked a track as unavailable the moment it finished playing,
+  which is the exact opposite of what had just happened.
+
+  A whole second of slack, because where a decoder gives up is not exactly
+  where the music stops.
+*/
+bool AudioEngine::reachedTheEnd() const
+{
+    const qint64 duration = m_mediaPlayer->duration();
+
+    return duration > 0 && m_lastPosition >= duration - 1000;
+}
+
+void AudioEngine::checkBuffer()
+{
+    if( !m_currentTrack || !m_currentTrack->track() )
+        return;
+
+    const TrackInfoPtr &info = m_currentTrack->track();
+    const qint64 duration = m_mediaPlayer->duration();
+    const qint64 size     = info->fileSize();
+
+    // Before the player knows how long the track is there is no way to turn
+    // bytes into seconds, and guessing would hold back a track that is fine.
+    if( duration <= 0 || size <= 0 )
+        return;
+
+    const qint64 buffered = The::torrentSession()->bufferedBytes( info->infoHash(), info->fileIndex() );
+
+    // The whole file is there, so there is nothing left to wait for — and that
+    // includes a wait already under way. Returning here without letting the
+    // player go was a track held at buffering for ever, with a bar reading a
+    // perfectly truthful hundred per cent: the one state in which nothing else
+    // was ever going to come along and release it.
+    if( buffered >= size ) {
+        if( m_waitingForBuffer ) {
+            m_waitingForBuffer = false;
+            m_mediaPlayer->play();
+        }
+
+        return;
+    }
+
+    // Bytes to milliseconds through the one ratio that is certainly right for
+    // this file: its own size against its own duration.
+    const qint64 playableMs = buffered * duration / size;
+    const qint64 aheadMs    = playableMs - m_mediaPlayer->position();
+
+    QSettings settings;
+    const qint64 wantedMs = qMax( 1, settings.value( Settings::bufferSeconds,
+                                                     Settings::bufferSecondsDefault ).toInt() ) * 1000;
+
+    // Stop with less in hand than was asked for. The margin is measured against
+    // the playing position, while ffmpeg reads well ahead of it, so by the time
+    // this fires the demuxer is already closer to the edge than the number says
+    // — which is why the number is the whole setting and not half of it.
+    if( !m_waitingForBuffer && aheadMs < wantedMs ) {
+        m_waitingForBuffer = true;
+        m_mediaPlayer->pause();
+        setState( GrooveOff::PlayerState::Buffering );
+        return;
+    }
+
+    // And start again only with twice it, never at the line that stopped it:
+    // resuming with exactly enough means stopping again a moment later, and a
+    // track that stutters every few seconds is worse than one that waits once
+    // and then plays.
+    if( m_waitingForBuffer && aheadMs >= wantedMs * 2 ) {
+        m_waitingForBuffer = false;
+        m_mediaPlayer->play();
+    }
 }
 
 void AudioEngine::maybePrefetchNext()
@@ -204,16 +309,41 @@ void AudioEngine::updateState()
 {
     GrooveOff::PlayerState newState;
 
-    if( m_mediaPlayer->error() != QMediaPlayer::NoError ) {
-        qDebug() << "GrooveOff :: " << "Error: " << m_mediaPlayer->errorString();
-        newState = GrooveOff::PlayerState::Error;
-    } else if( m_mediaPlayer->mediaStatus() == QMediaPlayer::StalledMedia ) {
+    const QMediaPlayer::PlaybackState playback = m_mediaPlayer->playbackState();
+    const QMediaPlayer::MediaStatus   status   = m_mediaPlayer->mediaStatus();
+
+    if( m_waitingForBuffer ) {
+        // The player is paused because we paused it. That is buffering, and
+        // calling it a pause would put a Play button in front of somebody who
+        // never pressed anything.
         newState = GrooveOff::PlayerState::Buffering;
+    } else if( status == QMediaPlayer::StalledMedia ) {
+        // Running but with nothing to run on. This has to come before the
+        // playing test and not after it: while a stream starves, the playback
+        // state still says Playing — it is the media status that knows — and
+        // asking in the other order gives a spinning animation and a pause
+        // button over a track that has gone silent.
+        newState = GrooveOff::PlayerState::Buffering;
+    } else if( playback == QMediaPlayer::PlayingState ) {
+        // And playing beats the error below, which is why that is last.
+        newState = GrooveOff::PlayerState::Playing;
+    } else if( m_mediaPlayer->error() != QMediaPlayer::NoError
+               && playback == QMediaPlayer::StoppedState
+               && status != QMediaPlayer::EndOfMedia
+               && !reachedTheEnd() ) {
+        // QMediaPlayer keeps its last error until a new source is set, so it
+        // says nothing about now. Streaming makes that difference visible in
+        // the worst way: ffmpeg reports a failure whenever it runs out of bytes
+        // mid packet, recovers on its own the moment more arrive, and the error
+        // stays behind — the row said the track was not available while the
+        // track was audibly playing, and went on saying it after the end.
+        //
+        // What an error means is that the player has given up, so that is what
+        // is asked: stopped, and not stopped because it reached the end.
+        qDebug() << "GrooveOff ::" << "playback failed:" << m_mediaPlayer->errorString();
+        newState = GrooveOff::PlayerState::Error;
     } else {
-        switch( m_mediaPlayer->playbackState() ) {
-            case QMediaPlayer::PlayingState:
-                newState = GrooveOff::PlayerState::Playing;
-                break;
+        switch( playback ) {
             case QMediaPlayer::PausedState:
                 newState = GrooveOff::PlayerState::Paused;
                 break;
@@ -254,6 +384,8 @@ void AudioEngine::playItem( const PlaylistItemPtr &track)
     m_currentTrack = track;
     m_oldTrack = track;
     m_pendingTrack.clear();
+    m_waitingForBuffer = false;
+    m_lastPosition = 0;
 
     // Whatever was being brought up for the previous choice is dropped here.
     // Skipping this is how ten skips become ten downloads and a cache full of
@@ -357,6 +489,10 @@ void AudioEngine::playPause()
 
 void AudioEngine::pause()
 {
+    // An explicit pause ends our own wait: from here on the player is stopped
+    // because somebody stopped it, and starting it again is their call.
+    m_waitingForBuffer = false;
+
     m_mediaPlayer->pause();
 }
 
@@ -374,6 +510,11 @@ void AudioEngine::play()
             return;
         }
     }
+
+    // Somebody who presses play while we are holding the track back is entitled
+    // to whatever comes out of it.
+    m_waitingForBuffer = false;
+
     m_mediaPlayer->play();
 }
 
