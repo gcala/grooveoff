@@ -105,8 +105,16 @@ private Q_SLOTS:
     /** the disk said no, which is the one thing worth a modal */
     void onStorageError( const QString &infoHash, const QString &message );
 
-    /** asks what of the torrent goes into its playlist, and remembers the answer */
-    void chooseTracksOf( const QString &infoHash );
+    /**
+     * Asks what of the torrent goes into its playlist, and remembers the
+     * answer. @p justAdded says whether this is the selector that follows an
+     * add — the only case in which cancelling means "I do not want this
+     * torrent after all" rather than "leave it as it was".
+     */
+    void chooseTracksOf( const QString &infoHash, bool justAdded = false );
+
+    /** reopens the selector on the playlist the sidebar is pointing at */
+    void chooseTracksAgain();
 
     /** the sticky refusal, as opposed to taking a row out of the playlist */
     void excludeTrack( DownloadItem *item );

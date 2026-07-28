@@ -19,6 +19,8 @@
 
 #include "Utility.h"
 
+#include <QSet>
+
 #include <QFontMetrics>
 #include <QDir>
 #include <QColor>
@@ -26,6 +28,44 @@
 #include <algorithm>
 
 const int Utility::coverSize  = 40; // possible values are 40,50,70,80,90,120
+QList<TrackInfoPtr> Utility::mergedSelection( const QList<TrackInfoPtr> &current,
+                                             const QList<TrackInfoPtr> &chosen )
+{
+    QSet<qint64> chosenIds;
+    for( const TrackInfoPtr &track : chosen )
+        chosenIds.insert( track->id() );
+
+    QList<TrackInfoPtr> merged;
+    QSet<qint64> kept;
+
+    for( const TrackInfoPtr &track : current ) {
+        if( !chosenIds.contains( track->id() ) )
+            continue;
+
+        merged << track;
+        kept.insert( track->id() );
+    }
+
+    for( const TrackInfoPtr &track : chosen ) {
+        if( kept.contains( track->id() ) )
+            continue;
+
+        // After the last track of the album that comes before this one. On a
+        // playlist still in file order that is simply its own place back; on
+        // one dragged into another shape it is the nearest thing to it that
+        // does not disturb what somebody arranged by hand.
+        int at = 0;
+        for( int i = 0; i < merged.count(); ++i ) {
+            if( merged.at( i )->fileIndex() < track->fileIndex() )
+                at = i + 1;
+        }
+
+        merged.insert( at, track );
+    }
+
+    return merged;
+}
+
 QString Utility::playlistName( const PlaylistStore::PlaylistInfo &playlist )
 {
     return playlist.pinned ? tr( "To listen" ) : playlist.name;

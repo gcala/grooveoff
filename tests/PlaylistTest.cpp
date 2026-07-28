@@ -68,6 +68,7 @@ private Q_SLOTS:
     void reordersRowsMovedDownwards();
     void reordersSeveralRowsAtOnce();
     void refusesAnImpossibleReorder();
+    void putsARetickedTrackBackWhereItWas();
 
 private:
     static TrackInfoPtr makeTrack( const QString &infoHash, int fileIndex, const QString &filePath );
@@ -193,6 +194,55 @@ void PlaylistTest::keepsThePinnedPlaylistFirstAndUndeletable()
   impossible, the writer makes a caller that tries it lose one row rather than
   the whole write.
 */
+/*!
+  \brief putsARetickedTrackBackWhereItWas: the selector, used a second time
+
+  Reopening the selector on a torrent already in the sidebar is for two things:
+  taking more of it, and putting back a track removed by mistake. The second
+  only works if "back" means where it was. Handing the selector's own order
+  straight to setTracks() would send it to the end instead — and would quietly
+  rearrange a playlist somebody had dragged into shape, which is the same
+  mistake seen from the other side.
+
+  Arithmetic, so it builds its own three tracks rather than borrowing the ones
+  the story is holding: this runs last, by which time that torrent has been
+  removed twice over.
+*/
+void PlaylistTest::putsARetickedTrackBackWhereItWas()
+{
+    QList<TrackInfoPtr> album;
+    for( int i = 0; i < 3; ++i ) {
+        TrackInfoPtr track( new TrackInfo );
+        track->setId( i + 1 );
+        track->setFileIndex( i );
+        album << track;
+    }
+
+    // The second was taken out of the playlist, and is ticked again.
+    const QList<TrackInfoPtr> current = { album.at( 0 ), album.at( 2 ) };
+    const QList<TrackInfoPtr> merged  = Utility::mergedSelection( current, album );
+
+    QCOMPARE( merged.count(), 3 );
+    QCOMPARE( merged.at( 0 )->id(), album.at( 0 )->id() );
+    QCOMPARE( merged.at( 1 )->id(), album.at( 1 )->id() );
+    QCOMPARE( merged.at( 2 )->id(), album.at( 2 )->id() );
+
+    // An order made by hand survives, and the newcomer lands after the track it
+    // follows in the album rather than at the end.
+    const QList<TrackInfoPtr> byHand = { album.at( 2 ), album.at( 0 ) };
+    const QList<TrackInfoPtr> after  = Utility::mergedSelection( byHand, album );
+
+    QCOMPARE( after.count(), 3 );
+    QCOMPARE( after.at( 0 )->id(), album.at( 2 )->id() );
+    QCOMPARE( after.at( 1 )->id(), album.at( 0 )->id() );
+    QCOMPARE( after.at( 2 )->id(), album.at( 1 )->id() );
+
+    // And unticking is how a track leaves.
+    const QList<TrackInfoPtr> fewer = Utility::mergedSelection( album, { album.at( 0 ), album.at( 2 ) } );
+    QCOMPARE( fewer.count(), 2 );
+    QCOMPARE( fewer.at( 1 )->id(), album.at( 2 )->id() );
+}
+
 void PlaylistTest::holdsATrackAtMostOnce()
 {
     const qint64 list = m_playlists->pinnedPlaylistId();

@@ -49,6 +49,26 @@ DownloadQueue::DownloadQueue()
 {
     reloadSettings();
 
+    // A priority handed to a torrent the session is not holding goes nowhere,
+    // and nothing repeats it — so a torrent that has just been let in is asked
+    // again what its files are worth.
+    //
+    // Measured, this changes nothing today: waking a torrent brings its
+    // metadata, the window rebuilds the sidebar when they arrive, and that
+    // hands the selection here again. But it does so for its own reasons, and
+    // a queue whose priorities are right because somebody else redraws a list
+    // is a queue that is right by accident. This is the class keeping its own
+    // promise.
+    //
+    // Both signals and not one: a torrent reopened from its resume file
+    // arrives with its file list in hand and never sends the second, while a
+    // magnet sends the first with nothing behind it yet.
+    connect( The::torrentSession(), &TorrentSession::torrentAdded, this,
+             [this]( const QString & ) { refresh(); } );
+
+    connect( The::torrentSession(), &TorrentSession::metadataReady, this,
+             [this]( const QString &, const QString &, const QList<TrackInfoPtr> & ) { refresh(); } );
+
     connect( m_roomTimer, &QTimer::timeout, this, &DownloadQueue::checkCacheRoom );
     m_roomTimer->start( roomIntervalMs );
 }

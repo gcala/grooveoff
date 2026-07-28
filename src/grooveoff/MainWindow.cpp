@@ -270,6 +270,7 @@ void MainWindow::setupConnections()
     connect( ac->getAction( "actionEmptyCache" ), &QAction::triggered, this, &MainWindow::emptyCache );
     connect( ac->getAction( "actionNewPlaylist" ), &QAction::triggered, this, &MainWindow::newPlaylist );
     connect( ac->getAction( "actionRenamePlaylist" ), &QAction::triggered, this, &MainWindow::renamePlaylist );
+    connect( ac->getAction( "actionChooseTracks" ), &QAction::triggered, this, &MainWindow::chooseTracksAgain );
     connect( ac->getAction( "actionEmptyPlaylist" ), &QAction::triggered, this, &MainWindow::emptyPlaylist );
     connect( ac->getAction( "actionRemovePlaylist" ), &QAction::triggered, this, &MainWindow::removePlaylist );
 
@@ -654,7 +655,7 @@ void MainWindow::addTorrentSource( const QString &source )
     // A torrent whose file list is already in hand posts no alert, so the
     // selector has to be opened here instead of waiting for one.
     if( The::torrentSession()->hasMetadata( infoHash ) && m_awaitingSelection.remove( infoHash ) )
-        QTimer::singleShot( 0, this, [this, infoHash] { chooseTracksOf( infoHash ); } );
+        QTimer::singleShot( 0, this, [this, infoHash] { chooseTracksOf( infoHash, true ); } );
 }
 
 /*!
@@ -691,10 +692,31 @@ void MainWindow::onMetadataReady( const QString &infoHash, const QString &name, 
     // Out of the alert handler before opening a modal: the dialog spins its own
     // event loop, and doing that in the middle of draining libtorrent's alerts
     // is asking for trouble that only shows up under load.
-    QTimer::singleShot( 0, this, [this, infoHash] { chooseTracksOf( infoHash ); } );
+    QTimer::singleShot( 0, this, [this, infoHash] { chooseTracksOf( infoHash, true ); } );
 }
 
-void MainWindow::chooseTracksOf( const QString &infoHash )
+/*!
+  \brief chooseTracksAgain: the selector, on a torrent that is already here
+
+  Two things it is for: putting back a track taken out of the playlist by
+  mistake, and taking more of a torrent once its album turns out to be worth
+  it. Neither needs the network — what the selector shows comes from the
+  catalogue, so a torrent fast asleep answers as well as one in the session.
+*/
+void MainWindow::chooseTracksAgain()
+{
+    const qint64 playlistId = ui->playlistList->currentPlaylistId();
+    if( playlistId <= 0 || !The::database()->isOpen() )
+        return;
+
+    const PlaylistStore::PlaylistInfo playlist = The::playlistStore()->playlist( playlistId );
+    if( playlist.kind != PlaylistStore::TorrentPlaylist || playlist.infoHash.isEmpty() )
+        return;
+
+    chooseTracksOf( playlist.infoHash );
+}
+
+void MainWindow::chooseTracksOf( const QString &infoHash, bool justAdded )
 {
     Catalog *catalog = The::catalog();
     PlaylistStore *playlists = The::playlistStore();
@@ -726,7 +748,11 @@ void MainWindow::chooseTracksOf( const QString &infoHash )
         // brings the torrent back with them instead of asking the swarm for
         // its metadata a second time. With nothing queued there is also
         // nothing worth announcing, so it leaves the session as well.
-        if( playlists->tracks( playlistId ).isEmpty() ) {
+        // And only for the selector that follows an add. Reopening it on a
+        // torrent that is already in the sidebar and then changing one's mind
+        // must leave it exactly where it was — even when it is empty, because
+        // emptying it was somebody's decision too.
+        if( justAdded && playlists->tracks( playlistId ).isEmpty() ) {
             The::torrentSession()->remove( infoHash, false );
             catalog->hideTorrent( infoHash );
 
@@ -746,7 +772,16 @@ void MainWindow::chooseTracksOf( const QString &infoHash )
     for( const TrackInfoPtr &track : selector.readmittedTracks() )
         catalog->setExcluded( track->id(), false );
 
-    playlists->setTracks( playlistId, selector.selectedTracks() );
+    // What was already in the playlist keeps the order it was put in, and what
+    // has just been ticked is dropped in where its place in the album says.
+    // Handing setTracks() the selector's own order instead would quietly
+    // rearrange a playlist somebody had dragged into shape, and would send a
+    // track taken out by mistake to the end of the list rather than back where
+    // it came from — which is one of the two things this dialog is for.
+    const QList<TrackInfoPtr> ordered =
+        Utility::mergedSelection( playlists->tracks( playlistId ), selector.selectedTracks() );
+
+    playlists->setTracks( playlistId, ordered );
     playlists->setPlaybackState( playlistId, 0, 0 );
 
     loadPlaylists();
@@ -1063,6 +1098,12 @@ void MainWindow::loadPlaylists()
         The::downloadQueue()->setSelection( playlist.infoHash, fileIndexes );
     }
 
+    // Whatever has just changed may have given a sleeping torrent something to
+    // fetch — a track chosen from the selector reopened on it, most of all —
+    // and a torrent the session is not holding fetches nothing however much
+    // its playlist asks for. Cheap: it wakes only the ones with work left.
+    wakeUnfinishedTorrents();
+
     ui->playlistList->selectPlaylist( open );
 
     // Playlists but nothing open — a database whose playback row went missing,
@@ -1325,6 +1366,11 @@ void MainWindow::showPlaylistMenu( const QPoint &position )
         // would be the interface offering something it will not do.
         if( !playlist.pinned )
             menu.addAction( ac->getAction( "actionRenamePlaylist" ) );
+
+        // Only a torrent has files to choose between; a list made by hand is
+        // filled by dragging into it.
+        if( playlist.kind == PlaylistStore::TorrentPlaylist )
+            menu.addAction( ac->getAction( "actionChooseTracks" ) );
 
         if( playlist.kind == PlaylistStore::CustomPlaylist )
             menu.addAction( ac->getAction( "actionEmptyPlaylist" ) );

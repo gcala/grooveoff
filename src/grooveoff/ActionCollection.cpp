@@ -149,6 +149,13 @@ void ActionCollection::initActions()
                                                  this
                                                );
 
+    QAction *actionChooseTracks = new QAction( QIcon::fromTheme( QLatin1String( "edit-select-all" ),
+                                                                 QIcon::fromTheme( QLatin1String( "view-list-details" ) )
+                                                               ),
+                                               tr( "&Choose tracks..." ),
+                                               this
+                                             );
+
     QAction *actionEmptyPlaylist = new QAction( QIcon::fromTheme( QLatin1String( "edit-clear-list" ),
                                                                   QIcon::fromTheme( QLatin1String( "edit-clear" ) )
                                                                 ),
@@ -201,6 +208,7 @@ void ActionCollection::initActions()
     m_actionCollection[ QLatin1String( "actionClearDownloadList" ) ] = actionClearDownloadList;
     m_actionCollection[ QLatin1String( "actionNewPlaylist" ) ] = actionNewPlaylist;
     m_actionCollection[ QLatin1String( "actionRenamePlaylist" ) ] = actionRenamePlaylist;
+    m_actionCollection[ QLatin1String( "actionChooseTracks" ) ] = actionChooseTracks;
     m_actionCollection[ QLatin1String( "actionEmptyPlaylist" ) ] = actionEmptyPlaylist;
     m_actionCollection[ QLatin1String( "actionRemovePlaylist" ) ] = actionRemovePlaylist;
     m_actionCollection[ QLatin1String( "actionEmptyCache" ) ] = actionEmptyCache;
@@ -220,6 +228,7 @@ void ActionCollection::initActions()
     actionClearDownloadList->setToolTip( tr( "Empties the list, leaving the catalogue alone" ) );
     actionEmptyCache->setToolTip( tr( "Deletes the downloaded data, leaving the playlists alone" ) );
     actionNewPlaylist->setToolTip( tr( "A list of your own, filled by dragging tracks into it" ) );
+    actionChooseTracks->setToolTip( tr( "Take more of this torrent, or put back something removed by mistake" ) );
     
     // set actions shortcuts
     actionClose->setShortcut( QKeySequence( Qt::CTRL | Qt::Key_Q ) );
@@ -245,6 +254,7 @@ QMenuBar* ActionCollection::createMenuBar( QWidget *parent )
     playlistsMenu->addAction( m_actionCollection[ QLatin1String( "actionNewPlaylist" ) ] );
     playlistsMenu->addSeparator();
     playlistsMenu->addAction( m_actionCollection[ QLatin1String( "actionRenamePlaylist" ) ] );
+    playlistsMenu->addAction( m_actionCollection[ QLatin1String( "actionChooseTracks" ) ] );
     playlistsMenu->addAction( m_actionCollection[ QLatin1String( "actionEmptyPlaylist" ) ] );
     playlistsMenu->addAction( m_actionCollection[ QLatin1String( "actionRemovePlaylist" ) ] );
     m_menuCollection[ QLatin1String( "playlistsMenu" ) ] = playlistsMenu;

@@ -75,22 +75,22 @@
         <translation>&amp;Irten</translation>
     </message>
     <message>
-        <location line="+156"/>
+        <location line="+164"/>
         <source>Close GrooveOff</source>
         <translation>Itxi GrooveOff</translation>
     </message>
     <message>
-        <location line="-149"/>
+        <location line="-157"/>
         <source>&amp;Donate</source>
         <translation>&amp;Dohaintza egin</translation>
     </message>
     <message>
-        <location line="+150"/>
+        <location line="+158"/>
         <source>Donate with PayPal</source>
         <translation>Dohaintza egin PayPalen bidez</translation>
     </message>
     <message>
-        <location line="-127"/>
+        <location line="-135"/>
         <source>&amp;Compact Layout</source>
         <translation>&amp;Diseinu trinkoa</translation>
     </message>
@@ -149,6 +149,11 @@
     </message>
     <message>
         <location line="+7"/>
+        <source>&amp;Choose tracks...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+7"/>
         <source>&amp;Empty playlist</source>
         <translation type="unfinished"></translation>
     </message>
@@ -173,7 +178,7 @@
         <translation>&amp;Qt-ri buruz</translation>
     </message>
     <message>
-        <location line="+35"/>
+        <location line="+36"/>
         <source>Add a .torrent file as a playlist</source>
         <translation type="unfinished"></translation>
     </message>
@@ -193,6 +198,11 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location line="+1"/>
+        <source>Take more of this torrent, or put back something removed by mistake</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location line="+18"/>
         <source>&amp;Tracks</source>
         <translation type="unfinished"></translation>
@@ -203,7 +213,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+8"/>
+        <location line="+9"/>
         <source>&amp;File</source>
         <translation>&amp;Fitxategia</translation>
     </message>
@@ -728,13 +738,13 @@
     </message>
     <message>
         <location line="+2"/>
-        <location line="+323"/>
-        <location line="+1068"/>
+        <location line="+324"/>
+        <location line="+1107"/>
         <source>Idle</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1382"/>
+        <location line="-1422"/>
         <source>Magnet</source>
         <translation type="unfinished"></translation>
     </message>
@@ -744,7 +754,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+437"/>
+        <location line="+438"/>
         <source>Open a torrent</source>
         <translation type="unfinished"></translation>
     </message>
@@ -759,12 +769,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+84"/>
+        <location line="+109"/>
         <source>Nothing chosen from «%1»: paste the magnet again to pick tracks.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+195"/>
+        <location line="+204"/>
         <source>The cache is already empty.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -871,7 +881,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message numerus="yes">
-        <location line="+98"/>
+        <location line="+103"/>
         <source>%n track(s) added to «%1».</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -903,7 +913,7 @@
         <translation type="vanished">Hasi bilatzen</translation>
     </message>
     <message>
-        <location line="-1178"/>
+        <location line="-1218"/>
         <source>Main menu</source>
         <translation>Menu nagusia</translation>
     </message>
@@ -956,7 +966,7 @@ Select a valid path</source>
 Hautatu baliozko bide-izena</translation>
     </message>
     <message>
-        <location line="+1398"/>
+        <location line="+1438"/>
         <source>Donation to Grooveoff&apos;s author</source>
         <translation>Grooveoff-en egilearentzako dohaintza</translation>
     </message>
@@ -965,8 +975,8 @@ Hautatu baliozko bide-izena</translation>
         <translation type="vanished">Gooveshark-en musika lineaz kanpo</translation>
     </message>
     <message>
-        <location line="-1458"/>
-        <location line="+880"/>
+        <location line="-1498"/>
+        <location line="+915"/>
         <source>Attention</source>
         <translation>Kasu</translation>
     </message>
@@ -1000,7 +1010,7 @@ Hautatu baliozko bide-izena</translation>
         <translation type="vanished">Uzten...</translation>
     </message>
     <message>
-        <location line="+572"/>
+        <location line="+577"/>
         <source>Offline</source>
         <translation>Lineaz kanpo</translation>
     </message>
@@ -1198,7 +1208,7 @@ Hautatu baliozko bide-izena</translation>
 <context>
     <name>Utility</name>
     <message>
-        <location filename="../src/grooveoff/Utility.cpp" line="+31"/>
+        <location filename="../src/grooveoff/Utility.cpp" line="+71"/>
         <source>To listen</source>
         <translation type="unfinished"></translation>
     </message>

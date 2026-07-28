@@ -21,6 +21,7 @@
 #define UTILITY_H
 
 #include "../db/PlaylistStore.h"
+#include "TrackInfo.h"
 
 #include <QCoreApplication>
 #include <QList>
@@ -72,6 +73,24 @@ public:
      * by one place and watches it not move.
      */
     static QList<int> reorderedIndexes( int count, const QList<int> &rows, int targetRow );
+
+    /**
+     * The new contents of a torrent's playlist after the selector has been
+     * used on it: what was already there keeps the order it was put in, and
+     * what has just been ticked is dropped in where its place in the album
+     * says — after the last track already there that comes before it.
+     *
+     * @p current is the playlist as it stands, @p chosen everything ticked, in
+     * file order.
+     *
+     * Here rather than in the window for the same reason as the function above
+     * it: taking a track out by mistake and putting it back is one of the two
+     * things that dialog is for, and "back" has to mean where it was rather
+     * than the end of the list. That is arithmetic, and arithmetic can be
+     * asked without a window.
+     */
+    static QList<TrackInfoPtr> mergedSelection( const QList<TrackInfoPtr> &current,
+                                                const QList<TrackInfoPtr> &chosen );
 
     static QString elidedText( const QString &text, const Qt::TextElideMode &elideMode, const int &width, const QFont::Weight &weight );
 
