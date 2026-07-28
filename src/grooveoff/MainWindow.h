@@ -134,6 +134,9 @@ private Q_SLOTS:
     void newPlaylist();
     void renamePlaylist();
 
+    /** takes every track out of a playlist made by hand, keeping the list */
+    void emptyPlaylist();
+
     /**
      * The one operation of this whole application that can delete something the
      * user made by hand, so it asks first and says what is at stake.

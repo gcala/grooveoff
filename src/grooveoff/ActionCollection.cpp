@@ -149,6 +149,13 @@ void ActionCollection::initActions()
                                                  this
                                                );
 
+    QAction *actionEmptyPlaylist = new QAction( QIcon::fromTheme( QLatin1String( "edit-clear-list" ),
+                                                                  QIcon::fromTheme( QLatin1String( "edit-clear" ) )
+                                                                ),
+                                                tr( "&Empty playlist" ),
+                                                this
+                                              );
+
     QAction *actionRemovePlaylist = new QAction( QIcon::fromTheme( QLatin1String( "edit-delete" ),
                                                                    QIcon( QLatin1String( ":/resources/edit-delete.png" ) )
                                                                  ),
@@ -194,6 +201,7 @@ void ActionCollection::initActions()
     m_actionCollection[ QLatin1String( "actionClearDownloadList" ) ] = actionClearDownloadList;
     m_actionCollection[ QLatin1String( "actionNewPlaylist" ) ] = actionNewPlaylist;
     m_actionCollection[ QLatin1String( "actionRenamePlaylist" ) ] = actionRenamePlaylist;
+    m_actionCollection[ QLatin1String( "actionEmptyPlaylist" ) ] = actionEmptyPlaylist;
     m_actionCollection[ QLatin1String( "actionRemovePlaylist" ) ] = actionRemovePlaylist;
     m_actionCollection[ QLatin1String( "actionEmptyCache" ) ] = actionEmptyCache;
     m_actionCollection[ QLatin1String( "actionAbout" ) ] = actionAbout;
@@ -237,6 +245,7 @@ QMenuBar* ActionCollection::createMenuBar( QWidget *parent )
     playlistsMenu->addAction( m_actionCollection[ QLatin1String( "actionNewPlaylist" ) ] );
     playlistsMenu->addSeparator();
     playlistsMenu->addAction( m_actionCollection[ QLatin1String( "actionRenamePlaylist" ) ] );
+    playlistsMenu->addAction( m_actionCollection[ QLatin1String( "actionEmptyPlaylist" ) ] );
     playlistsMenu->addAction( m_actionCollection[ QLatin1String( "actionRemovePlaylist" ) ] );
     m_menuCollection[ QLatin1String( "playlistsMenu" ) ] = playlistsMenu;
 

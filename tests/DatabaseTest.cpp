@@ -102,6 +102,13 @@ void DatabaseTest::initTestCase()
     QVERIFY2( The::database()->isOpen(), qPrintable( The::database()->errorString() ) );
     QCOMPARE( Database::schemaVersion(), 1 );
 
+    // The playlist that is always there arrives with the schema and not with
+    // the interface: a database is the only place that can guarantee it exists
+    // before anything has drawn a sidebar.
+    const qint64 pinned = The::playlistStore()->pinnedPlaylistId();
+    QVERIFY2( pinned > 0, "the migration did not leave a pinned playlist behind" );
+    QVERIFY( The::playlistStore()->playlist( pinned ).pinned );
+
     m_hashA = QStringLiteral( "aaaa000000000000000000000000000000000001" );
     m_hashB = QStringLiteral( "bbbb000000000000000000000000000000000002" );
 }
@@ -120,7 +127,9 @@ void DatabaseTest::addsTorrentsAndTheirPlaylists()
     // Adding a known torrent again must not disturb anything.
     QVERIFY( m_catalog->addTorrent( m_hashA, QLatin1String( "magnet:?xt=urn:btih:" ) + m_hashA,
                                     QStringLiteral( "Album A" ) ) );
-    QCOMPARE( m_playlists->visiblePlaylists().count(), 2 );
+
+    // The two torrents, and the playlist that came with the schema.
+    QCOMPARE( m_playlists->visiblePlaylists().count(), 3 );
 }
 
 void DatabaseTest::storesEveryFileOfATorrent()
@@ -190,8 +199,8 @@ void DatabaseTest::hidingKeepsTracksReachable()
     QVERIFY( m_catalog->hideTorrent( m_hashA ) );
     QVERIFY( m_catalog->isHidden( m_hashA ) );
 
-    // Out of sight: torrent B and the custom playlist remain.
-    QCOMPARE( m_playlists->visiblePlaylists().count(), 2 );
+    // Out of sight: torrent B, the custom playlist and the pinned one remain.
+    QCOMPARE( m_playlists->visiblePlaylists().count(), 3 );
 
     // Still alive, because a custom playlist points at one of its tracks.
     QVERIFY( m_catalog->collectGarbage( m_hashA ) );
@@ -254,7 +263,10 @@ void DatabaseTest::remembersWhatWasPlaying()
 void DatabaseTest::customPlaylistRemoval()
 {
     QVERIFY( m_playlists->removeCustomPlaylist( m_customId ) );
-    QCOMPARE( m_playlists->visiblePlaylists().count(), 1 );
+
+    // Torrent B and the pinned playlist: the list made by hand is gone and the
+    // one that cannot be removed is not.
+    QCOMPARE( m_playlists->visiblePlaylists().count(), 2 );
 
     // A torrent playlist belongs to its torrent and is removed with it.
     QVERIFY( !m_playlists->removeCustomPlaylist( m_playlists->torrentPlaylistId( m_hashB ) ) );

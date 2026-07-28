@@ -75,22 +75,22 @@
         <translation>&amp;Esci</translation>
     </message>
     <message>
-        <location line="+148"/>
+        <location line="+156"/>
         <source>Close GrooveOff</source>
         <translation>Chiudi GrooveOff</translation>
     </message>
     <message>
-        <location line="-141"/>
+        <location line="-149"/>
         <source>&amp;Donate</source>
         <translation>&amp;Dona</translation>
     </message>
     <message>
-        <location line="+142"/>
+        <location line="+150"/>
         <source>Donate with PayPal</source>
         <translation>Dona con PayPal</translation>
     </message>
     <message>
-        <location line="-119"/>
+        <location line="-127"/>
         <source>&amp;Compact Layout</source>
         <translation>Disposizione &amp;compatta</translation>
     </message>
@@ -149,6 +149,11 @@
     </message>
     <message>
         <location line="+7"/>
+        <source>&amp;Empty playlist</source>
+        <translation>S&amp;vuota la playlist</translation>
+    </message>
+    <message>
+        <location line="+7"/>
         <source>Re&amp;move playlist...</source>
         <translation>Ri&amp;muovi playlist...</translation>
     </message>
@@ -168,7 +173,7 @@
         <translation>Informazioni su &amp;Qt</translation>
     </message>
     <message>
-        <location line="+34"/>
+        <location line="+35"/>
         <source>Add a .torrent file as a playlist</source>
         <translation>Aggiunge un file .torrent come playlist</translation>
     </message>
@@ -202,7 +207,7 @@
         <translation type="vanished">&amp;Scaletta</translation>
     </message>
     <message>
-        <location line="+7"/>
+        <location line="+8"/>
         <source>&amp;File</source>
         <translation>&amp;File</translation>
     </message>
@@ -357,7 +362,7 @@
     <message>
         <location line="+31"/>
         <source>Download the playlist ahead, one track after another</source>
-        <translation>Scarica in anticipo i brani della playlist, uno dopo l'altro</translation>
+        <translation>Scarica in anticipo i brani della playlist, uno dopo l&apos;altro</translation>
     </message>
     <message>
         <location line="+7"/>
@@ -734,13 +739,13 @@
     </message>
     <message>
         <location line="+2"/>
-        <location line="+322"/>
-        <location line="+943"/>
+        <location line="+323"/>
+        <location line="+1049"/>
         <source>Idle</source>
         <translation>Fermo</translation>
     </message>
     <message>
-        <location line="-1256"/>
+        <location line="-1363"/>
         <source>Magnet</source>
         <translation>Magnet</translation>
     </message>
@@ -750,7 +755,7 @@
         <translation>Incolla un magnet e premi invio</translation>
     </message>
     <message>
-        <location line="+429"/>
+        <location line="+437"/>
         <source>Open a torrent</source>
         <translation>Apri un torrent</translation>
     </message>
@@ -783,7 +788,7 @@
         </translation>
     </message>
     <message>
-        <location line="+217"/>
+        <location line="+260"/>
         <source>The cache is already empty.</source>
         <translation>La cache è già vuota.</translation>
     </message>
@@ -825,7 +830,7 @@
         </translation>
     </message>
     <message>
-        <location line="+92"/>
+        <location line="+102"/>
         <location line="+3"/>
         <source>New playlist</source>
         <translation>Nuova playlist</translation>
@@ -847,7 +852,7 @@
         <translation>Rinomina playlist</translation>
     </message>
     <message>
-        <location line="+34"/>
+        <location line="+62"/>
         <source>Remove playlist</source>
         <translation>Rimuovi playlist</translation>
     </message>
@@ -897,7 +902,7 @@
         <translation>Conserva quei brani</translation>
     </message>
     <message numerus="yes">
-        <location line="+84"/>
+        <location line="+98"/>
         <source>%n track(s) added to «%1».</source>
         <translation>
             <numerusform>%n brano aggiunto a «%1».</numerusform>
@@ -944,7 +949,7 @@
         <translation type="vanished">Inizia ricerca</translation>
     </message>
     <message>
-        <location line="-1056"/>
+        <location line="-1159"/>
         <source>Main menu</source>
         <translation>Menu principale</translation>
     </message>
@@ -1001,13 +1006,13 @@ Select a valid path</source>
 Seleziona un percorso valido</translation>
     </message>
     <message>
-        <location line="+1272"/>
+        <location line="+1379"/>
         <source>Donation to Grooveoff&apos;s author</source>
         <translation>Donazione all&apos;autore di Grooveoff</translation>
     </message>
     <message>
-        <location line="-1332"/>
-        <location line="+810"/>
+        <location line="-1439"/>
+        <location line="+861"/>
         <source>Attention</source>
         <translation>Attenzione</translation>
     </message>
@@ -1041,7 +1046,7 @@ Selezionare un percorso valido</translation>
         <translation type="vanished">Annullo...</translation>
     </message>
     <message>
-        <location line="+516"/>
+        <location line="+572"/>
         <source>Offline</source>
         <translation>Non in linea</translation>
     </message>
@@ -1093,8 +1098,13 @@ Selezionare un percorso valido</translation>
 </context>
 <context>
     <name>PlaylistList</name>
+    <message>
+        <location filename="../src/grooveoff/widgets/PlaylistList.cpp" line="+62"/>
+        <source>To listen</source>
+        <translation>Da ascoltare</translation>
+    </message>
     <message numerus="yes">
-        <location filename="../src/grooveoff/widgets/PlaylistList.cpp" line="+72"/>
+        <location line="+19"/>
         <location line="+39"/>
         <source>%n track(s)</source>
         <translation>
@@ -1234,6 +1244,13 @@ Selezionare un percorso valido</translation>
             <numerusform>%n brano</numerusform>
             <numerusform>%n brani</numerusform>
         </translation>
+    </message>
+</context>
+<context>
+    <name>Utility</name>
+    <message>
+        <source>To listen</source>
+        <translation type="vanished">Da ascoltare</translation>
     </message>
 </context>
 <context>

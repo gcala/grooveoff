@@ -75,22 +75,22 @@
         <translation>&amp;Ukončit</translation>
     </message>
     <message>
-        <location line="+148"/>
+        <location line="+156"/>
         <source>Close GrooveOff</source>
         <translation>Zavřít GrooveOff</translation>
     </message>
     <message>
-        <location line="-141"/>
+        <location line="-149"/>
         <source>&amp;Donate</source>
         <translation>&amp;Darovat</translation>
     </message>
     <message>
-        <location line="+142"/>
+        <location line="+150"/>
         <source>Donate with PayPal</source>
         <translation>Darovat pomocí PayPal</translation>
     </message>
     <message>
-        <location line="-119"/>
+        <location line="-127"/>
         <source>&amp;Compact Layout</source>
         <translation>&amp;Celistvé rozvržení</translation>
     </message>
@@ -149,6 +149,11 @@
     </message>
     <message>
         <location line="+7"/>
+        <source>&amp;Empty playlist</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+7"/>
         <source>Re&amp;move playlist...</source>
         <translation type="unfinished"></translation>
     </message>
@@ -168,7 +173,7 @@
         <translation>O &amp;Qt</translation>
     </message>
     <message>
-        <location line="+34"/>
+        <location line="+35"/>
         <source>Add a .torrent file as a playlist</source>
         <translation type="unfinished"></translation>
     </message>
@@ -198,7 +203,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+7"/>
+        <location line="+8"/>
         <source>&amp;File</source>
         <translation>&amp;Soubor</translation>
     </message>
@@ -720,13 +725,13 @@
     </message>
     <message>
         <location line="+2"/>
-        <location line="+322"/>
-        <location line="+943"/>
+        <location line="+323"/>
+        <location line="+1049"/>
         <source>Idle</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1256"/>
+        <location line="-1363"/>
         <source>Magnet</source>
         <translation type="unfinished"></translation>
     </message>
@@ -736,7 +741,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+429"/>
+        <location line="+437"/>
         <source>Open a torrent</source>
         <translation type="unfinished"></translation>
     </message>
@@ -751,7 +756,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+217"/>
+        <location line="+260"/>
         <source>The cache is already empty.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -786,7 +791,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+92"/>
+        <location line="+102"/>
         <location line="+3"/>
         <source>New playlist</source>
         <translation type="unfinished"></translation>
@@ -808,7 +813,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+34"/>
+        <location line="+62"/>
         <source>Remove playlist</source>
         <translation type="unfinished"></translation>
     </message>
@@ -859,7 +864,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message numerus="yes">
-        <location line="+84"/>
+        <location line="+98"/>
         <source>%n track(s) added to «%1».</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -892,7 +897,7 @@
         <translation type="vanished">Spustit hledání</translation>
     </message>
     <message>
-        <location line="-1056"/>
+        <location line="-1159"/>
         <source>Main menu</source>
         <translation>Hlavní nabídka</translation>
     </message>
@@ -945,7 +950,7 @@ Select a valid path</source>
 Vyberte platnou cestu</translation>
     </message>
     <message>
-        <location line="+1272"/>
+        <location line="+1379"/>
         <source>Donation to Grooveoff&apos;s author</source>
         <translation>Dát dar autorovi GrooveOff</translation>
     </message>
@@ -954,8 +959,8 @@ Vyberte platnou cestu</translation>
         <translation type="vanished">Hudba z Grooveshark.com v režimu bez připojení k internetu</translation>
     </message>
     <message>
-        <location line="-1332"/>
-        <location line="+810"/>
+        <location line="-1439"/>
+        <location line="+861"/>
         <source>Attention</source>
         <translation>Pozor</translation>
     </message>
@@ -990,7 +995,7 @@ Vyberte platnou cestu</translation>
         <translation type="vanished">Ruší se...</translation>
     </message>
     <message>
-        <location line="+516"/>
+        <location line="+572"/>
         <source>Offline</source>
         <translation>Nepřipojený</translation>
     </message>
@@ -1042,8 +1047,13 @@ Vyberte platnou cestu</translation>
 </context>
 <context>
     <name>PlaylistList</name>
+    <message>
+        <location filename="../src/grooveoff/widgets/PlaylistList.cpp" line="+62"/>
+        <source>To listen</source>
+        <translation type="unfinished"></translation>
+    </message>
     <message numerus="yes">
-        <location filename="../src/grooveoff/widgets/PlaylistList.cpp" line="+72"/>
+        <location line="+19"/>
         <location line="+39"/>
         <source>%n track(s)</source>
         <translation type="unfinished">

@@ -22,6 +22,7 @@
 #include "torrent/CacheManager.h"
 #include "torrent/DownloadQueue.h"
 
+#include <QFile>
 #include <QSettings>
 #include <QStandardPaths>
 #include <QtTest>
@@ -90,7 +91,16 @@ void DownloadQueueTest::cleanupTestCase()
     settings.clear();
     settings.sync();
 
+    // The file goes with the connection, and that is not tidiness: a database
+    // left behind was written by whatever schema this build had at the time,
+    // and the next build refuses to open one it does not recognise. The test
+    // then fails for a reason that has nothing to do with what it is testing.
+    const QString file =
+        QStandardPaths::writableLocation( QStandardPaths::AppDataLocation )
+        + QStringLiteral( "/grooveoff.db" );
+
     delete The::database();
+    QFile::remove( file );
 }
 
 /*!

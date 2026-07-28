@@ -105,6 +105,15 @@ qint64 PlaylistStore::createCustomPlaylist( const QString &name )
 
 bool PlaylistStore::rename( qint64 playlistId, const QString &name )
 {
+    // The one that is always there says its own name in the language the
+    // interface is running in, so there is nothing here to rename: a name
+    // stored in a row could only ever be in one language.
+    if( playlist( playlistId ).pinned ) {
+        qWarning() << "GrooveOff ::" << "refusing to rename playlist" << playlistId
+                   << "because its name belongs to the interface";
+        return false;
+    }
+
     QSqlQuery query( The::database()->connection() );
     query.prepare( QStringLiteral( "UPDATE playlist SET name = :name, updated_at = :now WHERE id = :id" ) );
     query.bindValue( QStringLiteral( ":name" ), name );
@@ -116,6 +125,12 @@ bool PlaylistStore::rename( qint64 playlistId, const QString &name )
 
 bool PlaylistStore::removeCustomPlaylist( qint64 playlistId )
 {
+    if( playlist( playlistId ).pinned ) {
+        qWarning() << "GrooveOff ::" << "refusing to remove playlist" << playlistId
+                   << "because it is the one that is always there";
+        return false;
+    }
+
     if( !isCustom( playlistId ) ) {
         qWarning() << "GrooveOff ::" << "refusing to remove playlist" << playlistId
                    << "because it belongs to a torrent";
@@ -149,6 +164,56 @@ bool PlaylistStore::removeCustomPlaylist( qint64 playlistId )
     return database->commit();
 }
 
+/*!
+  \brief clearPlaylist: empties a list without removing it
+
+  The same care as a removal, and for the same reason: the tracks going out may
+  be the last thing keeping a hidden torrent alive, and a torrent nobody
+  references and nobody can see is cache that is never coming back.
+*/
+bool PlaylistStore::clearPlaylist( qint64 playlistId )
+{
+    if( !isCustom( playlistId ) ) {
+        qWarning() << "GrooveOff ::" << "refusing to empty playlist" << playlistId
+                   << "because it belongs to a torrent";
+        return false;
+    }
+
+    Database *database = The::database();
+
+    const QStringList &affected = referencedTorrents( playlistId );
+
+    if( !database->transaction() )
+        return false;
+
+    QSqlQuery query( database->connection() );
+    query.prepare( QStringLiteral( "DELETE FROM playlist_track WHERE playlist_id = :id" ) );
+    query.bindValue( QStringLiteral( ":id" ), playlistId );
+
+    if( !query.exec() ) {
+        reportFailure( query );
+        database->rollback();
+        return false;
+    }
+
+    if( !collectGarbageFor( affected ) ) {
+        database->rollback();
+        return false;
+    }
+
+    return database->commit();
+}
+
+qint64 PlaylistStore::pinnedPlaylistId() const
+{
+    QSqlQuery query( The::database()->connection() );
+
+    if( !query.exec( QStringLiteral( "SELECT id FROM playlist WHERE pinned = 1" ) ) || !query.next() )
+        return 0;
+
+    return query.value( 0 ).toLongLong();
+}
+
 QList<PlaylistStore::PlaylistInfo> PlaylistStore::visiblePlaylists() const
 {
     QList<PlaylistInfo> playlists;
@@ -156,11 +221,12 @@ QList<PlaylistStore::PlaylistInfo> PlaylistStore::visiblePlaylists() const
     QSqlQuery query( The::database()->connection() );
     if( !query.exec( QStringLiteral(
             "SELECT p.id, p.name, p.kind, COALESCE( p.info_hash, '' ),"
-            "       ( SELECT COUNT(*) FROM playlist_track pt WHERE pt.playlist_id = p.id )"
+            "       ( SELECT COUNT(*) FROM playlist_track pt WHERE pt.playlist_id = p.id ),"
+            "       p.pinned"
             "  FROM playlist p"
             "  LEFT JOIN torrent t ON t.info_hash = p.info_hash"
             " WHERE p.kind = 1 OR t.hidden = 0"
-            " ORDER BY p.kind, p.name COLLATE NOCASE" ) ) ) {
+            " ORDER BY p.pinned DESC, p.kind, p.name COLLATE NOCASE" ) ) ) {
         reportFailure( query );
         return playlists;
     }
@@ -172,6 +238,7 @@ QList<PlaylistStore::PlaylistInfo> PlaylistStore::visiblePlaylists() const
         info.kind       = Kind( query.value( 2 ).toInt() );
         info.infoHash   = query.value( 3 ).toString();
         info.trackCount = query.value( 4 ).toInt();
+        info.pinned     = query.value( 5 ).toInt() != 0;
         playlists << info;
     }
 
@@ -185,7 +252,8 @@ PlaylistStore::PlaylistInfo PlaylistStore::playlist( qint64 playlistId ) const
     QSqlQuery query( The::database()->connection() );
     query.prepare( QStringLiteral(
         "SELECT p.id, p.name, p.kind, COALESCE( p.info_hash, '' ),"
-        "       ( SELECT COUNT(*) FROM playlist_track pt WHERE pt.playlist_id = p.id )"
+        "       ( SELECT COUNT(*) FROM playlist_track pt WHERE pt.playlist_id = p.id ),"
+        "       p.pinned"
         "  FROM playlist p WHERE p.id = :id" ) );
     query.bindValue( QStringLiteral( ":id" ), playlistId );
 
@@ -197,6 +265,7 @@ PlaylistStore::PlaylistInfo PlaylistStore::playlist( qint64 playlistId ) const
     info.kind       = Kind( query.value( 2 ).toInt() );
     info.infoHash   = query.value( 3 ).toString();
     info.trackCount = query.value( 4 ).toInt();
+    info.pinned     = query.value( 5 ).toInt() != 0;
 
     return info;
 }

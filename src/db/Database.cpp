@@ -170,6 +170,18 @@ bool Database::open()
     if( !ensure.exec( QStringLiteral( "INSERT OR IGNORE INTO app_state ( id, position_ms ) VALUES ( 1, 0 )" ) ) )
         qWarning() << "GrooveOff ::" << "cannot ensure the app_state row:" << ensure.lastError().text();
 
+    // And the same for the playlist that is always there. It cannot be removed
+    // through the interface, but a database can arrive here from anywhere — an
+    // older backup, a hand edited file, a migration that was interrupted — and
+    // a sidebar without it is a sidebar with nowhere to drop a track.
+    QSqlQuery pinned( m_db );
+    if( !pinned.exec( QStringLiteral(
+            "INSERT INTO playlist ( name, kind, info_hash, pinned, created_at, updated_at )"
+            " SELECT 'To listen', 1, NULL, 1, strftime( '%s', 'now' ), strftime( '%s', 'now' )"
+            " WHERE NOT EXISTS ( SELECT 1 FROM playlist WHERE pinned = 1 )" ) ) ) {
+        qWarning() << "GrooveOff ::" << "cannot ensure the pinned playlist:" << pinned.lastError().text();
+    }
+
     return true;
 }
 
@@ -319,6 +331,11 @@ bool Database::migrateToVersion1()
             "    name        TEXT    NOT NULL,"
             "    kind        INTEGER NOT NULL,"
             "    info_hash   TEXT    REFERENCES torrent(info_hash) ON DELETE CASCADE,"
+            // The one that is always there. A column and not a kind of its own:
+            // it is a playlist made by hand in every respect the rest of the
+            // program asks about, so the twenty-odd places that ask go on
+            // giving the right answer without being touched.
+            "    pinned      INTEGER NOT NULL DEFAULT 0,"
             "    created_at  INTEGER NOT NULL,"
             "    updated_at  INTEGER NOT NULL"
             ")" ),
@@ -337,6 +354,11 @@ bool Database::migrateToVersion1()
             "    position_ms INTEGER NOT NULL DEFAULT 0"
             ")" ),
         QStringLiteral( "INSERT INTO app_state ( id, position_ms ) VALUES ( 1, 0 )" ),
+        // Its name is stored but never shown: the interface says it in the
+        // language it is running in, which a row in a database cannot do.
+        QStringLiteral(
+            "INSERT INTO playlist ( name, kind, info_hash, pinned, created_at, updated_at )"
+            " VALUES ( 'To listen', 1, NULL, 1, strftime( '%s', 'now' ), strftime( '%s', 'now' ) )" ),
         QStringLiteral( "CREATE UNIQUE INDEX idx_playlist_torrent ON playlist( info_hash ) WHERE info_hash IS NOT NULL" ),
         QStringLiteral( "CREATE INDEX idx_playlist_track ON playlist_track( track_id )" ),
         QStringLiteral( "CREATE INDEX idx_track_hash     ON track( info_hash, excluded )" ),

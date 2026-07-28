@@ -63,6 +63,13 @@ public:
         QString infoHash;      /**< empty for a custom playlist */
         int     trackCount = 0;
 
+        /**
+         * The one that is always there: it cannot be removed or renamed, and
+         * the interface shows a name of its own rather than the stored one, so
+         * that it follows the language the program is running in.
+         */
+        bool pinned = false;
+
         bool isValid() const { return id > 0; }
     };
 
@@ -80,6 +87,17 @@ public:
      * it are removed too, in the same transaction.
      */
     bool removeCustomPlaylist( qint64 playlistId );
+
+    /**
+     * Takes every track out of a playlist made by hand and leaves the playlist
+     * where it is. The garbage collection runs with it and in the same
+     * transaction, for the same reason removal does: a hidden torrent kept
+     * alive only by the tracks just taken out has nothing holding it any more.
+     */
+    bool clearPlaylist( qint64 playlistId );
+
+    /** the playlist that is always there, created by the migration */
+    qint64 pinnedPlaylistId() const;
 
     /** every playlist worth showing: custom ones plus the torrents not hidden */
     QList<PlaylistInfo> visiblePlaylists() const;

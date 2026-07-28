@@ -270,6 +270,7 @@ void MainWindow::setupConnections()
     connect( ac->getAction( "actionEmptyCache" ), &QAction::triggered, this, &MainWindow::emptyCache );
     connect( ac->getAction( "actionNewPlaylist" ), &QAction::triggered, this, &MainWindow::newPlaylist );
     connect( ac->getAction( "actionRenamePlaylist" ), &QAction::triggered, this, &MainWindow::renamePlaylist );
+    connect( ac->getAction( "actionEmptyPlaylist" ), &QAction::triggered, this, &MainWindow::emptyPlaylist );
     connect( ac->getAction( "actionRemovePlaylist" ), &QAction::triggered, this, &MainWindow::removePlaylist );
 
     // currentItemChanged rather than itemClicked, so that the keyboard opens a
@@ -1143,6 +1144,34 @@ void MainWindow::renamePlaylist()
   have been put into lists made by hand, because those are not ours to throw
   away without asking.
 */
+/*!
+  \brief emptyPlaylist: takes every track out and leaves the list where it is
+
+  What the playlist that is always there is for: fill it, listen to it, empty
+  it, fill it again, without inventing a name each time. It is offered on every
+  playlist made by hand, because two lists that are the same thing should not
+  answer differently to the same gesture.
+
+  No question is asked. Nothing is lost: the tracks stay in the catalogue and
+  in whatever else holds them, and putting them back is a drag away.
+*/
+void MainWindow::emptyPlaylist()
+{
+    const qint64 playlistId = ui->playlistList->currentPlaylistId();
+    if( playlistId <= 0 || !The::database()->isOpen() )
+        return;
+
+    const PlaylistStore::PlaylistInfo playlist = The::playlistStore()->playlist( playlistId );
+    if( playlist.kind != PlaylistStore::CustomPlaylist || playlist.trackCount == 0 )
+        return;
+
+    if( !The::playlistStore()->clearPlaylist( playlistId ) )
+        return;
+
+    loadPlaylists();
+    loadCurrentPlaylist();
+}
+
 void MainWindow::removePlaylist()
 {
     const qint64 playlistId = ui->playlistList->currentPlaylistId();
@@ -1150,7 +1179,7 @@ void MainWindow::removePlaylist()
         return;
 
     const PlaylistStore::PlaylistInfo playlist = The::playlistStore()->playlist( playlistId );
-    if( !playlist.isValid() )
+    if( !playlist.isValid() || playlist.pinned )
         return;
 
     if( playlist.kind == PlaylistStore::CustomPlaylist ) {
@@ -1268,9 +1297,21 @@ void MainWindow::showPlaylistMenu( const QPoint &position )
     menu.addAction( ac->getAction( "actionNewPlaylist" ) );
 
     if( playlistId > 0 ) {
+        const PlaylistStore::PlaylistInfo playlist = The::playlistStore()->playlist( playlistId );
+
         menu.addSeparator();
-        menu.addAction( ac->getAction( "actionRenamePlaylist" ) );
-        menu.addAction( ac->getAction( "actionRemovePlaylist" ) );
+
+        // The one that is always there has no name of its own to change and no
+        // removal to offer. Leaving the entries in and refusing afterwards
+        // would be the interface offering something it will not do.
+        if( !playlist.pinned )
+            menu.addAction( ac->getAction( "actionRenamePlaylist" ) );
+
+        if( playlist.kind == PlaylistStore::CustomPlaylist )
+            menu.addAction( ac->getAction( "actionEmptyPlaylist" ) );
+
+        if( !playlist.pinned )
+            menu.addAction( ac->getAction( "actionRemovePlaylist" ) );
     }
 
     menu.exec( ui->playlistList->mapToGlobal( position ) );

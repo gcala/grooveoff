@@ -56,18 +56,27 @@ PlaylistList::~PlaylistList() = default;
 
 void PlaylistList::addPlaylist( const PlaylistStore::PlaylistInfo &playlist )
 {
-    QListWidgetItem *row = new QListWidgetItem( playlist.name );
+    // The name of the pinned one comes from here and not from its row: a name
+    // in the database can only be in the language it was written in, and this
+    // is the one playlist nobody chose the name of.
+    QListWidgetItem *row = new QListWidgetItem( playlist.pinned ? tr( "To listen" ) : playlist.name );
 
     row->setData( PlaylistRoles::Id, playlist.id );
     row->setData( PlaylistRoles::Kind, static_cast<int>( playlist.kind ) );
     row->setData( PlaylistRoles::InfoHash, playlist.infoHash );
     row->setData( PlaylistRoles::TrackCount, playlist.trackCount );
 
-    row->setIcon( playlist.kind == PlaylistStore::CustomPlaylist
-                  ? QIcon::fromTheme( QLatin1String( "view-media-playlist" ),
-                                      QIcon( QLatin1String( ":/resources/Playlist.png" ) ) )
-                  : QIcon::fromTheme( QLatin1String( "network-workgroup" ),
-                                      QIcon( QLatin1String( ":/resources/grooveoff.png" ) ) ) );
+    if( playlist.pinned ) {
+        row->setIcon( QIcon::fromTheme( QLatin1String( "media-playlist-append" ),
+                                        QIcon::fromTheme( QLatin1String( "view-media-playlist" ),
+                                                          QIcon( QLatin1String( ":/resources/Playlist.png" ) ) ) ) );
+    } else {
+        row->setIcon( playlist.kind == PlaylistStore::CustomPlaylist
+                      ? QIcon::fromTheme( QLatin1String( "view-media-playlist" ),
+                                          QIcon( QLatin1String( ":/resources/Playlist.png" ) ) )
+                      : QIcon::fromTheme( QLatin1String( "network-workgroup" ),
+                                          QIcon( QLatin1String( ":/resources/grooveoff.png" ) ) ) );
+    }
 
     row->setToolTip( tr( "%n track(s)", "", playlist.trackCount ) );
 

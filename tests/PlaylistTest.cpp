@@ -52,6 +52,8 @@ class PlaylistTest : public QObject
 private Q_SLOTS:
     void initTestCase();
 
+    void keepsThePinnedPlaylistFirstAndUndeletable();
+    void emptiesAPlaylistWithoutRemovingIt();
     void namesThePlaylistsThatWouldSuffer();
     void keepingTheTracksOnlyHidesTheTorrent();
     void theHiddenTorrentGoesWithItsLastTrack();
@@ -138,7 +140,63 @@ void PlaylistTest::initTestCase()
     QVERIFY( m_customId > 0 );
     QVERIFY( m_playlists->appendTracks( m_customId, { m_tracksA.at( 0 ), m_tracksA.at( 1 ), m_tracksB.at( 0 ) } ) );
 
-    QCOMPARE( m_playlists->visiblePlaylists().count(), 3 );
+    // Four and not three: the one that is always there was there before any of
+    // these were made.
+    QCOMPARE( m_playlists->visiblePlaylists().count(), 4 );
+}
+
+/*!
+  \brief keepsThePinnedPlaylistFirstAndUndeletable
+
+  A list to drop things into without naming one first, so it has to be where
+  the hand goes — at the top, before the torrents — and it has to survive every
+  gesture that removes a playlist. Refusing in the store and not only in the
+  menu is the point: a menu can be worked around, a refusal here cannot.
+*/
+void PlaylistTest::keepsThePinnedPlaylistFirstAndUndeletable()
+{
+    const qint64 pinned = m_playlists->pinnedPlaylistId();
+    QVERIFY( pinned > 0 );
+
+    const QList<PlaylistStore::PlaylistInfo> visible = m_playlists->visiblePlaylists();
+    QVERIFY( !visible.isEmpty() );
+    QCOMPARE( visible.first().id, pinned );
+    QVERIFY( visible.first().pinned );
+
+    // It is a playlist made by hand in every other respect, which is what lets
+    // the rest of the program go on asking one question instead of two.
+    QCOMPARE( visible.first().kind, PlaylistStore::CustomPlaylist );
+
+    QVERIFY2( !m_playlists->removeCustomPlaylist( pinned ), "the pinned playlist let itself be removed" );
+    QVERIFY2( !m_playlists->rename( pinned, QStringLiteral( "Something else" ) ),
+              "the pinned playlist let itself be renamed" );
+
+    QVERIFY( m_playlists->playlist( pinned ).isValid() );
+}
+
+/*!
+  \brief emptiesAPlaylistWithoutRemovingIt
+
+  Emptying is the gesture the pinned playlist exists for, and it carries the
+  same danger as a removal: the tracks going out may be the last thing keeping
+  a hidden torrent alive. So the garbage collection runs with it, and a torrent
+  nobody can see and nobody references is not left behind holding cache.
+*/
+void PlaylistTest::emptiesAPlaylistWithoutRemovingIt()
+{
+    const qint64 pinned = m_playlists->pinnedPlaylistId();
+
+    QVERIFY( m_playlists->appendTracks( pinned, { m_tracksA.at( 0 ), m_tracksB.at( 0 ) } ) );
+    QCOMPARE( m_playlists->tracks( pinned ).count(), 2 );
+
+    QVERIFY( m_playlists->clearPlaylist( pinned ) );
+
+    QVERIFY( m_playlists->tracks( pinned ).isEmpty() );
+    QVERIFY2( m_playlists->playlist( pinned ).isValid(), "emptying removed the playlist" );
+
+    // And the tracks are still in the catalogue: emptying a list is not
+    // throwing anything away.
+    QVERIFY( m_catalog->track( m_tracksA.at( 0 )->id() ) );
 }
 
 void PlaylistTest::namesThePlaylistsThatWouldSuffer()
@@ -160,9 +218,10 @@ void PlaylistTest::keepingTheTracksOnlyHidesTheTorrent()
 {
     QVERIFY( m_catalog->hideTorrent( m_hashA ) );
 
-    // Out of the sidebar.
+    // Out of the sidebar: the other torrent, the list made by hand, and the one
+    // that is always there.
     const QList<PlaylistStore::PlaylistInfo> visible = m_playlists->visiblePlaylists();
-    QCOMPARE( visible.count(), 2 );
+    QCOMPARE( visible.count(), 3 );
 
     for( const PlaylistStore::PlaylistInfo &playlist : visible )
         QVERIFY( playlist.infoHash != m_hashA );
@@ -212,7 +271,9 @@ void PlaylistTest::removingEverythingTakesTheTracksWithIt()
 
     // The list itself is not a casualty: it is empty, not gone.
     QVERIFY( m_playlists->playlist( m_customId ).isValid() );
-    QCOMPARE( m_playlists->visiblePlaylists().count(), 1 );
+
+    // The list made by hand and the pinned one: every torrent is gone.
+    QCOMPARE( m_playlists->visiblePlaylists().count(), 2 );
 }
 
 /*!
@@ -253,7 +314,11 @@ void PlaylistTest::forgetsTheOpenPlaylistWhenItIsRemoved()
 
     QCOMPARE( m_playlists->currentPlaylistId(), qint64( 0 ) );
     QCOMPARE( m_playlists->currentTrackId(), qint64( 0 ) );
-    QVERIFY( m_playlists->visiblePlaylists().isEmpty() );
+    // Everything the story made is gone; what is left is the one nothing here
+    // created and nothing here can remove.
+    const QList<PlaylistStore::PlaylistInfo> left = m_playlists->visiblePlaylists();
+    QCOMPARE( left.count(), 1 );
+    QVERIFY( left.first().pinned );
 
     // And now the same thing from the other side, which is how it actually
     // happens: the player is still holding the track when the rows behind it
