@@ -45,12 +45,42 @@ QString pathOf( const TrackInfoPtr &track )
     return PlaylistItem( track ).localPath();
 }
 
+/*!
+  \brief hasHead: whether there is anything at the head of the file to read
+
+  The rule everywhere here is that a file is asked what it is only once its
+  head is in the cache. This is what enforces it, and it is not a nicety: a
+  sparse file whose first bytes have not arrived reads back as zeros, and
+  TagLib does not take that for an answer. The mpeg parser goes looking for a
+  sync word and scans forward through the whole file to find one that is not
+  there — a second, measured, for ten megabytes of holes. Adding an album of
+  thirteen tracks built thirteen rows and froze the window for thirteen
+  seconds, with nothing on screen and nothing in the log to say why.
+
+  Four bytes are enough to know. Every format this reads begins with a
+  signature — "ID3", "fLaC", "OggS", the mpeg sync itself — so four zeros mean
+  the head has not arrived, whatever the rest of the file may already hold.
+
+  A flac hid this for a long time by being honest: its magic is at offset zero,
+  so it gives up at once. It is the mp3 that goes looking.
+*/
+bool hasHead( const QString &path )
+{
+    QFile file( path );
+    if( !file.open( QIODevice::ReadOnly ) )
+        return false;
+
+    const QByteArray head = file.read( 4 );
+
+    return head.size() == 4 && head != QByteArray( 4, '\0' );
+}
+
 } // namespace
 
 bool TrackTags::read( const TrackInfoPtr &track )
 {
     const QString path = pathOf( track );
-    if( path.isEmpty() || !QFile::exists( path ) )
+    if( path.isEmpty() || !QFile::exists( path ) || !hasHead( path ) )
         return false;
 
     // No audio properties asked for: reading them means scanning, and scanning
@@ -86,7 +116,7 @@ bool TrackTags::read( const TrackInfoPtr &track )
 
 QImage TrackTags::cover( const QString &localPath )
 {
-    if( localPath.isEmpty() || !QFile::exists( localPath ) )
+    if( localPath.isEmpty() || !QFile::exists( localPath ) || !hasHead( localPath ) )
         return QImage();
 
     TagLib::FileRef file( QFile::encodeName( localPath ).constData(), false );

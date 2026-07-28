@@ -133,6 +133,25 @@ target_include_directories(configtest PRIVATE ${CMAKE_SOURCE_DIR}/src/grooveoff)
 add_test(NAME config COMMAND configtest)
 set_tests_properties(config PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
 
+# A test about a cost: what a file with nothing in it yet must not be put
+# through. It needs no database and no session, only TagLib and a sparse file.
+add_executable(tagstest TrackTagsTest.cpp
+                        ../src/grooveoff/TrackTags.cpp
+                        ../src/grooveoff/PlaylistItem.cpp
+                        ../src/grooveoff/Utility.cpp)
+
+target_link_libraries(tagstest PRIVATE
+                      grooveoff_core
+                      Qt6::Gui
+                      Qt6::Widgets
+                      Qt6::Test
+                      TagLib::TagLib)
+
+target_include_directories(tagstest PRIVATE ${CMAKE_SOURCE_DIR}/src/grooveoff)
+
+add_test(NAME tags COMMAND tagstest)
+set_tests_properties(tags PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+
 # Hand driven, needs a swarm and a pair of eyes: built so that it cannot rot,
 # never run by ctest.
 add_executable(torrentcli TorrentCli.cpp)
