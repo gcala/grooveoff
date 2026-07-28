@@ -72,6 +72,9 @@ private:
     bool loadSvg( const QString& name );
 
     QHash<QString,QSvgRenderer*> m_renderers;
+
+    /** what has already been rendered, by name, element, size and opacity */
+    QHash<QString,QPixmap> m_pixmapCache;
     QReadWriteLock m_lock;
 
     QString m_themeFile;
