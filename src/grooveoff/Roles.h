@@ -54,7 +54,19 @@ namespace PlaylistRoles
     {
         Id = 200,
         Kind,
-        InfoHash    /**< empty for a custom playlist */
+        InfoHash,   /**< empty for a custom playlist */
+
+        /**
+         * GrooveOff::SourceHealth, and only on a playlist born from a torrent.
+         * A custom playlist holds tracks of several torrents, so the health of
+         * the source has no single answer for it and the delegate draws
+         * nothing: an average of things that are not comparable would be worse
+         * than saying nothing at all.
+         */
+        Health,
+
+        /** how many tracks the playlist holds, for the first line of its tooltip */
+        TrackCount
     };
 }
 

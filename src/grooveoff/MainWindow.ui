@@ -64,16 +64,6 @@
        </spacer>
       </item>
       <item>
-       <widget class="SvgButton" name="svgLed" native="true">
-        <property name="minimumSize">
-         <size>
-          <width>30</width>
-          <height>30</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="SvgButton" name="compactMenuButton" native="true">
         <property name="minimumSize">
          <size>

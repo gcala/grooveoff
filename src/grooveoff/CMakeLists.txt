@@ -27,6 +27,7 @@ set(grooveoff_SRCS main.cpp
                    widgets/IconButton.cpp
                    widgets/Spinner.cpp
                    widgets/PlaylistList.cpp
+                   widgets/PlaylistDelegate.cpp
                    dbus/mpris.cpp
                    dbus/mpris2/Mpris2PluginRootAdaptor.cpp
                    dbus/mpris2/Mpris2PluginPlayerAdaptor.cpp)

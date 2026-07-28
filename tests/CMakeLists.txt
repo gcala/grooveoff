@@ -48,8 +48,12 @@ add_executable(playlisttest PlaylistTest.cpp
                             ../src/grooveoff/Utility.cpp
                             ../src/grooveoff/widgets/PlaylistList.cpp)
 
+# The sidebar knows the torrent session now: the led of a row is the health of
+# the torrent behind it, and asking the window to relay that was making the
+# window the owner of something that is not its business. Nothing here starts a
+# session — the singleton is built and never told to go online.
 target_link_libraries(playlisttest PRIVATE
-                      grooveoff_core
+                      grooveoff_torrent
                       Qt6::Widgets
                       Qt6::Test)
 
@@ -74,6 +78,30 @@ target_include_directories(selectortest PRIVATE ${CMAKE_SOURCE_DIR}/src/grooveof
 
 add_test(NAME selector COMMAND selectortest)
 set_tests_properties(selector PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+
+# And for the sidebar rows, where the thing worth pinning is not what is drawn
+# but where: a led painted past the right edge of the viewport is code that
+# runs, paints, and shows nothing at all.
+#
+# The leds come out of the themed svg, which brings the tinting along with
+# them: the theme file itself is not in this binary, and it does not need to
+# be — a renderer with nothing loaded hands back an empty pixmap, and what is
+# being asked here is where the led goes rather than what it looks like.
+add_executable(delegatetest PlaylistDelegateTest.cpp
+                            ../src/grooveoff/widgets/PlaylistDelegate.cpp
+                            ../src/grooveoff/SvgHandler.cpp
+                            ../src/grooveoff/SvgTinter.cpp
+                            ../src/grooveoff/PaletteHandler.cpp)
+
+target_link_libraries(delegatetest PRIVATE
+                      Qt6::Widgets
+                      Qt6::Svg
+                      Qt6::Test)
+
+target_include_directories(delegatetest PRIVATE ${CMAKE_SOURCE_DIR}/src/grooveoff)
+
+add_test(NAME delegate COMMAND delegatetest)
+set_tests_properties(delegate PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
 
 # Same arrangement for the settings dialog, and for one reason above the
 # others: a default that drifts apart from the one its reader uses is invisible

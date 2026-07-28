@@ -518,7 +518,7 @@
     <message>
         <location line="+31"/>
         <source>Everything on this page takes effect the next time GrooveOff starts.</source>
-        <translation>Tutto quello che c'è in questa pagina ha effetto al prossimo avvio di GrooveOff.</translation>
+        <translation>Tutto quello che c&apos;è in questa pagina ha effetto al prossimo avvio di GrooveOff.</translation>
     </message>
     <message>
         <source>Ports, bandwidth and proxy take effect the next time GrooveOff starts.</source>
@@ -705,7 +705,7 @@
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="+124"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="+125"/>
         <source>The database could not be opened:</source>
         <translation>Non è stato possibile aprire il database:</translation>
     </message>
@@ -715,7 +715,7 @@
         <translation>Le playlist non verranno ricordate.</translation>
     </message>
     <message>
-        <location line="+39"/>
+        <location line="+48"/>
         <source>GrooveOff</source>
         <translation>GrooveOff</translation>
     </message>
@@ -726,13 +726,13 @@
     </message>
     <message>
         <location line="+2"/>
-        <location line="+325"/>
-        <location line="+919"/>
+        <location line="+315"/>
+        <location line="+882"/>
         <source>Idle</source>
         <translation>Fermo</translation>
     </message>
     <message>
-        <location line="-1235"/>
+        <location line="-1188"/>
         <source>Magnet</source>
         <translation>Magnet</translation>
     </message>
@@ -742,7 +742,7 @@
         <translation>Incolla un magnet e premi invio</translation>
     </message>
     <message>
-        <location line="+390"/>
+        <location line="+380"/>
         <source>Open a torrent</source>
         <translation>Apri un torrent</translation>
     </message>
@@ -756,24 +756,26 @@
         <source>Reading the track list…</source>
         <translation>Lettura dell’elenco dei brani…</translation>
     </message>
+    <message>
+        <source>Asleep: it wakes at the first play</source>
+        <translation type="vanished">Addormentato: si sveglia alla prima riproduzione</translation>
+    </message>
     <message numerus="yes">
-        <location line="+848"/>
         <source>%n peer(s)</source>
-        <translation>
+        <translation type="vanished">
             <numerusform>%n peer</numerusform>
             <numerusform>%n peer</numerusform>
         </translation>
     </message>
     <message numerus="yes">
-        <location line="+1"/>
         <source>%n seed(s)</source>
-        <translation>
+        <translation type="vanished">
             <numerusform>%n seed</numerusform>
             <numerusform>%n seed</numerusform>
         </translation>
     </message>
     <message>
-        <location line="-611"/>
+        <location line="+217"/>
         <source>The cache is already empty.</source>
         <translation>La cache è già vuota.</translation>
     </message>
@@ -808,15 +810,14 @@
         <translation>Non suonerà niente finché non ci sarà spazio.</translation>
     </message>
     <message numerus="yes">
-        <location line="+51"/>
         <source>%n track(s)</source>
-        <translation>
+        <translation type="vanished">
             <numerusform>%n brano</numerusform>
             <numerusform>%n brani</numerusform>
         </translation>
     </message>
     <message>
-        <location line="+39"/>
+        <location line="+75"/>
         <location line="+3"/>
         <source>New playlist</source>
         <translation>Nuova playlist</translation>
@@ -896,19 +897,16 @@
         </translation>
     </message>
     <message>
-        <location line="+228"/>
         <source>Online</source>
-        <translation>In rete</translation>
+        <translation type="vanished">In rete</translation>
     </message>
     <message>
-        <location line="+1"/>
         <source>Offline: only cached tracks can be played</source>
-        <translation>Fuori rete: si possono riprodurre solo i brani in cache</translation>
+        <translation type="vanished">Fuori rete: si possono riprodurre solo i brani in cache</translation>
     </message>
     <message numerus="yes">
-        <location line="+13"/>
         <source>%n peer(s) from the tracker</source>
-        <translation>
+        <translation type="vanished">
             <numerusform>%n peer dal tracker</numerusform>
             <numerusform>%n peer dal tracker</numerusform>
         </translation>
@@ -938,7 +936,7 @@
         <translation type="vanished">Inizia ricerca</translation>
     </message>
     <message>
-        <location line="-1278"/>
+        <location line="-990"/>
         <source>Main menu</source>
         <translation>Menu principale</translation>
     </message>
@@ -995,13 +993,13 @@ Select a valid path</source>
 Seleziona un percorso valido</translation>
     </message>
     <message>
-        <location line="+1286"/>
+        <location line="+1204"/>
         <source>Donation to Grooveoff&apos;s author</source>
         <translation>Donazione all&apos;autore di Grooveoff</translation>
     </message>
     <message>
-        <location line="-1335"/>
-        <location line="+781"/>
+        <location line="-1262"/>
+        <location line="+759"/>
         <source>Attention</source>
         <translation>Attenzione</translation>
     </message>
@@ -1035,7 +1033,7 @@ Selezionare un percorso valido</translation>
         <translation type="vanished">Annullo...</translation>
     </message>
     <message>
-        <location line="+514"/>
+        <location line="+497"/>
         <source>Offline</source>
         <translation>Non in linea</translation>
     </message>
@@ -1083,6 +1081,47 @@ Selezionare un percorso valido</translation>
         <location line="+195"/>
         <source>Play</source>
         <translation>Riproduci</translation>
+    </message>
+</context>
+<context>
+    <name>PlaylistList</name>
+    <message numerus="yes">
+        <location filename="../src/grooveoff/widgets/PlaylistList.cpp" line="+72"/>
+        <location line="+39"/>
+        <source>%n track(s)</source>
+        <translation>
+            <numerusform>%n brano</numerusform>
+            <numerusform>%n brani</numerusform>
+        </translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Asleep: it wakes at the first play</source>
+        <translation>Addormentato: si sveglia alla prima riproduzione</translation>
+    </message>
+    <message numerus="yes">
+        <location line="+2"/>
+        <source>%n peer(s)</source>
+        <translation>
+            <numerusform>%n peer</numerusform>
+            <numerusform>%n peer</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location line="+1"/>
+        <source>%n seed(s)</source>
+        <translation>
+            <numerusform>%n seed</numerusform>
+            <numerusform>%n seed</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location line="+7"/>
+        <source>%n peer(s) from the tracker</source>
+        <translation>
+            <numerusform>%n peer dal tracker</numerusform>
+            <numerusform>%n peer dal tracker</numerusform>
+        </translation>
     </message>
 </context>
 <context>

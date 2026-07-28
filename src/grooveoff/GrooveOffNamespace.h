@@ -93,6 +93,24 @@ namespace GrooveOff {
          Idle,
          Playing
     };
+
+    /**
+     * What a torrent's swarm looks like from here, for the led of its playlist.
+     *
+     * Three states and not two, and the third one is the whole reason this can
+     * be shown at all: reactivation is lazy, so most torrents at start up have
+     * never been handed to the session and there is nothing to count. Told with
+     * two states they would all read as dead, and the sidebar would announce a
+     * disaster at every launch.
+     */
+    enum SourceHealth {
+         /** never asked: the torrent is not in the session, and will be at the first play */
+         UnknownSource,
+         /** asked, and nobody is there right now */
+         SilentSource,
+         /** peers, however many the tooltip says */
+         LiveSource
+    };
 }
 
 #include <QtCore/QMetaType>

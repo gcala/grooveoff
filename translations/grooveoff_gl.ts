@@ -701,7 +701,7 @@
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="+124"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="+125"/>
         <source>The database could not be opened:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -711,7 +711,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+39"/>
+        <location line="+48"/>
         <source>GrooveOff</source>
         <translation>GrooveOff</translation>
     </message>
@@ -722,13 +722,13 @@
     </message>
     <message>
         <location line="+2"/>
-        <location line="+325"/>
-        <location line="+919"/>
+        <location line="+315"/>
+        <location line="+882"/>
         <source>Idle</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1235"/>
+        <location line="-1188"/>
         <source>Magnet</source>
         <translation type="unfinished"></translation>
     </message>
@@ -738,7 +738,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+390"/>
+        <location line="+380"/>
         <source>Open a torrent</source>
         <translation type="unfinished"></translation>
     </message>
@@ -752,24 +752,8 @@
         <source>Reading the track list…</source>
         <translation type="unfinished"></translation>
     </message>
-    <message numerus="yes">
-        <location line="+848"/>
-        <source>%n peer(s)</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
-        </translation>
-    </message>
-    <message numerus="yes">
-        <location line="+1"/>
-        <source>%n seed(s)</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
-        </translation>
-    </message>
     <message>
-        <location line="-611"/>
+        <location line="+217"/>
         <source>The cache is already empty.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -803,16 +787,8 @@
         <source>Nothing will play until there is room for it.</source>
         <translation type="unfinished"></translation>
     </message>
-    <message numerus="yes">
-        <location line="+51"/>
-        <source>%n track(s)</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
-        </translation>
-    </message>
     <message>
-        <location line="+39"/>
+        <location line="+75"/>
         <location line="+3"/>
         <source>New playlist</source>
         <translation type="unfinished"></translation>
@@ -892,24 +868,6 @@
         </translation>
     </message>
     <message>
-        <location line="+228"/>
-        <source>Online</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+1"/>
-        <source>Offline: only cached tracks can be played</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message numerus="yes">
-        <location line="+13"/>
-        <source>%n peer(s) from the tracker</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
-        </translation>
-    </message>
-    <message>
         <source>Connecting...</source>
         <translation type="vanished">Conectando...</translation>
     </message>
@@ -934,7 +892,7 @@
         <translation type="vanished">Iniciar a busca</translation>
     </message>
     <message>
-        <location line="-1278"/>
+        <location line="-990"/>
         <source>Main menu</source>
         <translation>Menú principal</translation>
     </message>
@@ -994,7 +952,7 @@ Select a valid path</source>
 Selecciona un camiño válido</translation>
     </message>
     <message>
-        <location line="+1286"/>
+        <location line="+1204"/>
         <source>Donation to Grooveoff&apos;s author</source>
         <translation>Doazón ao creador de Grooveoff</translation>
     </message>
@@ -1003,8 +961,8 @@ Selecciona un camiño válido</translation>
         <translation type="vanished">Música sen conexión desde Grooveshark.com</translation>
     </message>
     <message>
-        <location line="-1335"/>
-        <location line="+781"/>
+        <location line="-1262"/>
+        <location line="+759"/>
         <source>Attention</source>
         <translation>Atención</translation>
     </message>
@@ -1031,7 +989,7 @@ Selecciona un camiño válido</translation>
         <translation type="vanished">Cancelando...</translation>
     </message>
     <message>
-        <location line="+514"/>
+        <location line="+497"/>
         <source>Offline</source>
         <translation>Sen conexión</translation>
     </message>
@@ -1079,6 +1037,47 @@ Selecciona un camiño válido</translation>
         <location line="+195"/>
         <source>Play</source>
         <translation>Reproducir</translation>
+    </message>
+</context>
+<context>
+    <name>PlaylistList</name>
+    <message numerus="yes">
+        <location filename="../src/grooveoff/widgets/PlaylistList.cpp" line="+72"/>
+        <location line="+39"/>
+        <source>%n track(s)</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Asleep: it wakes at the first play</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <location line="+2"/>
+        <source>%n peer(s)</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location line="+1"/>
+        <source>%n seed(s)</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location line="+7"/>
+        <source>%n peer(s) from the tracker</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
     </message>
 </context>
 <context>

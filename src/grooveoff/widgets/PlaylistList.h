@@ -19,7 +19,11 @@
 #ifndef PLAYLISTLIST_H
 #define PLAYLISTLIST_H
 
+#include "../../db/PlaylistStore.h"
+
+#include <QHash>
 #include <QListWidget>
+#include <QPair>
 
 /**
   * @class PlaylistList
@@ -44,6 +48,15 @@ public:
     explicit PlaylistList( QWidget *parent = nullptr );
     ~PlaylistList() override;
 
+    /**
+     * Adds one row, icon, tooltip and all. The window says which playlists
+     * exist and this says what a row of them looks like — including the led,
+     * which the window has no reason to know about: the health of a source is
+     * a property of the torrent behind the row, and the row is the only thing
+     * that has to hear about it changing.
+     */
+    void addPlaylist( const PlaylistStore::PlaylistInfo &playlist );
+
     /** the playlist under the cursor, or 0 where there is no row */
     qint64 playlistAt( const QPoint &position ) const;
 
@@ -67,6 +80,13 @@ protected:
 
 Q_SIGNALS:
     void tracksDropped( qint64 playlistId, const QList<qint64> &trackIds );
+
+private:
+    /** the led of one torrent, and the tooltip that spells out what it means */
+    void updateHealth( const QString &infoHash );
+
+    /** peers and seeds of every torrent the session is holding */
+    QHash<QString, QPair<int, int>> m_peers;
 };
 
 #endif // PLAYLISTLIST_H

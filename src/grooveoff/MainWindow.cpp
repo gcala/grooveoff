@@ -40,6 +40,7 @@
 #include "TrackTags.h"
 #include "Settings.h"
 #include "widgets/PlaylistList.h"
+#include "widgets/PlaylistDelegate.h"
 #include "../torrent/CacheManager.h"
 #include "../torrent/StreamServer.h"
 #include "../torrent/TorrentSession.h"
@@ -157,10 +158,19 @@ MainWindow::~MainWindow()
 
 void MainWindow::setupUi()
 {
-    ui->logoLabel->setPixmap( QPixmap( QLatin1String( ":/resources/grooveoff.png" ) ) );
-    ui->logoLabel->setMinimumHeight( 30 );
-    ui->logoLabel->setMaximumWidth( 30 );
-    ui->logoLabel->setScaledContents( 30 );
+    // Scaled once, to a square, rather than stretched to whatever the label
+    // ends up being. It used to be told to fill its label and to keep its width
+    // under thirty, and it looked right only because the led beside it was
+    // fixed at thirty and held the whole row to that height. Take the led away
+    // and the row grows to the labels, the logo grows with it, and a round icon
+    // comes out an oval — a widget's shape depending on a neighbour that has
+    // nothing to do with it.
+    const int logoSide = 30;
+    ui->logoLabel->setFixedSize( logoSide, logoSide );
+    ui->logoLabel->setAlignment( Qt::AlignCenter );
+    ui->logoLabel->setPixmap( QPixmap( QLatin1String( ":/resources/grooveoff.png" ) )
+                              .scaled( logoSide, logoSide,
+                                       Qt::KeepAspectRatio, Qt::SmoothTransformation ) );
 
     ui->appLabel->setText( tr( "GrooveOff" ) );
     ui->appLabel->setFont( Utility::font( QFont::Bold, 2 ) );
@@ -197,8 +207,7 @@ void MainWindow::setupUi()
 
     m_playerWidget->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Fixed );
 
-    ui->svgLed->setType( IconButton::Offline );
-    updateNetworkTooltip();
+    ui->playlistList->setItemDelegate( new PlaylistDelegate( this ) );
 }
 
 void MainWindow::setupGuiLayout()
@@ -279,15 +288,6 @@ void MainWindow::setupConnections()
 
     connect( The::torrentSession(), &TorrentSession::metadataReady, this, &MainWindow::onMetadataReady );
     connect( The::torrentSession(), &TorrentSession::statsUpdated,  this, &MainWindow::onTorrentStats );
-
-    // An announce is answered long after the play that caused it, so the count
-    // has to come to the tooltip rather than wait to be asked for.
-    connect( The::torrentSession(), &TorrentSession::trackerReplied, this,
-             [this]( const QString &infoHash, int ) {
-        const PlaylistItemPtr current = The::audioEngine()->currentTrack();
-        if( current && current->track() && current->track()->infoHash() == infoHash )
-            updateNetworkTooltip();
-    } );
 
     connect( The::torrentSession(), &TorrentSession::torrentError,  this, &MainWindow::onTorrentError );
     connect( The::torrentSession(), &TorrentSession::storageError,  this, &MainWindow::onStorageError );
@@ -729,19 +729,7 @@ void MainWindow::onTorrentStats( const QString &infoHash, int peers, int seeds, 
     The::catalog()->setBytesDone( infoHash, bytesDone );
 
     const PlaylistItemPtr current = The::audioEngine()->currentTrack();
-    if( !current || !current->track() ) {
-        // Nothing is being listened to, so the peers of whatever torrent is
-        // still announcing are nobody's business: left where they were they
-        // would keep describing a track that stopped playing.
-        if( m_peers != 0 || m_seeds != 0 ) {
-            m_peers = 0;
-            m_seeds = 0;
-            updateNetworkTooltip();
-        }
-        return;
-    }
-
-    if( current->track()->infoHash() != infoHash )
+    if( !current || !current->track() || current->track()->infoHash() != infoHash )
         return;
 
     // Bytes are still coming in, so the wait is buffering rather than a stall,
@@ -756,15 +744,6 @@ void MainWindow::onTorrentStats( const QString &infoHash, int peers, int seeds, 
 
     m_lastStatsHash = infoHash;
     m_lastBytesDone = bytesDone;
-
-    // The led follows the torrent being listened to, not the network as a
-    // whole: whether a machine is online says nothing about whether this track
-    // has anybody to get its bytes from.
-    ui->svgLed->setType( peers == 0 ? IconButton::Offline : IconButton::Online );
-
-    m_peers = peers;
-    m_seeds = seeds;
-    updateNetworkTooltip();
 
     DownloadItem *item = rowFor( current->track() );
     if( !item )
@@ -942,23 +921,8 @@ void MainWindow::loadPlaylists()
     ui->playlistList->clear();
 
     const QList<PlaylistStore::PlaylistInfo> playlists = The::playlistStore()->visiblePlaylists();
-    for( const PlaylistStore::PlaylistInfo &playlist : playlists ) {
-        QListWidgetItem *row = new QListWidgetItem( playlist.name );
-
-        row->setData( PlaylistRoles::Id, playlist.id );
-        row->setData( PlaylistRoles::Kind, static_cast<int>( playlist.kind ) );
-        row->setData( PlaylistRoles::InfoHash, playlist.infoHash );
-
-        row->setIcon( playlist.kind == PlaylistStore::CustomPlaylist
-                      ? QIcon::fromTheme( QLatin1String( "view-media-playlist" ),
-                                          QIcon( QLatin1String( ":/resources/Playlist.png" ) ) )
-                      : QIcon::fromTheme( QLatin1String( "network-workgroup" ),
-                                          QIcon( QLatin1String( ":/resources/grooveoff.png" ) ) ) );
-
-        row->setToolTip( tr( "%n track(s)", "", playlist.trackCount ) );
-
-        ui->playlistList->addItem( row );
-    }
+    for( const PlaylistStore::PlaylistInfo &playlist : playlists )
+        ui->playlistList->addPlaylist( playlist );
 
     ui->playlistList->selectPlaylist( open );
 
@@ -1409,48 +1373,12 @@ void MainWindow::configure()
 void MainWindow::onlineStateChanged( bool isOnline )
 {
     if( isOnline ) {
-        ui->svgLed->setType( IconButton::Online );
         m_playerWidget->showMessage( tr( "Idle" ) );
     } else {
         // Tracks already in the cache still play: only reaching new peers needs
         // the network.
-        ui->svgLed->setType( IconButton::Offline );
         m_playerWidget->showMessage( tr( "Offline" ) );
     }
-
-    updateNetworkTooltip();
-}
-
-/*!
-  \brief updateNetworkTooltip: the health of the source, in three lines
-
-  Written in one place because there is one tooltip and there were two writers
-  of it: the network coming and going wrote whether the machine was connected,
-  the statistics of the torrent wrote how many peers it had, and each of them
-  threw away what the other had just said.
-*/
-void MainWindow::updateNetworkTooltip()
-{
-    QStringList lines;
-
-    lines << ( isOnline() ? tr( "Online" )
-                          : tr( "Offline: only cached tracks can be played" ) );
-
-    if( m_peers > 0 || m_seeds > 0 )
-        lines << tr( "%n peer(s)", "", m_peers ) + QLatin1String( ", " )
-                 + tr( "%n seed(s)", "", m_seeds );
-
-    // Where those peers came from. A torrent whose tracker answered has
-    // somewhere to go back to when the ones it holds go quiet, and without
-    // this line a tracker that knows nobody reads like a swarm that is empty.
-    const PlaylistItemPtr current = The::audioEngine()->currentTrack();
-    if( current && current->track() ) {
-        const int fromTracker = The::torrentSession()->trackerPeers( current->track()->infoHash() );
-        if( fromTracker >= 0 )
-            lines << tr( "%n peer(s) from the tracker", "", fromTracker );
-    }
-
-    ui->svgLed->setToolTip( lines.join( QLatin1Char( '\n' ) ) );
 }
 
 void MainWindow::donate()
@@ -1471,7 +1399,6 @@ void MainWindow::resizeEvent( QResizeEvent *event )
     QFontMetrics fmSystemFont( Utility::font( QFont::Bold ) );
     const int side = qMax( fmSystemFont.height(), 24 );
 
-    ui->svgLed->setFixedSize( QSize( side, side ) );
     ui->compactMenuButton->setFixedSize( QSize( side, side ) );
     ui->spinnerWidget->setFixedSize( QSize( side, side ) );
     QWidget::resizeEvent( event );
