@@ -51,6 +51,14 @@ namespace TrackTags {
     /** the picture frame of the file, null when it has none or cannot be read */
     QImage cover( const QString &localPath );
 
+    /**
+     * Whether the head of this file has arrived, hence whether asking it
+     * anything can produce an answer. Public because it is also the cheapest
+     * way of asking "is this one ready to be read yet" of a row that is
+     * waiting: four bytes, against a file that may be ten megabytes of holes.
+     */
+    bool hasHead( const QString &localPath );
+
 }
 
 #endif // TRACKTAGS_H

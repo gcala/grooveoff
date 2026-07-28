@@ -513,6 +513,13 @@ void MainWindow::loadCurrentPlaylist()
     ui->downloadList->setAutoScroll( true );
     ui->downloadList->reloadPlaylist();
 
+    // Once here as well, and not only with the statistics: a torrent whose
+    // files are already in the cache is asleep, so no statistics arrive for it
+    // and nothing would ever ask. Its rows would show file names until
+    // somebody pressed play on each of them — which is the behaviour this is
+    // meant to be the end of.
+    readArrivedTags();
+
     // The track that was playing is selected but not started: pressing play
     // picks it up where it was left.
     QSettings settings;
@@ -780,6 +787,9 @@ void MainWindow::onTorrentStats( const QString &infoHash, int peers, int seeds, 
 
     The::catalog()->setBytesDone( infoHash, bytesDone );
 
+    // Whatever has landed since the last second gets asked what it is.
+    readArrivedTags( infoHash );
+
     const PlaylistItemPtr current = The::audioEngine()->currentTrack();
     if( !current || !current->track() || current->track()->infoHash() != infoHash )
         return;
@@ -813,6 +823,46 @@ void MainWindow::onTorrentStats( const QString &infoHash, int peers, int seeds, 
   arrived and not before: asking a hole what it is called gets no answer, and
   the row would keep the file name for ever.
 */
+/*!
+  \brief readArrivedTags: asks every row of this torrent whose file has landed
+
+  Reading the tags used to hang off the track being prepared for the player,
+  which was right when a file only ever arrived because somebody had pressed
+  play on it. Now the whole playlist is fetched whether or not anybody presses
+  anything, so a row would sit there showing a file name — track number, dashes
+  and extension — beside a file that has had its title in it for a minute.
+
+  Asking costs four bytes per row: TrackTags::hasHead() looks at the signature
+  and nothing else, and a file that has not arrived reads back as zeros. So
+  this runs with the statistics, once a second per torrent, and each row is
+  asked exactly once — when the answer is yes.
+*/
+void MainWindow::readArrivedTags( const QString &infoHash )
+{
+    for( int i = 0; i < ui->downloadList->count(); ++i ) {
+        DownloadItem *item = qobject_cast<DownloadItem *>( ui->downloadList->itemWidget( ui->downloadList->item( i ) ) );
+        if( !item || !item->playlistItem()->track() )
+            continue;
+
+        const TrackInfoPtr &track = item->playlistItem()->track();
+        if( !infoHash.isEmpty() && track->infoHash() != infoHash )
+            continue;
+
+        const QString key = track->infoHash() + QLatin1Char( '/' ) + QString::number( track->fileIndex() );
+        if( m_tagsRead.contains( key ) )
+            continue;
+
+        if( !TrackTags::hasHead( item->playlistItem()->localPath() ) )
+            continue;
+
+        // Once the head is there the answer will not change, so the row is
+        // marked whatever came back: a file with no tags at all is a file with
+        // no tags at all, and asking it again every second says nothing new.
+        m_tagsRead.insert( key );
+        readTagsOf( track->infoHash(), track->fileIndex() );
+    }
+}
+
 void MainWindow::readTagsOf( const QString &infoHash, int fileIndex )
 {
     const TrackInfoPtr track = The::catalog()->track( infoHash, fileIndex );

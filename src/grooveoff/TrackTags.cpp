@@ -64,7 +64,7 @@ QString pathOf( const TrackInfoPtr &track )
   A flac hid this for a long time by being honest: its magic is at offset zero,
   so it gives up at once. It is the mp3 that goes looking.
 */
-bool hasHead( const QString &path )
+bool headOf( const QString &path )
 {
     QFile file( path );
     if( !file.open( QIODevice::ReadOnly ) )
@@ -77,10 +77,15 @@ bool hasHead( const QString &path )
 
 } // namespace
 
+bool TrackTags::hasHead( const QString &localPath )
+{
+    return headOf( localPath );
+}
+
 bool TrackTags::read( const TrackInfoPtr &track )
 {
     const QString path = pathOf( track );
-    if( path.isEmpty() || !QFile::exists( path ) || !hasHead( path ) )
+    if( path.isEmpty() || !QFile::exists( path ) || !headOf( path ) )
         return false;
 
     // No audio properties asked for: reading them means scanning, and scanning
@@ -116,7 +121,7 @@ bool TrackTags::read( const TrackInfoPtr &track )
 
 QImage TrackTags::cover( const QString &localPath )
 {
-    if( localPath.isEmpty() || !QFile::exists( localPath ) || !hasHead( localPath ) )
+    if( localPath.isEmpty() || !QFile::exists( localPath ) || !headOf( localPath ) )
         return QImage();
 
     TagLib::FileRef file( QFile::encodeName( localPath ).constData(), false );

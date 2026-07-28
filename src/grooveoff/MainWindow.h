@@ -117,6 +117,9 @@ private Q_SLOTS:
     /** reads the tags of a track whose head has just arrived */
     void readTagsOf( const QString &infoHash, int fileIndex );
 
+    /** and of every row of this torrent whose file has landed since last time */
+    void readArrivedTags( const QString &infoHash = QString() );
+
     /** throws the cached bytes away, keeping every playlist as it is */
     void emptyCache();
 
@@ -219,6 +222,13 @@ private:
 
     /** the track the rows are being marked for, so the last one can be let go */
     TrackInfoPtr m_playingTrack;
+
+    /**
+     * Rows already asked what their file says, by info hash and file index.
+     * Asked once and not again: once the head of a file is there its answer
+     * stops changing, and a file with no tags at all has none to find.
+     */
+    QSet<QString> m_tagsRead;
 
     /** what the torrent being listened to had last time, to see it progressing */
     QString m_lastStatsHash;
