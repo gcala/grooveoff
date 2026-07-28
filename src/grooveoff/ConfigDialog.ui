@@ -537,6 +537,119 @@
           </widget>
          </item>
          <item>
+          <widget class="QGroupBox" name="sharingBox">
+           <property name="title">
+            <string>Sharing</string>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_14">
+            <item>
+             <widget class="QCheckBox" name="sharing">
+              <property name="text">
+               <string>Share the music while you listen to it</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="sharingHint">
+              <property name="text">
+               <string>Whoever gives something back is served first: with this off, a track can take longer to start and stop more often while playing. With it on, part of what you are listening to is sent to the other users, using some of your connection.</string>
+              </property>
+              <property name="wordWrap">
+               <bool>true</bool>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">margin-left: 20px;</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_15">
+              <property name="leftMargin">
+               <number>20</number>
+              </property>
+              <item>
+               <widget class="QLabel" name="uploadSlotsLabel">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="text">
+                 <string>Users served at once:</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="uploadSlots">
+                <property name="maximumSize">
+                 <size>
+                  <width>160</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="minimum">
+                 <number>1</number>
+                </property>
+                <property name="maximum">
+                 <number>50</number>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="uploadRateLabel">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="text">
+                 <string>Speed limit:</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="uploadRateLimit">
+                <property name="maximumSize">
+                 <size>
+                  <width>160</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="suffix">
+                 <string> KB/s</string>
+                </property>
+                <property name="specialValueText">
+                 <string>Unlimited</string>
+                </property>
+                <property name="maximum">
+                 <number>102400</number>
+                </property>
+                <property name="singleStep">
+                 <number>10</number>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_9">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
           <widget class="QGroupBox" name="proxyBox">
            <property name="title">
             <string>Proxy</string>
@@ -630,7 +743,7 @@
          <item>
           <widget class="QLabel" name="restartHint">
            <property name="text">
-            <string>Ports, bandwidth and proxy take effect the next time GrooveOff starts.</string>
+            <string>Everything on this page takes effect the next time GrooveOff starts.</string>
            </property>
            <property name="wordWrap">
             <bool>true</bool>

@@ -145,6 +145,10 @@ private Q_SLOTS:
     void about();
     void configure();
     void onlineStateChanged( bool isOnline );
+
+    /** the health of the source, written in one place by all of its writers */
+    void updateNetworkTooltip();
+
     void donate();
 
 private:
@@ -212,6 +216,10 @@ private:
     /** what the torrent being listened to had last time, to see it progressing */
     QString m_lastStatsHash;
     qint64  m_lastBytesDone = -1;
+
+    /** of the torrent being listened to, for the tooltip of the led */
+    int m_peers = 0;
+    int m_seeds = 0;
 
     Mpris *m_mpris;
 

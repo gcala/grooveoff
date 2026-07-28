@@ -198,6 +198,7 @@ void MainWindow::setupUi()
     m_playerWidget->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Fixed );
 
     ui->svgLed->setType( IconButton::Offline );
+    updateNetworkTooltip();
 }
 
 void MainWindow::setupGuiLayout()
@@ -278,6 +279,16 @@ void MainWindow::setupConnections()
 
     connect( The::torrentSession(), &TorrentSession::metadataReady, this, &MainWindow::onMetadataReady );
     connect( The::torrentSession(), &TorrentSession::statsUpdated,  this, &MainWindow::onTorrentStats );
+
+    // An announce is answered long after the play that caused it, so the count
+    // has to come to the tooltip rather than wait to be asked for.
+    connect( The::torrentSession(), &TorrentSession::trackerReplied, this,
+             [this]( const QString &infoHash, int ) {
+        const PlaylistItemPtr current = The::audioEngine()->currentTrack();
+        if( current && current->track() && current->track()->infoHash() == infoHash )
+            updateNetworkTooltip();
+    } );
+
     connect( The::torrentSession(), &TorrentSession::torrentError,  this, &MainWindow::onTorrentError );
     connect( The::torrentSession(), &TorrentSession::storageError,  this, &MainWindow::onStorageError );
 
@@ -718,7 +729,19 @@ void MainWindow::onTorrentStats( const QString &infoHash, int peers, int seeds, 
     The::catalog()->setBytesDone( infoHash, bytesDone );
 
     const PlaylistItemPtr current = The::audioEngine()->currentTrack();
-    if( !current || !current->track() || current->track()->infoHash() != infoHash )
+    if( !current || !current->track() ) {
+        // Nothing is being listened to, so the peers of whatever torrent is
+        // still announcing are nobody's business: left where they were they
+        // would keep describing a track that stopped playing.
+        if( m_peers != 0 || m_seeds != 0 ) {
+            m_peers = 0;
+            m_seeds = 0;
+            updateNetworkTooltip();
+        }
+        return;
+    }
+
+    if( current->track()->infoHash() != infoHash )
         return;
 
     // Bytes are still coming in, so the wait is buffering rather than a stall,
@@ -738,8 +761,10 @@ void MainWindow::onTorrentStats( const QString &infoHash, int peers, int seeds, 
     // whole: whether a machine is online says nothing about whether this track
     // has anybody to get its bytes from.
     ui->svgLed->setType( peers == 0 ? IconButton::Offline : IconButton::Online );
-    ui->svgLed->setToolTip( tr( "%n peer(s)", "", peers ) + QLatin1String( ", " )
-                            + tr( "%n seed(s)", "", seeds ) );
+
+    m_peers = peers;
+    m_seeds = seeds;
+    updateNetworkTooltip();
 
     DownloadItem *item = rowFor( current->track() );
     if( !item )
@@ -1385,15 +1410,47 @@ void MainWindow::onlineStateChanged( bool isOnline )
 {
     if( isOnline ) {
         ui->svgLed->setType( IconButton::Online );
-        ui->svgLed->setToolTip( tr( "Online" ) );
         m_playerWidget->showMessage( tr( "Idle" ) );
     } else {
         // Tracks already in the cache still play: only reaching new peers needs
         // the network.
         ui->svgLed->setType( IconButton::Offline );
-        ui->svgLed->setToolTip( tr( "Offline: only cached tracks can be played" ) );
         m_playerWidget->showMessage( tr( "Offline" ) );
     }
+
+    updateNetworkTooltip();
+}
+
+/*!
+  \brief updateNetworkTooltip: the health of the source, in three lines
+
+  Written in one place because there is one tooltip and there were two writers
+  of it: the network coming and going wrote whether the machine was connected,
+  the statistics of the torrent wrote how many peers it had, and each of them
+  threw away what the other had just said.
+*/
+void MainWindow::updateNetworkTooltip()
+{
+    QStringList lines;
+
+    lines << ( isOnline() ? tr( "Online" )
+                          : tr( "Offline: only cached tracks can be played" ) );
+
+    if( m_peers > 0 || m_seeds > 0 )
+        lines << tr( "%n peer(s)", "", m_peers ) + QLatin1String( ", " )
+                 + tr( "%n seed(s)", "", m_seeds );
+
+    // Where those peers came from. A torrent whose tracker answered has
+    // somewhere to go back to when the ones it holds go quiet, and without
+    // this line a tracker that knows nobody reads like a swarm that is empty.
+    const PlaylistItemPtr current = The::audioEngine()->currentTrack();
+    if( current && current->track() ) {
+        const int fromTracker = The::torrentSession()->trackerPeers( current->track()->infoHash() );
+        if( fromTracker >= 0 )
+            lines << tr( "%n peer(s) from the tracker", "", fromTracker );
+    }
+
+    ui->svgLed->setToolTip( lines.join( QLatin1Char( '\n' ) ) );
 }
 
 void MainWindow::donate()

@@ -198,6 +198,9 @@ public:
     /** torrents still waiting for their file list, and since when */
     QHash<QString, qint64> awaitingMetadata;
 
+    /** peers the last announce of each torrent came back with */
+    QHash<QString, int> trackerPeers;
+
     QTimer *updateTimer = nullptr;
 
     int pendingResumes = 0;
@@ -222,15 +225,37 @@ lt::settings_pack TorrentSession::Private::defaultSettings( Mode mode ) const
     // No upload, and here is the trap: in libtorrent a rate limit of 0 means
     // unlimited, not zero. What actually stops the upload is never unchoking
     // anybody; the rate limit is only a safety net behind it.
-    pack.set_int( lt::settings_pack::unchoke_slots_limit, 0 );
-    pack.set_int( lt::settings_pack::upload_rate_limit, 1024 );
+    //
+    // With sharing on the two settings have to move together, or the gift is
+    // not one: a peer unchoked and then fed a kilobyte a second gets nothing
+    // worth having and chokes us back anyway.
+    // slotCount and not slots: "slots" is one of Qt's own keywords, and a
+    // variable by that name disappears into the preprocessor.
+    const bool sharing = settings.value( Settings::sharing, Settings::sharingDefault ).toBool();
+    const int slotCount = sharing
+                          ? settings.value( Settings::uploadSlots, Settings::uploadSlotsDefault ).toInt()
+                          : 0;
+
+    pack.set_int( lt::settings_pack::unchoke_slots_limit, qMax( 0, slotCount ) );
+
+    if( slotCount > 0 ) {
+        const int limit = settings.value( Settings::uploadRateLimit, Settings::uploadRateLimitDefault ).toInt();
+        pack.set_int( lt::settings_pack::upload_rate_limit, qMax( 0, limit ) * 1024 );
+    } else {
+        pack.set_int( lt::settings_pack::upload_rate_limit, 1024 );
+    }
 
     const int downloadLimit = settings.value( Settings::downloadRateLimit, Settings::downloadRateLimitDefault ).toInt();
     pack.set_int( lt::settings_pack::download_rate_limit, downloadLimit * 1024 );
 
+    // tracker is in here for one reason: a tracker that answers "nobody" and a
+    // swarm that is genuinely empty look the same from the outside, and they
+    // are not the same problem. tracker_reply_alert carries the number of
+    // peers the announce came back with, which is exactly the missing fact.
     const lt::alert_category_t categories = lt::alert_category::status
                                             | lt::alert_category::error
                                             | lt::alert_category::storage
+                                            | lt::alert_category::tracker
                                             | lt::alert_category::piece_progress;
     pack.set_int( lt::settings_pack::alert_mask,
                   static_cast<int>( static_cast<std::uint32_t>( categories ) ) );
@@ -430,6 +455,18 @@ void TorrentSession::Private::maybeSaveResumeData( const QString &infoHash, cons
 
 void TorrentSession::Private::handleAlert( const lt::alert *alert )
 {
+    // How many peers the announce came back with. Without this number a
+    // tracker that answers "nobody" and a tracker that does not answer at all
+    // look the same, and so does a swarm that is genuinely empty — three
+    // different situations with three different things to do about them.
+    if( const auto *replied = lt::alert_cast<lt::tracker_reply_alert>( alert ) ) {
+        const QString infoHash = infoHashFor( replied->handle );
+
+        trackerPeers.insert( infoHash, replied->num_peers );
+        emit q->trackerReplied( infoHash, replied->num_peers );
+        return;
+    }
+
     if( const auto *added = lt::alert_cast<lt::add_torrent_alert>( alert ) ) {
         const QString infoHash = keyFor( added->params.info_hashes );
         pendingAdds.remove( infoHash );
@@ -877,6 +914,13 @@ void TorrentSession::requestResumeData( const QString &infoHash )
     const auto handle = d->handles.constFind( infoHash );
     if( handle != d->handles.constEnd() )
         d->saveResumeData( handle.value() );
+}
+
+int TorrentSession::trackerPeers( const QString &infoHash ) const
+{
+    // Below zero is not a count: it is the answer to a different question, the
+    // one about a torrent whose trackers have said nothing at all yet.
+    return d->trackerPeers.value( infoHash, -1 );
 }
 
 bool TorrentSession::hasMetadata( const QString &infoHash ) const

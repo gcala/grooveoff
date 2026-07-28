@@ -153,6 +153,14 @@ public:
     /** asks for the resume data of one torrent; the write happens on the alert */
     void requestResumeData( const QString &infoHash );
 
+    /**
+     * How many peers the last announce of this torrent came back with, or -1
+     * if no tracker of it has answered yet. The two are worth telling apart: a
+     * tracker that knows nobody and one that never spoke are different
+     * situations, and neither of them is an empty swarm.
+     */
+    int trackerPeers( const QString &infoHash ) const;
+
     // --- reading a file out of a torrent ------------------------------------
 
     /** whether the file list of this torrent is known, hence whether it can be read */
@@ -227,6 +235,9 @@ Q_SIGNALS:
     void statsUpdated( const QString &infoHash, int peers, int seeds, qint64 downloadRate, qint64 bytesDone );
 
     void resumeDataSaved( const QString &infoHash );
+
+    /** an announce came back, with however many peers it had to give */
+    void trackerReplied( const QString &infoHash, int peers );
 
 private Q_SLOTS:
     /** runs in the gui thread and translates the alerts into the signals above */

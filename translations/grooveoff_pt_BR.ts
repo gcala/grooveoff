@@ -400,16 +400,43 @@
     </message>
     <message>
         <location line="+13"/>
+        <location line="+111"/>
         <source> KB/s</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+3"/>
+        <location line="-108"/>
+        <location line="+111"/>
         <source>Unlimited</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location line="-82"/>
+        <source>Sharing</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Share the music while you listen to it</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Whoever gives something back is served first: with this off, a track can take longer to start and stop more often while playing. With it on, part of what you are listening to is sent to the other users, using some of your connection.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+24"/>
+        <source>Users served at once:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location line="+29"/>
+        <source>Speed limit:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+47"/>
         <source>Proxy</source>
         <translation type="unfinished"></translation>
     </message>
@@ -450,7 +477,7 @@
     </message>
     <message>
         <location line="+31"/>
-        <source>Ports, bandwidth and proxy take effect the next time GrooveOff starts.</source>
+        <source>Everything on this page takes effect the next time GrooveOff starts.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -474,7 +501,7 @@
         <translation>Cancelar</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/ConfigDialog.cpp" line="+150"/>
+        <location filename="../src/grooveoff/ConfigDialog.cpp" line="+167"/>
         <source>Empty the cache</source>
         <translation type="unfinished"></translation>
     </message>
@@ -497,13 +524,13 @@
 <context>
     <name>DownloadItem</name>
     <message>
-        <location filename="../src/grooveoff/DownloadItem.cpp" line="+118"/>
-        <location line="+271"/>
+        <location filename="../src/grooveoff/DownloadItem.cpp" line="+121"/>
+        <location line="+280"/>
         <source>Play</source>
         <translation>Play</translation>
     </message>
     <message>
-        <location line="-268"/>
+        <location line="-277"/>
         <source>Remove track from the playlist</source>
         <translation type="unfinished"></translation>
     </message>
@@ -513,7 +540,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+10"/>
+        <location line="+19"/>
         <location line="+124"/>
         <source>Waiting for peers</source>
         <translation type="unfinished"></translation>
@@ -598,7 +625,7 @@
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="+125"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="+124"/>
         <source>The database could not be opened:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -619,12 +646,13 @@
     </message>
     <message>
         <location line="+2"/>
-        <location line="+1143"/>
+        <location line="+325"/>
+        <location line="+919"/>
         <source>Idle</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1134"/>
+        <location line="-1235"/>
         <source>Magnet</source>
         <translation type="unfinished"></translation>
     </message>
@@ -634,7 +662,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+324"/>
+        <location line="+390"/>
         <source>Open a torrent</source>
         <translation type="unfinished"></translation>
     </message>
@@ -649,7 +677,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message numerus="yes">
-        <location line="+141"/>
+        <location line="+848"/>
         <source>%n peer(s)</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -665,7 +693,7 @@
         </translation>
     </message>
     <message>
-        <location line="+58"/>
+        <location line="-611"/>
         <source>The cache is already empty.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -708,7 +736,7 @@
         </translation>
     </message>
     <message>
-        <location line="+33"/>
+        <location line="+39"/>
         <location line="+3"/>
         <source>New playlist</source>
         <translation type="unfinished"></translation>
@@ -788,14 +816,22 @@
         </translation>
     </message>
     <message>
-        <location line="+213"/>
+        <location line="+228"/>
         <source>Online</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+6"/>
+        <location line="+1"/>
         <source>Offline: only cached tracks can be played</source>
         <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <location line="+13"/>
+        <source>%n peer(s) from the tracker</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
     </message>
     <message>
         <source>Connecting...</source>
@@ -818,7 +854,7 @@
         <translation type="vanished">Iniciar pesquisa</translation>
     </message>
     <message>
-        <location line="-1145"/>
+        <location line="-1278"/>
         <source>Main menu</source>
         <translation type="unfinished"></translation>
     </message>
@@ -841,7 +877,7 @@ Select a valid path</source>
 Selecione uma pasta válida</translation>
     </message>
     <message>
-        <location line="+1152"/>
+        <location line="+1286"/>
         <source>Donation to Grooveoff&apos;s author</source>
         <translation>Doações ao autor de Grooveoff</translation>
     </message>
@@ -850,8 +886,8 @@ Selecione uma pasta válida</translation>
         <translation type="vanished">Música do Grooveshark.com Offline</translation>
     </message>
     <message>
-        <location line="-1201"/>
-        <location line="+677"/>
+        <location line="-1335"/>
+        <location line="+781"/>
         <source>Attention</source>
         <translation>Atenção</translation>
     </message>
@@ -877,7 +913,7 @@ Selecione uma pasta válida</translation>
         <translation type="vanished">Um arquivo chamado &quot;%1&quot; já existe. Tem certeza que deseja sobrescreve-lo?</translation>
     </message>
     <message>
-        <location line="+518"/>
+        <location line="+514"/>
         <source>Offline</source>
         <translation>Offline</translation>
     </message>
@@ -885,7 +921,7 @@ Selecione uma pasta válida</translation>
 <context>
     <name>PlayerWidget</name>
     <message>
-        <location filename="../src/grooveoff/PlayerWidget.cpp" line="+130"/>
+        <location filename="../src/grooveoff/PlayerWidget.cpp" line="+131"/>
         <source>Bit Rate</source>
         <translation type="unfinished"></translation>
     </message>
@@ -895,12 +931,23 @@ Selecione uma pasta válida</translation>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+103"/>
+        <location line="+119"/>
+        <source>Buffering %1…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Buffering…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <location line="+9"/>
         <source>Pause</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+138"/>
+        <location line="+195"/>
         <source>Play</source>
         <translation type="unfinished">Play</translation>
     </message>
@@ -921,7 +968,7 @@ Selecione uma pasta válida</translation>
 <context>
     <name>TorrentSession</name>
     <message>
-        <location filename="../src/torrent/TorrentSession.cpp" line="+684"/>
+        <location filename="../src/torrent/TorrentSession.cpp" line="+721"/>
         <location line="+35"/>
         <location line="+41"/>
         <source>The torrent session is not running.</source>
@@ -948,7 +995,7 @@ Selecione uma pasta válida</translation>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+294"/>
+        <location line="+301"/>
         <source>Could not get the track list of this torrent.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -966,7 +1013,7 @@ Selecione uma pasta válida</translation>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+19"/>
+        <location line="+22"/>
         <source>File</source>
         <translation type="unfinished"></translation>
     </message>
@@ -986,7 +1033,7 @@ Selecione uma pasta válida</translation>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/TrackSelector.cpp" line="+48"/>
+        <location filename="../src/grooveoff/TrackSelector.cpp" line="+58"/>
         <source>Filter</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1001,7 +1048,7 @@ Selecione uma pasta válida</translation>
         <translation type="unfinished"></translation>
     </message>
     <message numerus="yes">
-        <location line="+70"/>
+        <location line="+68"/>
         <source>%n track(s)</source>
         <translation type="unfinished">
             <numerusform></numerusform>

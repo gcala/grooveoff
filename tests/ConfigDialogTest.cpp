@@ -102,6 +102,10 @@ void ConfigDialogTest::showsTheSameDefaultsTheCodeReads()
     QCOMPARE( widget<QSpinBox>( &dialog, Settings::streamPort )->value(), Settings::streamPortDefault );
     QCOMPARE( widget<QSpinBox>( &dialog, Settings::downloadRateLimit )->value(), Settings::downloadRateLimitDefault );
 
+    QCOMPARE( widget<QCheckBox>( &dialog, Settings::sharing )->isChecked(), Settings::sharingDefault );
+    QCOMPARE( widget<QSpinBox>( &dialog, Settings::uploadSlots )->value(), Settings::uploadSlotsDefault );
+    QCOMPARE( widget<QSpinBox>( &dialog, Settings::uploadRateLimit )->value(), Settings::uploadRateLimitDefault );
+
     QCOMPARE( widget<QComboBox>( &dialog, Settings::proxyType )->currentIndex(), 0 );
     QVERIFY( widget<QLineEdit>( &dialog, Settings::proxyHost )->text().isEmpty() );
     QCOMPARE( widget<QSpinBox>( &dialog, Settings::proxyPort )->value(), Settings::proxyPortDefault );
@@ -111,6 +115,10 @@ void ConfigDialogTest::showsTheSameDefaultsTheCodeReads()
     QVERIFY( !widget<QSpinBox>( &dialog, Settings::cacheSize )->specialValueText().isEmpty() );
     QVERIFY( !widget<QSpinBox>( &dialog, Settings::streamPort )->specialValueText().isEmpty() );
     QVERIFY( !widget<QSpinBox>( &dialog, Settings::downloadRateLimit )->specialValueText().isEmpty() );
+
+    // Sharing is the other way round: the checkbox is what says yes or no, so
+    // the count beside it never has to mean nobody and starts at one.
+    QCOMPARE( widget<QSpinBox>( &dialog, Settings::uploadSlots )->minimum(), 1 );
 }
 
 void ConfigDialogTest::writesWhatWasChanged()
@@ -125,6 +133,9 @@ void ConfigDialogTest::writesWhatWasChanged()
     widget<QSpinBox>( &dialog, Settings::listenPort )->setValue( 51413 );
     widget<QSpinBox>( &dialog, Settings::streamPort )->setValue( 8123 );
     widget<QSpinBox>( &dialog, Settings::downloadRateLimit )->setValue( 300 );
+    widget<QCheckBox>( &dialog, Settings::sharing )->setChecked( true );
+    widget<QSpinBox>( &dialog, Settings::uploadSlots )->setValue( 2 );
+    widget<QSpinBox>( &dialog, Settings::uploadRateLimit )->setValue( 30 );
     widget<QComboBox>( &dialog, Settings::proxyType )->setCurrentIndex( 1 );
     widget<QLineEdit>( &dialog, Settings::proxyHost )->setText( QStringLiteral( "127.0.0.1" ) );
     widget<QSpinBox>( &dialog, Settings::proxyPort )->setValue( 9050 );
@@ -142,6 +153,9 @@ void ConfigDialogTest::writesWhatWasChanged()
     QCOMPARE( settings.value( Settings::listenPort ).toInt(), 51413 );
     QCOMPARE( settings.value( Settings::streamPort ).toInt(), 8123 );
     QCOMPARE( settings.value( Settings::downloadRateLimit ).toInt(), 300 );
+    QCOMPARE( settings.value( Settings::sharing ).toBool(), true );
+    QCOMPARE( settings.value( Settings::uploadSlots ).toInt(), 2 );
+    QCOMPARE( settings.value( Settings::uploadRateLimit ).toInt(), 30 );
     QCOMPARE( settings.value( Settings::proxyType ).toString(), QString( Settings::proxyTypeSocks5 ) );
     QCOMPARE( settings.value( Settings::proxyHost ).toString(), QStringLiteral( "127.0.0.1" ) );
     QCOMPARE( settings.value( Settings::proxyPort ).toInt(), 9050 );
@@ -158,6 +172,8 @@ void ConfigDialogTest::readsBackWhatWasWritten()
     QCOMPARE( widget<QSpinBox>( &dialog, Settings::cacheSize )->value(), 512 );
     QCOMPARE( widget<QComboBox>( &dialog, Settings::proxyType )->currentIndex(), 1 );
     QCOMPARE( widget<QLineEdit>( &dialog, Settings::proxyHost )->text(), QStringLiteral( "127.0.0.1" ) );
+    QCOMPARE( widget<QCheckBox>( &dialog, Settings::sharing )->isChecked(), true );
+    QCOMPARE( widget<QSpinBox>( &dialog, Settings::uploadSlots )->value(), 2 );
 
     // Nothing was touched, so there is nothing to apply.
     QVERIFY( !widget<QPushButton>( &dialog, QLatin1String( "applyButton" ) )->isEnabled() );
@@ -201,6 +217,22 @@ void ConfigDialogTest::greysTheProxyOutWhenThereIsNone()
     type->setCurrentIndex( 0 );
     QVERIFY( !host->isEnabled() );
     QVERIFY( !port->isEnabled() );
+
+    // The same rule under the sharing checkbox: both numbers mean nothing
+    // while it is off, and a field that stays lit invites setting it.
+    // slotBox and not slots: "slots" is a Qt keyword, and a variable by that
+    // name is eaten by the preprocessor.
+    QCheckBox *share  = widget<QCheckBox>( &dialog, Settings::sharing );
+    QSpinBox *slotBox = widget<QSpinBox>( &dialog, Settings::uploadSlots );
+    QSpinBox *limit   = widget<QSpinBox>( &dialog, Settings::uploadRateLimit );
+
+    QVERIFY( !share->isChecked() );
+    QVERIFY( !slotBox->isEnabled() );
+    QVERIFY( !limit->isEnabled() );
+
+    share->setChecked( true );
+    QVERIFY( slotBox->isEnabled() );
+    QVERIFY( limit->isEnabled() );
 }
 
 QTEST_MAIN( ConfigDialogTest )

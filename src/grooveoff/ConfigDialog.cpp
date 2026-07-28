@@ -164,6 +164,10 @@ void ConfigDialog::restoreDefaults()
     ui->streamPort->setValue( Settings::streamPortDefault );
     ui->downloadRateLimit->setValue( Settings::downloadRateLimitDefault );
 
+    ui->sharing->setChecked( Settings::sharingDefault );
+    ui->uploadSlots->setValue( Settings::uploadSlotsDefault );
+    ui->uploadRateLimit->setValue( Settings::uploadRateLimitDefault );
+
     ui->proxyType->setCurrentIndex( NoProxy );
     ui->proxyHost->clear();
     ui->proxyPort->setValue( Settings::proxyPortDefault );
@@ -191,6 +195,10 @@ void ConfigDialog::saveSettings()
     settings.setValue( Settings::listenPort, ui->listenPort->value() );
     settings.setValue( Settings::streamPort, ui->streamPort->value() );
     settings.setValue( Settings::downloadRateLimit, ui->downloadRateLimit->value() );
+
+    settings.setValue( Settings::sharing, ui->sharing->isChecked() );
+    settings.setValue( Settings::uploadSlots, ui->uploadSlots->value() );
+    settings.setValue( Settings::uploadRateLimit, ui->uploadRateLimit->value() );
 
     QString proxyType = Settings::proxyTypeNone;
     if( ui->proxyType->currentIndex() == Socks5Proxy )
@@ -248,6 +256,15 @@ void ConfigDialog::updateEnabledState()
     ui->proxyPort->setEnabled( proxied );
 
     ui->prefetchHint->setEnabled( ui->prefetchNext->isChecked() );
+
+    // Neither number means anything with the sharing off, and greyed rather
+    // than hidden they say what turning it on is going to do.
+    const bool sharing = ui->sharing->isChecked();
+    ui->sharingHint->setEnabled( sharing );
+    ui->uploadSlotsLabel->setEnabled( sharing );
+    ui->uploadSlots->setEnabled( sharing );
+    ui->uploadRateLabel->setEnabled( sharing );
+    ui->uploadRateLimit->setEnabled( sharing );
 }
 
 /*!
@@ -300,6 +317,10 @@ void ConfigDialog::loadSettings()
     ui->listenPort->setValue( settings.value( Settings::listenPort, Settings::listenPortDefault ).toInt() );
     ui->streamPort->setValue( settings.value( Settings::streamPort, Settings::streamPortDefault ).toInt() );
     ui->downloadRateLimit->setValue( settings.value( Settings::downloadRateLimit, Settings::downloadRateLimitDefault ).toInt() );
+
+    ui->sharing->setChecked( settings.value( Settings::sharing, Settings::sharingDefault ).toBool() );
+    ui->uploadSlots->setValue( settings.value( Settings::uploadSlots, Settings::uploadSlotsDefault ).toInt() );
+    ui->uploadRateLimit->setValue( settings.value( Settings::uploadRateLimit, Settings::uploadRateLimitDefault ).toInt() );
 
     const QString proxyType = settings.value( Settings::proxyType, Settings::proxyTypeNone ).toString();
     if( proxyType == Settings::proxyTypeSocks5 )

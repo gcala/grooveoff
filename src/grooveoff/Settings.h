@@ -58,6 +58,35 @@ inline constexpr int listenPortDefault = 6881;
 inline const QLatin1String downloadRateLimit( "downloadRateLimit" );
 inline constexpr int downloadRateLimitDefault = 0;
 
+/**
+ * Whether anything at all is sent back to the other users. Off by default,
+ * which is the plan's decision and stays: what is being streamed leaving the
+ * machine is a choice that belongs to the person making it. What the setting
+ * is worth was measured — with nothing given back the same torrent stuttered
+ * through every track, and with four slots it played through — so the dialog
+ * says as much rather than leaving the trade for somebody to find.
+ */
+inline const QLatin1String sharing( "sharing" );
+inline constexpr bool sharingDefault = false;
+
+/**
+ * How many peers may be unchoked, which is to say how many may receive
+ * anything at all, once sharing is on. It is unchoking and not the rate limit
+ * that decides whether this is a client that gives something back: in
+ * libtorrent a rate limit of zero means unlimited, not nothing.
+ */
+inline const QLatin1String uploadSlots( "uploadSlots" );
+inline constexpr int uploadSlotsDefault = 4;
+
+/**
+ * Outgoing bandwidth ceiling in kilobytes a second, used only while sharing is
+ * on. It moves together with the slots above or the gift is not one: a peer
+ * unchoked and then fed a kilobyte a second gets nothing worth having and
+ * chokes us back anyway.
+ */
+inline const QLatin1String uploadRateLimit( "uploadRateLimit" );
+inline constexpr int uploadRateLimitDefault = 50;
+
 /** how much audio is asked for ahead of the reader, in seconds */
 inline const QLatin1String bufferSeconds( "bufferSeconds" );
 inline constexpr int bufferSecondsDefault = 10;
