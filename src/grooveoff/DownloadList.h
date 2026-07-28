@@ -44,7 +44,15 @@ public Q_SLOTS:
     void removeErrored();
 
     /** empties the list */
+    /** takes the tracks away for good, and tells the engine so */
     void removeAll();
+
+    /**
+     * Empties the list to fill it again, which is not the same as removing
+     * what is in it: nothing is announced to the engine, so a track being
+     * played goes on being played.
+     */
+    void releaseRows();
 
     void removeItemsFromState( GrooveOff::TrackState state );
     void removeItem(DownloadItem *item);

@@ -291,6 +291,30 @@ void MainWindow::setupConnections()
 
     connect( ui->searchLine, &QLineEdit::returnPressed, this, &MainWindow::addFromMagnetField );
 
+    // Which playlist the music is coming from is decided when a track is asked
+    // for and not when it starts: between the two there is the wait for the
+    // head of the file, and somebody who presses play and goes looking through
+    // another playlist while it buffers would otherwise have moved on by the
+    // time anybody asked where the track came from.
+    connect( The::audioEngine(), &AudioEngine::trackRequested, this,
+             [this]( const PlaylistItemPtr &track ) {
+        if( !track || !track->track() || !rowFor( track->track() ) || shownPlaylistId() <= 0 )
+            return;
+
+        // A track already in the queue is the queue advancing, not somebody
+        // choosing: next() takes what it plays from there. Without this the
+        // mark walks over to whatever playlist happens to be on screen the
+        // moment a track changes — and it walks over most easily when that
+        // playlist holds the same track, which is exactly when it is most
+        // confusing to watch.
+        if( The::playlist()->row( track ) >= 0 )
+            return;
+
+        m_playingPlaylistId = shownPlaylistId();
+        rebuildPlayQueue();
+        ui->playlistList->setPlayingPlaylist( m_playingPlaylistId );
+    } );
+
     connect( The::torrentSession(), &TorrentSession::metadataReady, this, &MainWindow::onMetadataReady );
     connect( The::torrentSession(), &TorrentSession::statsUpdated,  this, &MainWindow::onTorrentStats );
 
@@ -482,6 +506,54 @@ void MainWindow::restoreSplitterSizes()
     ui->splitter->setSizes( { 200, qMax( ui->splitter->height() - 200, 200 ) } );
 }
 
+qint64 MainWindow::shownPlaylistId() const
+{
+    return ui->playlistList->currentPlaylistId();
+}
+
+/*!
+  \brief rebuildPlayQueue: what the engine will walk when this track ends
+
+  Not what is on screen. Somebody who starts a playlist and then goes looking
+  through the others for something to add to it wants the first one to go on,
+  track after track, including the ones added while it played — which is the
+  whole reason this is a list of its own.
+*/
+void MainWindow::rebuildPlayQueue()
+{
+    The::playlist()->clear();
+
+    if( m_playingPlaylistId <= 0 || !The::database()->isOpen() )
+        return;
+
+    const PlaylistItemPtr current = The::audioEngine()->currentTrack();
+    const QList<TrackInfoPtr> tracks = The::playlistStore()->tracks( m_playingPlaylistId );
+
+    for( const TrackInfoPtr &track : tracks ) {
+        // The engine's own item for the track being played, first of all: next()
+        // finds where it is by identity, and the same track can have a row in
+        // another playlist on screen — two playlists holding one track is the
+        // point of having playlists — so asking the rows first would put a
+        // stranger in the queue where the engine expected itself.
+        if( current && current->track()
+            && current->track()->infoHash() == track->infoHash()
+            && current->track()->fileIndex() == track->fileIndex() ) {
+            The::playlist()->appendItem( current );
+            continue;
+        }
+
+        // Then the row on screen when there is one, so that it goes on showing
+        // what the engine is doing; a fresh item otherwise, for a playlist
+        // nobody is looking at.
+        if( DownloadItem *row = rowFor( track ) ) {
+            The::playlist()->appendItem( row->playlistItem() );
+            continue;
+        }
+
+        The::playlist()->appendItem( PlaylistItemPtr( new PlaylistItem( track ) ) );
+    }
+}
+
 void MainWindow::loadCurrentPlaylist()
 {
     if( !The::database()->isOpen() )
@@ -489,11 +561,15 @@ void MainWindow::loadCurrentPlaylist()
 
     PlaylistStore *playlists = The::playlistStore();
 
-    const qint64 playlistId = playlists->currentPlaylistId();
+    // The playlist on screen, from the sidebar. It used to come from app_state,
+    // which now holds the one being played instead — and asking that one which
+    // list to draw is how looking at a second playlist drew the first.
+    const qint64 playlistId = shownPlaylistId();
+    m_shownPlaylistId = playlistId;
 
     // disable temporarily AutoScroll
     ui->downloadList->setAutoScroll( false );
-    ui->downloadList->removeAll();
+    ui->downloadList->releaseRows();
 
     // No playlist open is a state to be shown, not a reason to do nothing.
     // Returning here before emptying the list is what left the tracks of the
@@ -507,13 +583,33 @@ void MainWindow::loadCurrentPlaylist()
         return;
     }
 
+    // The track being played keeps the item the engine is holding, and does not
+    // get a fresh one. A row shows that it is playing by listening to its own
+    // PlaylistItem, and the engine announces on the one it was given: two
+    // objects for one track means a row that sits still while the music comes
+    // out of it. Rebuilding the list is frequent — adding a track, coming back
+    // from another playlist, reordering — so a copy here is a copy for good.
+    const PlaylistItemPtr playing = The::audioEngine()->currentTrack();
+
     const QList<TrackInfoPtr> &tracks = playlists->tracks( playlistId );
     for( const TrackInfoPtr &track : tracks ) {
+        if( playing && playing->track()
+            && playing->track()->infoHash() == track->infoHash()
+            && playing->track()->fileIndex() == track->fileIndex() ) {
+            addPlaylistItem( playing );
+            continue;
+        }
+
         addPlaylistItem( PlaylistItemPtr( new PlaylistItem( track ) ) );
     }
 
     ui->downloadList->setAutoScroll( true );
     ui->downloadList->reloadPlaylist();
+
+    // The rows are new objects, so the queue is built again over them: a row
+    // that is the track being played has to be the engine's own item, or the
+    // list will look idle while the music comes out of it.
+    rebuildPlayQueue();
 
     // Once here as well, and not only with the statistics: a torrent whose
     // files are already in the cache is asleep, so no statistics arrive for it
@@ -822,7 +918,7 @@ void MainWindow::savePlaylistOrder()
     if( !The::database()->isOpen() )
         return;
 
-    const qint64 playlistId = The::playlistStore()->currentPlaylistId();
+    const qint64 playlistId = shownPlaylistId();
     if( playlistId <= 0 )
         return;
 
@@ -1073,7 +1169,12 @@ void MainWindow::loadPlaylists()
     if( !The::database()->isOpen() )
         return;
 
-    const qint64 open = The::playlistStore()->currentPlaylistId();
+    // The row that is selected now, and at start up — when there is no sidebar
+    // to be selected in yet — the one app_state remembers, which is the
+    // playlist that was playing. Read before the list is emptied, or it is the
+    // emptied list that answers.
+    const qint64 open = shownPlaylistId() > 0 ? shownPlaylistId()
+                                              : The::playlistStore()->currentPlaylistId();
 
     ui->playlistList->clear();
 
@@ -1104,6 +1205,11 @@ void MainWindow::loadPlaylists()
     // its playlist asks for. Cheap: it wakes only the ones with work left.
     wakeUnfinishedTorrents();
 
+    // Tracks may have been added to the playlist being played while somebody
+    // was looking at another one, and they belong in the queue too.
+    rebuildPlayQueue();
+    ui->playlistList->setPlayingPlaylist( m_playingPlaylistId );
+
     ui->playlistList->selectPlaylist( open );
 
     // Playlists but nothing open — a database whose playback row went missing,
@@ -1111,7 +1217,8 @@ void MainWindow::loadPlaylists()
     // having just been removed — would show a full sidebar beside an empty
     // list, which reads as something having failed to load.
     if( open <= 0 && ui->playlistList->count() > 0 ) {
-        openPlaylist( ui->playlistList->item( 0 ) );
+        QListWidgetItem *first = ui->playlistList->item( 0 );
+        openPlaylist( first );
 
         // And the row is brought forward as well. Opening one without selecting
         // it leaves the sidebar with nothing highlighted beside a track list
@@ -1119,7 +1226,7 @@ void MainWindow::loadPlaylists()
         // nothing at all: openPlaylist() returns early on the playlist that is
         // already open, so the row stays unselected however often it is
         // pressed. It looks exactly like a playlist that refuses to open.
-        ui->playlistList->selectPlaylist( The::playlistStore()->currentPlaylistId() );
+        ui->playlistList->selectPlaylist( first->data( PlaylistRoles::Id ).toLongLong() );
     }
 }
 
@@ -1129,14 +1236,20 @@ void MainWindow::openPlaylist( QListWidgetItem *row )
         return;
 
     const qint64 playlistId = row->data( PlaylistRoles::Id ).toLongLong();
-    if( playlistId <= 0 || playlistId == The::playlistStore()->currentPlaylistId() )
+    if( playlistId <= 0 || playlistId == m_shownPlaylistId )
         return;
 
-    // Where the listening had got to belongs to the playlist being left, and it
-    // has to be written before app_state points somewhere else.
-    savePlaybackState();
+    // The row becomes the current one here rather than being assumed to be:
+    // what is on screen is now read from the sidebar, so a caller that opens a
+    // playlist without touching the selection — the fallback below, a menu, a
+    // test — would otherwise draw one playlist while the sidebar named another.
+    ui->playlistList->selectPlaylist( playlistId );
 
-    The::playlistStore()->setPlaybackState( playlistId, 0, 0 );
+    // What app_state holds is the playlist being played, not the one being
+    // looked at, so opening another one says nothing to it: browsing is not an
+    // act of stopping. The position of what is playing is written all the same,
+    // since it goes on playing and this is a good moment to remember it.
+    savePlaybackState();
 
     loadCurrentPlaylist();
 }
@@ -1403,7 +1516,7 @@ void MainWindow::addTracksToPlaylist( qint64 playlistId, const QList<qint64> &tr
 
     loadPlaylists();
 
-    if( playlistId == The::playlistStore()->currentPlaylistId() )
+    if( playlistId == shownPlaylistId() )
         loadCurrentPlaylist();
 
     m_playerWidget->showMessage( tr( "%n track(s) added to «%1».", "", tracks.count() )
@@ -1428,7 +1541,7 @@ void MainWindow::addTrackToPlaylist( DownloadItem *item, qint64 playlistId )
 */
 void MainWindow::reorderTracks( const QList<int> &rows, int targetRow )
 {
-    const qint64 playlistId = The::playlistStore()->currentPlaylistId();
+    const qint64 playlistId = shownPlaylistId();
     if( playlistId <= 0 || rows.isEmpty() )
         return;
 
@@ -1457,7 +1570,7 @@ void MainWindow::reorderTracks( const QList<int> &rows, int targetRow )
 bool MainWindow::openPlaylistIsCustom() const
 {
     const PlaylistStore::PlaylistInfo playlist =
-        The::playlistStore()->playlist( The::playlistStore()->currentPlaylistId() );
+        The::playlistStore()->playlist( shownPlaylistId() );
 
     return playlist.isValid() && playlist.kind == PlaylistStore::CustomPlaylist;
 }
@@ -1484,7 +1597,12 @@ void MainWindow::savePlaybackState()
     // it are deleted — a torrent removed while one of its tracks was playing is
     // exactly that — so this can name a track that no longer exists. What to do
     // about it belongs to the writer and is done there.
-    The::playlistStore()->setPlaybackState( The::playlistStore()->currentPlaylistId(),
+    // The playlist being played and not the one on screen: what this row is
+    // for is coming back to what was playing, and coming back to a list that
+    // happened to be open when the window closed would name a playlist the
+    // remembered track may not even be in.
+    The::playlistStore()->setPlaybackState( m_playingPlaylistId > 0 ? m_playingPlaylistId
+                                                                    : shownPlaylistId(),
                                             current->track()->id(),
                                             The::audioEngine()->currentTime() );
 }

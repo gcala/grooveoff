@@ -136,6 +136,17 @@ void PlaylistList::updateHealth( const QString &infoHash )
     }
 }
 
+void PlaylistList::setPlayingPlaylist( qint64 playlistId )
+{
+    for( int i = 0; i < count(); ++i ) {
+        QListWidgetItem *row = item( i );
+        const bool playing = row->data( PlaylistRoles::Id ).toLongLong() == playlistId && playlistId > 0;
+
+        if( row->data( PlaylistRoles::Playing ).toBool() != playing )
+            row->setData( PlaylistRoles::Playing, playing );
+    }
+}
+
 qint64 PlaylistList::playlistAt( const QPoint &position ) const
 {
     const QListWidgetItem *row = itemAt( position );

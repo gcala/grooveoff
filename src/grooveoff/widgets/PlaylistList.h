@@ -57,6 +57,9 @@ public:
      */
     void addPlaylist( const PlaylistStore::PlaylistInfo &playlist );
 
+    /** marks the row the music is coming from, and unmarks whatever had it */
+    void setPlayingPlaylist( qint64 playlistId );
+
     /** the playlist under the cursor, or 0 where there is no row */
     qint64 playlistAt( const QPoint &position ) const;
 

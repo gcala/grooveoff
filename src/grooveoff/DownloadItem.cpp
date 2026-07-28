@@ -45,7 +45,13 @@ DownloadItem::DownloadItem( const PlaylistItemPtr &playlistItemPtr, QWidget *par
     , ui( new Ui::DownloadItem )
     , m_playlistItem( playlistItemPtr )
     , m_trackState( GrooveOff::DormantState )
-    , m_playerState( GrooveOff::PlayerState::Stopped )
+    // Asked rather than assumed. A row is told what its track is doing by a
+    // signal, and a signal only arrives when something changes: a row built
+    // over a track that is already playing — a list rebuilt while the music
+    // goes on, which happens whenever somebody comes back to the playlist they
+    // started — would be born stopped and stay there, showing a play button
+    // over a track it is playing.
+    , m_playerState( playlistItemPtr ? playlistItemPtr->state() : GrooveOff::PlayerState::Stopped )
 {
     ui->setupUi( this );
     setupUi();

@@ -52,6 +52,10 @@ public:
                     const QModelIndex &index ) const override;
 
 private:
+    /** the mark on the row the music is coming from, when it is not this one */
+    void drawPlayingMark( QPainter *painter, const QStyleOptionViewItem &option,
+                          int right, int side ) const;
+
     /** the led of one state at one size, out of the theme and kept afterwards */
     QPixmap led( int health, int side ) const;
 

@@ -372,6 +372,8 @@ void AudioEngine::setState( GrooveOff::PlayerState state )
 
 void AudioEngine::playItem( const PlaylistItemPtr &track)
 {
+    emit trackRequested( track );
+
     // this was added to handle triggers from playlist menu
     if(m_currentTrack == track) {
         m_currentTrack->isPlaying() ? pause() : play();

@@ -42,9 +42,16 @@ DownloadList::DownloadList( QWidget *parent ) :
     connect( model(), &QAbstractItemModel::layoutChanged, this, &DownloadList::reloadPlaylist );
 }
 
+/*!
+  \brief reloadPlaylist: rebuilds the menu that lists what is on screen
+
+  It used to fill the queue the engine walks as well, which is what tied the
+  two together: changing what was shown changed what would be played next. The
+  queue belongs to the playlist playback started in and is built by the window,
+  which is the only place that knows which one that is.
+*/
 void DownloadList::reloadPlaylist()
 {
-    The::playlist()->clear();
     
     const QList< QAction * > playlistActions = The::actionCollection()->getMenu( "tracksMenu" )->actions();
     for( QAction *action : playlistActions ) {
@@ -58,7 +65,6 @@ void DownloadList::reloadPlaylist()
         if( ITEM( i )->trackState() == GrooveOff::ErrorState )
             continue;
 
-        The::playlist()->appendItem( ITEM( i )->playlistItem() );
         PlaylistAction *action = new PlaylistAction( ITEM( i )->playlistItem(), The::actionCollection()->getMenu( "tracksMenu" ) );
         The::actionCollection()->getMenu( "tracksMenu" )->addAction( (QAction *)action );
 
@@ -79,8 +85,31 @@ void DownloadList::removeErrored()
   \brief removeAll : empty the list
   \return void
 */
+/*!
+  \brief releaseRows: lets go of every row without anybody losing a track
+
+  Emptying the list to draw another playlist in it is not removing tracks, and
+  it used to be told as if it were: the engine was stopped and then handed each
+  row in turn as one being taken away. Handed the row it was playing, it did
+  what that means — stopped, dropped the track and moved to the next one — so
+  clicking a second playlist while the first one played either killed the music
+  or started another track of the playlist being left. Two symptoms, one cause.
+
+  Nothing is lost by saying nothing. The engine holds its own reference to the
+  track it is playing, so the track outlives the row showing it; what follows
+  when it ends is decided by canGoNext(), which finds the track is not in the
+  open playlist any more and stops there. Leaving a playlist is a good reason
+  for nothing to follow.
+*/
 void DownloadList::removeAll()
 {
+    // The other half of the distinction: here the tracks really are being
+    // taken away, so the engine is told and stops if it was playing one of
+    // them. Its one caller is a leftover of the download era — "Clear
+    // finished", in a Downloads menu whose three entries no longer have an
+    // object — and it empties the view rather than the playlist, so the rows
+    // come back at the next rebuild. Worth cleaning up, but not from inside
+    // the fix for something else.
     The::audioEngine()->stop();
 
     for( int i = count() - 1; i >= 0; i-- ) {
@@ -91,6 +120,15 @@ void DownloadList::removeAll()
     }
 
     The::playlist()->clear();
+}
+
+void DownloadList::releaseRows()
+{
+    for( int i = count() - 1; i >= 0; i-- ) {
+        QListWidgetItem *item = takeItem( i );
+        removeItemWidget( item );
+        delete item;
+    }
 }
 
 void DownloadList::removeItemsFromState( GrooveOff::TrackState state )

@@ -197,8 +197,44 @@ private:
     /** the saved split, when it matches the splitter this window actually has */
     void restoreSplitterSizes();
 
-    /** rebuilds the list from the playlist app_state points at */
+    /**
+     * The playlist on screen, which is the row the sidebar is pointing at.
+     *
+     * Told apart from the one being played, which is what app_state remembers
+     * and what The::playlist() walks. They used to be the same thing and the
+     * plan said they should be — "what plays is the open playlist" — but that
+     * makes looking at a second playlist an act of stopping the first, and
+     * looking around while the music goes on is the ordinary thing to want.
+     */
+    qint64 shownPlaylistId() const;
+
+    /** rebuilds the list from the playlist the sidebar is pointing at */
     void loadCurrentPlaylist();
+
+    /**
+     * Fills The::playlist() — the queue the engine walks — from the playlist
+     * playback started in, whatever is on screen. Rebuilt rather than kept up
+     * to date piece by piece, because it also has to pick up tracks added to
+     * that playlist after the music started.
+     *
+     * The rows on screen are preferred as the items, when they are the same
+     * playlist: a row shows whether it is playing by being the very object the
+     * engine holds, so a queue of copies would leave the list looking idle
+     * while it plays.
+     */
+    void rebuildPlayQueue();
+
+    /** the playlist the music is coming from; 0 when nothing is playing */
+    qint64 m_playingPlaylistId = 0;
+
+    /**
+     * The playlist the track list is actually showing, which is not the same
+     * as the row the sidebar is pointing at: openPlaylist() is called from
+     * currentItemChanged, by which time the selection has already moved. A
+     * guard that compared the two would find them equal every time and return
+     * without drawing anything, which is a sidebar where clicking does nothing.
+     */
+    qint64 m_shownPlaylistId = 0;
     void addPlaylistItem( const PlaylistItemPtr &playlistItem );
 
     /** hands the torrent of the track that was playing back to the session */

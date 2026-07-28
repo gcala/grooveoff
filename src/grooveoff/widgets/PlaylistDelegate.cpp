@@ -101,6 +101,44 @@ QPixmap PlaylistDelegate::led( int health, int side ) const
     return pixmap;
 }
 
+/*!
+  \brief drawPlayingMark: which playlist the music is coming from
+
+  It is not always the one being looked at, and once those two can differ the
+  question "why is this playing?" has to have an answer on screen. A triangle
+  in the text colour — small, because it says where the music is rather than
+  offering to do anything.
+*/
+void PlaylistDelegate::drawPlayingMark( QPainter *painter, const QStyleOptionViewItem &option,
+                                        int right, int side ) const
+{
+    const QRect box( right - side, option.rect.center().y() - side / 2, side, side );
+
+    QPolygonF triangle;
+    triangle << QPointF( box.left(), box.top() )
+             << QPointF( box.right(), box.center().y() )
+             << QPointF( box.left(), box.bottom() );
+
+    painter->save();
+    painter->setRenderHint( QPainter::Antialiasing, true );
+    painter->setPen( Qt::NoPen );
+    painter->setBrush( option.palette.color( option.state & QStyle::State_Selected
+                                             ? QPalette::HighlightedText
+                                             : QPalette::WindowText ) );
+    painter->drawPolygon( triangle );
+    painter->restore();
+}
+
+/*!
+  \brief paint: the row, with whatever it has to say at its right edge
+
+  Two marks, either of which may be absent: the led belongs to a torrent
+  playlist, the triangle to whichever playlist the music is coming from — which
+  is often a list made by hand. So the right edge is walked leftwards and the
+  name is elided to what is left. The first version of this drew the triangle
+  after the point at which a row without a led had already returned, which is
+  to say never on the one playlist most likely to be playing.
+*/
 void PlaylistDelegate::paint( QPainter *painter, const QStyleOptionViewItem &option,
                               const QModelIndex &index ) const
 {
@@ -108,7 +146,9 @@ void PlaylistDelegate::paint( QPainter *painter, const QStyleOptionViewItem &opt
     initStyleOption( &opt, index );
 
     const QVariant health = index.data( PlaylistRoles::Health );
-    if( !health.isValid() ) {
+    const bool playing    = index.data( PlaylistRoles::Playing ).toBool();
+
+    if( !health.isValid() && !playing ) {
         QStyledItemDelegate::paint( painter, option, index );
         return;
     }
@@ -116,22 +156,36 @@ void PlaylistDelegate::paint( QPainter *painter, const QStyleOptionViewItem &opt
     QStyle *style = opt.widget ? opt.widget->style() : QApplication::style();
 
     const int side = ledSide( option.rect );
+    const int mark = side - 2;
 
-    // The room for the led is taken out of the text and not out of the row:
-    // shrinking the rectangle the row is drawn with would stop the selection
-    // short of the right edge, which looks like a painting fault rather than
-    // like a margin. So the name is elided to what is left instead, and the
-    // width it is elided to comes from the style rather than from arithmetic
-    // of our own, which would be wrong the moment an icon changed size.
+    // The room is taken out of the text and not out of the row: shrinking the
+    // rectangle the row is drawn with would stop the selection short of the
+    // right edge, which looks like a painting fault rather than like a margin.
+    // The width comes from the style rather than from arithmetic of our own,
+    // which would be wrong the moment an icon changed size.
     const QRect textRect = style->subElementRect( QStyle::SE_ItemViewItemText, &opt, opt.widget );
+
+    int reserved = ledMargin;
+    if( health.isValid() )
+        reserved += ledMargin + side;
+    if( playing )
+        reserved += ledMargin + mark;
+
     opt.text = opt.fontMetrics.elidedText( opt.text, Qt::ElideRight,
-                                           qMax( 0, textRect.width() - side - 2 * ledMargin ) );
+                                           qMax( 0, textRect.width() - reserved ) );
 
     style->drawControl( QStyle::CE_ItemViewItem, &opt, painter, opt.widget );
 
-    painter->drawPixmap( option.rect.right() - ledMargin - side,
-                         option.rect.center().y() - side / 2,
-                         led( health.toInt(), side ) );
+    int right = option.rect.right();
+
+    if( health.isValid() ) {
+        painter->drawPixmap( right - ledMargin - side, option.rect.center().y() - side / 2,
+                             led( health.toInt(), side ) );
+        right -= ledMargin + side;
+    }
+
+    if( playing )
+        drawPlayingMark( painter, option, right - ledMargin, mark );
 }
 
 QSize PlaylistDelegate::sizeHint( const QStyleOptionViewItem &option,

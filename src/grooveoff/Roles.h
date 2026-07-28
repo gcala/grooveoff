@@ -66,7 +66,14 @@ namespace PlaylistRoles
         Health,
 
         /** how many tracks the playlist holds, for the first line of its tooltip */
-        TrackCount
+        TrackCount,
+
+        /**
+         * The playlist the music is coming from, which is not always the one
+         * being looked at. Without something on the row saying so, "why is
+         * this playing?" has no answer anywhere on screen.
+         */
+        Playing
     };
 }
 

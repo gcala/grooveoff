@@ -96,6 +96,15 @@ Q_SIGNALS:
      */
     void sourceChanged();
 
+    /**
+     * A track has been asked for, which is not the same moment as the sound
+     * starting: between the two there is a wait for the file list and for the
+     * head of the file, and on a slow swarm that is seconds. Anything that has
+     * to know *which* track was chosen — and above all which playlist it was
+     * chosen from — has to hear it now, while the answer is still on screen.
+     */
+    void trackRequested( const PlaylistItemPtr &track );
+
     /*
      * Called when slider moved to new position
      */
