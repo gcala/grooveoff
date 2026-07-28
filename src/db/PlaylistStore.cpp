@@ -346,8 +346,27 @@ QList<qint64> PlaylistStore::trackIds( qint64 playlistId ) const
     return ids;
 }
 
-bool PlaylistStore::writeTrackIds( qint64 playlistId, const QList<qint64> &trackIds )
+/*!
+  \brief writeTrackIds: the contents of a playlist, in order and without repeats
+
+  Every path that changes what a playlist holds comes through here — appending,
+  replacing, reordering — which is what makes this the place to keep a track
+  from appearing twice. A repeat is dropped and the first one stays where it
+  was: the schema refuses it as well, and a caller that sent one would
+  otherwise lose the whole write to a constraint rather than the one row it got
+  wrong.
+
+  Positions stay contiguous from zero afterwards, which the arithmetic of a
+  drag depends on.
+*/
+bool PlaylistStore::writeTrackIds( qint64 playlistId, const QList<qint64> &requested )
 {
+    QList<qint64> trackIds;
+    for( qint64 trackId : requested ) {
+        if( !trackIds.contains( trackId ) )
+            trackIds << trackId;
+    }
+
     QSqlQuery clear( The::database()->connection() );
     clear.prepare( QStringLiteral( "DELETE FROM playlist_track WHERE playlist_id = :id" ) );
     clear.bindValue( QStringLiteral( ":id" ), playlistId );
@@ -419,6 +438,17 @@ bool PlaylistStore::setTracks( qint64 playlistId, const QList<TrackInfoPtr> &tra
     }
 
     return database->commit();
+}
+
+bool PlaylistStore::contains( qint64 playlistId, qint64 trackId ) const
+{
+    QSqlQuery query( The::database()->connection() );
+    query.prepare( QStringLiteral( "SELECT 1 FROM playlist_track"
+                                   " WHERE playlist_id = :playlist AND track_id = :track" ) );
+    query.bindValue( QStringLiteral( ":playlist" ), playlistId );
+    query.bindValue( QStringLiteral( ":track" ), trackId );
+
+    return query.exec() && query.next();
 }
 
 bool PlaylistStore::removeTrackAt( qint64 playlistId, int position )

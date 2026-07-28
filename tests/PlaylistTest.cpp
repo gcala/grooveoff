@@ -53,6 +53,7 @@ private Q_SLOTS:
     void initTestCase();
 
     void keepsThePinnedPlaylistFirstAndUndeletable();
+    void holdsATrackAtMostOnce();
     void emptiesAPlaylistWithoutRemovingIt();
     void namesThePlaylistsThatWouldSuffer();
     void keepingTheTracksOnlyHidesTheTorrent();
@@ -182,6 +183,42 @@ void PlaylistTest::keepsThePinnedPlaylistFirstAndUndeletable()
   a hidden torrent alive. So the garbage collection runs with it, and a torrent
   nobody can see and nobody references is not left behind holding cache.
 */
+/*!
+  \brief holdsATrackAtMostOnce
+
+  The same track in three lists is what having lists is for; the same track
+  twice in one list is a list nobody meant to build, and the second copy says
+  nothing the first does not. The schema refuses it and the one writer every
+  path goes through drops it, which are two different jobs: the schema makes it
+  impossible, the writer makes a caller that tries it lose one row rather than
+  the whole write.
+*/
+void PlaylistTest::holdsATrackAtMostOnce()
+{
+    const qint64 list = m_playlists->pinnedPlaylistId();
+    const TrackInfoPtr track = m_tracksA.at( 0 );
+
+    QVERIFY( m_playlists->clearPlaylist( list ) );
+    QVERIFY( m_playlists->appendTracks( list, { track } ) );
+    QCOMPARE( m_playlists->tracks( list ).count(), 1 );
+
+    // Asked for again, by the menu or by a drag: it is already there.
+    QVERIFY( m_playlists->appendTracks( list, { track } ) );
+    QCOMPARE( m_playlists->tracks( list ).count(), 1 );
+    QVERIFY( m_playlists->contains( list, track->id() ) );
+
+    // And a list handed to it with a repeat inside keeps the first one, in the
+    // place it was in, rather than failing on the constraint.
+    QVERIFY( m_playlists->setTracks( list, { track, m_tracksB.at( 0 ), track } ) );
+
+    const QList<TrackInfoPtr> written = m_playlists->tracks( list );
+    QCOMPARE( written.count(), 2 );
+    QCOMPARE( written.at( 0 )->id(), track->id() );
+    QCOMPARE( written.at( 1 )->id(), m_tracksB.at( 0 )->id() );
+
+    QVERIFY( m_playlists->clearPlaylist( list ) );
+}
+
 void PlaylistTest::emptiesAPlaylistWithoutRemovingIt()
 {
     const qint64 pinned = m_playlists->pinnedPlaylistId();

@@ -400,23 +400,39 @@ void DownloadItem::contextMenuEvent( QContextMenuEvent *event )
     QAction *playAction = menu.addAction( QIcon::fromTheme( QLatin1String( "media-playback-start" ) ),
                                           tr( "Play" ) );
 
-    // Every custom playlist, this one included when it is the open one: adding
-    // a track twice to a list made by hand is a choice, not a mistake to stop.
+    // The lists made by hand that do not have this track already. A playlist
+    // holds a track at most once, so offering one that has it would be
+    // offering a gesture with no outcome — and the one being looked at, when
+    // it is a list made by hand, always has it.
     QHash<const QAction *, qint64> playlistOf;
     QMenu *addMenu = menu.addMenu( QIcon::fromTheme( QLatin1String( "list-add" ) ),
                                    tr( "Add to playlist" ) );
 
-    const QList<PlaylistStore::PlaylistInfo> playlists = The::playlistStore()->visiblePlaylists();
-    for( const PlaylistStore::PlaylistInfo &playlist : playlists ) {
+    PlaylistStore *playlists = The::playlistStore();
+    const qint64 trackId = m_playlistItem->track() ? m_playlistItem->track()->id() : 0;
+
+    int customCount = 0;
+    const QList<PlaylistStore::PlaylistInfo> all = playlists->visiblePlaylists();
+    for( const PlaylistStore::PlaylistInfo &playlist : all ) {
         if( playlist.kind != PlaylistStore::CustomPlaylist )
+            continue;
+
+        ++customCount;
+
+        if( playlists->contains( playlist.id, trackId ) )
             continue;
 
         playlistOf.insert( addMenu->addAction( Utility::playlistName( playlist ) ), playlist.id );
     }
 
     addMenu->setEnabled( !playlistOf.isEmpty() );
-    if( playlistOf.isEmpty() )
-        addMenu->setTitle( tr( "Add to playlist (none yet)" ) );
+
+    // Two different empty menus, and telling them apart is the difference
+    // between "make a list first" and "it is already in all of them".
+    if( playlistOf.isEmpty() ) {
+        addMenu->setTitle( customCount == 0 ? tr( "Add to playlist (none yet)" )
+                                            : tr( "Add to playlist (already in them all)" ) );
+    }
 
     menu.addSeparator();
     QAction *removeAction = menu.addAction( QIcon::fromTheme( QLatin1String( "list-remove" ) ),

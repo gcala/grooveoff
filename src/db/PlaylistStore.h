@@ -114,6 +114,9 @@ public:
     /** replaces the whole content, which is what the file selector does */
     bool setTracks( qint64 playlistId, const QList<TrackInfoPtr> &tracks );
 
+    /** whether this playlist already holds this track, which it can only once */
+    bool contains( qint64 playlistId, qint64 trackId ) const;
+
     bool removeTrackAt( qint64 playlistId, int position );
     bool moveTrack( qint64 playlistId, int from, int to );
 
@@ -135,7 +138,8 @@ private:
     bool isCustom( qint64 playlistId ) const;
     QStringList referencedTorrents( qint64 playlistId ) const;
     bool collectGarbageFor( const QStringList &infoHashes );
-    bool writeTrackIds( qint64 playlistId, const QList<qint64> &trackIds );
+    /** the contents of a playlist, in order, with any repeat dropped */
+    bool writeTrackIds( qint64 playlistId, const QList<qint64> &requested );
     QList<qint64> trackIds( qint64 playlistId ) const;
     bool touch( qint64 playlistId );
 };

@@ -344,7 +344,12 @@ bool Database::migrateToVersion1()
             "    playlist_id INTEGER NOT NULL REFERENCES playlist(id) ON DELETE CASCADE,"
             "    position    INTEGER NOT NULL,"
             "    track_id    INTEGER NOT NULL REFERENCES track(id)    ON DELETE CASCADE,"
-            "    PRIMARY KEY( playlist_id, position )"
+            "    PRIMARY KEY( playlist_id, position ),"
+            // A track appears at most once in a list. The same track in three
+            // lists is the point of having lists; the same track twice in one
+            // is a list nobody meant to build, and the second copy has no
+            // meaning the first does not already have.
+            "    UNIQUE( playlist_id, track_id )"
             ")" ),
         QStringLiteral(
             "CREATE TABLE app_state ("

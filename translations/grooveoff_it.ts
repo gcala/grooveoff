@@ -654,17 +654,22 @@
         <translation>Annulla la rimozione</translation>
     </message>
     <message>
-        <location line="+47"/>
+        <location line="+45"/>
         <source>Add to playlist</source>
         <translation>Aggiungi a playlist</translation>
     </message>
     <message>
-        <location line="+12"/>
+        <location line="+24"/>
         <source>Add to playlist (none yet)</source>
         <translation>Aggiungi a playlist (nessuna)</translation>
     </message>
     <message>
-        <location line="+4"/>
+        <location line="+1"/>
+        <source>Add to playlist (already in them all)</source>
+        <translation>Aggiungi a playlist (è già in tutte)</translation>
+    </message>
+    <message>
+        <location line="+5"/>
         <source>Remove from the playlist</source>
         <translation>Togli dalla playlist</translation>
     </message>
