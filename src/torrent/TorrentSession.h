@@ -84,8 +84,9 @@ public:
     };
 
     enum FilePriority {
-        SkipFile,     /**< dont_download: the resting state of every file */
-        NormalFile,   /**< what the next track gets while the current one plays */
+        SkipFile,     /**< dont_download: what is not in the playlist at all */
+        QueuedFile,   /**< in the queue, but behind: a hole left by a jump forward */
+        NormalFile,   /**< in the queue and ahead of the cursor: fetched in order */
         TopFile       /**< the track being listened to, which never gives way */
     };
 

@@ -19,6 +19,7 @@
 
 #include "TorrentTrack.h"
 #include "TorrentSession.h"
+#include "DownloadQueue.h"
 
 #include "../grooveoff/Settings.h"
 
@@ -106,9 +107,14 @@ TorrentTrack::~TorrentTrack()
     if( tail.piece >= 0 )
         The::torrentSession()->resetPieceDeadline( m_infoHash, tail.piece );
 
-    // Back to resting. Skipping this is what leaves ten files downloading at
-    // once after ten skips, with a cache full of music nobody listened to.
-    The::torrentSession()->setFilePriority( m_infoHash, m_fileIndex, TorrentSession::SkipFile );
+    // Back to whatever the queue says this file is worth now that nobody is
+    // reading it — which is its place in the download queue if it is in one,
+    // and nothing at all if it is not. It used to be nothing at all in every
+    // case, and that flat answer is what kept ten skips from leaving ten files
+    // downloading at once; the queue gives the same answer for a file it does
+    // not know, so what was prevented then is prevented still.
+    The::torrentSession()->setFilePriority( m_infoHash, m_fileIndex,
+                                            The::downloadQueue()->priorityFor( m_infoHash, m_fileIndex ) );
 }
 
 QString TorrentTrack::infoHash() const

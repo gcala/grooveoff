@@ -41,6 +41,17 @@ target_link_libraries(cachetest PRIVATE
 
 add_test(NAME cache COMMAND cachetest)
 
+# The order a playlist is fetched in, asked without a network, a torrent or a
+# disk: the rule is a function of three things and lives in one place, which is
+# exactly what makes it answerable this way.
+add_executable(queuetest DownloadQueueTest.cpp)
+
+target_link_libraries(queuetest PRIVATE
+                      grooveoff_torrent
+                      Qt6::Test)
+
+add_test(NAME queue COMMAND queuetest)
+
 # Removing a torrent is the one operation that can destroy what the user made
 # by hand, and it does so silently, so both ways out of it are followed to the
 # end and asked what is left.

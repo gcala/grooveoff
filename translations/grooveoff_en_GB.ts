@@ -252,12 +252,12 @@
     </message>
     <message>
         <location line="+31"/>
-        <source>Bring up the next track while the current one plays</source>
+        <source>Download the playlist ahead, one track after another</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+7"/>
-        <source>Without this the playlist stops at every change of track, waiting for the next torrent to find its peers.</source>
+        <source>Without this a track is fetched only when you press play on it, and the playlist stops at every change of track. Nothing already in the cache is ever thrown away to make room for this.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -549,7 +549,7 @@
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="+125"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="+126"/>
         <source>The database could not be opened:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -559,7 +559,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+48"/>
+        <location line="+50"/>
         <source>GrooveOff</source>
         <translation type="unfinished"></translation>
     </message>
@@ -570,13 +570,13 @@
     </message>
     <message>
         <location line="+2"/>
-        <location line="+315"/>
-        <location line="+882"/>
+        <location line="+322"/>
+        <location line="+943"/>
         <source>Idle</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1188"/>
+        <location line="-1256"/>
         <source>Magnet</source>
         <translation type="unfinished"></translation>
     </message>
@@ -586,7 +586,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+380"/>
+        <location line="+429"/>
         <source>Open a torrent</source>
         <translation type="unfinished"></translation>
     </message>
@@ -636,7 +636,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+75"/>
+        <location line="+92"/>
         <location line="+3"/>
         <source>New playlist</source>
         <translation type="unfinished"></translation>
@@ -716,23 +716,23 @@
         </translation>
     </message>
     <message>
-        <location line="-990"/>
+        <location line="-1056"/>
         <source>Main menu</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+1204"/>
+        <location line="+1272"/>
         <source>Donation to Grooveoff&apos;s author</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1262"/>
-        <location line="+759"/>
+        <location line="-1332"/>
+        <location line="+810"/>
         <source>Attention</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+497"/>
+        <location line="+516"/>
         <source>Offline</source>
         <translation type="unfinished"></translation>
     </message>
@@ -855,7 +855,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+301"/>
+        <location line="+311"/>
         <source>Could not get the track list of this torrent.</source>
         <translation type="unfinished"></translation>
     </message>

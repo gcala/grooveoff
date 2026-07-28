@@ -347,14 +347,22 @@
         <translation> s</translation>
     </message>
     <message>
-        <location line="+31"/>
         <source>Bring up the next track while the current one plays</source>
-        <translation>Prepara il brano successivo mentre suona quello attuale</translation>
+        <translation type="vanished">Prepara il brano successivo mentre suona quello attuale</translation>
+    </message>
+    <message>
+        <source>Without this the playlist stops at every change of track, waiting for the next torrent to find its peers.</source>
+        <translation type="vanished">Senza, la playlist si ferma a ogni cambio di brano, in attesa che il torrent successivo trovi i suoi peer.</translation>
+    </message>
+    <message>
+        <location line="+31"/>
+        <source>Download the playlist ahead, one track after another</source>
+        <translation>Scarica in anticipo i brani della playlist, uno dopo l'altro</translation>
     </message>
     <message>
         <location line="+7"/>
-        <source>Without this the playlist stops at every change of track, waiting for the next torrent to find its peers.</source>
-        <translation>Senza, la playlist si ferma a ogni cambio di brano, in attesa che il torrent successivo trovi i suoi peer.</translation>
+        <source>Without this a track is fetched only when you press play on it, and the playlist stops at every change of track. Nothing already in the cache is ever thrown away to make room for this.</source>
+        <translation>Senza, un brano si scarica solo quando lo premi e la playlist si ferma a ogni cambio. Quello che è già in cache non viene mai buttato via per fare posto a questo.</translation>
     </message>
     <message>
         <location line="+44"/>
@@ -705,7 +713,7 @@
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../src/grooveoff/MainWindow.cpp" line="+125"/>
+        <location filename="../src/grooveoff/MainWindow.cpp" line="+126"/>
         <source>The database could not be opened:</source>
         <translation>Non è stato possibile aprire il database:</translation>
     </message>
@@ -715,7 +723,7 @@
         <translation>Le playlist non verranno ricordate.</translation>
     </message>
     <message>
-        <location line="+48"/>
+        <location line="+50"/>
         <source>GrooveOff</source>
         <translation>GrooveOff</translation>
     </message>
@@ -726,13 +734,13 @@
     </message>
     <message>
         <location line="+2"/>
-        <location line="+315"/>
-        <location line="+882"/>
+        <location line="+322"/>
+        <location line="+943"/>
         <source>Idle</source>
         <translation>Fermo</translation>
     </message>
     <message>
-        <location line="-1188"/>
+        <location line="-1256"/>
         <source>Magnet</source>
         <translation>Magnet</translation>
     </message>
@@ -742,7 +750,7 @@
         <translation>Incolla un magnet e premi invio</translation>
     </message>
     <message>
-        <location line="+380"/>
+        <location line="+429"/>
         <source>Open a torrent</source>
         <translation>Apri un torrent</translation>
     </message>
@@ -817,7 +825,7 @@
         </translation>
     </message>
     <message>
-        <location line="+75"/>
+        <location line="+92"/>
         <location line="+3"/>
         <source>New playlist</source>
         <translation>Nuova playlist</translation>
@@ -936,7 +944,7 @@
         <translation type="vanished">Inizia ricerca</translation>
     </message>
     <message>
-        <location line="-990"/>
+        <location line="-1056"/>
         <source>Main menu</source>
         <translation>Menu principale</translation>
     </message>
@@ -993,13 +1001,13 @@ Select a valid path</source>
 Seleziona un percorso valido</translation>
     </message>
     <message>
-        <location line="+1204"/>
+        <location line="+1272"/>
         <source>Donation to Grooveoff&apos;s author</source>
         <translation>Donazione all&apos;autore di Grooveoff</translation>
     </message>
     <message>
-        <location line="-1262"/>
-        <location line="+759"/>
+        <location line="-1332"/>
+        <location line="+810"/>
         <source>Attention</source>
         <translation>Attenzione</translation>
     </message>
@@ -1033,7 +1041,7 @@ Selezionare un percorso valido</translation>
         <translation type="vanished">Annullo...</translation>
     </message>
     <message>
-        <location line="+497"/>
+        <location line="+516"/>
         <source>Offline</source>
         <translation>Non in linea</translation>
     </message>
@@ -1167,7 +1175,7 @@ Selezionare un percorso valido</translation>
         <translation>Per questo torrent non ci sono né dati di ripresa né un magnet.</translation>
     </message>
     <message>
-        <location line="+301"/>
+        <location line="+311"/>
         <source>Could not get the track list of this torrent.</source>
         <translation>Non è stato possibile ottenere l’elenco dei brani di questo torrent.</translation>
     </message>

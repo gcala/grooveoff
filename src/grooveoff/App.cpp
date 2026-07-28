@@ -27,6 +27,7 @@
 #include "../db/Database.h"
 #include "../db/PlaylistStore.h"
 #include "../torrent/CacheManager.h"
+#include "../torrent/DownloadQueue.h"
 #include "../torrent/StreamServer.h"
 #include "../torrent/TorrentSession.h"
 
@@ -171,6 +172,7 @@ App::~App()
     delete The::playlist();
     delete The::actionCollection();
 
+    delete The::downloadQueue();
     delete The::cacheManager();
     delete The::streamServer();
     delete The::torrentSession();

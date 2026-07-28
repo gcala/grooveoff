@@ -153,16 +153,16 @@
              </layout>
             </item>
             <item>
-             <widget class="QCheckBox" name="prefetchNext">
+             <widget class="QCheckBox" name="downloadAhead">
               <property name="text">
-               <string>Bring up the next track while the current one plays</string>
+               <string>Download the playlist ahead, one track after another</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QLabel" name="prefetchHint">
+             <widget class="QLabel" name="downloadAheadHint">
               <property name="text">
-               <string>Without this the playlist stops at every change of track, waiting for the next torrent to find its peers.</string>
+               <string>Without this a track is fetched only when you press play on it, and the playlist stops at every change of track. Nothing already in the cache is ever thrown away to make room for this.</string>
               </property>
               <property name="wordWrap">
                <bool>true</bool>

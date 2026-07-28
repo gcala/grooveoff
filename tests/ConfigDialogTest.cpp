@@ -92,7 +92,7 @@ void ConfigDialogTest::showsTheSameDefaultsTheCodeReads()
     ConfigDialog dialog;
 
     QCOMPARE( widget<QCheckBox>( &dialog, Settings::restorePlayback )->isChecked(), Settings::restorePlaybackDefault );
-    QCOMPARE( widget<QCheckBox>( &dialog, Settings::prefetchNext )->isChecked(), Settings::prefetchNextDefault );
+    QCOMPARE( widget<QCheckBox>( &dialog, Settings::downloadAhead )->isChecked(), Settings::downloadAheadDefault );
     QCOMPARE( widget<QSpinBox>( &dialog, Settings::bufferSeconds )->value(), Settings::bufferSecondsDefault );
 
     QCOMPARE( widget<QSpinBox>( &dialog, Settings::cacheSize )->value(), Settings::cacheSizeDefault );
@@ -126,7 +126,7 @@ void ConfigDialogTest::writesWhatWasChanged()
     ConfigDialog dialog;
 
     widget<QCheckBox>( &dialog, Settings::restorePlayback )->setChecked( false );
-    widget<QCheckBox>( &dialog, Settings::prefetchNext )->setChecked( false );
+    widget<QCheckBox>( &dialog, Settings::downloadAhead )->setChecked( false );
     widget<QSpinBox>( &dialog, Settings::bufferSeconds )->setValue( 25 );
     widget<QSpinBox>( &dialog, Settings::cacheSize )->setValue( 512 );
     widget<QCheckBox>( &dialog, Settings::emptyCacheOnExit )->setChecked( true );
@@ -146,7 +146,7 @@ void ConfigDialogTest::writesWhatWasChanged()
 
     QSettings settings;
     QCOMPARE( settings.value( Settings::restorePlayback ).toBool(), false );
-    QCOMPARE( settings.value( Settings::prefetchNext ).toBool(), false );
+    QCOMPARE( settings.value( Settings::downloadAhead ).toBool(), false );
     QCOMPARE( settings.value( Settings::bufferSeconds ).toInt(), 25 );
     QCOMPARE( settings.value( Settings::cacheSize ).toInt(), 512 );
     QCOMPARE( settings.value( Settings::emptyCacheOnExit ).toBool(), true );
@@ -167,7 +167,7 @@ void ConfigDialogTest::readsBackWhatWasWritten()
 {
     ConfigDialog dialog;
 
-    QCOMPARE( widget<QCheckBox>( &dialog, Settings::prefetchNext )->isChecked(), false );
+    QCOMPARE( widget<QCheckBox>( &dialog, Settings::downloadAhead )->isChecked(), false );
     QCOMPARE( widget<QSpinBox>( &dialog, Settings::bufferSeconds )->value(), 25 );
     QCOMPARE( widget<QSpinBox>( &dialog, Settings::cacheSize )->value(), 512 );
     QCOMPARE( widget<QComboBox>( &dialog, Settings::proxyType )->currentIndex(), 1 );
@@ -183,7 +183,7 @@ void ConfigDialogTest::restoresTheDefaults()
 {
     QSettings settings;
     settings.setValue( Settings::cacheSize, 128 );
-    settings.setValue( Settings::prefetchNext, false );
+    settings.setValue( Settings::downloadAhead, false );
     settings.sync();
 
     ConfigDialog dialog;
@@ -192,7 +192,7 @@ void ConfigDialogTest::restoresTheDefaults()
     widget<QPushButton>( &dialog, QLatin1String( "restoreButton" ) )->click();
 
     QCOMPARE( widget<QSpinBox>( &dialog, Settings::cacheSize )->value(), Settings::cacheSizeDefault );
-    QCOMPARE( widget<QCheckBox>( &dialog, Settings::prefetchNext )->isChecked(), Settings::prefetchNextDefault );
+    QCOMPARE( widget<QCheckBox>( &dialog, Settings::downloadAhead )->isChecked(), Settings::downloadAheadDefault );
 
     // Restoring fills the fields in; it is Apply that writes them.
     QCOMPARE( settings.value( Settings::cacheSize ).toInt(), 128 );

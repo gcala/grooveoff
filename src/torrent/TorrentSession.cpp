@@ -1023,6 +1023,13 @@ void TorrentSession::setFilePriority( const QString &infoHash, int fileIndex, Fi
 
     lt::download_priority_t value = lt::dont_download;
     switch( priority ) {
+        // Between "do not fetch this" and "fetch it when you can" there is now
+        // a step, and the whole order of the download queue lives in it: within
+        // one torrent libtorrent serves the higher priority first and, at equal
+        // priority, in piece order — which is track order. Three levels are
+        // therefore enough to say "this one, then the ones after it, then the
+        // ones left behind" without a single piece being bookkept by hand.
+        case QueuedFile: value = lt::low_priority;     break;
         case NormalFile: value = lt::default_priority; break;
         case TopFile:    value = lt::top_priority;     break;
         case SkipFile:   break;
@@ -1042,7 +1049,10 @@ TorrentSession::FilePriority TorrentSession::filePriority( const QString &infoHa
     if( priority == lt::dont_download )
         return SkipFile;
 
-    return priority >= lt::top_priority ? TopFile : NormalFile;
+    if( priority >= lt::top_priority )
+        return TopFile;
+
+    return priority <= lt::low_priority ? QueuedFile : NormalFile;
 }
 
 void TorrentSession::setPieceDeadline( const QString &infoHash, int piece, int milliseconds )

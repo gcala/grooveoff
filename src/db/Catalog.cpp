@@ -206,6 +206,18 @@ bool Catalog::setBytesDone( const QString &infoHash, qint64 bytes )
     return query.exec() ? true : reportFailure( query );
 }
 
+qint64 Catalog::bytesDone( const QString &infoHash ) const
+{
+    QSqlQuery query( The::database()->connection() );
+    query.prepare( QStringLiteral( "SELECT bytes_done FROM torrent WHERE info_hash = :hash" ) );
+    query.bindValue( QStringLiteral( ":hash" ), infoHash );
+
+    if( !query.exec() || !query.next() )
+        return 0;
+
+    return query.value( 0 ).toLongLong();
+}
+
 bool Catalog::setHasResume( const QString &infoHash, bool hasResume )
 {
     QSqlQuery query( The::database()->connection() );

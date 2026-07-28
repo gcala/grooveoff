@@ -91,9 +91,17 @@ inline constexpr int uploadRateLimitDefault = 50;
 inline const QLatin1String bufferSeconds( "bufferSeconds" );
 inline constexpr int bufferSecondsDefault = 10;
 
-/** whether the next track is brought up while the current one plays */
-inline const QLatin1String prefetchNext( "prefetchNext" );
-inline constexpr bool prefetchNextDefault = true;
+/**
+ * Whether the tracks of a playlist are fetched as soon as they are chosen,
+ * in order, instead of one at a time when somebody asks to hear them.
+ *
+ * A new key rather than the old prefetchNext, and not for tidiness: that one
+ * meant "bring up the next track while this one plays" and this one means
+ * "fetch the whole playlist", so a stored yes to the first is not an informed
+ * yes to the second. Whoever had switched the prefetch off gets asked again.
+ */
+inline const QLatin1String downloadAhead( "downloadAhead" );
+inline constexpr bool downloadAheadDefault = true;
 
 /** whether the track and position of the last session come back, paused */
 inline const QLatin1String restorePlayback( "restorePlayback" );

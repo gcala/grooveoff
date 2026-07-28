@@ -154,7 +154,7 @@ void ConfigDialog::restoreDefaults()
     ui->applyButton->setEnabled( true );
 
     ui->restorePlayback->setChecked( Settings::restorePlaybackDefault );
-    ui->prefetchNext->setChecked( Settings::prefetchNextDefault );
+    ui->downloadAhead->setChecked( Settings::downloadAheadDefault );
     ui->bufferSeconds->setValue( Settings::bufferSecondsDefault );
 
     ui->cacheSize->setValue( Settings::cacheSizeDefault );
@@ -186,7 +186,7 @@ void ConfigDialog::saveSettings()
     QSettings settings;
 
     settings.setValue( Settings::restorePlayback, ui->restorePlayback->isChecked() );
-    settings.setValue( Settings::prefetchNext, ui->prefetchNext->isChecked() );
+    settings.setValue( Settings::downloadAhead, ui->downloadAhead->isChecked() );
     settings.setValue( Settings::bufferSeconds, ui->bufferSeconds->value() );
 
     settings.setValue( Settings::cacheSize, ui->cacheSize->value() );
@@ -255,7 +255,7 @@ void ConfigDialog::updateEnabledState()
     ui->proxyPortLabel->setEnabled( proxied );
     ui->proxyPort->setEnabled( proxied );
 
-    ui->prefetchHint->setEnabled( ui->prefetchNext->isChecked() );
+    ui->downloadAheadHint->setEnabled( ui->downloadAhead->isChecked() );
 
     // Neither number means anything with the sharing off, and greyed rather
     // than hidden they say what turning it on is going to do.
@@ -308,7 +308,7 @@ void ConfigDialog::loadSettings()
     QSettings settings;
 
     ui->restorePlayback->setChecked( settings.value( Settings::restorePlayback, Settings::restorePlaybackDefault ).toBool() );
-    ui->prefetchNext->setChecked( settings.value( Settings::prefetchNext, Settings::prefetchNextDefault ).toBool() );
+    ui->downloadAhead->setChecked( settings.value( Settings::downloadAhead, Settings::downloadAheadDefault ).toBool() );
     ui->bufferSeconds->setValue( settings.value( Settings::bufferSeconds, Settings::bufferSecondsDefault ).toInt() );
 
     ui->cacheSize->setValue( settings.value( Settings::cacheSize, Settings::cacheSizeDefault ).toInt() );

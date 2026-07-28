@@ -190,6 +190,9 @@ private:
     /** hands the torrent of the track that was playing back to the session */
     void wakeLastUsedTorrent();
 
+    /** and the ones that still have chosen tracks to fetch, if fetching ahead is on */
+    void wakeUnfinishedTorrents();
+
     /** brings the rows of one torrent out of the dormant state */
     void refreshRowsOf( const QString &infoHash );
 

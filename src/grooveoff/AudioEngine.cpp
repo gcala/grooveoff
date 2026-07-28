@@ -257,7 +257,7 @@ void AudioEngine::maybePrefetchNext()
         return;
 
     QSettings settings;
-    if( !settings.value( Settings::prefetchNext, Settings::prefetchNextDefault ).toBool() )
+    if( !settings.value( Settings::downloadAhead, Settings::downloadAheadDefault ).toBool() )
         return;
 
     // Prefetched bytes are a guess, and a cache near its ceiling does not pay

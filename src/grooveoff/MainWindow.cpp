@@ -42,6 +42,7 @@
 #include "widgets/PlaylistList.h"
 #include "widgets/PlaylistDelegate.h"
 #include "../torrent/CacheManager.h"
+#include "../torrent/DownloadQueue.h"
 #include "../torrent/StreamServer.h"
 #include "../torrent/TorrentSession.h"
 
@@ -314,8 +315,15 @@ void MainWindow::setupConnections()
     // the cache never had to wait and so was never announced as playable.
     connect( The::audioEngine(), &AudioEngine::sourceChanged, this, [this] {
         const PlaylistItemPtr current = The::audioEngine()->currentTrack();
-        if( current && current->track() )
-            readTagsOf( current->track()->infoHash(), current->track()->fileIndex() );
+        if( !current || !current->track() )
+            return;
+
+        readTagsOf( current->track()->infoHash(), current->track()->fileIndex() );
+
+        // And the download queue moves its cursor here: what comes after this
+        // track is what will be wanted next.
+        The::downloadQueue()->setPlaying( current->track()->infoHash(),
+                                          current->track()->fileIndex() );
     } );
 
     // The row of the track being listened to follows the player: it is the one
@@ -537,23 +545,65 @@ void MainWindow::wakeLastUsedTorrent()
     if( !The::torrentSession()->isRunning() )
         return;
 
-    // Nothing is being brought back, so there is nothing worth announcing to a
-    // tracker before the user has asked for anything.
     QSettings settings;
-    if( !settings.value( Settings::restorePlayback, Settings::restorePlaybackDefault ).toBool() )
-        return;
 
     const qint64 trackId = The::playlistStore()->currentTrackId();
-    if( trackId <= 0 )
+    const TrackInfoPtr track = trackId > 0 ? The::catalog()->track( trackId ) : TrackInfoPtr();
+
+    // Nothing is being brought back, so there is nothing worth announcing to a
+    // tracker before the user has asked for anything.
+    if( track && !track->infoHash().isEmpty()
+        && settings.value( Settings::restorePlayback, Settings::restorePlaybackDefault ).toBool() ) {
+        QString error;
+        if( !The::torrentSession()->reopen( track->infoHash(), track->magnetUri(), &error ) )
+            qDebug() << "GrooveOff ::" << "cannot reopen the last used torrent:" << error;
+    }
+
+    if( !The::downloadQueue()->isEnabled() )
         return;
 
-    const TrackInfoPtr track = The::catalog()->track( trackId );
-    if( !track || track->infoHash().isEmpty() )
-        return;
+    // Fetching ahead cannot happen in a torrent the session is not holding, so
+    // reactivation stops being lazy for the torrents that still have music to
+    // fetch. Not for the others: one whose chosen tracks are already in the
+    // cache has nothing to do on the network, and waking it would announce it
+    // to a tracker to accomplish precisely nothing. So the announcements stay
+    // proportionate to the work left, and once everything has been fetched a
+    // start up goes back to being as quiet as it was before.
+    wakeUnfinishedTorrents();
+}
 
-    QString error;
-    if( !The::torrentSession()->reopen( track->infoHash(), track->magnetUri(), &error ) )
-        qDebug() << "GrooveOff ::" << "cannot reopen the last used torrent:" << error;
+void MainWindow::wakeUnfinishedTorrents()
+{
+    const QList<PlaylistStore::PlaylistInfo> playlists = The::playlistStore()->visiblePlaylists();
+
+    for( const PlaylistStore::PlaylistInfo &playlist : playlists ) {
+        if( playlist.kind == PlaylistStore::CustomPlaylist || playlist.infoHash.isEmpty() )
+            continue;
+
+        if( The::torrentSession()->isActive( playlist.infoHash ) )
+            continue;
+
+        const QList<TrackInfoPtr> tracks = The::playlistStore()->tracks( playlist.id );
+        if( tracks.isEmpty() )
+            continue;
+
+        qint64 wanted = 0;
+        for( const TrackInfoPtr &track : tracks )
+            wanted += track->fileSize();
+
+        // Rough on purpose, and rough in the safe direction: bytes_done counts
+        // every piece the torrent holds, including the ones shared with files
+        // nobody chose, so a torrent that has enough bytes to cover the chosen
+        // tracks is probably done with them. Being wrong here costs one torrent
+        // waking up for nothing; being wrong the other way would leave a
+        // playlist that never finishes fetching.
+        if( The::catalog()->bytesDone( playlist.infoHash ) >= wanted )
+            continue;
+
+        QString error;
+        if( !The::torrentSession()->reopen( playlist.infoHash, tracks.first()->magnetUri(), &error ) )
+            qDebug() << "GrooveOff ::" << "cannot wake" << playlist.infoHash << "to fetch ahead:" << error;
+    }
 }
 
 void MainWindow::addFromMagnetField()
@@ -922,9 +972,26 @@ void MainWindow::loadPlaylists()
 
     ui->playlistList->clear();
 
+    The::downloadQueue()->forgetAll();
+
     const QList<PlaylistStore::PlaylistInfo> playlists = The::playlistStore()->visiblePlaylists();
-    for( const PlaylistStore::PlaylistInfo &playlist : playlists )
+    for( const PlaylistStore::PlaylistInfo &playlist : playlists ) {
         ui->playlistList->addPlaylist( playlist );
+
+        // The queue is told about every torrent playlist and not only the open
+        // one: what is being fetched ahead has nothing to do with what is being
+        // looked at, and a playlist nobody has clicked on this week is still
+        // one whose tracks somebody chose.
+        if( playlist.kind == PlaylistStore::CustomPlaylist )
+            continue;
+
+        QList<int> fileIndexes;
+        const QList<TrackInfoPtr> tracks = The::playlistStore()->tracks( playlist.id );
+        for( const TrackInfoPtr &track : tracks )
+            fileIndexes << track->fileIndex();
+
+        The::downloadQueue()->setSelection( playlist.infoHash, fileIndexes );
+    }
 
     ui->playlistList->selectPlaylist( open );
 
@@ -1370,6 +1437,8 @@ void MainWindow::configure()
     config.exec();
 
     loadSettings();
+    The::downloadQueue()->reloadSettings();
+    The::downloadQueue()->refresh();
 }
 
 void MainWindow::onlineStateChanged( bool isOnline )

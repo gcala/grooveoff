@@ -83,6 +83,14 @@ public:
     bool touch( const QString &infoHash );
 
     bool setBytesDone( const QString &infoHash, qint64 bytes );
+
+    /**
+     * What this torrent has in the cache, as the last statistics said. Read at
+     * start up to tell a torrent that still has music to fetch from one that
+     * has it all already: the first is worth waking, the second can go on
+     * sleeping until somebody presses play on it.
+     */
+    qint64 bytesDone( const QString &infoHash ) const;
     bool setHasResume( const QString &infoHash, bool hasResume );
     bool hasResume( const QString &infoHash ) const;
 
