@@ -20,6 +20,7 @@
 
 #include "../GrooveOffNamespace.h"
 #include "../Roles.h"
+#include "../Utility.h"
 #include "../../torrent/TorrentSession.h"
 
 #include <QDragEnterEvent>
@@ -56,10 +57,7 @@ PlaylistList::~PlaylistList() = default;
 
 void PlaylistList::addPlaylist( const PlaylistStore::PlaylistInfo &playlist )
 {
-    // The name of the pinned one comes from here and not from its row: a name
-    // in the database can only be in the language it was written in, and this
-    // is the one playlist nobody chose the name of.
-    QListWidgetItem *row = new QListWidgetItem( playlist.pinned ? tr( "To listen" ) : playlist.name );
+    QListWidgetItem *row = new QListWidgetItem( Utility::playlistName( playlist ) );
 
     row->setData( PlaylistRoles::Id, playlist.id );
     row->setData( PlaylistRoles::Kind, static_cast<int>( playlist.kind ) );

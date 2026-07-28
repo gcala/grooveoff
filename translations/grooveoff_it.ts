@@ -654,7 +654,7 @@
         <translation>Annulla la rimozione</translation>
     </message>
     <message>
-        <location line="+43"/>
+        <location line="+47"/>
         <source>Add to playlist</source>
         <translation>Aggiungi a playlist</translation>
     </message>
@@ -1099,12 +1099,11 @@ Selezionare un percorso valido</translation>
 <context>
     <name>PlaylistList</name>
     <message>
-        <location filename="../src/grooveoff/widgets/PlaylistList.cpp" line="+62"/>
         <source>To listen</source>
-        <translation>Da ascoltare</translation>
+        <translation type="vanished">Da ascoltare</translation>
     </message>
     <message numerus="yes">
-        <location line="+19"/>
+        <location filename="../src/grooveoff/widgets/PlaylistList.cpp" line="+79"/>
         <location line="+39"/>
         <source>%n track(s)</source>
         <translation>
@@ -1249,8 +1248,9 @@ Selezionare un percorso valido</translation>
 <context>
     <name>Utility</name>
     <message>
+        <location filename="../src/grooveoff/Utility.cpp" line="+31"/>
         <source>To listen</source>
-        <translation type="vanished">Da ascoltare</translation>
+        <translation>Da ascoltare</translation>
     </message>
 </context>
 <context>

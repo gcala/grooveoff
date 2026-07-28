@@ -582,7 +582,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+43"/>
+        <location line="+47"/>
         <source>Add to playlist</source>
         <translation type="unfinished"></translation>
     </message>
@@ -917,13 +917,8 @@ Selecione uma pasta válida</translation>
 </context>
 <context>
     <name>PlaylistList</name>
-    <message>
-        <location filename="../src/grooveoff/widgets/PlaylistList.cpp" line="+62"/>
-        <source>To listen</source>
-        <translation type="unfinished"></translation>
-    </message>
     <message numerus="yes">
-        <location line="+19"/>
+        <location filename="../src/grooveoff/widgets/PlaylistList.cpp" line="+79"/>
         <location line="+39"/>
         <source>%n track(s)</source>
         <translation type="unfinished">
@@ -1063,6 +1058,14 @@ Selecione uma pasta válida</translation>
             <numerusform></numerusform>
             <numerusform></numerusform>
         </translation>
+    </message>
+</context>
+<context>
+    <name>Utility</name>
+    <message>
+        <location filename="../src/grooveoff/Utility.cpp" line="+31"/>
+        <source>To listen</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

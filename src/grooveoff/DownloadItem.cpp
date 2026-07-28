@@ -411,7 +411,7 @@ void DownloadItem::contextMenuEvent( QContextMenuEvent *event )
         if( playlist.kind != PlaylistStore::CustomPlaylist )
             continue;
 
-        playlistOf.insert( addMenu->addAction( playlist.name ), playlist.id );
+        playlistOf.insert( addMenu->addAction( Utility::playlistName( playlist ) ), playlist.id );
     }
 
     addMenu->setEnabled( !playlistOf.isEmpty() );

@@ -20,6 +20,9 @@
 #ifndef UTILITY_H
 #define UTILITY_H
 
+#include "../db/PlaylistStore.h"
+
+#include <QCoreApplication>
 #include <QList>
 #include <QString>
 #include <QFont>
@@ -28,10 +31,26 @@
 
 class Utility
 {
+    Q_DECLARE_TR_FUNCTIONS( Utility )
+
 private:
     Utility(){};
 
 public:
+
+    /**
+     * What to show a playlist as. Everything except the pinned one goes by the
+     * name in its row; that one has no name of its own to show, because a row
+     * in a database can only be written in one language and this is the one
+     * playlist nobody chose the name of.
+     *
+     * Here rather than in the sidebar because the sidebar is not the only place
+     * that says it: the menu that offers to add a track to a playlist says it
+     * too, and it said "To listen" in Italian for exactly as long as there were
+     * two answers to one question.
+     */
+    static QString playlistName( const PlaylistStore::PlaylistInfo &playlist );
+
     static const int buttonSize;
     static const int coverSize;
     static const int marginSize;

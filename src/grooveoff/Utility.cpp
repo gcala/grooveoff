@@ -26,6 +26,11 @@
 #include <algorithm>
 
 const int Utility::coverSize  = 40; // possible values are 40,50,70,80,90,120
+QString Utility::playlistName( const PlaylistStore::PlaylistInfo &playlist )
+{
+    return playlist.pinned ? tr( "To listen" ) : playlist.name;
+}
+
 const int Utility::buttonSize = 24;
 const int Utility::marginSize = 5;
 QString Utility::torrentsCachePath = QString();
