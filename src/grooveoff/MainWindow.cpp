@@ -714,10 +714,29 @@ void MainWindow::chooseTracksOf( const QString &infoHash )
     TrackSelector selector( catalog->name( infoHash ), all, chosen, this );
 
     if( selector.exec() != QDialog::Accepted ) {
-        // The torrent stays in the catalogue — it may be chosen from later —
-        // but with nothing queued there is no reason to keep announcing it.
-        if( playlists->tracks( playlistId ).isEmpty() )
+        // Nothing was taken, so nothing should be showing. The playlist of a
+        // torrent is created with the torrent — that is where the selection
+        // lives — so cancelling used to leave an empty row in the sidebar,
+        // which reads as a torrent that failed rather than one that was
+        // declined.
+        //
+        // Hidden and not removed, which is the distinction this program
+        // already makes elsewhere: the file list, the exclusions and whatever
+        // had been chosen before all stay, and pasting the same magnet again
+        // brings the torrent back with them instead of asking the swarm for
+        // its metadata a second time. With nothing queued there is also
+        // nothing worth announcing, so it leaves the session as well.
+        if( playlists->tracks( playlistId ).isEmpty() ) {
             The::torrentSession()->remove( infoHash, false );
+            catalog->hideTorrent( infoHash );
+
+            loadPlaylists();
+            loadCurrentPlaylist();
+
+            m_playerWidget->showMessage( tr( "Nothing chosen from «%1»: paste the magnet again to pick tracks." )
+                                         .arg( catalog->name( infoHash ) ) );
+            return;
+        }
 
         m_playerWidget->showMessage( catalog->name( infoHash ) );
         return;

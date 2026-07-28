@@ -581,12 +581,12 @@
     <message>
         <location line="+2"/>
         <location line="+323"/>
-        <location line="+1049"/>
+        <location line="+1068"/>
         <source>Idle</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1363"/>
+        <location line="-1382"/>
         <source>Magnet</source>
         <translation type="unfinished"></translation>
     </message>
@@ -611,7 +611,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+260"/>
+        <location line="+84"/>
+        <source>Nothing chosen from «%1»: paste the magnet again to pick tracks.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+195"/>
         <source>The cache is already empty.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -726,18 +731,18 @@
         </translation>
     </message>
     <message>
-        <location line="-1159"/>
+        <location line="-1178"/>
         <source>Main menu</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+1379"/>
+        <location line="+1398"/>
         <source>Donation to Grooveoff&apos;s author</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1439"/>
-        <location line="+861"/>
+        <location line="-1458"/>
+        <location line="+880"/>
         <source>Attention</source>
         <translation type="unfinished"></translation>
     </message>

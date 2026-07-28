@@ -657,12 +657,12 @@
     <message>
         <location line="+2"/>
         <location line="+323"/>
-        <location line="+1049"/>
+        <location line="+1068"/>
         <source>Idle</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1363"/>
+        <location line="-1382"/>
         <source>Magnet</source>
         <translation type="unfinished"></translation>
     </message>
@@ -687,7 +687,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+260"/>
+        <location line="+84"/>
+        <source>Nothing chosen from «%1»: paste the magnet again to pick tracks.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+195"/>
         <source>The cache is already empty.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -822,7 +827,7 @@
         <translation type="vanished">Iniciar pesquisa</translation>
     </message>
     <message>
-        <location line="-1159"/>
+        <location line="-1178"/>
         <source>Main menu</source>
         <translation type="unfinished"></translation>
     </message>
@@ -845,7 +850,7 @@ Select a valid path</source>
 Selecione uma pasta válida</translation>
     </message>
     <message>
-        <location line="+1379"/>
+        <location line="+1398"/>
         <source>Donation to Grooveoff&apos;s author</source>
         <translation>Doações ao autor de Grooveoff</translation>
     </message>
@@ -854,8 +859,8 @@ Selecione uma pasta válida</translation>
         <translation type="vanished">Música do Grooveshark.com Offline</translation>
     </message>
     <message>
-        <location line="-1439"/>
-        <location line="+861"/>
+        <location line="-1458"/>
+        <location line="+880"/>
         <source>Attention</source>
         <translation>Atenção</translation>
     </message>
