@@ -996,10 +996,20 @@ void MainWindow::loadPlaylists()
     ui->playlistList->selectPlaylist( open );
 
     // Playlists but nothing open — a database whose playback row went missing,
-    // or a first start right after one was made — would show a full sidebar
-    // beside an empty list, which reads as something having failed to load.
-    if( open <= 0 && ui->playlistList->count() > 0 )
+    // a first start right after one was made, or the playlist that was open
+    // having just been removed — would show a full sidebar beside an empty
+    // list, which reads as something having failed to load.
+    if( open <= 0 && ui->playlistList->count() > 0 ) {
         openPlaylist( ui->playlistList->item( 0 ) );
+
+        // And the row is brought forward as well. Opening one without selecting
+        // it leaves the sidebar with nothing highlighted beside a track list
+        // that is showing something, and the click that would fix it does
+        // nothing at all: openPlaylist() returns early on the playlist that is
+        // already open, so the row stays unselected however often it is
+        // pressed. It looks exactly like a playlist that refuses to open.
+        ui->playlistList->selectPlaylist( The::playlistStore()->currentPlaylistId() );
+    }
 }
 
 void MainWindow::openPlaylist( QListWidgetItem *row )
@@ -1186,6 +1196,8 @@ void MainWindow::removeTorrentEverywhere( const QString &infoHash )
         The::cacheManager()->setPlayingTorrent( QString() );
     }
 
+    The::downloadQueue()->forget( infoHash );
+
     The::torrentSession()->remove( infoHash, true );
     The::catalog()->removeTorrent( infoHash );
 }
@@ -1312,6 +1324,10 @@ void MainWindow::savePlaybackState()
     if( !current || !current->track() )
         return;
 
+    // The engine goes on holding the track it was given after the rows behind
+    // it are deleted — a torrent removed while one of its tracks was playing is
+    // exactly that — so this can name a track that no longer exists. What to do
+    // about it belongs to the writer and is done there.
     The::playlistStore()->setPlaybackState( The::playlistStore()->currentPlaylistId(),
                                             current->track()->id(),
                                             The::audioEngine()->currentTime() );

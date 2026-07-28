@@ -254,6 +254,23 @@ void PlaylistTest::forgetsTheOpenPlaylistWhenItIsRemoved()
     QCOMPARE( m_playlists->currentPlaylistId(), qint64( 0 ) );
     QCOMPARE( m_playlists->currentTrackId(), qint64( 0 ) );
     QVERIFY( m_playlists->visiblePlaylists().isEmpty() );
+
+    // And now the same thing from the other side, which is how it actually
+    // happens: the player is still holding the track when the rows behind it
+    // are deleted, so the next write of the playback state names a track that
+    // no longer exists. Written straight through, that fails on the foreign
+    // key and takes the position with it — the whole upsert is one statement —
+    // and the only sign of it is a line in the log nobody is reading. So the
+    // writer drops what is gone and writes the rest.
+    const qint64 deletedTrack = tracksC.first()->id();
+    QVERIFY( deletedTrack > 0 );
+
+    QVERIFY2( m_playlists->setPlaybackState( playlistC, deletedTrack, 34000 ),
+              "writing the state of a track that has just been removed must not fail" );
+
+    QCOMPARE( m_playlists->currentPlaylistId(), qint64( 0 ) );
+    QCOMPARE( m_playlists->currentTrackId(), qint64( 0 ) );
+    QCOMPARE( m_playlists->currentPositionMs(), qint64( 34000 ) );
 }
 
 PlaylistList* PlaylistTest::buildSidebar( qint64 torrentPlaylistId, qint64 customPlaylistId ) const

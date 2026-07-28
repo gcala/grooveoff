@@ -444,14 +444,43 @@ bool PlaylistStore::setPlaybackState( qint64 playlistId, qint64 trackId, qint64 
                                    " VALUES ( 1, :playlist, :track, :position )"
                                    " ON CONFLICT( id ) DO UPDATE SET playlist_id = :playlist,"
                                    " track_id = :track, position_ms = :position" ) );
-    query.bindValue( QStringLiteral( ":playlist" ), playlistId > 0 ? QVariant( playlistId ) : QVariant() );
-    query.bindValue( QStringLiteral( ":track" ), trackId > 0 ? QVariant( trackId ) : QVariant() );
+    // A playlist or a track that is not there any more is written as nothing,
+    // and that is the writer guaranteeing what it writes into rather than
+    // trusting whoever called it. It is not a hypothetical: removing a torrent
+    // while one of its tracks is playing leaves the player holding rows that
+    // have just been deleted, and naming one of them makes the whole upsert
+    // fail on the foreign key — taking the playlist and the position down with
+    // a track that was doomed anyway. Silence in the log and a playback state
+    // that stops being written, for a reason nothing on screen could show.
+    query.bindValue( QStringLiteral( ":playlist" ),
+                     exists( QStringLiteral( "playlist" ), playlistId ) ? QVariant( playlistId ) : QVariant() );
+    query.bindValue( QStringLiteral( ":track" ),
+                     exists( QStringLiteral( "track" ), trackId ) ? QVariant( trackId ) : QVariant() );
     query.bindValue( QStringLiteral( ":position" ), positionMs );
 
     return query.exec() ? true : reportFailure( query );
 }
 
 // --- helpers ----------------------------------------------------------------
+
+/*!
+  \brief exists: whether a row of that table is still there
+
+  @p table is a literal from this file and never anything a caller supplied,
+  which is why it can be pasted into the statement: there is no way for the
+  outside to reach it.
+*/
+bool PlaylistStore::exists( const QString &table, qint64 id ) const
+{
+    if( id <= 0 )
+        return false;
+
+    QSqlQuery query( The::database()->connection() );
+    query.prepare( QStringLiteral( "SELECT 1 FROM %1 WHERE id = :id" ).arg( table ) );
+    query.bindValue( QStringLiteral( ":id" ), id );
+
+    return query.exec() && query.next();
+}
 
 bool PlaylistStore::isCustom( qint64 playlistId ) const
 {

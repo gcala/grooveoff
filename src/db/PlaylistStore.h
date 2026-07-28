@@ -111,6 +111,9 @@ private:
     PlaylistStore();
     Q_DISABLE_COPY( PlaylistStore )
 
+    /** whether a row with this id is still in that table */
+    bool exists( const QString &table, qint64 id ) const;
+
     bool isCustom( qint64 playlistId ) const;
     QStringList referencedTorrents( qint64 playlistId ) const;
     bool collectGarbageFor( const QStringList &infoHashes );
