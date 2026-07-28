@@ -144,13 +144,26 @@ void App::startTorrentEngine()
 
 App::~App()
 {
-    // The engine goes first, while the window is still there to hear it: the
-    // shutdown saves the resume data of every torrent, and it is the window
-    // that writes what came back into the catalogue.
+    // What was playing, before anything is stopped. The position comes from the
+    // player and a stopped player is at zero, so asking any later than this
+    // writes a zero over the very thing that is meant to come back.
+    mainWindow()->savePlaybackState();
+
+    // Then the player, and only then the server it is reading from. Stopping a
+    // player makes ffmpeg seek back to the start, and on http a seek is a fresh
+    // request: made to a server that has already gone it is a connection
+    // refused, followed by a demuxer failing to seek and a decoder complaining
+    // about frame headers that were never sent. All of it on the way out, all
+    // of it looking like something went wrong, and nothing did.
+    The::audioEngine()->stop();
+
     The::streamServer()->stop();
 
     emptyCacheIfAsked();
 
+    // The session goes while the window is still there to hear it: the shutdown
+    // saves the resume data of every torrent, and it is the window that writes
+    // what came back into the catalogue.
     The::torrentSession()->shutdown();
 
     delete mainWindow();

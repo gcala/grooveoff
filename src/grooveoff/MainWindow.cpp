@@ -150,7 +150,9 @@ MainWindow::~MainWindow()
 
     m_spinner->stop();
 
-    savePlaybackState();
+    // The playback state is not written here: App asks for it before it stops
+    // the player, because the position comes from a player that is still
+    // running. By the time this destructor runs it would be a zero.
     saveSettings();
 
     delete m_mpris;

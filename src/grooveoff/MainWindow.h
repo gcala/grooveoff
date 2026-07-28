@@ -77,6 +77,15 @@ public:
     explicit MainWindow( QWidget *parent = nullptr );
     ~MainWindow() override;
 
+    /**
+     * Writes the playlist, the track and the millisecond that were playing.
+     *
+     * Public because the order it happens in is not this window's to decide:
+     * the position is read off the player, so it has to be asked for before
+     * anything stops the player, and what stops it is the shutdown in App.
+     */
+    void savePlaybackState();
+
 protected:
     void changeEvent( QEvent *event ) override;
     void resizeEvent( QResizeEvent *event ) override;
@@ -176,7 +185,6 @@ private:
 
     /** rebuilds the list from the playlist app_state points at */
     void loadCurrentPlaylist();
-    void savePlaybackState();
     void addPlaylistItem( const PlaylistItemPtr &playlistItem );
 
     /** hands the torrent of the track that was playing back to the session */
