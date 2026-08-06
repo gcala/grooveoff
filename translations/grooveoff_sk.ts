@@ -75,22 +75,22 @@
         <translation>&amp;Ukončiť</translation>
     </message>
     <message>
-        <location line="+164"/>
+        <location line="+140"/>
         <source>Close GrooveOff</source>
         <translation>Zatvoriť GrooveOff</translation>
     </message>
     <message>
-        <location line="-157"/>
+        <location line="-133"/>
         <source>&amp;Donate</source>
         <translation>&amp;Prispieť</translation>
     </message>
     <message>
-        <location line="+158"/>
+        <location line="+134"/>
         <source>Donate with PayPal</source>
         <translation>Prispieť s PayPal</translation>
     </message>
     <message>
-        <location line="-135"/>
+        <location line="-111"/>
         <source>&amp;Compact Layout</source>
         <translation>&amp;Kompaktné rozvrhnutie</translation>
     </message>
@@ -110,21 +110,19 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+7"/>
         <source>&amp;Stop all downloads</source>
-        <translation>Za&amp;staviť všetky sťahovanie</translation>
+        <translation type="vanished">Za&amp;staviť všetky sťahovanie</translation>
     </message>
     <message>
-        <location line="+7"/>
         <source>&amp;Remove canceled/failed downloads</source>
-        <translation>Odst&amp;rániť zrušené/zlyhané sťahovania</translation>
+        <translation type="vanished">Odst&amp;rániť zrušené/zlyhané sťahovania</translation>
     </message>
     <message>
         <source>Removes all finished downloads preserving files on disk</source>
         <translation type="vanished">Odstráni všetky dokončené sťahovania zo zoznamu</translation>
     </message>
     <message>
-        <location line="-49"/>
+        <location line="-35"/>
         <source>Configure &amp;GrooveOff...</source>
         <translation>Konfigurovať &amp;GrooveOff...</translation>
     </message>
@@ -133,12 +131,11 @@
         <translation type="vanished">Získať &amp;novú známku...</translation>
     </message>
     <message>
-        <location line="+56"/>
         <source>Clear &amp;finished</source>
-        <translation>Vyčistiť dokončené</translation>
+        <translation type="vanished">Vyčistiť dokončené</translation>
     </message>
     <message>
-        <location line="+7"/>
+        <location line="+42"/>
         <source>&amp;New playlist...</source>
         <translation type="unfinished"></translation>
     </message>
@@ -178,13 +175,8 @@
         <translation>O &amp;Qt</translation>
     </message>
     <message>
-        <location line="+36"/>
+        <location line="+33"/>
         <source>Add a .torrent file as a playlist</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+1"/>
-        <source>Empties the list, leaving the catalogue alone</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -222,12 +214,11 @@
         <translation>&amp;Súbor</translation>
     </message>
     <message>
-        <location line="+18"/>
         <source>&amp;Downloads</source>
-        <translation>&amp;Sťahovania</translation>
+        <translation type="vanished">&amp;Sťahovania</translation>
     </message>
     <message>
-        <location line="+11"/>
+        <location line="+22"/>
         <source>&amp;View</source>
         <translation>&amp;Zobraziť</translation>
     </message>
@@ -242,7 +233,7 @@
         <translation>&amp;Nápoveda</translation>
     </message>
     <message>
-        <location line="+20"/>
+        <location line="+19"/>
         <source>Main Menu</source>
         <translation>Hlavné menu</translation>
     </message>
@@ -599,7 +590,7 @@
 <context>
     <name>DownloadItem</name>
     <message>
-        <location filename="../src/grooveoff/DownloadItem.cpp" line="+121"/>
+        <location filename="../src/grooveoff/DownloadItem.cpp" line="+127"/>
         <location line="+280"/>
         <source>Play</source>
         <translation>Prehrať</translation>
@@ -744,13 +735,13 @@
     </message>
     <message>
         <location line="+2"/>
-        <location line="+324"/>
-        <location line="+1107"/>
+        <location line="+394"/>
+        <location line="+1155"/>
         <source>Idle</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1422"/>
+        <location line="-1540"/>
         <source>Magnet</source>
         <translation type="unfinished"></translation>
     </message>
@@ -760,7 +751,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+438"/>
+        <location line="+528"/>
         <source>Open a torrent</source>
         <translation type="unfinished"></translation>
     </message>
@@ -815,7 +806,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+102"/>
+        <location line="+125"/>
         <location line="+3"/>
         <source>New playlist</source>
         <translation type="unfinished"></translation>
@@ -921,7 +912,7 @@
         <translation type="vanished">Spustiť vyhľadávanie</translation>
     </message>
     <message>
-        <location line="-1218"/>
+        <location line="-1331"/>
         <source>Main menu</source>
         <translation>Hlavné menu</translation>
     </message>
@@ -982,7 +973,7 @@ Select a valid path</source>
 Vyberte platný priečinok</translation>
     </message>
     <message>
-        <location line="+1438"/>
+        <location line="+1556"/>
         <source>Donation to Grooveoff&apos;s author</source>
         <translation>Prispieť autorovi GrooveOff</translation>
     </message>
@@ -991,8 +982,8 @@ Vyberte platný priečinok</translation>
         <translation type="vanished">Offline hudba z Grooveshark.com</translation>
     </message>
     <message>
-        <location line="-1498"/>
-        <location line="+915"/>
+        <location line="-1616"/>
+        <location line="+1005"/>
         <source>Attention</source>
         <translation>Výstraha</translation>
     </message>
@@ -1019,7 +1010,7 @@ Vyberte platnú cestu</translation>
         <translation type="vanished">Ruší sa...</translation>
     </message>
     <message>
-        <location line="+577"/>
+        <location line="+605"/>
         <source>Offline</source>
         <translation>Offline</translation>
     </message>

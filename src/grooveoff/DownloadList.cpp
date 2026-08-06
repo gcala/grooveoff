@@ -73,19 +73,6 @@ void DownloadList::reloadPlaylist()
 }
 
 /*!
-  \brief removeErrored : remove the tracks that will not play however long one waits
-  \return void
-*/
-void DownloadList::removeErrored()
-{
-    removeItemsFromState( GrooveOff::ErrorState );
-}
-
-/*!
-  \brief removeAll : empty the list
-  \return void
-*/
-/*!
   \brief releaseRows: lets go of every row without anybody losing a track
 
   Emptying the list to draw another playlist in it is not removing tracks, and
@@ -100,28 +87,14 @@ void DownloadList::removeErrored()
   when it ends is decided by canGoNext(), which finds the track is not in the
   open playlist any more and stops there. Leaving a playlist is a good reason
   for nothing to follow.
+
+  There used to be a second way out, removeAll(), which announced every row to
+  the engine as one being taken away. It went with the Downloads menu that was
+  its only caller: emptying the view is not emptying the playlist, and a track
+  removed from the one and not the other came back at the next rebuild. What
+  takes tracks away for good is removeItem(), one row at a time, from the
+  gesture that means it.
 */
-void DownloadList::removeAll()
-{
-    // The other half of the distinction: here the tracks really are being
-    // taken away, so the engine is told and stops if it was playing one of
-    // them. Its one caller is a leftover of the download era — "Clear
-    // finished", in a Downloads menu whose three entries no longer have an
-    // object — and it empties the view rather than the playlist, so the rows
-    // come back at the next rebuild. Worth cleaning up, but not from inside
-    // the fix for something else.
-    The::audioEngine()->stop();
-
-    for( int i = count() - 1; i >= 0; i-- ) {
-        The::audioEngine()->removingTrack( ITEM( i )->playlistItem() );
-        QListWidgetItem *item = takeItem( i );
-        removeItemWidget( item );
-        delete item;
-    }
-
-    The::playlist()->clear();
-}
-
 void DownloadList::releaseRows()
 {
     for( int i = count() - 1; i >= 0; i-- ) {
@@ -129,20 +102,6 @@ void DownloadList::releaseRows()
         removeItemWidget( item );
         delete item;
     }
-}
-
-void DownloadList::removeItemsFromState( GrooveOff::TrackState state )
-{
-    for( int i = count() - 1; i >= 0; i-- ) {
-        if( ITEM( i )->trackState() == state ) {
-            The::audioEngine()->removingTrack( ITEM( i )->playlistItem() );
-            QListWidgetItem *item = takeItem( i );
-            removeItemWidget( item );
-            delete item;
-        }
-    }
-
-    reloadPlaylist();
 }
 
 QList< PlaylistItemPtr > DownloadList::playlistItems() const

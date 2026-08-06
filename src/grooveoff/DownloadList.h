@@ -40,13 +40,6 @@ public:
 public Q_SLOTS:
     void reloadPlaylist();
 
-    /** takes out the tracks that will not play however long one waits */
-    void removeErrored();
-
-    /** empties the list */
-    /** takes the tracks away for good, and tells the engine so */
-    void removeAll();
-
     /**
      * Empties the list to fill it again, which is not the same as removing
      * what is in it: nothing is announced to the engine, so a track being
@@ -54,7 +47,7 @@ public Q_SLOTS:
      */
     void releaseRows();
 
-    void removeItemsFromState( GrooveOff::TrackState state );
+    /** takes one track away for good, and tells the engine so */
     void removeItem(DownloadItem *item);
 
 Q_SIGNALS:

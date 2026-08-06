@@ -75,22 +75,22 @@
         <translation>&amp;Irten</translation>
     </message>
     <message>
-        <location line="+164"/>
+        <location line="+140"/>
         <source>Close GrooveOff</source>
         <translation>Itxi GrooveOff</translation>
     </message>
     <message>
-        <location line="-157"/>
+        <location line="-133"/>
         <source>&amp;Donate</source>
         <translation>&amp;Dohaintza egin</translation>
     </message>
     <message>
-        <location line="+158"/>
+        <location line="+134"/>
         <source>Donate with PayPal</source>
         <translation>Dohaintza egin PayPalen bidez</translation>
     </message>
     <message>
-        <location line="-135"/>
+        <location line="-111"/>
         <source>&amp;Compact Layout</source>
         <translation>&amp;Diseinu trinkoa</translation>
     </message>
@@ -110,21 +110,19 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+7"/>
         <source>&amp;Stop all downloads</source>
-        <translation>&amp;Gelditu deskarga guztiak</translation>
+        <translation type="vanished">&amp;Gelditu deskarga guztiak</translation>
     </message>
     <message>
-        <location line="+7"/>
         <source>&amp;Remove canceled/failed downloads</source>
-        <translation>&amp;Ezabatu utzitako/huts egindako deskargak</translation>
+        <translation type="vanished">&amp;Ezabatu utzitako/huts egindako deskargak</translation>
     </message>
     <message>
         <source>Removes all finished downloads preserving files on disk</source>
         <translation type="vanished">Ezabatu burututako deskargak fitxategiak diskoan mantenduta</translation>
     </message>
     <message>
-        <location line="-49"/>
+        <location line="-35"/>
         <source>Configure &amp;GrooveOff...</source>
         <translation>Konfiguratu &amp;GrooveOff...</translation>
     </message>
@@ -133,12 +131,11 @@
         <translation type="vanished">Lortu marka-ikur &amp;berria</translation>
     </message>
     <message>
-        <location line="+56"/>
         <source>Clear &amp;finished</source>
-        <translation>Garbiketa &amp;bukatua</translation>
+        <translation type="vanished">Garbiketa &amp;bukatua</translation>
     </message>
     <message>
-        <location line="+7"/>
+        <location line="+42"/>
         <source>&amp;New playlist...</source>
         <translation type="unfinished"></translation>
     </message>
@@ -178,13 +175,8 @@
         <translation>&amp;Qt-ri buruz</translation>
     </message>
     <message>
-        <location line="+36"/>
+        <location line="+33"/>
         <source>Add a .torrent file as a playlist</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+1"/>
-        <source>Empties the list, leaving the catalogue alone</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -218,12 +210,11 @@
         <translation>&amp;Fitxategia</translation>
     </message>
     <message>
-        <location line="+18"/>
         <source>&amp;Downloads</source>
-        <translation>&amp;Deskargak</translation>
+        <translation type="vanished">&amp;Deskargak</translation>
     </message>
     <message>
-        <location line="+11"/>
+        <location line="+22"/>
         <source>&amp;View</source>
         <translation>&amp;Ikusi</translation>
     </message>
@@ -238,7 +229,7 @@
         <translation>&amp;Laguntza</translation>
     </message>
     <message>
-        <location line="+20"/>
+        <location line="+19"/>
         <source>Main Menu</source>
         <translation>Menu nagusia</translation>
     </message>
@@ -595,7 +586,7 @@
 <context>
     <name>DownloadItem</name>
     <message>
-        <location filename="../src/grooveoff/DownloadItem.cpp" line="+121"/>
+        <location filename="../src/grooveoff/DownloadItem.cpp" line="+127"/>
         <location line="+280"/>
         <source>Play</source>
         <translation>Erreproduzitu</translation>
@@ -738,13 +729,13 @@
     </message>
     <message>
         <location line="+2"/>
-        <location line="+324"/>
-        <location line="+1107"/>
+        <location line="+394"/>
+        <location line="+1155"/>
         <source>Idle</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1422"/>
+        <location line="-1540"/>
         <source>Magnet</source>
         <translation type="unfinished"></translation>
     </message>
@@ -754,7 +745,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+438"/>
+        <location line="+528"/>
         <source>Open a torrent</source>
         <translation type="unfinished"></translation>
     </message>
@@ -809,7 +800,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+102"/>
+        <location line="+125"/>
         <location line="+3"/>
         <source>New playlist</source>
         <translation type="unfinished"></translation>
@@ -913,7 +904,7 @@
         <translation type="vanished">Hasi bilatzen</translation>
     </message>
     <message>
-        <location line="-1218"/>
+        <location line="-1331"/>
         <source>Main menu</source>
         <translation>Menu nagusia</translation>
     </message>
@@ -966,7 +957,7 @@ Select a valid path</source>
 Hautatu baliozko bide-izena</translation>
     </message>
     <message>
-        <location line="+1438"/>
+        <location line="+1556"/>
         <source>Donation to Grooveoff&apos;s author</source>
         <translation>Grooveoff-en egilearentzako dohaintza</translation>
     </message>
@@ -975,8 +966,8 @@ Hautatu baliozko bide-izena</translation>
         <translation type="vanished">Gooveshark-en musika lineaz kanpo</translation>
     </message>
     <message>
-        <location line="-1498"/>
-        <location line="+915"/>
+        <location line="-1616"/>
+        <location line="+1005"/>
         <source>Attention</source>
         <translation>Kasu</translation>
     </message>
@@ -1010,7 +1001,7 @@ Hautatu baliozko bide-izena</translation>
         <translation type="vanished">Uzten...</translation>
     </message>
     <message>
-        <location line="+577"/>
+        <location line="+605"/>
         <source>Offline</source>
         <translation>Lineaz kanpo</translation>
     </message>

@@ -262,8 +262,6 @@ void MainWindow::setupConnections()
     connect( ac->getAction( "actionCompact" ), &QAction::triggered, this, &MainWindow::setCompactLayout );
     connect( ac->getAction( "actionWide" ), &QAction::triggered, this, &MainWindow::setWideLayout );
     connect( ac->getAction( "miniPlayer" ), &QAction::triggered, this, &MainWindow::setMiniPlayerLayout );
-    connect( ac->getAction( "actionRemoveFailed" ), &QAction::triggered, ui->downloadList, &DownloadList::removeErrored );
-    connect( ac->getAction( "actionClearDownloadList" ), &QAction::triggered, ui->downloadList, &DownloadList::removeAll );
     connect( ac->getAction( "actionAbout" ), &QAction::triggered, this, &MainWindow::about );
     connect( ac->getAction( "actionQtAbout" ), &QAction::triggered, qApp, &QApplication::aboutQt );
     connect( ac->getAction( "actionOpenTorrent" ), &QAction::triggered, this, &MainWindow::openTorrentFile );
@@ -284,10 +282,6 @@ void MainWindow::setupConnections()
     connect( ui->playlistList, &PlaylistList::tracksDropped, this, &MainWindow::addTracksToPlaylist );
 
     connect( ui->downloadList, &DownloadList::reorderRequested, this, &MainWindow::reorderTracks );
-
-    // Nothing is downloaded any more, so there is nothing to stop. The menus
-    // are rebuilt around playlists later on.
-    ac->getAction( "actionStopDownloads" )->setVisible( false );
 
     connect( ui->searchLine, &QLineEdit::returnPressed, this, &MainWindow::addFromMagnetField );
 

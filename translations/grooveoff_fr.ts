@@ -75,22 +75,22 @@
         <translation type="unfinished">&amp;Quitter</translation>
     </message>
     <message>
-        <location line="+164"/>
+        <location line="+140"/>
         <source>Close GrooveOff</source>
         <translation type="unfinished">Fermer GrooveOff</translation>
     </message>
     <message>
-        <location line="-157"/>
+        <location line="-133"/>
         <source>&amp;Donate</source>
         <translation type="unfinished">&amp;Donner</translation>
     </message>
     <message>
-        <location line="+158"/>
+        <location line="+134"/>
         <source>Donate with PayPal</source>
         <translation type="unfinished">Donner avec PayPal</translation>
     </message>
     <message>
-        <location line="-135"/>
+        <location line="-111"/>
         <source>&amp;Compact Layout</source>
         <translation type="unfinished"></translation>
     </message>
@@ -110,27 +110,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+7"/>
-        <source>&amp;Stop all downloads</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+7"/>
-        <source>&amp;Remove canceled/failed downloads</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="-49"/>
+        <location line="-35"/>
         <source>Configure &amp;GrooveOff...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+56"/>
-        <source>Clear &amp;finished</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+7"/>
+        <location line="+42"/>
         <source>&amp;New playlist...</source>
         <translation type="unfinished"></translation>
     </message>
@@ -170,13 +155,8 @@
         <translation type="unfinished">À propos &amp;Qt</translation>
     </message>
     <message>
-        <location line="+36"/>
+        <location line="+33"/>
         <source>Add a .torrent file as a playlist</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+1"/>
-        <source>Empties the list, leaving the catalogue alone</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -210,12 +190,11 @@
         <translation type="unfinished">&amp;Fichier</translation>
     </message>
     <message>
-        <location line="+18"/>
         <source>&amp;Downloads</source>
-        <translation type="unfinished">&amp;Téléchargement</translation>
+        <translation type="obsolete">&amp;Téléchargement</translation>
     </message>
     <message>
-        <location line="+11"/>
+        <location line="+22"/>
         <source>&amp;View</source>
         <translation type="unfinished">&amp;Vue</translation>
     </message>
@@ -230,7 +209,7 @@
         <translation type="unfinished">&amp;Aide</translation>
     </message>
     <message>
-        <location line="+20"/>
+        <location line="+19"/>
         <source>Main Menu</source>
         <translation type="unfinished"></translation>
     </message>
@@ -539,7 +518,7 @@
 <context>
     <name>DownloadItem</name>
     <message>
-        <location filename="../src/grooveoff/DownloadItem.cpp" line="+121"/>
+        <location filename="../src/grooveoff/DownloadItem.cpp" line="+127"/>
         <location line="+280"/>
         <source>Play</source>
         <translation>Lire</translation>
@@ -666,13 +645,13 @@
     </message>
     <message>
         <location line="+2"/>
-        <location line="+324"/>
-        <location line="+1107"/>
+        <location line="+394"/>
+        <location line="+1155"/>
         <source>Idle</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1422"/>
+        <location line="-1540"/>
         <source>Magnet</source>
         <translation type="unfinished"></translation>
     </message>
@@ -682,7 +661,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+438"/>
+        <location line="+528"/>
         <source>Open a torrent</source>
         <translation type="unfinished"></translation>
     </message>
@@ -737,7 +716,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+102"/>
+        <location line="+125"/>
         <location line="+3"/>
         <source>New playlist</source>
         <translation type="unfinished"></translation>
@@ -837,7 +816,7 @@
         <translation type="vanished">Lancer la recherche</translation>
     </message>
     <message>
-        <location line="-1218"/>
+        <location line="-1331"/>
         <source>Main menu</source>
         <translation type="unfinished"></translation>
     </message>
@@ -860,7 +839,7 @@ Select a valid path</source>
 Sélectionnez un chemin valide</translation>
     </message>
     <message>
-        <location line="+1438"/>
+        <location line="+1556"/>
         <source>Donation to Grooveoff&apos;s author</source>
         <translation>Don à l&apos;auteur de Grooveoff</translation>
     </message>
@@ -869,8 +848,8 @@ Sélectionnez un chemin valide</translation>
         <translation type="vanished">La musique de Grooveshark.com hors connexion</translation>
     </message>
     <message>
-        <location line="-1498"/>
-        <location line="+915"/>
+        <location line="-1616"/>
+        <location line="+1005"/>
         <source>Attention</source>
         <translation>Attention</translation>
     </message>
@@ -896,7 +875,7 @@ Sélectionnez un chemin valide</translation>
         <translation type="vanished">Un fichier nommé &quot;%1&quot; existe déjà. Êtes-vous sûr de vouloir l&apos;écraser ?</translation>
     </message>
     <message>
-        <location line="+577"/>
+        <location line="+605"/>
         <source>Offline</source>
         <translation>Hors connexion</translation>
     </message>

@@ -75,22 +75,22 @@
         <translation>&amp;Выход</translation>
     </message>
     <message>
-        <location line="+164"/>
+        <location line="+140"/>
         <source>Close GrooveOff</source>
         <translation>Закрыть GrooveOff</translation>
     </message>
     <message>
-        <location line="-157"/>
+        <location line="-133"/>
         <source>&amp;Donate</source>
         <translation>&amp;Пожертвовать</translation>
     </message>
     <message>
-        <location line="+158"/>
+        <location line="+134"/>
         <source>Donate with PayPal</source>
         <translation>Пожертвовать через PayPal</translation>
     </message>
     <message>
-        <location line="-135"/>
+        <location line="-111"/>
         <source>&amp;Compact Layout</source>
         <translation>&amp;Компактный Макет</translation>
     </message>
@@ -110,21 +110,19 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+7"/>
         <source>&amp;Stop all downloads</source>
-        <translation>&amp;Остановить все загрузки</translation>
+        <translation type="vanished">&amp;Остановить все загрузки</translation>
     </message>
     <message>
-        <location line="+7"/>
         <source>&amp;Remove canceled/failed downloads</source>
-        <translation>&amp;Удалить неудачные загрузки</translation>
+        <translation type="vanished">&amp;Удалить неудачные загрузки</translation>
     </message>
     <message>
         <source>Removes all finished downloads preserving files on disk</source>
         <translation type="vanished">Удаляет все завершенные загрузки сохраненые на диск</translation>
     </message>
     <message>
-        <location line="-49"/>
+        <location line="-35"/>
         <source>Configure &amp;GrooveOff...</source>
         <translation>Настройка &amp;GrooveOff...</translation>
     </message>
@@ -133,12 +131,11 @@
         <translation type="vanished">Получить &amp;новый токен...</translation>
     </message>
     <message>
-        <location line="+56"/>
         <source>Clear &amp;finished</source>
-        <translation>Удалить &amp;законченные</translation>
+        <translation type="vanished">Удалить &amp;законченные</translation>
     </message>
     <message>
-        <location line="+7"/>
+        <location line="+42"/>
         <source>&amp;New playlist...</source>
         <translation type="unfinished"></translation>
     </message>
@@ -178,13 +175,8 @@
         <translation>О &amp;Qt</translation>
     </message>
     <message>
-        <location line="+36"/>
+        <location line="+33"/>
         <source>Add a .torrent file as a playlist</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+1"/>
-        <source>Empties the list, leaving the catalogue alone</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -218,12 +210,11 @@
         <translation>&amp;Файл</translation>
     </message>
     <message>
-        <location line="+18"/>
         <source>&amp;Downloads</source>
-        <translation>&amp;Загрузки</translation>
+        <translation type="vanished">&amp;Загрузки</translation>
     </message>
     <message>
-        <location line="+11"/>
+        <location line="+22"/>
         <source>&amp;View</source>
         <translation>&amp;Вид</translation>
     </message>
@@ -238,7 +229,7 @@
         <translation>&amp;Помощь</translation>
     </message>
     <message>
-        <location line="+20"/>
+        <location line="+19"/>
         <source>Main Menu</source>
         <translation>Главное меню</translation>
     </message>
@@ -595,7 +586,7 @@
 <context>
     <name>DownloadItem</name>
     <message>
-        <location filename="../src/grooveoff/DownloadItem.cpp" line="+121"/>
+        <location filename="../src/grooveoff/DownloadItem.cpp" line="+127"/>
         <location line="+280"/>
         <source>Play</source>
         <translation>Воспроизвести</translation>
@@ -740,13 +731,13 @@
     </message>
     <message>
         <location line="+2"/>
-        <location line="+324"/>
-        <location line="+1107"/>
+        <location line="+394"/>
+        <location line="+1155"/>
         <source>Idle</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1422"/>
+        <location line="-1540"/>
         <source>Magnet</source>
         <translation type="unfinished"></translation>
     </message>
@@ -756,7 +747,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+438"/>
+        <location line="+528"/>
         <source>Open a torrent</source>
         <translation type="unfinished"></translation>
     </message>
@@ -811,7 +802,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+102"/>
+        <location line="+125"/>
         <location line="+3"/>
         <source>New playlist</source>
         <translation type="unfinished"></translation>
@@ -917,7 +908,7 @@
         <translation type="vanished">Запустить поиск</translation>
     </message>
     <message>
-        <location line="-1218"/>
+        <location line="-1331"/>
         <source>Main menu</source>
         <translation>Главное меню</translation>
     </message>
@@ -970,7 +961,7 @@ Select a valid path</source>
 Выберите другой каталог</translation>
     </message>
     <message>
-        <location line="+1438"/>
+        <location line="+1556"/>
         <source>Donation to Grooveoff&apos;s author</source>
         <translation>Пожертвование автору Grooveoff</translation>
     </message>
@@ -979,8 +970,8 @@ Select a valid path</source>
         <translation type="vanished">Offline Grooveshark.com music</translation>
     </message>
     <message>
-        <location line="-1498"/>
-        <location line="+915"/>
+        <location line="-1616"/>
+        <location line="+1005"/>
         <source>Attention</source>
         <translation>Внимание</translation>
     </message>
@@ -1007,7 +998,7 @@ Select a valid path</source>
         <translation type="vanished">Отмена...</translation>
     </message>
     <message>
-        <location line="+577"/>
+        <location line="+605"/>
         <source>Offline</source>
         <translation>Offline</translation>
     </message>

@@ -75,22 +75,22 @@
         <translation>&amp;Saír</translation>
     </message>
     <message>
-        <location line="+164"/>
+        <location line="+140"/>
         <source>Close GrooveOff</source>
         <translation>Pechar GrooveOff</translation>
     </message>
     <message>
-        <location line="-157"/>
+        <location line="-133"/>
         <source>&amp;Donate</source>
         <translation>&amp;Doar</translation>
     </message>
     <message>
-        <location line="+158"/>
+        <location line="+134"/>
         <source>Donate with PayPal</source>
         <translation>Doar con PayPal</translation>
     </message>
     <message>
-        <location line="-135"/>
+        <location line="-111"/>
         <source>&amp;Compact Layout</source>
         <translation>Disposición &amp;compacta</translation>
     </message>
@@ -110,21 +110,19 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+7"/>
         <source>&amp;Stop all downloads</source>
-        <translation>&amp;Deter todas as descargas</translation>
+        <translation type="vanished">&amp;Deter todas as descargas</translation>
     </message>
     <message>
-        <location line="+7"/>
         <source>&amp;Remove canceled/failed downloads</source>
-        <translation>%Retirar descargas canceladas ou fallidas</translation>
+        <translation type="vanished">%Retirar descargas canceladas ou fallidas</translation>
     </message>
     <message>
         <source>Removes all finished downloads preserving files on disk</source>
         <translation type="vanished">Retira todas as descargas rematadas preservando os ficheiros no disco</translation>
     </message>
     <message>
-        <location line="-49"/>
+        <location line="-35"/>
         <source>Configure &amp;GrooveOff...</source>
         <translation>&amp;Configurar GrooveOff...</translation>
     </message>
@@ -133,12 +131,11 @@
         <translation type="vanished">&amp;Obter un token novo...</translation>
     </message>
     <message>
-        <location line="+56"/>
         <source>Clear &amp;finished</source>
-        <translation>Borrar &amp;rematadas</translation>
+        <translation type="vanished">Borrar &amp;rematadas</translation>
     </message>
     <message>
-        <location line="+7"/>
+        <location line="+42"/>
         <source>&amp;New playlist...</source>
         <translation type="unfinished"></translation>
     </message>
@@ -178,13 +175,8 @@
         <translation>Sobre &amp;QT</translation>
     </message>
     <message>
-        <location line="+36"/>
+        <location line="+33"/>
         <source>Add a .torrent file as a playlist</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+1"/>
-        <source>Empties the list, leaving the catalogue alone</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -222,12 +214,11 @@
         <translation>&amp;Ficheiro</translation>
     </message>
     <message>
-        <location line="+18"/>
         <source>&amp;Downloads</source>
-        <translation>&amp;Descargas</translation>
+        <translation type="vanished">&amp;Descargas</translation>
     </message>
     <message>
-        <location line="+11"/>
+        <location line="+22"/>
         <source>&amp;View</source>
         <translation>&amp;Ver</translation>
     </message>
@@ -242,7 +233,7 @@
         <translation>&amp;Axuda</translation>
     </message>
     <message>
-        <location line="+20"/>
+        <location line="+19"/>
         <source>Main Menu</source>
         <translation>Menú principal</translation>
     </message>
@@ -599,7 +590,7 @@
 <context>
     <name>DownloadItem</name>
     <message>
-        <location filename="../src/grooveoff/DownloadItem.cpp" line="+121"/>
+        <location filename="../src/grooveoff/DownloadItem.cpp" line="+127"/>
         <location line="+280"/>
         <source>Play</source>
         <translation>Reproducir</translation>
@@ -742,13 +733,13 @@
     </message>
     <message>
         <location line="+2"/>
-        <location line="+324"/>
-        <location line="+1107"/>
+        <location line="+394"/>
+        <location line="+1155"/>
         <source>Idle</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1422"/>
+        <location line="-1540"/>
         <source>Magnet</source>
         <translation type="unfinished"></translation>
     </message>
@@ -758,7 +749,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+438"/>
+        <location line="+528"/>
         <source>Open a torrent</source>
         <translation type="unfinished"></translation>
     </message>
@@ -813,7 +804,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+102"/>
+        <location line="+125"/>
         <location line="+3"/>
         <source>New playlist</source>
         <translation type="unfinished"></translation>
@@ -917,7 +908,7 @@
         <translation type="vanished">Iniciar a busca</translation>
     </message>
     <message>
-        <location line="-1218"/>
+        <location line="-1331"/>
         <source>Main menu</source>
         <translation>Menú principal</translation>
     </message>
@@ -977,7 +968,7 @@ Select a valid path</source>
 Selecciona un camiño válido</translation>
     </message>
     <message>
-        <location line="+1438"/>
+        <location line="+1556"/>
         <source>Donation to Grooveoff&apos;s author</source>
         <translation>Doazón ao creador de Grooveoff</translation>
     </message>
@@ -986,8 +977,8 @@ Selecciona un camiño válido</translation>
         <translation type="vanished">Música sen conexión desde Grooveshark.com</translation>
     </message>
     <message>
-        <location line="-1498"/>
-        <location line="+915"/>
+        <location line="-1616"/>
+        <location line="+1005"/>
         <source>Attention</source>
         <translation>Atención</translation>
     </message>
@@ -1014,7 +1005,7 @@ Selecciona un camiño válido</translation>
         <translation type="vanished">Cancelando...</translation>
     </message>
     <message>
-        <location line="+577"/>
+        <location line="+605"/>
         <source>Offline</source>
         <translation>Sen conexión</translation>
     </message>

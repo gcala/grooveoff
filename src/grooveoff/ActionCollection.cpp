@@ -114,27 +114,6 @@ void ActionCollection::initActions()
                                               this
                                             );
 
-    QAction *actionStopDownloads = new QAction( QIcon::fromTheme( QLatin1String( "process-stop" ),
-                                                                  QIcon( QLatin1String( ":/resources/process-stop.png" ) )
-                                                                ),
-                                                tr( "&Stop all downloads" ), 
-                                                this
-                                              );
-
-    QAction *actionRemoveFailed = new QAction( QIcon::fromTheme( QLatin1String( "edit-delete" ),
-                                                                 QIcon( QLatin1String( ":/resources/edit-delete.png" ) )
-                                                               ),
-                                               tr( "&Remove canceled/failed downloads" ), 
-                                               this
-                                             );
-
-    QAction *actionClearDownloadList = new QAction( QIcon::fromTheme( QLatin1String( "edit-clear" ),
-                                                                      QIcon( QLatin1String( ":/resources/edit-clear" ) )
-                                                                    ),
-                                                    tr( "Clear &finished" ),
-                                                    this
-                                                  );
-    
     QAction *actionNewPlaylist = new QAction( QIcon::fromTheme( QLatin1String( "list-add" ),
                                                                QIcon( QLatin1String( ":/resources/emblem-new.png" ) )
                                                              ),
@@ -203,9 +182,6 @@ void ActionCollection::initActions()
     m_actionCollection[ QLatin1String( "miniPlayer" ) ] = miniPlayer;
     m_actionCollection[ QLatin1String( "miniPlayer" ) ] = miniPlayer;
     m_actionCollection[ QLatin1String( "actionOpenTorrent" ) ] = actionOpenTorrent;
-    m_actionCollection[ QLatin1String( "actionStopDownloads" ) ] = actionStopDownloads;
-    m_actionCollection[ QLatin1String( "actionRemoveFailed" ) ] = actionRemoveFailed;
-    m_actionCollection[ QLatin1String( "actionClearDownloadList" ) ] = actionClearDownloadList;
     m_actionCollection[ QLatin1String( "actionNewPlaylist" ) ] = actionNewPlaylist;
     m_actionCollection[ QLatin1String( "actionRenamePlaylist" ) ] = actionRenamePlaylist;
     m_actionCollection[ QLatin1String( "actionChooseTracks" ) ] = actionChooseTracks;
@@ -225,7 +201,6 @@ void ActionCollection::initActions()
 //     actionManageSessions->setToolTip( tr( "Open Session Manager" ) );
 //     actionSaveSessionAs->setToolTip( tr( "Save Session As..." ) );
     actionOpenTorrent->setToolTip( tr( "Add a .torrent file as a playlist" ) );
-    actionClearDownloadList->setToolTip( tr( "Empties the list, leaving the catalogue alone" ) );
     actionEmptyCache->setToolTip( tr( "Deletes the downloaded data, leaving the playlists alone" ) );
     actionNewPlaylist->setToolTip( tr( "A list of your own, filled by dragging tracks into it" ) );
     actionChooseTracks->setToolTip( tr( "Take more of this torrent, or put back something removed by mistake" ) );
@@ -277,13 +252,6 @@ QMenuBar* ActionCollection::createMenuBar( QWidget *parent )
     fileMenu->addAction( m_actionCollection[ QLatin1String( "actionClose" ) ] );
     m_menuCollection[ QLatin1String( "fileMenu" ) ] = fileMenu;
 
-    QMenu* downloadsMenu = new QMenu( tr( "&Downloads" ), menuBar );
-    downloadsMenu->addAction( m_actionCollection[ QLatin1String( "actionStopDownloads" ) ] );
-    downloadsMenu->addSeparator();
-    downloadsMenu->addAction( m_actionCollection[ QLatin1String( "actionRemoveFailed" ) ] );
-    downloadsMenu->addAction( m_actionCollection[ QLatin1String( "actionClearDownloadList" ) ] );
-    m_menuCollection[ QLatin1String( "downloadsMenu" ) ] = downloadsMenu;
-
     QActionGroup *alignmentGroup = new QActionGroup(this);
     alignmentGroup->addAction( m_actionCollection[ QLatin1String( "actionCompact" ) ] );
     alignmentGroup->addAction( m_actionCollection[ QLatin1String( "actionWide" ) ] );
@@ -307,7 +275,6 @@ QMenuBar* ActionCollection::createMenuBar( QWidget *parent )
 
     menuBar->addMenu( fileMenu );
     menuBar->addMenu( playlistsMenu );
-    menuBar->addMenu( downloadsMenu );
     menuBar->addMenu( viewMenu );
     menuBar->addMenu( settingsMenu );
     menuBar->addMenu( helpMenu );
@@ -322,12 +289,6 @@ QMenu* ActionCollection::createCompactMenu( QWidget *parent )
 {
     QMenu* compactMenu = new QMenu( tr( "Main Menu" ), parent );
 
-//     compactMenu->addAction( m_actionCollection[ QLatin1String( "actionNewToken" ) ] );
-//     compactMenu->addSeparator();
-//     compactMenu->addAction( m_actionCollection[ QLatin1String( "actionStopDownloads" ) ] );
-//     compactMenu->addAction( m_actionCollection[ QLatin1String( "actionRemoveFailed" ) ] );
-//     compactMenu->addAction( m_actionCollection[ QLatin1String( "actionClearDownloadList" ) ] );
-//     compactMenu->addSeparator();
     compactMenu->addMenu( m_menuCollection[ QLatin1String( "tracksMenu" ) ] );
     compactMenu->addMenu( m_menuCollection[ QLatin1String( "playlistsMenu" ) ] );
     compactMenu->addSeparator();
