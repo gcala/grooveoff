@@ -65,6 +65,16 @@ public:
 
     PlaylistItemPtr currentTrack() const;
 
+    /**
+     * What was being listened to when the window last closed, and how far in.
+     * play() uses it while nothing is loaded, because pressing play on an
+     * application that has just opened means "carry on" and not "start this
+     * list from the top". Choosing any other track drops it: a track that
+     * resumed somewhere in the middle because of an earlier session would be
+     * a surprise with no explanation on screen.
+     */
+    void setResumePoint( const PlaylistItemPtr &track, qint64 positionMs );
+
     void previous();
     void next();
     bool canGoPrevious();
@@ -205,6 +215,13 @@ private:
 
     /** what is being taken in the background, so that it is asked for once */
     PlaylistItemPtr        m_prefetchingTrack;
+
+    /** what to carry on with, and from where, until somebody chooses otherwise */
+    PlaylistItemPtr        m_resumeTrack;
+    qint64                 m_resumePosition = 0;
+
+    /** puts the resumed track back where it was left, once it can be seeked */
+    void applyResumePosition();
 
     GrooveOff::PlayerState m_state;
 

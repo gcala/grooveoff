@@ -224,7 +224,28 @@ private:
      */
     void rebuildPlayQueue();
 
-    /** the playlist the music is coming from; 0 when nothing is playing */
+    /**
+     * Builds the queue out of the playlist that was playing when the window
+     * last closed and tells the engine where in the track to carry on from, so
+     * that pressing play resumes rather than doing nothing. From the
+     * constructor only — see the note on it.
+     */
+    void restoreWhatWasPlaying();
+
+    /**
+     * Puts the mark on the sidebar row the music is coming from, or takes it
+     * off when it is coming from nowhere. Asked again at every change of state
+     * rather than decided once when play is pressed: a playlist reaches its
+     * end without anybody choosing anything.
+     */
+    void updatePlayingMark();
+
+    /**
+     * The playlist the music is coming from; 0 when nothing was ever started.
+     * It outlives the playing — a finished playlist is still the one to come
+     * back to, and that is what app_state remembers — so it is not what says
+     * whether the mark is drawn. See updatePlayingMark().
+     */
     qint64 m_playingPlaylistId = 0;
 
     /**

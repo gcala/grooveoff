@@ -288,6 +288,12 @@ void AudioEngine::onSourceChanged()
 
 void AudioEngine::onMediaStatusChanged( QMediaPlayer::MediaStatus status )
 {
+    // Loaded, or loaded and buffered: either is late enough for a position to
+    // survive, and they arrive in either order depending on how fast the
+    // stream opens.
+    if( status == QMediaPlayer::LoadedMedia || status == QMediaPlayer::BufferedMedia )
+        applyResumePosition();
+
     if( status == QMediaPlayer::EndOfMedia )
         onFinished();
 }
@@ -327,6 +333,15 @@ void AudioEngine::updateState()
     } else if( playback == QMediaPlayer::PlayingState ) {
         // And playing beats the error below, which is why that is last.
         newState = GrooveOff::PlayerState::Playing;
+    } else if( status == QMediaPlayer::LoadingMedia
+               || status == QMediaPlayer::BufferingMedia ) {
+        // Opening the stream, which takes about a tenth of a second and used to
+        // be reported as stopped. Nothing was stopped: the track was asked for
+        // and is on its way. It showed as a play button appearing on the row
+        // for a moment at the start of every track, and — once the sidebar
+        // started marking the playlist the music comes from — as that mark
+        // blinking off and on again at every change of track.
+        newState = GrooveOff::PlayerState::Buffering;
     } else if( m_mediaPlayer->error() != QMediaPlayer::NoError
                && playback == QMediaPlayer::StoppedState
                && status != QMediaPlayer::EndOfMedia
@@ -370,9 +385,52 @@ void AudioEngine::setState( GrooveOff::PlayerState state )
     emit stateChanged( state );
 }
 
+void AudioEngine::setResumePoint( const PlaylistItemPtr &track, qint64 positionMs )
+{
+    m_resumeTrack = track;
+    m_resumePosition = positionMs;
+}
+
+/*!
+  \brief applyResumePosition: puts the resumed track back where it was left
+
+  The position was written at every close and read by nobody, so what came back
+  was the right track from its beginning — which is the half of "carry on where
+  I left off" that is easy not to notice missing, because the track is right.
+
+  When to ask is the whole difficulty, and it cost a run to find out. The
+  player says it can seek while it is still LoadingMedia, and a position set
+  then is thrown away when the loading finishes: the track starts from the
+  beginning with nothing anywhere saying why. So the media status is what is
+  waited for, not seekability — which is asked as well, because the two become
+  true in either order.
+*/
+void AudioEngine::applyResumePosition()
+{
+    if( m_resumePosition <= 0 || !m_mediaPlayer->isSeekable() )
+        return;
+
+    const qint64 position = m_resumePosition;
+    m_resumePosition = 0;
+
+    m_mediaPlayer->setPosition( position );
+
+    // Not a user seek: nobody dragged anything, and the slider is being told
+    // where the track already was rather than being obeyed.
+    emit seeked( position, false );
+}
+
 void AudioEngine::playItem( const PlaylistItemPtr &track)
 {
     emit trackRequested( track );
+
+    // Somebody chose, and what they chose is not what was left behind: the
+    // saved position belongs to another track and would drop this one into its
+    // middle for no reason anybody could see.
+    if( track != m_resumeTrack ) {
+        m_resumeTrack.clear();
+        m_resumePosition = 0;
+    }
 
     // this was added to handle triggers from playlist menu
     if(m_currentTrack == track) {
@@ -507,6 +565,17 @@ void AudioEngine::play()
         return;
 
     if( m_mediaPlayer->source().isEmpty() ) {
+        // What was being listened to when the window last closed. Only while
+        // nothing is loaded: after that this is ordinary playback and the queue
+        // is what decides. Cleared here rather than in playItem(), which is
+        // about to be handed it and would drop the position with it.
+        if( m_resumeTrack ) {
+            const PlaylistItemPtr resume = m_resumeTrack;
+            playItem( resume );
+            m_resumeTrack.clear();
+            return;
+        }
+
         if( The::playlist()->count() > 0 ) {
             playItem( The::playlist()->item( 0 ) );
             return;

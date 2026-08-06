@@ -131,6 +131,7 @@ MainWindow::MainWindow( QWidget *parent )
 
     loadPlaylists();
     loadCurrentPlaylist();
+    restoreWhatWasPlaying();
     wakeLastUsedTorrent();
 
     m_mpris = new Mpris( this );
@@ -306,8 +307,14 @@ void MainWindow::setupConnections()
 
         m_playingPlaylistId = shownPlaylistId();
         rebuildPlayQueue();
-        ui->playlistList->setPlayingPlaylist( m_playingPlaylistId );
+        updatePlayingMark();
     } );
+
+    // And the mark comes off by itself when the music ends. Nobody chooses that
+    // moment — the last track of the playlist simply finishes — so there is no
+    // gesture to hang it on, only the state the player ends up in.
+    connect( The::audioEngine(), &AudioEngine::stateChanged, this,
+             [this]( GrooveOff::PlayerState ) { updatePlayingMark(); } );
 
     connect( The::torrentSession(), &TorrentSession::metadataReady, this, &MainWindow::onMetadataReady );
     connect( The::torrentSession(), &TorrentSession::statsUpdated,  this, &MainWindow::onTorrentStats );
@@ -513,6 +520,82 @@ qint64 MainWindow::shownPlaylistId() const
   track after track, including the ones added while it played — which is the
   whole reason this is a list of its own.
 */
+/*!
+  \brief restoreWhatWasPlaying: the queue to walk and the point to carry on from
+
+  Selecting the row was all that came back, and it was not enough for either
+  half of carrying on. The queue is built from the playlist playback is in, and
+  at start up nothing was playing, so it was empty: the play button of the
+  player bar — and MPRIS with it — had nothing to walk and did nothing at all,
+  in silence. The position, meanwhile, was written at every close and read by
+  nobody, so whatever did start, started from its beginning.
+
+  Both answers were in app_state already. This runs from the constructor and
+  nowhere else: the row is selected in loadCurrentPlaylist(), which runs at
+  every playlist opened, and doing this there would make looking at a list that
+  happens to hold the remembered track an act of choosing it.
+
+  Nothing is marked as playing on the sidebar, and nothing should be: this is
+  what will play if somebody presses play, which is not the same as playing.
+*/
+void MainWindow::restoreWhatWasPlaying()
+{
+    QSettings settings;
+    if( !settings.value( Settings::restorePlayback, Settings::restorePlaybackDefault ).toBool() )
+        return;
+
+    PlaylistStore *playlists = The::playlistStore();
+
+    const qint64 playlistId = playlists->currentPlaylistId();
+    const qint64 trackId    = playlists->currentTrackId();
+
+    if( playlistId <= 0 || trackId <= 0 )
+        return;
+
+    m_playingPlaylistId = playlistId;
+    rebuildPlayQueue();
+
+    // The item out of the queue rather than a fresh one over the same track:
+    // it is the one the row on screen is showing, and the engine says what it
+    // is doing by setting state on the item it was handed. A copy here is a
+    // row that sits still while the music comes out of it.
+    for( int i = 0; i < The::playlist()->count(); ++i ) {
+        const PlaylistItemPtr item = The::playlist()->item( i );
+
+        if( item && item->track() && item->track()->id() == trackId ) {
+            The::audioEngine()->setResumePoint( item, playlists->currentPositionMs() );
+            return;
+        }
+    }
+}
+
+/*!
+  \brief updatePlayingMark: whether the sidebar says where the music comes from
+
+  The mark answers "why is this playing, when I am looking at something else?",
+  so it belongs to a playlist exactly while something is coming out of it. Which
+  playlist that is stays known after the music stops — a finished playlist is
+  still the one to come back to at the next start — so the mark cannot be read
+  off m_playingPlaylistId alone, and left to it the mark stayed on a playlist
+  that had played itself out.
+
+  The rule is the one a track row already follows, deliberately: Stopped puts
+  the play button back, and everything else keeps the mark, because paused,
+  buffering, or stopped on an error the player still holds that track and
+  pressing play goes on with it. Two marks about the same thing that disagreed
+  would be worse than either.
+
+  Called at every change of state and not only when play is pressed: reaching
+  the end of a playlist is a moment nobody chose, and it is the moment this
+  exists for.
+*/
+void MainWindow::updatePlayingMark()
+{
+    const bool coming = The::audioEngine()->state() != GrooveOff::PlayerState::Stopped;
+
+    ui->playlistList->setPlayingPlaylist( coming ? m_playingPlaylistId : 0 );
+}
+
 void MainWindow::rebuildPlayQueue()
 {
     The::playlist()->clear();
@@ -1202,7 +1285,7 @@ void MainWindow::loadPlaylists()
     // Tracks may have been added to the playlist being played while somebody
     // was looking at another one, and they belong in the queue too.
     rebuildPlayQueue();
-    ui->playlistList->setPlayingPlaylist( m_playingPlaylistId );
+    updatePlayingMark();
 
     ui->playlistList->selectPlaylist( open );
 
