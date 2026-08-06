@@ -235,6 +235,9 @@ private:
     /** puts the resumed track back where it was left, once it can be seeked */
     void applyResumePosition();
 
+    /** the whole of playItem() past the question of whether to do it at all */
+    void startTrack( const PlaylistItemPtr &track );
+
     GrooveOff::PlayerState m_state;
 
     QMediaPlayer* m_mediaPlayer;

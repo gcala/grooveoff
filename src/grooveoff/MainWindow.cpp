@@ -882,9 +882,20 @@ void MainWindow::onMetadataReady( const QString &infoHash, const QString &name, 
     refreshRowsOf( infoHash );
 
     if( !m_awaitingSelection.remove( infoHash ) ) {
-        // A torrent woken up to play something, not one just added: it keeps
-        // the playlist it had and does not steal the view.
-        m_playerWidget->showMessage( name );
+        // A torrent woken up rather than added: it keeps the playlist it had
+        // and does not steal the view.
+        //
+        // It does not steal the bar either, unless there is nothing in it. A
+        // message covers the player for three seconds, and nobody asked for
+        // this one — the torrent was woken by the start up, by the fetching
+        // ahead or by a play, and a name landing on top of the track being
+        // started answers a question nobody put. At start up it was worse than
+        // noise: the bar is filled with the restored track a quarter of a
+        // second in, and every torrent woken behind it pushed those three
+        // seconds further out, so the whole thing opened blank for as long as
+        // there were torrents to wake.
+        if( !The::audioEngine()->currentTrack() )
+            m_playerWidget->showMessage( name );
         return;
     }
 

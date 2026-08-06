@@ -389,6 +389,16 @@ void AudioEngine::setResumePoint( const PlaylistItemPtr &track, qint64 positionM
 {
     m_resumeTrack = track;
     m_resumePosition = positionMs;
+
+    // It becomes the current track without being played, which is what
+    // "restored, paused" is supposed to look like: the player bar has a name,
+    // an album and a cover from the moment the window opens instead of the
+    // blank it used to show until somebody pressed something. Nothing is
+    // loaded, so the state stays Stopped and no mark appears on the sidebar.
+    m_currentTrack = track;
+    m_oldTrack = track;
+
+    emit sourceChanged();
 }
 
 /*!
@@ -422,8 +432,6 @@ void AudioEngine::applyResumePosition()
 
 void AudioEngine::playItem( const PlaylistItemPtr &track)
 {
-    emit trackRequested( track );
-
     // Somebody chose, and what they chose is not what was left behind: the
     // saved position belongs to another track and would drop this one into its
     // middle for no reason anybody could see.
@@ -438,7 +446,24 @@ void AudioEngine::playItem( const PlaylistItemPtr &track)
         return;
     }
 
-    if( m_currentTrack )
+    startTrack( track );
+}
+
+/*!
+  \brief startTrack: everything playItem() does once it knows it has to
+
+  Told apart from playItem() because of the track restored at start up. That
+  one is already the current track — it has to be, or the player bar would open
+  blank and the play button would have nothing to resume — so playItem() takes
+  its shortcut and hands the question back to play(), which would hand it
+  straight back: two functions politely calling each other until the stack ran
+  out. This is the way out of that circle, and play() uses it directly.
+*/
+void AudioEngine::startTrack( const PlaylistItemPtr &track )
+{
+    emit trackRequested( track );
+
+    if( m_currentTrack && m_currentTrack != track )
         m_currentTrack->setState( GrooveOff::PlayerState::Stopped );
 
     m_currentTrack = track;
@@ -571,7 +596,7 @@ void AudioEngine::play()
         // about to be handed it and would drop the position with it.
         if( m_resumeTrack ) {
             const PlaylistItemPtr resume = m_resumeTrack;
-            playItem( resume );
+            startTrack( resume );
             m_resumeTrack.clear();
             return;
         }
@@ -623,6 +648,12 @@ GrooveOff::PlayerState AudioEngine::state() const
 
 qint64 AudioEngine::currentTime() const
 {
+    // Before anything has been loaded the player sits at zero, and zero is not
+    // where the track is: opening the window and closing it again without
+    // pressing anything would write that zero over the position being kept.
+    if( m_resumePosition > 0 && m_mediaPlayer->source().isEmpty() )
+        return m_resumePosition;
+
     return m_mediaPlayer->position();
 }
 

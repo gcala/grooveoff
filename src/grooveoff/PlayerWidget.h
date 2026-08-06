@@ -94,6 +94,9 @@ private:
     QMetaObject::Connection m_trackConnection;
 
     //Methods
+    /** the two clocks, from numbers that need not come from the player */
+    void showTimes( qint64 elapsed, qint64 remaining );
+
     void setupConnections();
     void setupShadows();
     void setupFonts();
