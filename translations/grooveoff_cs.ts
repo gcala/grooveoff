@@ -584,130 +584,6 @@
     </message>
 </context>
 <context>
-    <name>DownloadItem</name>
-    <message>
-        <location filename="../src/grooveoff/DownloadItem.cpp" line="+127"/>
-        <location line="+280"/>
-        <source>Play</source>
-        <translation>Přehrát</translation>
-    </message>
-    <message>
-        <location line="-277"/>
-        <source>Remove track from the playlist</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+58"/>
-        <source>%1 of %2 buffered</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+19"/>
-        <location line="+124"/>
-        <source>Waiting for peers</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message numerus="yes">
-        <location line="-123"/>
-        <source>%n peer(s)</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
-            <numerusform></numerusform>
-        </translation>
-    </message>
-    <message numerus="yes">
-        <location line="+2"/>
-        <source>%n seed(s)</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
-            <numerusform></numerusform>
-        </translation>
-    </message>
-    <message>
-        <location line="+63"/>
-        <source>Not buffered</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+68"/>
-        <source>Track not available</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+29"/>
-        <source>Abort removal</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+45"/>
-        <source>Add to playlist</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+24"/>
-        <source>Add to playlist (none yet)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+1"/>
-        <source>Add to playlist (already in them all)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+5"/>
-        <source>Remove from the playlist</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+5"/>
-        <source>Exclude this track</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+1"/>
-        <source>Keeps it out of this torrent&apos;s playlist until you say otherwise</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Open folder</source>
-        <translation type="vanished">Otevřít složku</translation>
-    </message>
-    <message>
-        <source>Queued</source>
-        <translation type="vanished">Zařazeno</translation>
-    </message>
-    <message>
-        <source>Remove track from queue</source>
-        <translation type="vanished">Odstranit skladbu z řady</translation>
-    </message>
-    <message>
-        <source>Stop track download</source>
-        <translation type="vanished">Zastavit stahování skladby</translation>
-    </message>
-    <message>
-        <source>Delete track from disk</source>
-        <translation type="vanished">Smazat skladbu z disku</translation>
-    </message>
-    <message>
-        <source>Redownload track</source>
-        <translation type="vanished">Stáhnout skladbu znovu</translation>
-    </message>
-    <message>
-        <source>Aborted</source>
-        <translation type="vanished">Zrušeno</translation>
-    </message>
-    <message>
-        <source>Network or Server error</source>
-        <translation type="vanished">Chyba sítě nebo serveru</translation>
-    </message>
-    <message>
-        <source>Abort deletion</source>
-        <translation type="vanished">Zrušit smazání</translation>
-    </message>
-</context>
-<context>
     <name>MainWindow</name>
     <message>
         <location filename="../src/grooveoff/MainWindow.cpp" line="+126"/>
@@ -1147,6 +1023,130 @@ Vyberte platnou cestu</translation>
         <location line="+311"/>
         <source>Could not get the track list of this torrent.</source>
         <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>TrackRow</name>
+    <message>
+        <location filename="../src/grooveoff/TrackRow.cpp" line="+127"/>
+        <location line="+280"/>
+        <source>Play</source>
+        <translation>Přehrát</translation>
+    </message>
+    <message>
+        <location line="-277"/>
+        <source>Remove track from the playlist</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+58"/>
+        <source>%1 of %2 buffered</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+19"/>
+        <location line="+124"/>
+        <source>Waiting for peers</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <location line="-123"/>
+        <source>%n peer(s)</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location line="+2"/>
+        <source>%n seed(s)</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message>
+        <location line="+63"/>
+        <source>Not buffered</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+68"/>
+        <source>Track not available</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+29"/>
+        <source>Abort removal</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+45"/>
+        <source>Add to playlist</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+24"/>
+        <source>Add to playlist (none yet)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Add to playlist (already in them all)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Remove from the playlist</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Exclude this track</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Keeps it out of this torrent&apos;s playlist until you say otherwise</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Open folder</source>
+        <translation type="vanished">Otevřít složku</translation>
+    </message>
+    <message>
+        <source>Queued</source>
+        <translation type="vanished">Zařazeno</translation>
+    </message>
+    <message>
+        <source>Remove track from queue</source>
+        <translation type="vanished">Odstranit skladbu z řady</translation>
+    </message>
+    <message>
+        <source>Stop track download</source>
+        <translation type="vanished">Zastavit stahování skladby</translation>
+    </message>
+    <message>
+        <source>Delete track from disk</source>
+        <translation type="vanished">Smazat skladbu z disku</translation>
+    </message>
+    <message>
+        <source>Redownload track</source>
+        <translation type="vanished">Stáhnout skladbu znovu</translation>
+    </message>
+    <message>
+        <source>Aborted</source>
+        <translation type="vanished">Zrušeno</translation>
+    </message>
+    <message>
+        <source>Network or Server error</source>
+        <translation type="vanished">Chyba sítě nebo serveru</translation>
+    </message>
+    <message>
+        <source>Abort deletion</source>
+        <translation type="vanished">Zrušit smazání</translation>
     </message>
 </context>
 <context>

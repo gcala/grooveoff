@@ -53,7 +53,7 @@ ElidedLabel::ElidedLabel(const QString& text, Qt::TextElideMode elideMode, QWidg
 
   What used to be here did two more things, and both of them were somebody
   else's business. It reset the size policy, undoing whatever the container had
-  asked for — DownloadItem sets one deliberately, with a comment reading "fix
+  asked for — TrackRow sets one deliberately, with a comment reading "fix
   hidden label", which is what fighting this looks like from the outside. And it
   hid and showed the widget again to make the drop shadow repaint, which is a
   layout round trip to achieve what update() achieves.

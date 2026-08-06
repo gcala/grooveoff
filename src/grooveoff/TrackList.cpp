@@ -17,8 +17,8 @@
 */
 
 
-#include "DownloadList.h"
-#include "DownloadItem.h"
+#include "TrackList.h"
+#include "TrackRow.h"
 #include "Utility.h"
 #include "Playlist.h"
 #include "AudioEngine.h"
@@ -34,12 +34,12 @@
 #include <QDropEvent>
 #include <QMimeData>
 
-#define ITEM( x )  ( (DownloadItem * )itemWidget( item( x ) ) )
+#define ROW( x )  ( (TrackRow *)itemWidget( item( x ) ) )
 
-DownloadList::DownloadList( QWidget *parent ) :
+TrackList::TrackList( QWidget *parent ) :
     QListWidget( parent )
 {
-    connect( model(), &QAbstractItemModel::layoutChanged, this, &DownloadList::reloadPlaylist );
+    connect( model(), &QAbstractItemModel::layoutChanged, this, &TrackList::reloadPlaylist );
 }
 
 /*!
@@ -50,7 +50,7 @@ DownloadList::DownloadList( QWidget *parent ) :
   queue belongs to the playlist playback started in and is built by the window,
   which is the only place that knows which one that is.
 */
-void DownloadList::reloadPlaylist()
+void TrackList::reloadPlaylist()
 {
     
     const QList< QAction * > playlistActions = The::actionCollection()->getMenu( "tracksMenu" )->actions();
@@ -62,13 +62,13 @@ void DownloadList::reloadPlaylist()
     // Every track goes into the playlist, whatever its state: a dormant one is
     // still playable, pressing play is what wakes its torrent up.
     for( int i = 0; i < count(); i++ ) {
-        if( ITEM( i )->trackState() == GrooveOff::ErrorState )
+        if( ROW( i )->trackState() == GrooveOff::ErrorState )
             continue;
 
-        PlaylistAction *action = new PlaylistAction( ITEM( i )->playlistItem(), The::actionCollection()->getMenu( "tracksMenu" ) );
+        PlaylistAction *action = new PlaylistAction( ROW( i )->playlistItem(), The::actionCollection()->getMenu( "tracksMenu" ) );
         The::actionCollection()->getMenu( "tracksMenu" )->addAction( (QAction *)action );
 
-        connect( action, &QAction::triggered, this, &DownloadList::actionTriggered );
+        connect( action, &QAction::triggered, this, &TrackList::actionTriggered );
     }
 }
 
@@ -92,10 +92,10 @@ void DownloadList::reloadPlaylist()
   the engine as one being taken away. It went with the Downloads menu that was
   its only caller: emptying the view is not emptying the playlist, and a track
   removed from the one and not the other came back at the next rebuild. What
-  takes tracks away for good is removeItem(), one row at a time, from the
+  takes tracks away for good is removeRow(), one row at a time, from the
   gesture that means it.
 */
-void DownloadList::releaseRows()
+void TrackList::releaseRows()
 {
     for( int i = count() - 1; i >= 0; i-- ) {
         QListWidgetItem *item = takeItem( i );
@@ -104,22 +104,22 @@ void DownloadList::releaseRows()
     }
 }
 
-QList< PlaylistItemPtr > DownloadList::playlistItems() const
+QList< PlaylistItemPtr > TrackList::playlistItems() const
 {
     QList< PlaylistItemPtr > tracks;
     for( int i = 0; i < count(); i++ ) {
-        tracks << ITEM( i )->playlistItem();
+        tracks << ROW( i )->playlistItem();
     }
 
     return tracks;
 }
 
-void DownloadList::removeItem( DownloadItem* downItem )
+void TrackList::removeRow( TrackRow *row )
 {
-    The::audioEngine()->removingTrack( downItem->playlistItem() );
+    The::audioEngine()->removingTrack( row->playlistItem() );
     
     for( int i = 0; i < count(); i++ ) {
-        if( ITEM( i ) == downItem ) {
+        if( ROW( i ) == row ) {
             QListWidgetItem *it = takeItem( i );
             removeItemWidget( it );
             delete it;
@@ -127,12 +127,12 @@ void DownloadList::removeItem( DownloadItem* downItem )
     }
 }
 
-QStringList DownloadList::mimeTypes() const
+QStringList TrackList::mimeTypes() const
 {
     return QListWidget::mimeTypes() << QString( GrooveOffMime::tracks );
 }
 
-QMimeData* DownloadList::mimeData( const QList<QListWidgetItem *> &items ) const
+QMimeData* TrackList::mimeData( const QList<QListWidgetItem *> &items ) const
 {
     QMimeData *data = QListWidget::mimeData( items );
     if( !data )
@@ -153,7 +153,7 @@ QMimeData* DownloadList::mimeData( const QList<QListWidgetItem *> &items ) const
     return data;
 }
 
-void DownloadList::dragEnterEvent( QDragEnterEvent *event )
+void TrackList::dragEnterEvent( QDragEnterEvent *event )
 {
     // Only its own tracks: a list belongs to one playlist, and a track dragged
     // in from somewhere else would have to come from a playlist that is not
@@ -164,7 +164,7 @@ void DownloadList::dragEnterEvent( QDragEnterEvent *event )
         event->ignore();
 }
 
-void DownloadList::dragMoveEvent( QDragMoveEvent *event )
+void TrackList::dragMoveEvent( QDragMoveEvent *event )
 {
     if( event->source() != this ) {
         event->ignore();
@@ -176,7 +176,7 @@ void DownloadList::dragMoveEvent( QDragMoveEvent *event )
     QListWidget::dragMoveEvent( event );
 }
 
-void DownloadList::dropEvent( QDropEvent *event )
+void TrackList::dropEvent( QDropEvent *event )
 {
     // The drag came from here, so the selection is what is being dragged, and
     // reading it back is exact where decoding the payload would not be.
@@ -203,7 +203,7 @@ void DownloadList::dropEvent( QDropEvent *event )
     emit reorderRequested( rows, targetRow );
 }
 
-void DownloadList::actionTriggered()
+void TrackList::actionTriggered()
 {
     PlaylistAction *action = ( PlaylistAction * )QObject::sender();
     The::audioEngine()->playItem( action->track() );

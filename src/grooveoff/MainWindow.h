@@ -42,7 +42,7 @@ class QBoxLayout;
 
 //Custom
 class PlayerWidget;
-class DownloadItem;
+class TrackRow;
 class Spinner;
 
 namespace Ui {
@@ -117,7 +117,7 @@ private Q_SLOTS:
     void chooseTracksAgain();
 
     /** the sticky refusal, as opposed to taking a row out of the playlist */
-    void excludeTrack( DownloadItem *item );
+    void excludeTrack( TrackRow *item );
 
     /** writes the rows, in the order they are in, into the open playlist */
     void savePlaylistOrder();
@@ -157,7 +157,7 @@ private Q_SLOTS:
     void addTracksToPlaylist( qint64 playlistId, const QList<qint64> &trackIds );
 
     /** the same thing from the row's own menu, one track at a time */
-    void addTrackToPlaylist( DownloadItem *item, qint64 playlistId );
+    void addTrackToPlaylist( TrackRow *item, qint64 playlistId );
 
     /** a drag that landed back in the track list: an order, not a move */
     void reorderTracks( const QList<int> &rows, int targetRow );
@@ -247,7 +247,7 @@ private:
     void refreshRowsOf( const QString &infoHash );
 
     /** the row showing this track, if it is in the open playlist */
-    DownloadItem* rowFor( const TrackInfoPtr &track ) const;
+    TrackRow* rowFor( const TrackInfoPtr &track ) const;
 
     /** adds a magnet or a .torrent, and says so when it will not go in */
     void addTorrentSource( const QString &source );

@@ -604,128 +604,6 @@
     </message>
 </context>
 <context>
-    <name>DownloadItem</name>
-    <message>
-        <location filename="../src/grooveoff/DownloadItem.cpp" line="+127"/>
-        <location line="+280"/>
-        <source>Play</source>
-        <translation>Riproduci</translation>
-    </message>
-    <message>
-        <location line="-277"/>
-        <source>Remove track from the playlist</source>
-        <translation>Toglie il brano dalla playlist</translation>
-    </message>
-    <message>
-        <location line="+58"/>
-        <source>%1 of %2 buffered</source>
-        <translation>%1 di %2 nel buffer</translation>
-    </message>
-    <message>
-        <location line="+19"/>
-        <location line="+124"/>
-        <source>Waiting for peers</source>
-        <translation>In attesa di peer</translation>
-    </message>
-    <message numerus="yes">
-        <location line="-123"/>
-        <source>%n peer(s)</source>
-        <translation>
-            <numerusform>%n peer</numerusform>
-            <numerusform>%n peer</numerusform>
-        </translation>
-    </message>
-    <message numerus="yes">
-        <location line="+2"/>
-        <source>%n seed(s)</source>
-        <translation>
-            <numerusform>%n seed</numerusform>
-            <numerusform>%n seed</numerusform>
-        </translation>
-    </message>
-    <message>
-        <location line="+63"/>
-        <source>Not buffered</source>
-        <translation>Buffer vuoto</translation>
-    </message>
-    <message>
-        <location line="+68"/>
-        <source>Track not available</source>
-        <translation>Brano non disponibile</translation>
-    </message>
-    <message>
-        <location line="+29"/>
-        <source>Abort removal</source>
-        <translation>Annulla la rimozione</translation>
-    </message>
-    <message>
-        <location line="+45"/>
-        <source>Add to playlist</source>
-        <translation>Aggiungi a playlist</translation>
-    </message>
-    <message>
-        <location line="+24"/>
-        <source>Add to playlist (none yet)</source>
-        <translation>Aggiungi a playlist (nessuna)</translation>
-    </message>
-    <message>
-        <location line="+1"/>
-        <source>Add to playlist (already in them all)</source>
-        <translation>Aggiungi a playlist (è già in tutte)</translation>
-    </message>
-    <message>
-        <location line="+5"/>
-        <source>Remove from the playlist</source>
-        <translation>Togli dalla playlist</translation>
-    </message>
-    <message>
-        <location line="+5"/>
-        <source>Exclude this track</source>
-        <translation>Escludi questo brano</translation>
-    </message>
-    <message>
-        <location line="+1"/>
-        <source>Keeps it out of this torrent&apos;s playlist until you say otherwise</source>
-        <translation>Lo tiene fuori dalla playlist di questo torrent finché non dici altrimenti</translation>
-    </message>
-    <message>
-        <source>Open folder</source>
-        <translation type="vanished">Apri cartella</translation>
-    </message>
-    <message>
-        <source>Queued</source>
-        <translation type="vanished">In coda</translation>
-    </message>
-    <message>
-        <source>Remove track from queue</source>
-        <translation type="vanished">Rimuovi traccia dalla coda</translation>
-    </message>
-    <message>
-        <source>Stop track download</source>
-        <translation type="vanished">Ferma scaricamento traccia</translation>
-    </message>
-    <message>
-        <source>Delete track from disk</source>
-        <translation type="vanished">Elimina la traccia dal disco</translation>
-    </message>
-    <message>
-        <source>Redownload track</source>
-        <translation type="vanished">Scarica nuovamente la traccia</translation>
-    </message>
-    <message>
-        <source>Aborted</source>
-        <translation type="vanished">Annullato</translation>
-    </message>
-    <message>
-        <source>Network or Server error</source>
-        <translation type="vanished">Errore di rete o del server</translation>
-    </message>
-    <message>
-        <source>Abort deletion</source>
-        <translation type="vanished">Annulla eliminazione</translation>
-    </message>
-</context>
-<context>
     <name>MainWindow</name>
     <message>
         <location filename="../src/grooveoff/MainWindow.cpp" line="+126"/>
@@ -1202,6 +1080,128 @@ Selezionare un percorso valido</translation>
         <location line="+311"/>
         <source>Could not get the track list of this torrent.</source>
         <translation>Non è stato possibile ottenere l’elenco dei brani di questo torrent.</translation>
+    </message>
+</context>
+<context>
+    <name>TrackRow</name>
+    <message>
+        <location filename="../src/grooveoff/TrackRow.cpp" line="+127"/>
+        <location line="+280"/>
+        <source>Play</source>
+        <translation>Riproduci</translation>
+    </message>
+    <message>
+        <location line="-277"/>
+        <source>Remove track from the playlist</source>
+        <translation>Toglie il brano dalla playlist</translation>
+    </message>
+    <message>
+        <location line="+58"/>
+        <source>%1 of %2 buffered</source>
+        <translation>%1 di %2 nel buffer</translation>
+    </message>
+    <message>
+        <location line="+19"/>
+        <location line="+124"/>
+        <source>Waiting for peers</source>
+        <translation>In attesa di peer</translation>
+    </message>
+    <message numerus="yes">
+        <location line="-123"/>
+        <source>%n peer(s)</source>
+        <translation>
+            <numerusform>%n peer</numerusform>
+            <numerusform>%n peer</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location line="+2"/>
+        <source>%n seed(s)</source>
+        <translation>
+            <numerusform>%n seed</numerusform>
+            <numerusform>%n seed</numerusform>
+        </translation>
+    </message>
+    <message>
+        <location line="+63"/>
+        <source>Not buffered</source>
+        <translation>Buffer vuoto</translation>
+    </message>
+    <message>
+        <location line="+68"/>
+        <source>Track not available</source>
+        <translation>Brano non disponibile</translation>
+    </message>
+    <message>
+        <location line="+29"/>
+        <source>Abort removal</source>
+        <translation>Annulla la rimozione</translation>
+    </message>
+    <message>
+        <location line="+45"/>
+        <source>Add to playlist</source>
+        <translation>Aggiungi a playlist</translation>
+    </message>
+    <message>
+        <location line="+24"/>
+        <source>Add to playlist (none yet)</source>
+        <translation>Aggiungi a playlist (nessuna)</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Add to playlist (already in them all)</source>
+        <translation>Aggiungi a playlist (è già in tutte)</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Remove from the playlist</source>
+        <translation>Togli dalla playlist</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Exclude this track</source>
+        <translation>Escludi questo brano</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Keeps it out of this torrent&apos;s playlist until you say otherwise</source>
+        <translation>Lo tiene fuori dalla playlist di questo torrent finché non dici altrimenti</translation>
+    </message>
+    <message>
+        <source>Open folder</source>
+        <translation type="vanished">Apri cartella</translation>
+    </message>
+    <message>
+        <source>Queued</source>
+        <translation type="vanished">In coda</translation>
+    </message>
+    <message>
+        <source>Remove track from queue</source>
+        <translation type="vanished">Rimuovi traccia dalla coda</translation>
+    </message>
+    <message>
+        <source>Stop track download</source>
+        <translation type="vanished">Ferma scaricamento traccia</translation>
+    </message>
+    <message>
+        <source>Delete track from disk</source>
+        <translation type="vanished">Elimina la traccia dal disco</translation>
+    </message>
+    <message>
+        <source>Redownload track</source>
+        <translation type="vanished">Scarica nuovamente la traccia</translation>
+    </message>
+    <message>
+        <source>Aborted</source>
+        <translation type="vanished">Annullato</translation>
+    </message>
+    <message>
+        <source>Network or Server error</source>
+        <translation type="vanished">Errore di rete o del server</translation>
+    </message>
+    <message>
+        <source>Abort deletion</source>
+        <translation type="vanished">Annulla eliminazione</translation>
     </message>
 </context>
 <context>

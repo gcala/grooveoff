@@ -17,8 +17,8 @@
 */
 
 
-#ifndef DOWNLOADLIST_H
-#define DOWNLOADLIST_H
+#ifndef TRACKLIST_H
+#define TRACKLIST_H
 
 #include "PlaylistItem.h"
 #include "GrooveOffNamespace.h"
@@ -26,13 +26,22 @@
 #include <QListWidget>
 #include "GrooveOffNamespace.h"
 
-class DownloadItem;
+class TrackRow;
 
-class DownloadList : public QListWidget
+/**
+  * @class TrackList
+  * @short The tracks of the playlist being looked at, one TrackRow each.
+  *
+  * The counterpart of PlaylistList: that one lists the playlists, this one
+  * lists what is inside the chosen one. Which playlist that is has nothing to
+  * do with which one is playing — the music goes on in the list it started in,
+  * and this may well be showing another.
+  */
+class TrackList : public QListWidget
 {
     Q_OBJECT
 public:
-    explicit DownloadList( QWidget *parent = 0 );
+    explicit TrackList( QWidget *parent = 0 );
 
     QList< PlaylistItemPtr > playlistItems() const;
 
@@ -48,7 +57,7 @@ public Q_SLOTS:
     void releaseRows();
 
     /** takes one track away for good, and tells the engine so */
-    void removeItem(DownloadItem *item);
+    void removeRow( TrackRow *row );
 
 Q_SIGNALS:
     /**
@@ -81,4 +90,4 @@ private Q_SLOTS:
     void actionTriggered();
 };
 
-#endif // DOWNLOADLIST_H
+#endif // TRACKLIST_H

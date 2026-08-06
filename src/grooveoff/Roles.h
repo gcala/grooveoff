@@ -41,7 +41,7 @@ namespace SongRoles
 
         /**
          * The catalogue id of the track this row shows. The row carries it, and
-         * not only the DownloadItem inside it, because a drag leaves the widget
+         * not only the TrackRow inside it, because a drag leaves the widget
          * behind and takes the item's data with it.
          */
         TrackId

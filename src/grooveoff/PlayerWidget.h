@@ -20,7 +20,7 @@
 #ifndef PLAYERWIDGET_H
 #define PLAYERWIDGET_H
 
-#include "DownloadItem.h"
+#include "TrackRow.h"
 #include "GrooveOffNamespace.h"
 
 #include <QWidget>

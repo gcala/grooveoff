@@ -17,10 +17,10 @@
 */
 
 
-#include "DownloadItem.h"
+#include "TrackRow.h"
 #include "widgets/TimerButton.h"
 #include "Utility.h"
-#include "ui_DownloadItem.h"
+#include "ui_TrackRow.h"
 #include "AudioEngine.h"
 #include "Playlist.h"
 #include "MainWindow.h"
@@ -40,9 +40,9 @@
 /*!
   \brief Class representing a track in a playlist
 */
-DownloadItem::DownloadItem( const PlaylistItemPtr &playlistItemPtr, QWidget *parent )
+TrackRow::TrackRow( const PlaylistItemPtr &playlistItemPtr, QWidget *parent )
     : QWidget( parent )
-    , ui( new Ui::DownloadItem )
+    , ui( new Ui::TrackRow )
     , m_playlistItem( playlistItemPtr )
     , m_trackState( GrooveOff::DormantState )
     // Asked rather than assumed. A row is told what its track is doing by a
@@ -70,7 +70,7 @@ DownloadItem::DownloadItem( const PlaylistItemPtr &playlistItemPtr, QWidget *par
     stateChanged();
 }
 
-DownloadItem::~DownloadItem()
+TrackRow::~TrackRow()
 {
     if( ui->timerButton->isCountdownStarted() ) {
         ui->timerButton->stopCountdown();
@@ -84,7 +84,7 @@ DownloadItem::~DownloadItem()
   \brief setupUi: setup widgets
   \return void
 */
-void DownloadItem::setupUi()
+void TrackRow::setupUi()
 {
     // The scaling is done on the pixmap, keeping its shape: scaledContents
     // would stretch it to the square of the label, and album art is not always
@@ -158,18 +158,18 @@ void DownloadItem::setupUi()
   \brief setupConnections: setup widgets connections
   \return void
 */
-void DownloadItem::setupConnections()
+void TrackRow::setupConnections()
 {
-    connect( m_playlistItem.data(), &PlaylistItem::refreshNeeded, this, &DownloadItem::refreshLabels );
-    connect( m_playlistItem.data(), &PlaylistItem::stateChanged, this, &DownloadItem::setPlayerState );
+    connect( m_playlistItem.data(), &PlaylistItem::refreshNeeded, this, &TrackRow::refreshLabels );
+    connect( m_playlistItem.data(), &PlaylistItem::stateChanged, this, &TrackRow::setPlayerState );
 
-    connect( ui->playButton, &SvgButton::buttonClicked, this, &DownloadItem::playSong );
-    connect( ui->timerButton, &TimerButton::clicked, this, &DownloadItem::timerButtonClicked );
-    connect( ui->timerButton, &TimerButton::countdownFinished, this, &DownloadItem::removeSong );
-    connect( ui->deleteButton, &SvgButton::buttonClicked, this, &DownloadItem::deleteItem );
+    connect( ui->playButton, &SvgButton::buttonClicked, this, &TrackRow::playSong );
+    connect( ui->timerButton, &TimerButton::clicked, this, &TrackRow::timerButtonClicked );
+    connect( ui->timerButton, &TimerButton::countdownFinished, this, &TrackRow::removeSong );
+    connect( ui->deleteButton, &SvgButton::buttonClicked, this, &TrackRow::deleteItem );
 }
 
-void DownloadItem::setTrackState( GrooveOff::TrackState state )
+void TrackRow::setTrackState( GrooveOff::TrackState state )
 {
     if( m_trackState == state )
         return;
@@ -178,7 +178,7 @@ void DownloadItem::setTrackState( GrooveOff::TrackState state )
     stateChanged();
 }
 
-void DownloadItem::setBuffered( qint64 bytesAvailable, qint64 bytesTotal )
+void TrackRow::setBuffered( qint64 bytesAvailable, qint64 bytesTotal )
 {
     // The bar counts in kilobytes: a QProgressBar works on ints, and a forty
     // megabyte flac would overflow one.
@@ -199,7 +199,7 @@ void DownloadItem::setBuffered( qint64 bytesAvailable, qint64 bytesTotal )
         ui->progressWidget->setVisible( !m_fullyBuffered );
 }
 
-void DownloadItem::setPeerInfo( int peers, int seeds )
+void TrackRow::setPeerInfo( int peers, int seeds )
 {
     if( m_trackState != GrooveOff::BufferingState && m_trackState != GrooveOff::StalledState )
         return;
@@ -214,7 +214,7 @@ void DownloadItem::setPeerInfo( int peers, int seeds )
   \brief stateChanged: handle state changes
   \return void
 */
-void DownloadItem::stateChanged()
+void TrackRow::stateChanged()
 {
     emit stateChangedSignal();
 
@@ -246,7 +246,7 @@ void DownloadItem::stateChanged()
     update();
 }
 
-void DownloadItem::setDormantState()
+void TrackRow::setDormantState()
 {
     ui->animationWidget->setVisible( false );
     ui->barsWidget->stopAnimation();
@@ -259,7 +259,7 @@ void DownloadItem::setDormantState()
     ui->infoIconWidget->setVisible( false );
 }
 
-void DownloadItem::setIdleState()
+void TrackRow::setIdleState()
 {
     ui->animationWidget->setVisible( false );
     ui->barsWidget->stopAnimation();
@@ -273,7 +273,7 @@ void DownloadItem::setIdleState()
     ui->infoMessage->setText( tr( "Not buffered" ) );
 }
 
-void DownloadItem::setBufferingState()
+void TrackRow::setBufferingState()
 {
     // The bar measures the buffer, not a download: what it fills up with is
     // how much of the track can be listened to without waiting again.
@@ -296,7 +296,7 @@ void DownloadItem::setBufferingState()
     }
 }
 
-void DownloadItem::setReadyState()
+void TrackRow::setReadyState()
 {
     ui->progressWidget->setVisible( !m_fullyBuffered );
     ui->infoIconWidget->setVisible( false );
@@ -318,7 +318,7 @@ void DownloadItem::setReadyState()
     }
 }
 
-void DownloadItem::setStalledState()
+void TrackRow::setStalledState()
 {
     ui->animationWidget->setVisible( false );
     ui->barsWidget->stopAnimation();
@@ -331,7 +331,7 @@ void DownloadItem::setStalledState()
     ui->infoMessage->setText( tr( "Waiting for peers" ) );
 }
 
-void DownloadItem::setErrorState()
+void TrackRow::setErrorState()
 {
     ui->playWidget->setVisible( false );
     ui->animationWidget->setVisible( false );
@@ -348,7 +348,7 @@ void DownloadItem::setErrorState()
   \brief playSong: play song
   \return void
 */
-void DownloadItem::playSong() const
+void TrackRow::playSong() const
 {
     The::audioEngine()->playItem( m_playlistItem );
 }
@@ -357,14 +357,14 @@ void DownloadItem::playSong() const
   \brief startRemoving: prepare to remove a song
   \return void
 */
-void DownloadItem::timerButtonClicked()
+void TrackRow::timerButtonClicked()
 {
     ui->timerButton->stopCountdown();
     ui->timerWidget->setVisible( false );
     ui->deleteWidget->setVisible( true );
 }
 
-void DownloadItem::deleteItem()
+void TrackRow::deleteItem()
 {
     ui->timerWidget->setVisible( true );
     ui->timerButton->setToolTip( tr( "Abort removal" ) );
@@ -372,7 +372,7 @@ void DownloadItem::deleteItem()
     ui->deleteWidget->setVisible( false );
 }
 
-bool DownloadItem::operator==( DownloadItem& right ) const
+bool TrackRow::operator==( TrackRow& right ) const
 {
     return *m_playlistItem == *right.playlistItem();
 }
@@ -381,7 +381,7 @@ bool DownloadItem::operator==( DownloadItem& right ) const
   \brief removeSong: take the track out of the playlist
   \return void
 */
-void DownloadItem::removeSong()
+void TrackRow::removeSong()
 {
     // Nothing is deleted from disk here: the cache decides on its own when to
     // let go of the bytes, and the track stays in the catalogue.
@@ -399,7 +399,7 @@ void DownloadItem::removeSong()
   different consequences the next time round, so they are two entries and never
   one. The bin button on the row is the first of the two.
 */
-void DownloadItem::contextMenuEvent( QContextMenuEvent *event )
+void TrackRow::contextMenuEvent( QContextMenuEvent *event )
 {
     QMenu menu( this );
 
@@ -463,7 +463,7 @@ void DownloadItem::contextMenuEvent( QContextMenuEvent *event )
         emit addToPlaylistRequested( this, playlistOf.value( chosen ) );
 }
 
-void DownloadItem::setInCustomPlaylist( bool custom )
+void TrackRow::setInCustomPlaylist( bool custom )
 {
     m_inCustomPlaylist = custom;
 }
@@ -472,7 +472,7 @@ void DownloadItem::setInCustomPlaylist( bool custom )
   \brief enterEvent: manage mouse movement
   \return void
 */
-void DownloadItem::enterEvent( QEnterEvent* event )
+void TrackRow::enterEvent( QEnterEvent* event )
 {
     ui->deleteWidget->setVisible( !ui->timerButton->isCountdownStarted() );
 
@@ -486,7 +486,7 @@ void DownloadItem::enterEvent( QEnterEvent* event )
   \brief leaveEvent: manage mouse movement
   \return void
 */
-void DownloadItem::leaveEvent( QEvent* event )
+void TrackRow::leaveEvent( QEvent* event )
 {
     ui->deleteWidget->setVisible( false );
     ui->infoMessageWidget->setVisible( false );
@@ -499,7 +499,7 @@ void DownloadItem::leaveEvent( QEvent* event )
          for icon synchronization
   \return void
 */
-void DownloadItem::setPlayerState( GrooveOff::PlayerState state )
+void TrackRow::setPlayerState( GrooveOff::PlayerState state )
 {
     m_playerState = state;
     stateChanged();
@@ -512,7 +512,7 @@ void DownloadItem::setPlayerState( GrooveOff::PlayerState state )
   at which there is anything to read. Until then a row shows the file name,
   which is a poor title but never a wrong one.
 */
-void DownloadItem::refreshLabels()
+void TrackRow::refreshLabels()
 {
     ui->titleLabel->setText( m_playlistItem->displayTitle() );
     ui->titleLabel->setToolTip( m_playlistItem->displayTitle() );
@@ -523,7 +523,7 @@ void DownloadItem::refreshLabels()
     loadCover();
 }
 
-void DownloadItem::loadCover()
+void TrackRow::loadCover()
 {
     // The picture frame of the file itself. Covers used to come from a
     // Grooveshark cdn that no longer exists, and there is no other source that

@@ -134,7 +134,7 @@
         <bool>true</bool>
        </property>
       </widget>
-      <widget class="DownloadList" name="downloadList">
+      <widget class="TrackList" name="trackList">
        <property name="dragDropMode">
         <enum>QAbstractItemView::DragDrop</enum>
        </property>
@@ -168,9 +168,9 @@
    <header location="global">widgets/PlaylistList.h</header>
   </customwidget>
   <customwidget>
-   <class>DownloadList</class>
+   <class>TrackList</class>
    <extends>QListWidget</extends>
-   <header location="global">DownloadList.h</header>
+   <header location="global">TrackList.h</header>
   </customwidget>
   <customwidget>
    <class>SvgButton</class>

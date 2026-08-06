@@ -4,8 +4,8 @@ set(grooveoff_SRCS main.cpp
                    AboutDialog.cpp
                    AudioEngine.cpp
                    ConfigDialog.cpp
-                   DownloadItem.cpp
-                   DownloadList.cpp
+                   TrackRow.cpp
+                   TrackList.cpp
                    MainWindow.cpp
                    PlayerWidget.cpp
                    Playlist.cpp
@@ -33,7 +33,7 @@ set(grooveoff_SRCS main.cpp
                    dbus/mpris2/Mpris2PluginPlayerAdaptor.cpp)
 
 # handled by AUTOUIC
-set(grooveoff_UI DownloadItem.ui
+set(grooveoff_UI TrackRow.ui
                  PlayerWidget.ui
                  MainWindow.ui
                  ConfigDialog.ui

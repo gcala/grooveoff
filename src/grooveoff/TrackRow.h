@@ -17,8 +17,8 @@
 */
 
 
-#ifndef DOWNLOADITEM_H
-#define DOWNLOADITEM_H
+#ifndef TRACKROW_H
+#define TRACKROW_H
 
 #include "GrooveOffNamespace.h"
 #include "PlaylistItem.h"
@@ -26,26 +26,31 @@
 #include <QWidget>
 
 namespace Ui {
-class DownloadItem;
+class TrackRow;
 }
 
 class QEnterEvent;
 
 /**
-  * @class DownloadItem
-  * @short One track in a playlist.
+  * @class TrackRow
+  * @short One track of the open playlist, as it appears on screen.
   *
-  * The progress bar no longer measures a download: it will show how much of
-  * the file is buffered out of the torrent. The name stays for now, the widget
-  * is renamed together with the rest of the interface.
+  * A row and not an item, which is the distinction the name is chosen for:
+  * TrackInfo is what a track is, PlaylistItem is that plus what the player is
+  * doing with it, and this is the widget showing them — put into the list with
+  * setItemWidget(), so there is no model and no delegate underneath it.
+  *
+  * Its progress bar measures the buffer and not a download: how much of the
+  * track can be listened to without waiting again. It was called DownloadItem
+  * when that was the same number.
   */
-class DownloadItem : public QWidget
+class TrackRow : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit DownloadItem( const PlaylistItemPtr &playlistItemPtr, QWidget *parent = nullptr );
-    ~DownloadItem() override;
+    explicit TrackRow( const PlaylistItemPtr &playlistItemPtr, QWidget *parent = nullptr );
+    ~TrackRow() override;
 
     inline const PlaylistItemPtr playlistItem() {
         return m_playlistItem;
@@ -74,7 +79,7 @@ public:
      */
     void setInCustomPlaylist( bool custom );
 
-    bool operator==( DownloadItem & ) const;
+    bool operator==( TrackRow & ) const;
 
 public Q_SLOTS:
     void setPlayerState( GrooveOff::PlayerState );
@@ -84,13 +89,13 @@ Q_SIGNALS:
     void stateChangedSignal();
     void play( QString );
     void reloadPlaylist();
-    void removeMe( DownloadItem * );
+    void removeMe( TrackRow * );
 
     /** the user refused this file for good, which is not the same as removing it */
-    void excludeRequested( DownloadItem * );
+    void excludeRequested( TrackRow * );
 
     /** copy this track into a custom playlist, leaving it where it is */
-    void addToPlaylistRequested( DownloadItem *, qint64 playlistId );
+    void addToPlaylistRequested( TrackRow *, qint64 playlistId );
 
 protected:
     void leaveEvent( QEvent *event ) override;
@@ -105,7 +110,7 @@ private Q_SLOTS:
     void deleteItem();
 
 private:
-    Ui::DownloadItem      *ui;
+    Ui::TrackRow      *ui;
     PlaylistItemPtr        m_playlistItem;
     GrooveOff::TrackState  m_trackState;
     GrooveOff::PlayerState m_playerState;
@@ -130,4 +135,4 @@ private:
     void setErrorState();
 };
 
-#endif // DOWNLOADITEM_H
+#endif // TRACKROW_H

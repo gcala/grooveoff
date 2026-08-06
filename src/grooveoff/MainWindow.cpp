@@ -20,7 +20,7 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
 #include "PlayerWidget.h"
-#include "DownloadItem.h"
+#include "TrackRow.h"
 #include "Roles.h"
 #include "ConfigDialog.h"
 #include "AboutDialog.h"
@@ -281,7 +281,7 @@ void MainWindow::setupConnections()
     connect( ui->playlistList, &QWidget::customContextMenuRequested, this, &MainWindow::showPlaylistMenu );
     connect( ui->playlistList, &PlaylistList::tracksDropped, this, &MainWindow::addTracksToPlaylist );
 
-    connect( ui->downloadList, &DownloadList::reorderRequested, this, &MainWindow::reorderTracks );
+    connect( ui->trackList, &TrackList::reorderRequested, this, &MainWindow::reorderTracks );
 
     connect( ui->searchLine, &QLineEdit::returnPressed, this, &MainWindow::addFromMagnetField );
 
@@ -361,7 +361,7 @@ void MainWindow::setupConnections()
         // unavailable long after it had finished playing, with the next one
         // already going.
         if( m_playingTrack && m_playingTrack != current->track() ) {
-            if( DownloadItem *previous = rowFor( m_playingTrack ) ) {
+            if( TrackRow *previous = rowFor( m_playingTrack ) ) {
                 previous->setTrackState( The::torrentSession()->hasMetadata( m_playingTrack->infoHash() )
                                          ? GrooveOff::ReadyState
                                          : GrooveOff::DormantState );
@@ -370,7 +370,7 @@ void MainWindow::setupConnections()
 
         m_playingTrack = current->track();
 
-        DownloadItem *item = rowFor( current->track() );
+        TrackRow *item = rowFor( current->track() );
         if( !item )
             return;
 
@@ -401,7 +401,7 @@ void MainWindow::setupConnections()
         if( !current )
             return;
 
-        DownloadItem *item = rowFor( current->track() );
+        TrackRow *item = rowFor( current->track() );
         if( item && item->trackState() == GrooveOff::BufferingState )
             item->setTrackState( GrooveOff::StalledState );
     } );
@@ -539,7 +539,7 @@ void MainWindow::rebuildPlayQueue()
         // Then the row on screen when there is one, so that it goes on showing
         // what the engine is doing; a fresh item otherwise, for a playlist
         // nobody is looking at.
-        if( DownloadItem *row = rowFor( track ) ) {
+        if( TrackRow *row = rowFor( track ) ) {
             The::playlist()->appendItem( row->playlistItem() );
             continue;
         }
@@ -562,8 +562,8 @@ void MainWindow::loadCurrentPlaylist()
     m_shownPlaylistId = playlistId;
 
     // disable temporarily AutoScroll
-    ui->downloadList->setAutoScroll( false );
-    ui->downloadList->releaseRows();
+    ui->trackList->setAutoScroll( false );
+    ui->trackList->releaseRows();
 
     // No playlist open is a state to be shown, not a reason to do nothing.
     // Returning here before emptying the list is what left the tracks of the
@@ -571,8 +571,8 @@ void MainWindow::loadCurrentPlaylist()
     // rows were still there, and they went only at the next start — which reads
     // as a removal that did not work rather than one that did.
     if( playlistId <= 0 ) {
-        ui->downloadList->setAutoScroll( true );
-        ui->downloadList->reloadPlaylist();
+        ui->trackList->setAutoScroll( true );
+        ui->trackList->reloadPlaylist();
         m_playerWidget->showMessage( tr( "Idle" ) );
         return;
     }
@@ -597,8 +597,8 @@ void MainWindow::loadCurrentPlaylist()
         addPlaylistItem( PlaylistItemPtr( new PlaylistItem( track ) ) );
     }
 
-    ui->downloadList->setAutoScroll( true );
-    ui->downloadList->reloadPlaylist();
+    ui->trackList->setAutoScroll( true );
+    ui->trackList->reloadPlaylist();
 
     // The rows are new objects, so the queue is built again over them: a row
     // that is the track being played has to be the engine's own item, or the
@@ -622,10 +622,10 @@ void MainWindow::loadCurrentPlaylist()
     if( trackId <= 0 )
         return;
 
-    for( int i = 0; i < ui->downloadList->count(); ++i ) {
-        DownloadItem *item = qobject_cast<DownloadItem *>( ui->downloadList->itemWidget( ui->downloadList->item( i ) ) );
+    for( int i = 0; i < ui->trackList->count(); ++i ) {
+        TrackRow *item = qobject_cast<TrackRow *>( ui->trackList->itemWidget( ui->trackList->item( i ) ) );
         if( item && item->playlistItem()->track()->id() == trackId ) {
-            ui->downloadList->setCurrentRow( i );
+            ui->trackList->setCurrentRow( i );
             break;
         }
     }
@@ -891,7 +891,7 @@ void MainWindow::chooseTracksOf( const QString &infoHash, bool justAdded )
   things, and conflating them is the mistake that has the user pressing select
   all and watching the same three tracks come back for ever.
 */
-void MainWindow::excludeTrack( DownloadItem *item )
+void MainWindow::excludeTrack( TrackRow *item )
 {
     if( !item || !item->playlistItem()->track() )
         return;
@@ -902,7 +902,7 @@ void MainWindow::excludeTrack( DownloadItem *item )
 
     The::audioEngine()->removingTrack( item->playlistItem() );
     The::playlist()->removeItem( item->playlistItem() );
-    ui->downloadList->removeItem( item );
+    ui->trackList->removeRow( item );
 
     savePlaylistOrder();
 }
@@ -917,8 +917,8 @@ void MainWindow::savePlaylistOrder()
         return;
 
     QList<TrackInfoPtr> tracks;
-    for( int i = 0; i < ui->downloadList->count(); ++i ) {
-        DownloadItem *item = qobject_cast<DownloadItem *>( ui->downloadList->itemWidget( ui->downloadList->item( i ) ) );
+    for( int i = 0; i < ui->trackList->count(); ++i ) {
+        TrackRow *item = qobject_cast<TrackRow *>( ui->trackList->itemWidget( ui->trackList->item( i ) ) );
         if( item && item->playlistItem()->track() )
             tracks << item->playlistItem()->track();
     }
@@ -952,7 +952,7 @@ void MainWindow::onTorrentStats( const QString &infoHash, int peers, int seeds, 
     m_lastStatsHash = infoHash;
     m_lastBytesDone = bytesDone;
 
-    DownloadItem *item = rowFor( current->track() );
+    TrackRow *item = rowFor( current->track() );
     if( !item )
         return;
 
@@ -984,8 +984,8 @@ void MainWindow::onTorrentStats( const QString &infoHash, int peers, int seeds, 
 */
 void MainWindow::readArrivedTags( const QString &infoHash )
 {
-    for( int i = 0; i < ui->downloadList->count(); ++i ) {
-        DownloadItem *item = qobject_cast<DownloadItem *>( ui->downloadList->itemWidget( ui->downloadList->item( i ) ) );
+    for( int i = 0; i < ui->trackList->count(); ++i ) {
+        TrackRow *item = qobject_cast<TrackRow *>( ui->trackList->itemWidget( ui->trackList->item( i ) ) );
         if( !item || !item->playlistItem()->track() )
             continue;
 
@@ -1019,7 +1019,7 @@ void MainWindow::readTagsOf( const QString &infoHash, int fileIndex )
 
     The::catalog()->updateTags( track );
 
-    DownloadItem *item = rowFor( track );
+    TrackRow *item = rowFor( track );
     if( !item )
         return;
 
@@ -1076,13 +1076,13 @@ void MainWindow::emptyCache()
                               4000 );
 }
 
-DownloadItem* MainWindow::rowFor( const TrackInfoPtr &track ) const
+TrackRow* MainWindow::rowFor( const TrackInfoPtr &track ) const
 {
     if( !track )
         return nullptr;
 
-    for( int i = 0; i < ui->downloadList->count(); ++i ) {
-        DownloadItem *item = qobject_cast<DownloadItem *>( ui->downloadList->itemWidget( ui->downloadList->item( i ) ) );
+    for( int i = 0; i < ui->trackList->count(); ++i ) {
+        TrackRow *item = qobject_cast<TrackRow *>( ui->trackList->itemWidget( ui->trackList->item( i ) ) );
         if( !item || !item->playlistItem()->track() )
             continue;
 
@@ -1105,8 +1105,8 @@ void MainWindow::onTorrentError( const QString &infoHash, const QString &message
     // waiting for one would leave the row hanging.
     m_awaitingSelection.remove( infoHash );
 
-    for( int i = 0; i < ui->downloadList->count(); ++i ) {
-        DownloadItem *item = qobject_cast<DownloadItem *>( ui->downloadList->itemWidget( ui->downloadList->item( i ) ) );
+    for( int i = 0; i < ui->trackList->count(); ++i ) {
+        TrackRow *item = qobject_cast<TrackRow *>( ui->trackList->itemWidget( ui->trackList->item( i ) ) );
         if( item && item->playlistItem()->track()
             && item->playlistItem()->track()->infoHash() == infoHash ) {
             item->setTrackState( GrooveOff::ErrorState );
@@ -1138,8 +1138,8 @@ void MainWindow::refreshRowsOf( const QString &infoHash )
 {
     const bool awake = The::torrentSession()->hasMetadata( infoHash );
 
-    for( int i = 0; i < ui->downloadList->count(); ++i ) {
-        DownloadItem *item = qobject_cast<DownloadItem *>( ui->downloadList->itemWidget( ui->downloadList->item( i ) ) );
+    for( int i = 0; i < ui->trackList->count(); ++i ) {
+        TrackRow *item = qobject_cast<TrackRow *>( ui->trackList->itemWidget( ui->trackList->item( i ) ) );
         if( !item || !item->playlistItem()->track() )
             continue;
 
@@ -1517,7 +1517,7 @@ void MainWindow::addTracksToPlaylist( qint64 playlistId, const QList<qint64> &tr
                                  .arg( playlist.name ) );
 }
 
-void MainWindow::addTrackToPlaylist( DownloadItem *item, qint64 playlistId )
+void MainWindow::addTrackToPlaylist( TrackRow *item, qint64 playlistId )
 {
     if( !item || !item->playlistItem()->track() )
         return;
@@ -1540,8 +1540,8 @@ void MainWindow::reorderTracks( const QList<int> &rows, int targetRow )
         return;
 
     QList<TrackInfoPtr> tracks;
-    for( int i = 0; i < ui->downloadList->count(); ++i ) {
-        DownloadItem *item = qobject_cast<DownloadItem *>( ui->downloadList->itemWidget( ui->downloadList->item( i ) ) );
+    for( int i = 0; i < ui->trackList->count(); ++i ) {
+        TrackRow *item = qobject_cast<TrackRow *>( ui->trackList->itemWidget( ui->trackList->item( i ) ) );
         if( !item || !item->playlistItem()->track() )
             return;
 
@@ -1603,21 +1603,21 @@ void MainWindow::savePlaybackState()
 
 void MainWindow::addPlaylistItem( const PlaylistItemPtr &playlistItem )
 {
-    DownloadItem *item = new DownloadItem( playlistItem, this );
+    TrackRow *item = new TrackRow( playlistItem, this );
 
-    connect( item,             &DownloadItem::reloadPlaylist,
-             ui->downloadList, &DownloadList::reloadPlaylist );
+    connect( item,             &TrackRow::reloadPlaylist,
+             ui->trackList, &TrackList::reloadPlaylist );
 
-    connect( item,             &DownloadItem::removeMe,
-             ui->downloadList, &DownloadList::removeItem );
+    connect( item,             &TrackRow::removeMe,
+             ui->trackList, &TrackList::removeRow );
 
     // After the list has taken the row out, not before: what is written is
     // what is on screen.
-    connect( item, &DownloadItem::removeMe, this, &MainWindow::savePlaylistOrder );
+    connect( item, &TrackRow::removeMe, this, &MainWindow::savePlaylistOrder );
 
-    connect( item, &DownloadItem::excludeRequested, this, &MainWindow::excludeTrack );
+    connect( item, &TrackRow::excludeRequested, this, &MainWindow::excludeTrack );
 
-    connect( item, &DownloadItem::addToPlaylistRequested, this, &MainWindow::addTrackToPlaylist );
+    connect( item, &TrackRow::addToPlaylistRequested, this, &MainWindow::addTrackToPlaylist );
 
     item->setInCustomPlaylist( openPlaylistIsCustom() );
 
@@ -1628,8 +1628,8 @@ void MainWindow::addPlaylistItem( const PlaylistItemPtr &playlistItem )
     if( playlistItem->track() )
         wi->setData( SongRoles::TrackId, playlistItem->track()->id() );
 
-    ui->downloadList->addItem( wi );
-    ui->downloadList->setItemWidget( wi, item );
+    ui->trackList->addItem( wi );
+    ui->trackList->setItemWidget( wi, item );
     wi->setSizeHint( QSize( Utility::coverSize + Utility::marginSize * 2,
                             Utility::coverSize + Utility::marginSize * 2
                           )
