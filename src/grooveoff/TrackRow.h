@@ -124,6 +124,9 @@ private:
      */
     bool                   m_fullyBuffered = true;
 
+    /** the file whose cover is on screen, so that it is decoded once */
+    QString                m_coverPath;
+
     void setupUi();
     void setupConnections();
     void stateChanged();

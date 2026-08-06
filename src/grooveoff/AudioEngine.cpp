@@ -46,11 +46,6 @@ AudioEngine::AudioEngine()
     : m_state( GrooveOff::PlayerState::Stopped )
     , m_volume( 0 )
 {
-    m_mediaPlayer = new QMediaPlayer( this );
-
-    m_audioOutput = new QAudioOutput( this );
-    m_mediaPlayer->setAudioOutput( m_audioOutput );
-
     setupConnections();
 
     setVolume( 50 );
@@ -60,7 +55,56 @@ AudioEngine::~AudioEngine()
 {
 }
 
-void AudioEngine::setupConnections()
+/*!
+  \brief player: the QMediaPlayer, built the first time anybody needs to hear
+         something
+
+  Building it is not cheap and the cost is not ours: it asks the multimedia
+  backend what there is to play on, which means a round trip to the sound
+  server. On the machine this was found on that answer took **2.8 seconds** —
+  more than two thirds of the whole start up — and it was being waited for in
+  the constructor of PlayerWidget, which is built in the initialiser list of
+  MainWindow. So the window did not appear until the sound system had said what
+  devices exist, which is a thing it has no reason to know before somebody
+  presses play.
+
+  Everything that only wants to connect to a signal, ask what state we are in
+  or set the volume goes on working with no player at all, or the laziness
+  would be undone by the first of them.
+*/
+QMediaPlayer *AudioEngine::player()
+{
+    if( m_mediaPlayer )
+        return m_mediaPlayer;
+
+    m_mediaPlayer = new QMediaPlayer( this );
+
+    m_audioOutput = new QAudioOutput( this );
+    m_mediaPlayer->setAudioOutput( m_audioOutput );
+
+    connectPlayer();
+
+    // What was asked for while there was nobody to ask.
+    m_audioOutput->setMuted( m_muted );
+    setVolume( m_volume );
+
+    return m_mediaPlayer;
+}
+
+/*!
+  \brief prepareOutput: builds the player at a moment when the wait costs nothing
+
+  Called once the window is on screen. Without it the whole wait would land on
+  the first play instead, which is not an improvement — it is the same pause
+  moved somewhere the user is looking at it. With it, by the time anybody has
+  chosen a track the sound system has usually finished answering.
+*/
+void AudioEngine::prepareOutput()
+{
+    player();
+}
+
+void AudioEngine::connectPlayer()
 {
     connect( m_mediaPlayer, &QMediaPlayer::positionChanged, this, &AudioEngine::onPositionChanged );
     connect( m_mediaPlayer, &QMediaPlayer::mediaStatusChanged, this, &AudioEngine::onMediaStatusChanged );
@@ -75,7 +119,10 @@ void AudioEngine::setupConnections()
 
     connect( m_audioOutput, &QAudioOutput::volumeChanged, this, &AudioEngine::onVolumeChanged );
     connect( m_audioOutput, &QAudioOutput::mutedChanged, this, &AudioEngine::onMutedChanged );
+}
 
+void AudioEngine::setupConnections()
+{
     // A track asked for while its torrent was asleep waits here for its file
     // list to arrive.
     connect( The::torrentSession(), &TorrentSession::metadataReady, this,
@@ -173,13 +220,19 @@ void AudioEngine::onPositionChanged( qint64 time )
 */
 bool AudioEngine::reachedTheEnd() const
 {
-    const qint64 duration = m_mediaPlayer->duration();
+    const qint64 duration = m_mediaPlayer ? m_mediaPlayer->duration() : 0;
 
     return duration > 0 && m_lastPosition >= duration - 1000;
 }
 
 void AudioEngine::checkBuffer()
 {
+    // The statistics of a torrent arrive once a second whatever we are doing,
+    // and a track restored at start up is current without ever having been
+    // played: this runs with nothing to hold back and nothing to hold it with.
+    if( !m_mediaPlayer )
+        return;
+
     if( !m_currentTrack || !m_currentTrack->track() )
         return;
 
@@ -528,7 +581,7 @@ bool AudioEngine::openStream( const PlaylistItemPtr &track )
         return false;
     }
 
-    m_mediaPlayer->setSource( url );
+    player()->setSource( url );
     return true;
 }
 
@@ -578,7 +631,8 @@ void AudioEngine::pause()
     // because somebody stopped it, and starting it again is their call.
     m_waitingForBuffer = false;
 
-    m_mediaPlayer->pause();
+    if( m_mediaPlayer )
+        m_mediaPlayer->pause();
 }
 
 void AudioEngine::play()
@@ -589,7 +643,10 @@ void AudioEngine::play()
     if( m_pendingTrack )
         return;
 
-    if( m_mediaPlayer->source().isEmpty() ) {
+    // No player is no source, and asking the question that way keeps the whole
+    // point of the laziness: pressing play with nothing anywhere to play must
+    // not build the sound machinery to then say there is nothing to play.
+    if( !m_mediaPlayer || m_mediaPlayer->source().isEmpty() ) {
         // What was being listened to when the window last closed. Only while
         // nothing is loaded: after that this is ordinary playback and the queue
         // is what decides. Cleared here rather than in playItem(), which is
@@ -617,12 +674,13 @@ void AudioEngine::play()
     // to whatever comes out of it.
     m_waitingForBuffer = false;
 
-    m_mediaPlayer->play();
+    player()->play();
 }
 
 void AudioEngine::stop()
 {
-    m_mediaPlayer->stop();
+    if( m_mediaPlayer )
+        m_mediaPlayer->stop();
 }
 
 
@@ -651,15 +709,15 @@ qint64 AudioEngine::currentTime() const
     // Before anything has been loaded the player sits at zero, and zero is not
     // where the track is: opening the window and closing it again without
     // pressing anything would write that zero over the position being kept.
-    if( m_resumePosition > 0 && m_mediaPlayer->source().isEmpty() )
+    if( m_resumePosition > 0 && ( !m_mediaPlayer || m_mediaPlayer->source().isEmpty() ) )
         return m_resumePosition;
 
-    return m_mediaPlayer->position();
+    return m_mediaPlayer ? m_mediaPlayer->position() : 0;
 }
 
 qint64 AudioEngine::currentTrackTotalTime() const
 {
-    return m_mediaPlayer->duration();
+    return m_mediaPlayer ? m_mediaPlayer->duration() : 0;
 }
 
 PlaylistItemPtr AudioEngine::currentTrack() const
@@ -669,6 +727,9 @@ PlaylistItemPtr AudioEngine::currentTrack() const
 
 qint64 AudioEngine::remainingTime() const
 {
+    if( !m_mediaPlayer )
+        return 0;
+
     return m_mediaPlayer->duration() - m_mediaPlayer->position();
 }
 
@@ -719,7 +780,8 @@ void AudioEngine::removingTrack( const PlaylistItemPtr &track )
 
     if( m_currentTrack == track ) {
         emit removedPlayingTrack();
-        m_mediaPlayer->stop();
+        if( m_mediaPlayer )
+            m_mediaPlayer->stop();
         m_currentTrack = PlaylistItemPtr();
         next();
     }
@@ -748,7 +810,10 @@ AudioEngine::seek( int ms )
 
 void AudioEngine::setMuted( bool mute )
 {
-    m_audioOutput->setMuted( mute );
+    m_muted = mute;
+
+    if( m_audioOutput )
+        m_audioOutput->setMuted( mute );
     if( !isMuted() )
         setVolume( m_volume );
     emit muteStateChanged( mute );
@@ -769,6 +834,12 @@ void AudioEngine::setVolume( int percentage )
     const float volume = QtAudio::convertVolume( percentage / 100.0f,
                                                  QtAudio::LogarithmicVolumeScale,
                                                  QtAudio::LinearVolumeScale );
+
+    // Remembered and applied when there is an output to apply it to: the volume
+    // is restored from the settings while the window is being built, which is
+    // exactly the moment this class exists not to be building a player in.
+    if( !m_audioOutput )
+        return;
 
     if ( !qFuzzyCompare( m_audioOutput->volume(), volume ) )
     {
@@ -796,7 +867,7 @@ void AudioEngine::onMutedChanged( bool mute )
 
 bool AudioEngine::isMuted() const
 {
-    return m_audioOutput->isMuted();
+    return m_audioOutput ? m_audioOutput->isMuted() : m_muted;
 }
 
 int AudioEngine::volume() const

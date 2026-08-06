@@ -525,12 +525,25 @@ void TrackRow::refreshLabels()
 
 void TrackRow::loadCover()
 {
+    const QString path = m_playlistItem->localPath();
+
+    // Once per file, and the picture in a file does not change under us. A row
+    // reads its cover when it is built and again when the tags arrive a moment
+    // later, so eleven rows meant twenty-two decodings of eleven pictures —
+    // half the cost of putting a track list on screen, spent twice on the same
+    // answer. Only a cover that was actually found is remembered: the head of
+    // the file may simply not have arrived yet, and that is a question worth
+    // asking again.
+    if( !m_coverPath.isEmpty() && m_coverPath == path )
+        return;
+
     // The picture frame of the file itself. Covers used to come from a
     // Grooveshark cdn that no longer exists, and there is no other source that
     // would not mean asking a stranger what the user is listening to.
-    const QImage cover = TrackTags::cover( m_playlistItem->localPath() );
+    const QImage cover = TrackTags::cover( path );
 
     if( !cover.isNull() ) {
+        m_coverPath = path;
         ui->coverLabel->setPixmap( QPixmap::fromImage( cover ).scaled( Utility::coverSize,
                                                                        Utility::coverSize,
                                                                        Qt::KeepAspectRatio,

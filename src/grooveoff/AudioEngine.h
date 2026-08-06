@@ -75,6 +75,12 @@ public:
      */
     void setResumePoint( const PlaylistItemPtr &track, qint64 positionMs );
 
+    /**
+     * Builds the player before anybody needs it, from a moment at which
+     * waiting for it costs nothing. See the definition.
+     */
+    void prepareOutput();
+
     void previous();
     void next();
     bool canGoPrevious();
@@ -198,6 +204,9 @@ private Q_SLOTS:
 private:
     AudioEngine();
 
+    /** the player, built on first use; see the definition for why */
+    QMediaPlayer* player();
+
     void setState( GrooveOff::PlayerState state );
 
     /**
@@ -240,7 +249,8 @@ private:
 
     GrooveOff::PlayerState m_state;
 
-    QMediaPlayer* m_mediaPlayer;
+    /** null until somebody needs to hear something: see player() */
+    QMediaPlayer* m_mediaPlayer = nullptr;
 
     /** whether the track had all but finished when the player gave up on it */
     bool reachedTheEnd() const;
@@ -254,11 +264,17 @@ private:
      * from one that simply ran out needs to know how far it got.
      */
     qint64 m_lastPosition = 0;
-    QAudioOutput* m_audioOutput;
+    QAudioOutput* m_audioOutput = nullptr;
 
     int m_volume;
 
+    /** asked for while there was no output to ask; applied when there is one */
+    bool m_muted = false;
+
     void setupConnections();
+
+    /** the half of them that needs a player, hence not done at construction */
+    void connectPlayer();
 };
 
 #endif // AUDIOENGINE_H

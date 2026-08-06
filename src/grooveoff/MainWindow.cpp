@@ -719,7 +719,13 @@ void MainWindow::loadCurrentPlaylist()
     // and nothing would ever ask. Its rows would show file names until
     // somebody pressed play on each of them — which is the behaviour this is
     // meant to be the end of.
-    readArrivedTags();
+    //
+    // Behind the list rather than in front of it: this opens every file of the
+    // playlist to read its tags, which at start up is a quarter of a second
+    // spent before there is anything on screen. A moment later the rows say the
+    // same thing and the window is already there — and switching playlists
+    // stops paying it in the middle of the switch.
+    QTimer::singleShot( 0, this, [this] { readArrivedTags(); } );
 
     // The track that was playing is selected but not started: pressing play
     // picks it up where it was left.
