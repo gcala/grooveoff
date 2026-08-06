@@ -580,6 +580,12 @@ void AudioEngine::play()
             playItem( The::playlist()->item( 0 ) );
             return;
         }
+
+        // Nothing chosen, nothing queued, nothing to resume: pressing play
+        // means "the one I am looking at, from the top", and what that is
+        // belongs to the window.
+        emit nothingToPlay();
+        return;
     }
 
     // Somebody who presses play while we are holding the track back is entitled

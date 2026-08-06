@@ -115,6 +115,18 @@ Q_SIGNALS:
      */
     void trackRequested( const PlaylistItemPtr &track );
 
+    /**
+     * Play was pressed with nothing chosen and nothing left over from last
+     * time: no source, no queue, no track to resume. It is a question rather
+     * than an event, and the answer — the playlist being looked at, from its
+     * first track — is one only the window can give, since what is on screen
+     * is precisely what this class is kept from knowing.
+     *
+     * Without it the button did nothing at all and said nothing either, which
+     * is what the first start of a fresh installation looked like.
+     */
+    void nothingToPlay();
+
     /*
      * Called when slider moved to new position
      */

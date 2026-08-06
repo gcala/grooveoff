@@ -224,6 +224,9 @@ private:
      */
     void rebuildPlayQueue();
 
+    /** starts the playlist on screen from its first track; see the definition */
+    void playShownPlaylist();
+
     /**
      * Builds the queue out of the playlist that was playing when the window
      * last closed and tells the engine where in the track to carry on from, so

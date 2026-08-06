@@ -316,6 +316,8 @@ void MainWindow::setupConnections()
     connect( The::audioEngine(), &AudioEngine::stateChanged, this,
              [this]( GrooveOff::PlayerState ) { updatePlayingMark(); } );
 
+    connect( The::audioEngine(), &AudioEngine::nothingToPlay, this, &MainWindow::playShownPlaylist );
+
     connect( The::torrentSession(), &TorrentSession::metadataReady, this, &MainWindow::onMetadataReady );
     connect( The::torrentSession(), &TorrentSession::statsUpdated,  this, &MainWindow::onTorrentStats );
 
@@ -520,6 +522,30 @@ qint64 MainWindow::shownPlaylistId() const
   track after track, including the ones added while it played — which is the
   whole reason this is a list of its own.
 */
+/*!
+  \brief playShownPlaylist: what pressing play means when nothing is playing
+
+  The playlist being looked at, from its first track. The engine asks rather
+  than decides, because the whole point of the split between the playlist shown
+  and the one playing is that it does not know about the first — and here the
+  two become the same one, which is right: choosing is exactly what this is.
+
+  Nothing else has to be told. The track is not in the queue, so playItem()
+  goes through trackRequested() like any other choice, and that is where the
+  playing playlist, the queue and the mark are all decided.
+
+  A list with no rows leaves the button doing nothing, and there is nothing
+  else it could do: an empty playlist has no first track.
+*/
+void MainWindow::playShownPlaylist()
+{
+    if( ui->trackList->count() == 0 )
+        return;
+
+    if( TrackRow *first = qobject_cast<TrackRow *>( ui->trackList->itemWidget( ui->trackList->item( 0 ) ) ) )
+        The::audioEngine()->playItem( first->playlistItem() );
+}
+
 /*!
   \brief restoreWhatWasPlaying: the queue to walk and the point to carry on from
 
