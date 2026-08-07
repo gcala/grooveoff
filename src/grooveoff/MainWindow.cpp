@@ -129,6 +129,10 @@ MainWindow::MainWindow( QWidget *parent )
                                QMessageBox::Ok );
     }
 
+    // Before the sidebar is built, because the rows of the magnets still being
+    // looked for are laid on top of it from the map this fills.
+    resumeMagnetSearches();
+
     loadPlaylists();
     loadCurrentPlaylist();
     restoreWhatWasPlaying();
@@ -271,6 +275,11 @@ void MainWindow::setupConnections()
     connect( ac->getAction( "actionRenamePlaylist" ), &QAction::triggered, this, &MainWindow::renamePlaylist );
     connect( ac->getAction( "actionChooseTracks" ), &QAction::triggered, this, &MainWindow::chooseTracksAgain );
     connect( ac->getAction( "actionEmptyPlaylist" ), &QAction::triggered, this, &MainWindow::emptyPlaylist );
+    connect( ac->getAction( "actionStopLooking" ), &QAction::triggered, this, [this] {
+        const QString infoHash = ui->playlistList->currentPendingHash();
+        if( !infoHash.isEmpty() )
+            stopLookingFor( infoHash );
+    } );
     connect( ac->getAction( "actionRemovePlaylist" ), &QAction::triggered, this, &MainWindow::removePlaylist );
 
     // currentItemChanged rather than itemClicked, so that the keyboard opens a
@@ -863,13 +872,100 @@ void MainWindow::addTorrentSource( const QString &source )
     }
 
     ui->searchLine->clear();
-    m_awaitingSelection.insert( infoHash );
-    m_playerWidget->showMessage( tr( "Reading the track list…" ) );
+
+    // Pasting again a magnet already being looked for leaves the entry alone.
+    // Replacing it would put the question back on a magnet that has been asked
+    // about and answered, which is the one thing asked() exists to prevent.
+    if( !m_awaitingSelection.contains( infoHash ) ) {
+        PendingAdd pending;
+        pending.name = Utility::magnetDisplayName( source );
+        m_awaitingSelection.insert( infoHash, pending );
+    }
+
+    const PendingAdd pending = m_awaitingSelection.value( infoHash );
 
     // A torrent whose file list is already in hand posts no alert, so the
-    // selector has to be opened here instead of waiting for one.
-    if( The::torrentSession()->hasMetadata( infoHash ) && m_awaitingSelection.remove( infoHash ) )
+    // selector has to be opened here instead of waiting for one. That is every
+    // .torrent file and every magnet of a torrent already awake, and none of
+    // them ever waits for anything.
+    if( The::torrentSession()->hasMetadata( infoHash ) ) {
+        m_awaitingSelection.remove( infoHash );
+        m_playerWidget->showMessage( tr( "Reading the track list…" ) );
         QTimer::singleShot( 0, this, [this, infoHash] { chooseTracksOf( infoHash, true ); } );
+        return;
+    }
+
+    // The wait that follows is up to a minute long, and it goes in the sidebar
+    // rather than in the bar of the player: a message there costs three seconds
+    // and then gives the bar back to whoever is listening, which is the right
+    // shape for acknowledging a gesture and the wrong one for a state. The row
+    // stays for as long as the looking does.
+    //
+    // Unless the sidebar already has a row for this torrent — the same magnet
+    // pasted twice, or one the catalogue knows and nobody has woken. Then there
+    // is already something on screen standing for it.
+    if( !ui->playlistList->hasRow( infoHash ) )
+        ui->playlistList->addPending( infoHash, pendingName( infoHash ) );
+
+    m_playerWidget->showMessage( pending.name.isEmpty()
+                                 ? tr( "Reading the track list…" )
+                                 : tr( "Looking for the track list of «%1»…" ).arg( pending.name ) );
+}
+
+/*!
+  \brief pendingName: what to call a torrent that has not said its name yet
+
+  The magnet's own dn field, which is there nearly always, and something
+  neutral when it is not. Never the info hash: forty hexadecimal digits are an
+  identifier for us and noise for somebody listening to music.
+*/
+QString MainWindow::pendingName( const QString &infoHash ) const
+{
+    const QString name = m_awaitingSelection.value( infoHash ).name;
+
+    return name.isEmpty() ? tr( "New torrent" ) : name;
+}
+
+/*!
+  \brief addPendingRows: puts the provisional rows back after a rebuild
+
+  loadPlaylists() empties the sidebar and fills it from a query, and a magnet
+  still being looked for is in no query — it is in memory and nowhere else. So
+  the rows have to be laid back on top, and they go last: the fallback that
+  opens the first row when nothing is open must keep landing on a real playlist.
+*/
+void MainWindow::addPendingRows()
+{
+    for( auto it = m_awaitingSelection.constBegin(); it != m_awaitingSelection.constEnd(); ++it ) {
+        if( ui->playlistList->hasRow( it.key() ) )
+            continue;
+
+        ui->playlistList->addPending( it.key(), pendingName( it.key() ) );
+        ui->playlistList->setPendingSearching( it.key(), it.value().searching );
+    }
+}
+
+void MainWindow::resumeMagnetSearches()
+{
+    if( !The::database()->isOpen() )
+        return;
+
+    const QList<Catalog::PendingMagnet> magnets = The::catalog()->magnetsWithoutMetadata();
+    for( const Catalog::PendingMagnet &magnet : magnets ) {
+        PendingAdd pending;
+        pending.name = magnet.name;
+
+        // Looking again from scratch, so the led blinks again — a new attempt
+        // is genuinely under way and saying otherwise would be showing the
+        // result of the last one. What does not come back is the question.
+        pending.asked = true;
+
+        m_awaitingSelection.insert( magnet.infoHash, pending );
+
+        QString error;
+        if( !The::torrentSession()->reopen( magnet.infoHash, magnet.magnetUri, &error ) )
+            qDebug() << "GrooveOff ::" << "could not look for" << magnet.name << "again:" << error;
+    }
 }
 
 /*!
@@ -884,6 +980,21 @@ void MainWindow::onMetadataReady( const QString &infoHash, const QString &name, 
     if( !The::database()->isOpen() )
         return;
 
+    // Read and dropped before the sidebar is rebuilt, and both halves of that
+    // matter. The provisional row is put back from this very map, so an entry
+    // left in it would have the row reappear beside the real one and never go
+    // away again; and the answer is needed further down, after the rebuild.
+    const bool wasAdded = m_awaitingSelection.contains( infoHash );
+    if( wasAdded ) {
+        // The question of the timeout, if it is still on screen, is about a
+        // torrent that has just answered. Left there, its «Remove» would throw
+        // away a torrent whose tracks are being chosen in the selector.
+        if( QMessageBox *question = m_awaitingSelection.value( infoHash ).question )
+            question->close();
+
+        m_awaitingSelection.remove( infoHash );
+    }
+
     Catalog *catalog = The::catalog();
 
     catalog->addTorrent( infoHash, The::torrentSession()->magnetUri( infoHash ), name );
@@ -896,7 +1007,7 @@ void MainWindow::onMetadataReady( const QString &infoHash, const QString &name, 
     loadPlaylists();
     refreshRowsOf( infoHash );
 
-    if( !m_awaitingSelection.remove( infoHash ) ) {
+    if( !wasAdded ) {
         // A torrent woken up rather than added: it keeps the playlist it had
         // and does not steal the view.
         //
@@ -1232,13 +1343,35 @@ TrackRow* MainWindow::rowFor( const TrackInfoPtr &track ) const
 
 void MainWindow::onTorrentError( const QString &infoHash, const QString &message )
 {
+    // A magnet whose track list has not come in a minute is a case of its own,
+    // and the entry stays in the map: the timeout is a report and not a giving
+    // up — the torrent is still in the session and still announcing, so the
+    // metadata may yet arrive, and when they do the selector must open. It used
+    // to be dropped right here, which is why a magnet answering at the
+    // ninetieth second left an empty row nobody had asked for.
+    if( m_awaitingSelection.contains( infoHash ) ) {
+        PendingAdd &pending = m_awaitingSelection[ infoHash ];
+        pending.searching = false;
+
+        // The blinking was "I am looking"; stopping it on the red is "I looked
+        // and nobody answered". Nothing is said in the bar: the row says it,
+        // and it goes on saying it.
+        ui->playlistList->setPendingSearching( infoHash, false );
+
+        // Asked once and never again. A magnet somebody chose to keep looking
+        // for comes back at every start and times out at every start, and a
+        // question that reappears every time is one that was not listened to.
+        if( !pending.asked ) {
+            pending.asked = true;
+            askAboutSlowMagnet( infoHash );
+        }
+
+        return;
+    }
+
     // Errors on a torrent are ordinary, not exceptional: a modal in the middle
     // of listening would be the most annoying thing this application could do.
     m_playerWidget->showMessage( message );
-
-    // A torrent that never produced a file list has no selector to open, and
-    // waiting for one would leave the row hanging.
-    m_awaitingSelection.remove( infoHash );
 
     for( int i = 0; i < ui->trackList->count(); ++i ) {
         TrackRow *item = qobject_cast<TrackRow *>( ui->trackList->itemWidget( ui->trackList->item( i ) ) );
@@ -1247,6 +1380,115 @@ void MainWindow::onTorrentError( const QString &infoHash, const QString &message
             item->setTrackState( GrooveOff::ErrorState );
         }
     }
+}
+
+/*!
+  \brief askAboutSlowMagnet: the one question a failed add is worth
+
+  This is the exception to the rule two functions up, and it has a reason: an
+  error arriving on its own is weather, while this is the outcome of something
+  somebody did deliberately a minute ago and is waiting on. An add that goes
+  well opens the selector; one that does not deserves an answer of the same
+  weight.
+
+  Opened rather than executed, which is the whole difference between a question
+  and an interruption. The event loop keeps running: the music goes on, the
+  window answers clicks, another magnet can be pasted, and two of these that
+  come due together stand side by side instead of one on top of the other. And
+  because the row keeps the state whatever happens here, closing the window
+  without choosing loses nothing.
+*/
+void MainWindow::askAboutSlowMagnet( const QString &infoHash )
+{
+    PendingAdd &pending = m_awaitingSelection[ infoHash ];
+    if( pending.question )
+        return;
+
+    const QString name = pendingName( infoHash );
+    const bool anybodyThere = The::torrentSession()->trackerPeers( infoHash ) > 0;
+
+    QMessageBox *box = new QMessageBox( this );
+    box->setAttribute( Qt::WA_DeleteOnClose );
+    box->setIcon( QMessageBox::Warning );
+    box->setWindowTitle( tr( "No answer" ) );
+
+    // Two sentences and not one, because one of them would be false half the
+    // time: a torrent whose tracker knows peers is not one nobody is sharing,
+    // it is one that has not sent its track list yet. Saying the wrong one
+    // sends whoever reads it looking in the wrong place.
+    box->setText( anybodyThere
+                  ? tr( "«%1» has not sent its track list." ).arg( name )
+                  : tr( "Nobody is sharing «%1» at the moment." ).arg( name ) );
+
+    box->setInformativeText( tr( "It can be left in the sidebar and looked for again at every "
+                                 "start: if a source turns up, the track list will arrive on "
+                                 "its own." ) );
+
+    QPushButton *remove = box->addButton( tr( "Remove" ), QMessageBox::DestructiveRole );
+    QPushButton *keep   = box->addButton( tr( "Keep looking" ), QMessageBox::AcceptRole );
+    box->setDefaultButton( keep );
+
+    connect( box, &QDialog::finished, this, [this, infoHash, box, remove] {
+        if( box->clickedButton() == remove ) {
+            stopLookingFor( infoHash );
+            return;
+        }
+
+        // Going on looking is a decision, and a decision that only lasted until
+        // the program was closed would be the button promising more than it
+        // does. So the magnet goes into the catalogue — a row and no playlist,
+        // because there is still nothing to make a playlist of.
+        //
+        // Closing the window without choosing counts as this too: the looking
+        // carries on either way, and it would be strange for the way out that
+        // decides nothing to be the destructive one.
+        keepLookingFor( infoHash );
+    } );
+
+    pending.question = box;
+
+    box->open();
+}
+
+/*!
+  \brief keepLookingFor: makes the waiting outlast the program
+
+  The row of a magnet being looked for lives in memory, which is right while
+  nothing has been decided: pasting one and closing the window a moment later
+  should leave nothing behind. Choosing to go on looking is the moment
+  something is decided, so that is where it is written down.
+
+  A row in torrent and no playlist. There is nothing to make a playlist of —
+  the track list is exactly what has not arrived — and the absence is then what
+  says, at the next start, which magnets to go looking for again.
+*/
+void MainWindow::keepLookingFor( const QString &infoHash )
+{
+    if( !The::database()->isOpen() || !m_awaitingSelection.contains( infoHash ) )
+        return;
+
+    The::catalog()->rememberMagnet( infoHash,
+                                    The::torrentSession()->magnetUri( infoHash ),
+                                    m_awaitingSelection.value( infoHash ).name );
+}
+
+/*!
+  \brief stopLookingFor: gives up on a magnet
+
+  Out of the session, out of the catalogue if it ever got there, and out of the
+  map. There is no playlist and there are no tracks, so the DELETE has nothing
+  to cascade into: giving up on a magnet cannot take anybody's music with it.
+*/
+void MainWindow::stopLookingFor( const QString &infoHash )
+{
+    The::torrentSession()->remove( infoHash, true );
+
+    if( The::database()->isOpen() )
+        The::catalog()->removeTorrent( infoHash );
+
+    m_awaitingSelection.remove( infoHash );
+
+    loadPlaylists();
 }
 
 /*!
@@ -1328,6 +1570,10 @@ void MainWindow::loadPlaylists()
         The::downloadQueue()->setSelection( playlist.infoHash, fileIndexes );
     }
 
+    // The magnets still being looked for are in no query: they live in memory
+    // and the clear() above has just taken their rows away.
+    addPendingRows();
+
     // Whatever has just changed may have given a sleeping torrent something to
     // fetch — a track chosen from the selector reopened on it, most of all —
     // and a torrent the session is not holding fetches nothing however much
@@ -1371,7 +1617,26 @@ void MainWindow::openPlaylist( QListWidgetItem *row )
         return;
 
     const qint64 playlistId = row->data( PlaylistRoles::Id ).toLongLong();
-    if( playlistId <= 0 || playlistId == m_shownPlaylistId )
+
+    // A magnet still being looked for has no tracks to show and no playlist to
+    // point at. Returning here and leaving the list alone would put the
+    // highlight on one row while the tracks of another were on screen, which
+    // reads as a playlist that failed to open — so the list is emptied and the
+    // reason said out loud. releaseRows() lets the rows go without telling the
+    // engine, so a track playing out of the playlist just left goes on playing.
+    if( playlistId <= 0 ) {
+        const QString infoHash = row->data( PlaylistRoles::InfoHash ).toString();
+        if( infoHash.isEmpty() )
+            return;
+
+        ui->trackList->releaseRows();
+        m_shownPlaylistId = 0;
+        m_playerWidget->showMessage( tr( "Still looking for the tracks of «%1»…" )
+                                     .arg( pendingName( infoHash ) ) );
+        return;
+    }
+
+    if( playlistId == m_shownPlaylistId )
         return;
 
     // The row becomes the current one here rather than being assumed to be:
@@ -1611,17 +1876,26 @@ void MainWindow::updatePlaylistActions()
                                                        && playlist.isValid() );
     ac->getAction( "actionEmptyPlaylist" )->setVisible( playlist.kind == PlaylistStore::CustomPlaylist
                                                         && playlist.isValid() );
+
+    // A magnet still being looked for. It answers none of the questions above —
+    // it has no name of its own to change, no tracks to empty and no files to
+    // choose between — and it needs the one thing they cannot offer: a way out
+    // for whoever chose to leave it waiting and has had enough.
+    ac->getAction( "actionStopLooking" )->setVisible( !ui->playlistList->currentPendingHash().isEmpty() );
 }
 
 void MainWindow::showPlaylistMenu( const QPoint &position )
 {
     const qint64 playlistId = ui->playlistList->playlistAt( position );
+    const QString pendingHash = ui->playlistList->pendingAt( position );
 
     // The menu acts on the row it was opened over, so that row becomes the
     // current one first: otherwise a right click somewhere and a Remove would
     // take away whatever happened to be selected before.
     if( playlistId > 0 )
         ui->playlistList->selectPlaylist( playlistId );
+    else if( !pendingHash.isEmpty() )
+        ui->playlistList->selectPending( pendingHash );
 
     // And selecting it is not only about what the entries act on: which of them
     // apply is decided from the current row, so this has to come after. Asked
@@ -1634,11 +1908,12 @@ void MainWindow::showPlaylistMenu( const QPoint &position )
     QMenu menu( this );
     menu.addAction( ac->getAction( "actionNewPlaylist" ) );
 
-    if( playlistId > 0 ) {
+    if( playlistId > 0 || !pendingHash.isEmpty() ) {
         menu.addSeparator();
         menu.addAction( ac->getAction( "actionRenamePlaylist" ) );
         menu.addAction( ac->getAction( "actionChooseTracks" ) );
         menu.addAction( ac->getAction( "actionEmptyPlaylist" ) );
+        menu.addAction( ac->getAction( "actionStopLooking" ) );
         menu.addAction( ac->getAction( "actionRemovePlaylist" ) );
     }
 

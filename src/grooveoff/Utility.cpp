@@ -24,6 +24,8 @@
 #include <QFontMetrics>
 #include <QDir>
 #include <QColor>
+#include <QUrl>
+#include <QUrlQuery>
 
 #include <algorithm>
 
@@ -69,6 +71,24 @@ QList<TrackInfoPtr> Utility::mergedSelection( const QList<TrackInfoPtr> &current
 QString Utility::playlistName( const PlaylistStore::PlaylistInfo &playlist )
 {
     return playlist.pinned ? tr( "To listen" ) : playlist.name;
+}
+
+QString Utility::magnetDisplayName( const QString &magnetUri )
+{
+    const QUrl url( magnetUri );
+    if( url.scheme() != QLatin1String( "magnet" ) )
+        return QString();
+
+    // A magnet has no path: everything it says is in the query, which QUrl
+    // leaves alone for a scheme it knows nothing about.
+    const QString name = QUrlQuery( url.query() ).queryItemValue( QLatin1String( "dn" ),
+                                                                  QUrl::FullyDecoded );
+
+    // Percent decoding is not the whole of it. Magnets are written by hand and
+    // by web pages, and both spell a space as a plus — the form encoding rules,
+    // which QUrlQuery does not apply because a query is not a form. Left as it
+    // is, the row would be called "Camila+Cabello+-+Havana".
+    return QString( name ).replace( QLatin1Char( '+' ), QLatin1Char( ' ' ) ).trimmed();
 }
 
 const int Utility::buttonSize = 24;

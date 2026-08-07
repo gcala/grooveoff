@@ -73,7 +73,19 @@ namespace PlaylistRoles
          * being looked at. Without something on the row saying so, "why is
          * this playing?" has no answer anywhere on screen.
          */
-        Playing
+        Playing,
+
+        /**
+         * Whether the led of a provisional row is blinking, which is to say
+         * whether its track list is still being looked for. Only on the rows a
+         * magnet has just been pasted for — a row of the catalogue is never
+         * searching for anything.
+         *
+         * Told apart from Health because the two answer different questions:
+         * this one says whether the timer owns the led, Health says what the
+         * led currently shows.
+         */
+        Searching
     };
 }
 

@@ -72,6 +72,28 @@ public:
      */
     bool addTorrent( const QString &infoHash, const QString &magnetUri, const QString &name );
 
+    /** a magnet whose track list has never arrived: all that is known of it */
+    struct PendingMagnet
+    {
+        QString infoHash;
+        QString magnetUri;
+        QString name;      /**< from the magnet's own dn field */
+    };
+
+    /**
+     * Records a magnet and **no playlist**, which is the whole difference from
+     * addTorrent(): there is nothing to make a playlist of yet. It is what
+     * makes the waiting outlive the program — somebody asked to go on looking,
+     * and that is a decision worth keeping rather than a torrent worth showing.
+     *
+     * A torrent with no playlist is exactly one whose metadata never came, and
+     * addTorrent() repairs that the moment they do.
+     */
+    bool rememberMagnet( const QString &infoHash, const QString &magnetUri, const QString &name );
+
+    /** those magnets, to be looked for again at the next start */
+    QList<PendingMagnet> magnetsWithoutMetadata() const;
+
     bool isKnown( const QString &infoHash ) const;
     bool isHidden( const QString &infoHash ) const;
     QString magnetUri( const QString &infoHash ) const;

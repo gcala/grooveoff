@@ -56,6 +56,7 @@ private Q_SLOTS:
     void remembersWhatWasPlaying();
     void customPlaylistRemoval();
     void survivesALostPlaybackRow();
+    void aMagnetLeftWaitingIsKnownWithoutBeingAPlaylist();
 
 private:
     Catalog*       m_catalog  = nullptr;
@@ -298,6 +299,63 @@ void DatabaseTest::survivesALostPlaybackRow()
     QCOMPARE( m_playlists->currentPlaylistId(), playlistId );
     QCOMPARE( m_playlists->currentTrackId(), qint64( 0 ) );
     QCOMPARE( m_playlists->currentPositionMs(), qint64( 0 ) );
+}
+
+/*!
+  \brief aMagnetLeftWaitingIsKnownWithoutBeingAPlaylist
+
+  A magnet whose track list never arrived, and which somebody asked to go on
+  looking for. It is a torrent the catalogue knows and nothing else: there is
+  no track list, so there is nothing to make a playlist of, and the missing
+  playlist is precisely what says at the next start which magnets to look for
+  again.
+
+  The last part is the one worth the test. Whenever the metadata do arrive,
+  addTorrent() is the call that follows, and it takes an early way out on a
+  torrent it already knows — so it has to notice that this one has no playlist
+  and make it. Without that the torrent would be known, have tracks, and never
+  appear anywhere at all.
+*/
+void DatabaseTest::aMagnetLeftWaitingIsKnownWithoutBeingAPlaylist()
+{
+    const QString hash = QStringLiteral( "cccccccccccccccccccccccccccccccccccccccc" );
+    const QString magnet = QLatin1String( "magnet:?xt=urn:btih:" ) + hash + QLatin1String( "&dn=Slow+One" );
+
+    const int before = m_playlists->visiblePlaylists().count();
+
+    QVERIFY( m_catalog->rememberMagnet( hash, magnet, QStringLiteral( "Slow One" ) ) );
+
+    QVERIFY( m_catalog->isKnown( hash ) );
+    QCOMPARE( m_playlists->torrentPlaylistId( hash ), qint64( 0 ) );
+
+    // Nothing to show yet, so nothing shows: no playlist, no row.
+    QCOMPARE( m_playlists->visiblePlaylists().count(), before );
+
+    const QList<Catalog::PendingMagnet> waiting = m_catalog->magnetsWithoutMetadata();
+    QCOMPARE( waiting.count(), 1 );
+    QCOMPARE( waiting.first().infoHash, hash );
+    QCOMPARE( waiting.first().magnetUri, magnet );
+    QCOMPARE( waiting.first().name, QStringLiteral( "Slow One" ) );
+
+    // Remembering it twice is one row, not two: the same magnet can be pasted
+    // again while it is still being looked for.
+    QVERIFY( m_catalog->rememberMagnet( hash, magnet, QStringLiteral( "Slow One" ) ) );
+    QCOMPARE( m_catalog->magnetsWithoutMetadata().count(), 1 );
+
+    // The track list turns up at last.
+    QVERIFY( m_catalog->addTorrent( hash, magnet, QStringLiteral( "Slow One" ) ) );
+    QVERIFY( m_playlists->torrentPlaylistId( hash ) > 0 );
+    QCOMPARE( m_playlists->visiblePlaylists().count(), before + 1 );
+    QVERIFY( m_catalog->magnetsWithoutMetadata().isEmpty() );
+
+    // And giving up on one takes nothing with it, there being nothing to take.
+    const QString gone = QStringLiteral( "dddddddddddddddddddddddddddddddddddddddd" );
+    QVERIFY( m_catalog->rememberMagnet( gone, QLatin1String( "magnet:?xt=urn:btih:" ) + gone,
+                                        QStringLiteral( "Never" ) ) );
+    QVERIFY( m_catalog->removeTorrent( gone ) );
+    QVERIFY( !m_catalog->isKnown( gone ) );
+    QVERIFY( m_catalog->magnetsWithoutMetadata().isEmpty() );
+    QCOMPARE( m_playlists->visiblePlaylists().count(), before + 1 );
 }
 
 QTEST_MAIN( DatabaseTest )

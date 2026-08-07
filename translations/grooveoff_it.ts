@@ -75,22 +75,22 @@
         <translation>&amp;Esci</translation>
     </message>
     <message>
-        <location line="+140"/>
+        <location line="+148"/>
         <source>Close GrooveOff</source>
         <translation>Chiudi GrooveOff</translation>
     </message>
     <message>
-        <location line="-133"/>
+        <location line="-141"/>
         <source>&amp;Donate</source>
         <translation>&amp;Dona</translation>
     </message>
     <message>
-        <location line="+134"/>
+        <location line="+142"/>
         <source>Donate with PayPal</source>
         <translation>Dona con PayPal</translation>
     </message>
     <message>
-        <location line="-111"/>
+        <location line="-119"/>
         <source>&amp;Compact Layout</source>
         <translation>Disposizione &amp;compatta</translation>
     </message>
@@ -156,6 +156,11 @@
     </message>
     <message>
         <location line="+7"/>
+        <source>&amp;Stop looking</source>
+        <translation>&amp;Smetti di cercare</translation>
+    </message>
+    <message>
+        <location line="+7"/>
         <source>Re&amp;move playlist...</source>
         <translation>Ri&amp;muovi playlist...</translation>
     </message>
@@ -175,7 +180,7 @@
         <translation>Informazioni su &amp;Qt</translation>
     </message>
     <message>
-        <location line="+33"/>
+        <location line="+34"/>
         <source>Add a .torrent file as a playlist</source>
         <translation>Aggiunge un file .torrent come playlist</translation>
     </message>
@@ -199,6 +204,11 @@
         <translation>Prendi altri brani di questo torrent, o rimetti quello tolto per sbaglio</translation>
     </message>
     <message>
+        <location line="+1"/>
+        <source>Give up on this magnet: nothing of it has been kept</source>
+        <translation>Rinuncia a questo magnet: non ne è stato conservato niente</translation>
+    </message>
+    <message>
         <location line="+18"/>
         <source>&amp;Tracks</source>
         <translation>&amp;Brani</translation>
@@ -213,7 +223,7 @@
         <translation type="vanished">&amp;Scaletta</translation>
     </message>
     <message>
-        <location line="+9"/>
+        <location line="+10"/>
         <source>&amp;File</source>
         <translation>&amp;File</translation>
     </message>
@@ -327,7 +337,7 @@
     </message>
     <message>
         <location line="+36"/>
-        <location filename="../src/grooveoff/ConfigDialog.cpp" line="+111"/>
+        <location filename="../src/grooveoff/ConfigDialog.cpp" line="+154"/>
         <source>Playback</source>
         <translation>Riproduzione</translation>
     </message>
@@ -616,7 +626,7 @@
         <translation>Le playlist non verranno ricordate.</translation>
     </message>
     <message>
-        <location line="+50"/>
+        <location line="+55"/>
         <source>GrooveOff</source>
         <translation>GrooveOff</translation>
     </message>
@@ -627,13 +637,13 @@
     </message>
     <message>
         <location line="+2"/>
-        <location line="+394"/>
-        <location line="+1155"/>
+        <location line="+510"/>
+        <location line="+1465"/>
         <source>Idle</source>
         <translation>Fermo</translation>
     </message>
     <message>
-        <location line="-1540"/>
+        <location line="-1966"/>
         <source>Magnet</source>
         <translation>Magnet</translation>
     </message>
@@ -643,7 +653,7 @@
         <translation>Incolla un magnet e premi invio</translation>
     </message>
     <message>
-        <location line="+528"/>
+        <location line="+656"/>
         <source>Open a torrent</source>
         <translation>Apri un torrent</translation>
     </message>
@@ -653,7 +663,8 @@
         <translation>Torrent (*.torrent)</translation>
     </message>
     <message>
-        <location line="+21"/>
+        <location line="+38"/>
+        <location line="+18"/>
         <source>Reading the track list…</source>
         <translation>Lettura dell’elenco dei brani…</translation>
     </message>
@@ -676,7 +687,7 @@
         </translation>
     </message>
     <message>
-        <location line="+313"/>
+        <location line="+391"/>
         <source>The cache is already empty.</source>
         <translation>La cache è già vuota.</translation>
     </message>
@@ -701,7 +712,17 @@
         <translation>Liberati %1.</translation>
     </message>
     <message>
-        <location line="+56"/>
+        <location line="+102"/>
+        <source>It can be left in the sidebar and looked for again at every start: if a source turns up, the track list will arrive on its own.</source>
+        <translation>Può restare nella barra laterale e viene cercato di nuovo a ogni avvio: se compare una fonte, l’elenco dei brani arriverà da solo.</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Keep looking</source>
+        <translation>Continua a cercare</translation>
+    </message>
+    <message>
+        <location line="+80"/>
         <source>The cache could not be written to:</source>
         <translation>Non è stato possibile scrivere nella cache:</translation>
     </message>
@@ -718,12 +739,55 @@
         </translation>
     </message>
     <message>
-        <location line="-281"/>
+        <location line="-598"/>
+        <source>Looking for the track list of «%1»…</source>
+        <translation>Cerco l’elenco dei brani di «%1»…</translation>
+    </message>
+    <message>
+        <location line="+14"/>
+        <source>New torrent</source>
+        <translation>Nuovo torrent</translation>
+    </message>
+    <message>
+        <location line="+172"/>
         <source>Nothing chosen from «%1»: paste the magnet again to pick tracks.</source>
         <translation>Non hai scelto niente da «%1»: incolla di nuovo il magnet per scegliere dei brani.</translation>
     </message>
     <message>
-        <location line="+406"/>
+        <location line="+315"/>
+        <source>No answer</source>
+        <translation>Nessuna risposta</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>«%1» has not sent its track list.</source>
+        <translation>«%1» non ha mandato il suo elenco dei brani.</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Nobody is sharing «%1» at the moment.</source>
+        <translation>Al momento nessuno sta condividendo «%1».</translation>
+    </message>
+    <message>
+        <source>You can leave it waiting: if a source turns up, the track list will arrive on its own.</source>
+        <translation type="vanished">Puoi lasciarlo in attesa: se compare una fonte, l’elenco dei brani arriverà da solo.</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Remove</source>
+        <translation>Rimuovi</translation>
+    </message>
+    <message>
+        <source>Leave it waiting</source>
+        <translation type="vanished">Lascia in attesa</translation>
+    </message>
+    <message>
+        <location line="+207"/>
+        <source>Still looking for the tracks of «%1»…</source>
+        <translation>Sto ancora cercando i brani di «%1»…</translation>
+    </message>
+    <message>
+        <location line="+30"/>
         <location line="+3"/>
         <source>New playlist</source>
         <translation>Nuova playlist</translation>
@@ -795,7 +859,7 @@
         <translation>Conserva quei brani</translation>
     </message>
     <message numerus="yes">
-        <location line="+103"/>
+        <location line="+128"/>
         <source>%n track(s) added to «%1».</source>
         <translation>
             <numerusform>%n brano aggiunto a «%1».</numerusform>
@@ -842,7 +906,7 @@
         <translation type="vanished">Inizia ricerca</translation>
     </message>
     <message>
-        <location line="-1331"/>
+        <location line="-1757"/>
         <source>Main menu</source>
         <translation>Menu principale</translation>
     </message>
@@ -899,13 +963,13 @@ Select a valid path</source>
 Seleziona un percorso valido</translation>
     </message>
     <message>
-        <location line="+1556"/>
+        <location line="+1982"/>
         <source>Donation to Grooveoff&apos;s author</source>
         <translation>Donazione all&apos;autore di Grooveoff</translation>
     </message>
     <message>
-        <location line="-1616"/>
-        <location line="+1005"/>
+        <location line="-2047"/>
+        <location line="+1382"/>
         <source>Attention</source>
         <translation>Attenzione</translation>
     </message>
@@ -939,7 +1003,7 @@ Selezionare un percorso valido</translation>
         <translation type="vanished">Annullo...</translation>
     </message>
     <message>
-        <location line="+605"/>
+        <location line="+659"/>
         <source>Offline</source>
         <translation>Non in linea</translation>
     </message>
@@ -984,7 +1048,7 @@ Selezionare un percorso valido</translation>
         <translation>Pausa</translation>
     </message>
     <message>
-        <location line="+195"/>
+        <location line="+263"/>
         <source>Play</source>
         <translation>Riproduci</translation>
     </message>
@@ -996,8 +1060,8 @@ Selezionare un percorso valido</translation>
         <translation type="vanished">Da ascoltare</translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/grooveoff/widgets/PlaylistList.cpp" line="+79"/>
-        <location line="+39"/>
+        <location filename="../src/grooveoff/widgets/PlaylistList.cpp" line="+92"/>
+        <location line="+199"/>
         <source>%n track(s)</source>
         <translation>
             <numerusform>%n brano</numerusform>
@@ -1010,15 +1074,27 @@ Selezionare un percorso valido</translation>
         <translation>Addormentato: si sveglia alla prima riproduzione</translation>
     </message>
     <message numerus="yes">
-        <location line="+2"/>
+        <location line="-87"/>
+        <location line="+89"/>
         <source>%n peer(s)</source>
         <translation>
             <numerusform>%n peer</numerusform>
             <numerusform>%n peer</numerusform>
         </translation>
     </message>
-    <message numerus="yes">
+    <message>
+        <location line="-93"/>
+        <source>Looking for the track list…</source>
+        <translation>Cerco l’elenco dei brani…</translation>
+    </message>
+    <message>
         <location line="+1"/>
+        <source>The track list has not arrived</source>
+        <translation>L’elenco dei brani non è arrivato</translation>
+    </message>
+    <message numerus="yes">
+        <location line="+4"/>
+        <location line="+89"/>
         <source>%n seed(s)</source>
         <translation>
             <numerusform>%n seed</numerusform>
@@ -1026,7 +1102,8 @@ Selezionare un percorso valido</translation>
         </translation>
     </message>
     <message numerus="yes">
-        <location line="+7"/>
+        <location line="-84"/>
+        <location line="+91"/>
         <source>%n peer(s) from the tracker</source>
         <translation>
             <numerusform>%n peer dal tracker</numerusform>
@@ -1050,7 +1127,7 @@ Selezionare un percorso valido</translation>
 <context>
     <name>TorrentSession</name>
     <message>
-        <location filename="../src/torrent/TorrentSession.cpp" line="+721"/>
+        <location filename="../src/torrent/TorrentSession.cpp" line="+722"/>
         <location line="+35"/>
         <location line="+41"/>
         <source>The torrent session is not running.</source>
@@ -1077,7 +1154,7 @@ Selezionare un percorso valido</translation>
         <translation>Per questo torrent non ci sono né dati di ripresa né un magnet.</translation>
     </message>
     <message>
-        <location line="+311"/>
+        <location line="+387"/>
         <source>Could not get the track list of this torrent.</source>
         <translation>Non è stato possibile ottenere l’elenco dei brani di questo torrent.</translation>
     </message>
@@ -1263,7 +1340,7 @@ Selezionare un percorso valido</translation>
 <context>
     <name>Utility</name>
     <message>
-        <location filename="../src/grooveoff/Utility.cpp" line="+71"/>
+        <location filename="../src/grooveoff/Utility.cpp" line="+73"/>
         <source>To listen</source>
         <translation>Da ascoltare</translation>
     </message>

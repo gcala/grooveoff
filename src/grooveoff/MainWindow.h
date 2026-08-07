@@ -25,6 +25,7 @@
 // Dbus & remote
 #include "dbus/mpris.h"
 
+#include <QHash>
 #include <QPointer>
 #include <QMainWindow>
 #include <QSet>
@@ -36,6 +37,7 @@ class QPushButton;
 class QLineEdit;
 class QListWidget;
 class QListWidgetItem;
+class QMessageBox;
 class QSplitter;
 class QTimer;
 class QBoxLayout;
@@ -296,11 +298,67 @@ private:
     /** whether the open playlist is one the user built by hand */
     bool openPlaylistIsCustom() const;
 
+    /** what is known about a magnet while its track list is still being looked for */
+    struct PendingAdd
+    {
+        /** what the magnet calls itself, which is all there is to go on until the metadata land */
+        QString name;
+
+        /** whether the led is still blinking: the sixty seconds turn it off */
+        bool searching = true;
+
+        /**
+         * Whether the question has already been put. Kept apart from the
+         * blinking because a magnet somebody chose to go on looking for is
+         * looked for again at every start, and asking again each time would be
+         * asking a question that has been answered.
+         */
+        bool asked = false;
+
+        /**
+         * The question asked at that point, while it is still on screen. Held
+         * so that it can be taken away: metadata arriving late open the
+         * selector, and a stale «Remove» left behind it would throw away a
+         * torrent whose tracks have just been chosen.
+         */
+        QPointer<QMessageBox> question;
+    };
+
     /**
      * Torrents the user has just added by hand. Only those open the selector:
      * one woken up to play a track must not stop to ask questions.
+     *
+     * An entry outlives the metadata timeout on purpose. The torrent stays in
+     * the session and goes on announcing, so its track list may still arrive —
+     * and dropping the entry at the timeout, which is what used to happen, left
+     * whoever pasted the magnet with an empty unexplained row instead of the
+     * selector they asked for.
      */
-    QSet<QString> m_awaitingSelection;
+    QHash<QString, PendingAdd> m_awaitingSelection;
+
+    /** what to call a torrent whose metadata have not arrived: its magnet's name, or a stand-in */
+    QString pendingName( const QString &infoHash ) const;
+
+    /** the row of a magnet still being looked for, put back after every rebuild */
+    void addPendingRows();
+
+    /**
+     * Picks up the magnets somebody chose to go on looking for and starts
+     * looking again. They are the ones with a row in the catalogue and no
+     * playlist, which is what a torrent whose metadata never arrived looks
+     * like; nothing is asked about them, since the question was answered the
+     * day they were left waiting.
+     */
+    void resumeMagnetSearches();
+
+    /** the question at the end of the wait, asked without blocking anything */
+    void askAboutSlowMagnet( const QString &infoHash );
+
+    /** writes the magnet down so the looking survives the program being closed */
+    void keepLookingFor( const QString &infoHash );
+
+    /** gives up on a magnet: out of the session, off the sidebar, nothing left behind */
+    void stopLookingFor( const QString &infoHash );
 
     /** turns a buffering that never ends into a row that says it is waiting */
     QTimer *m_stallTimer;

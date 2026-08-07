@@ -92,6 +92,18 @@ public:
     static QList<TrackInfoPtr> mergedSelection( const QList<TrackInfoPtr> &current,
                                                 const QList<TrackInfoPtr> &chosen );
 
+    /**
+     * The name a magnet carries for itself, from its @c dn field, or an empty
+     * string when it has none. It is the only thing known about a torrent
+     * before its metadata arrive, and that wait is up to a minute long, so it
+     * is what a row can be called meanwhile.
+     *
+     * Here rather than in the window for the reason the two functions above it
+     * are: it is a question that can be asked without a window, hence one that
+     * can be tested.
+     */
+    static QString magnetDisplayName( const QString &magnetUri );
+
     static QString elidedText( const QString &text, const Qt::TextElideMode &elideMode, const int &width, const QFont::Weight &weight );
 
     static QFont font( const QFont::Weight &weight = QFont::Normal, const int &delta = 0 );

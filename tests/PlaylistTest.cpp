@@ -17,6 +17,7 @@
 */
 
 
+#include "GrooveOffNamespace.h"
 #include "Roles.h"
 #include "Utility.h"
 #include "widgets/PlaylistList.h"
@@ -63,6 +64,10 @@ private Q_SLOTS:
 
     void refusesTracksDroppedOnATorrentPlaylist();
     void acceptsTracksDroppedOnACustomPlaylist();
+
+    void readsTheNameAMagnetGivesItself();
+    void showsAMagnetStillBeingLookedFor();
+    void stopsBlinkingWhenTheLookingIsOver();
 
     void reordersRowsWithoutLosingOne();
     void reordersRowsMovedDownwards();
@@ -485,6 +490,131 @@ void PlaylistTest::acceptsTracksDroppedOnACustomPlaylist()
     QMimeData foreign;
     foreign.setText( QStringLiteral( "something else entirely" ) );
     QVERIFY( GrooveOffMime::decodeTracks( &foreign ).isEmpty() );
+
+    delete sidebar;
+}
+
+/*!
+  \brief readsTheNameAMagnetGivesItself
+
+  It is the only thing known about a torrent for up to a minute, so the row
+  waiting for its track list is called by it. The plus signs are the part worth
+  a test: magnets are written by hand and by web pages, both spell a space that
+  way, and QUrlQuery does not undo it — the row would be called
+  "Camila+Cabello+-+Havana" and nothing anywhere would say why.
+*/
+void PlaylistTest::readsTheNameAMagnetGivesItself()
+{
+    QCOMPARE( Utility::magnetDisplayName( QStringLiteral(
+                  "magnet:?xt=urn:btih:9D4A9495BE35D97B13E60D143F37CC38378D8233"
+                  "&dn=Camila+Cabello+-+Havana&tr=udp%3A%2F%2Ftracker.org%3A80" ) ),
+              QStringLiteral( "Camila Cabello - Havana" ) );
+
+    // Percent encoding is undone as well, and the two live side by side.
+    QCOMPARE( Utility::magnetDisplayName( QStringLiteral(
+                  "magnet:?xt=urn:btih:0123456789abcdef&dn=Bach%3A+Cantate" ) ),
+              QStringLiteral( "Bach: Cantate" ) );
+
+    // A magnet without a name, which is legal and happens.
+    QVERIFY( Utility::magnetDisplayName( QStringLiteral(
+                 "magnet:?xt=urn:btih:0123456789abcdef" ) ).isEmpty() );
+
+    // And something that is not a magnet at all: the caller falls back rather
+    // than showing whatever this made of it.
+    QVERIFY( Utility::magnetDisplayName( QStringLiteral( "/home/somebody/album.torrent" ) ).isEmpty() );
+    QVERIFY( Utility::magnetDisplayName( QString() ).isEmpty() );
+}
+
+/*!
+  \brief showsAMagnetStillBeingLookedFor
+
+  The row exists before the catalogue knows anything, which is the whole point:
+  the wait for a track list is up to a minute long and used to happen with
+  nothing on screen saying so.
+*/
+void PlaylistTest::showsAMagnetStillBeingLookedFor()
+{
+    PlaylistList *sidebar = buildSidebar( 1, 2 );
+
+    const QString hash = QStringLiteral( "1111111111111111111111111111111111111111" );
+    sidebar->addPending( hash, QStringLiteral( "Camila Cabello - Havana" ) );
+
+    QCOMPARE( sidebar->count(), 3 );
+
+    QListWidgetItem *row = sidebar->item( 2 );
+    QCOMPARE( row->text(), QStringLiteral( "Camila Cabello - Havana" ) );
+
+    // No id, because there is no playlist to point at. Everything that asks a
+    // row which playlist it is gets 0 and steps aside.
+    QCOMPARE( row->data( PlaylistRoles::Id ).toLongLong(), qint64( 0 ) );
+    QVERIFY( row->data( PlaylistRoles::Searching ).toBool() );
+    QVERIFY( !row->toolTip().isEmpty() );
+
+    // Found by position like any other row, but through the door meant for it.
+    const QPoint centre = sidebar->visualItemRect( row ).center();
+    QCOMPARE( sidebar->pendingAt( centre ), hash );
+    QCOMPARE( sidebar->playlistAt( centre ), qint64( 0 ) );
+    QVERIFY( sidebar->pendingAt( sidebar->visualItemRect( sidebar->item( 0 ) ).center() ).isEmpty() );
+
+    // The same magnet pasted twice is one row, not two. So is a magnet whose
+    // torrent the catalogue already has: something on screen already stands
+    // for it, and a second row would be the sidebar disagreeing with itself.
+    sidebar->addPending( hash, QStringLiteral( "Camila Cabello - Havana" ) );
+    QCOMPARE( sidebar->count(), 3 );
+    QVERIFY( sidebar->hasRow( hash ) );
+    QVERIFY( !sidebar->hasRow( QStringLiteral( "2222222222222222222222222222222222222222" ) ) );
+
+    // Nothing open must not land on it either. Provisional rows carry an id of
+    // 0, and selectPlaylist() used to have no reason to guard against that.
+    sidebar->setCurrentRow( 0 );
+    sidebar->selectPlaylist( 0 );
+    QCOMPARE( sidebar->currentRow(), 0 );
+
+    sidebar->selectPending( hash );
+    QCOMPARE( sidebar->currentPendingHash(), hash );
+
+    sidebar->setCurrentRow( 0 );
+    QVERIFY( sidebar->currentPendingHash().isEmpty() );
+
+    delete sidebar;
+}
+
+/*!
+  \brief stopsBlinkingWhenTheLookingIsOver
+
+  The blinking is what tells a row that is waiting apart from one that is
+  asleep, and the two static states were both already taken. It is driven by a
+  timer flipping the Health role, so what can be asked here is whether the led
+  actually changes on its own — and, just as important, whether it stops.
+*/
+void PlaylistTest::stopsBlinkingWhenTheLookingIsOver()
+{
+    PlaylistList *sidebar = buildSidebar( 1, 2 );
+
+    const QString hash = QStringLiteral( "3333333333333333333333333333333333333333" );
+    sidebar->addPending( hash, QStringLiteral( "Something slow" ) );
+
+    QListWidgetItem *row = sidebar->item( 2 );
+    const int first = row->data( PlaylistRoles::Health ).toInt();
+
+    QTRY_VERIFY_WITH_TIMEOUT( row->data( PlaylistRoles::Health ).toInt() != first, 3000 );
+
+    const QString searchingTip = row->toolTip();
+
+    sidebar->setPendingSearching( hash, false );
+
+    QVERIFY( !row->data( PlaylistRoles::Searching ).toBool() );
+    QCOMPARE( row->data( PlaylistRoles::Health ).toInt(), static_cast<int>( GrooveOff::SilentSource ) );
+
+    // What it says changes with it: "I am looking" and "I looked and nobody
+    // answered" are different things to be told.
+    QVERIFY( row->toolTip() != searchingTip );
+
+    // And it stays there. A timer left ticking over a sidebar where nothing is
+    // waiting would go on for as long as the program is open, and the led would
+    // never settle on the answer it has.
+    QTest::qWait( 1500 );
+    QCOMPARE( row->data( PlaylistRoles::Health ).toInt(), static_cast<int>( GrooveOff::SilentSource ) );
 
     delete sidebar;
 }

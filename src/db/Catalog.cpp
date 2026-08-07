@@ -99,8 +99,19 @@ bool Catalog::addTorrent( const QString &infoHash, const QString &magnetUri, con
         return false;
 
     if( isKnown( infoHash ) ) {
-        // Already in the catalogue. Bringing it back into sight is all that is
-        // needed: its tracks, exclusions and playlist are still there.
+        // Already in the catalogue. Bringing it back into sight is usually all
+        // that is needed: its tracks, exclusions and playlist are still there.
+        //
+        // Usually, and not always. A magnet left waiting by rememberMagnet()
+        // has a row here and no playlist, because there was nothing to make one
+        // of; this is the call that arrives when its track list finally does,
+        // so it is where the playlist has to appear. Without it the torrent
+        // would be known, have tracks, and never show up anywhere.
+        if( The::playlistStore()->torrentPlaylistId( infoHash ) <= 0
+            && The::playlistStore()->createTorrentPlaylist( infoHash, name ) <= 0 ) {
+            return false;
+        }
+
         return isHidden( infoHash ) ? unhideTorrent( infoHash ) : true;
     }
 
@@ -129,6 +140,54 @@ bool Catalog::addTorrent( const QString &infoHash, const QString &magnetUri, con
     }
 
     return database->commit();
+}
+
+bool Catalog::rememberMagnet( const QString &infoHash, const QString &magnetUri, const QString &name )
+{
+    Database *database = The::database();
+
+    if( !database->isOpen() || infoHash.isEmpty() )
+        return false;
+
+    if( isKnown( infoHash ) )
+        return true;
+
+    QSqlQuery query( database->connection() );
+    query.prepare( QStringLiteral( "INSERT INTO torrent ( info_hash, magnet, name, added_at, last_access )"
+                                   " VALUES ( :hash, :magnet, :name, :now, :now )" ) );
+    query.bindValue( QStringLiteral( ":hash" ), infoHash );
+    query.bindValue( QStringLiteral( ":magnet" ), magnetUri );
+    query.bindValue( QStringLiteral( ":name" ), name );
+    query.bindValue( QStringLiteral( ":now" ), now() );
+
+    return query.exec() ? true : reportFailure( query );
+}
+
+QList<Catalog::PendingMagnet> Catalog::magnetsWithoutMetadata() const
+{
+    QList<PendingMagnet> magnets;
+
+    QSqlQuery query( The::database()->connection() );
+
+    // No playlist is the mark of it. Every torrent whose metadata arrived got
+    // one, and addTorrent() makes sure of that even for the ones that came in
+    // through here, so the absence cannot mean anything else.
+    if( !query.exec( QStringLiteral( "SELECT t.info_hash, t.magnet, t.name FROM torrent t"
+                                     " LEFT JOIN playlist p ON p.info_hash = t.info_hash"
+                                     " WHERE p.id IS NULL ORDER BY t.added_at" ) ) ) {
+        reportFailure( query );
+        return magnets;
+    }
+
+    while( query.next() ) {
+        PendingMagnet magnet;
+        magnet.infoHash  = query.value( 0 ).toString();
+        magnet.magnetUri = query.value( 1 ).toString();
+        magnet.name      = query.value( 2 ).toString();
+        magnets << magnet;
+    }
+
+    return magnets;
 }
 
 bool Catalog::isKnown( const QString &infoHash ) const

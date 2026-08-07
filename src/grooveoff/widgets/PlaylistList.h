@@ -25,6 +25,8 @@
 #include <QListWidget>
 #include <QPair>
 
+class QTimer;
+
 /**
   * @class PlaylistList
   * @short The sidebar: every playlist worth showing, of both kinds.
@@ -57,6 +59,30 @@ public:
      */
     void addPlaylist( const PlaylistStore::PlaylistInfo &playlist );
 
+    /**
+     * A row for a magnet whose track list has not arrived yet: it exists before
+     * the catalogue knows anything, and it is the whole point — that wait is up
+     * to a minute long, and without a row it happens with nothing on screen
+     * saying so.
+     *
+     * Provisional in the strict sense. Nothing of it is written anywhere, it
+     * carries no playlist id, and it goes away either replaced by the real row
+     * or dropped by whoever gave up. @p name is what the magnet calls itself.
+     */
+    void addPending( const QString &infoHash, const QString &name );
+
+    /** whether any row at all, provisional or real, already stands for this torrent */
+    bool hasRow( const QString &infoHash ) const;
+
+    /** stops the blinking of a provisional row: the looking is over, one way or another */
+    void setPendingSearching( const QString &infoHash, bool searching );
+
+    /** the torrent of the provisional row under the cursor, or nothing */
+    QString pendingAt( const QPoint &position ) const;
+
+    /** and of the one selected now, which is what a menu acts on */
+    QString currentPendingHash() const;
+
     /** marks the row the music is coming from, and unmarks whatever had it */
     void setPlayingPlaylist( qint64 playlistId );
 
@@ -67,6 +93,9 @@ public:
 
     /** brings the row of this playlist forward without asking to open it again */
     void selectPlaylist( qint64 playlistId );
+
+    /** the same for a provisional row, which has no id to be found by */
+    void selectPending( const QString &infoHash );
 
     /**
      * Whether tracks may be dropped on this playlist. Told apart from the drag
@@ -88,8 +117,28 @@ private:
     /** the led of one torrent, and the tooltip that spells out what it means */
     void updateHealth( const QString &infoHash );
 
+    /** a row put there by a paste rather than read out of the catalogue */
+    static bool isPending( const QListWidgetItem *row );
+
+    /** what a provisional row's led and tooltip say, which is not what a real one's do */
+    void updatePendingRow( QListWidgetItem *row );
+
+    /**
+     * One tick of the blinking. It flips the Health role of every row still
+     * looking, which is why the delegate needs to know nothing about any of
+     * this: it draws the led the role names, and it has both of them cached
+     * already.
+     */
+    void blink();
+
+    /** starts the blinking when something is looking and stops it when nothing is */
+    void updateBlinking();
+
     /** peers and seeds of every torrent the session is holding */
     QHash<QString, QPair<int, int>> m_peers;
+
+    QTimer *m_blinkTimer;
+    bool    m_blinkOn = false;
 };
 
 #endif // PLAYLISTLIST_H
