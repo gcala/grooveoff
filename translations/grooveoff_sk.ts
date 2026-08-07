@@ -25,16 +25,29 @@
     </message>
     <message>
         <location line="+4"/>
-        <source>Offline Grooveshark.com music.</source>
-        <translation>Hudba z Grooveshark.com offline.</translation>
+        <source>Music streaming from torrents.</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+1"/>
-        <source>GrooveOff can access the huge Grooveshark database through its &lt;a href=&quot;http://developers.grooveshark.com/docs/public_api/v3/&quot;&gt;public api&lt;/a&gt;.</source>
-        <translation>GrooveOff môže pristupovať k obrovskej Grooveshark databáze cez jej &lt;a href=&quot;http://developers.grooveshark.com/docs/public_api/v3/&quot;&gt;verejné api&lt;/a&gt;.</translation>
+        <source>Paste a magnet link or open a .torrent file and it becomes a playlist.</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+4"/>
+        <location line="+5"/>
+        <source>GrooveOff provides no content and is not affiliated with any tracker, indexer or torrent site. The end user is solely responsible for the sources used and for complying with the law where they are. The author accepts no liability for any use made of this application. Support the artists you like by buying their music.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Offline Grooveshark.com music.</source>
+        <translation type="vanished">Hudba z Grooveshark.com offline.</translation>
+    </message>
+    <message>
+        <source>GrooveOff can access the huge Grooveshark database through its &lt;a href=&quot;http://developers.grooveshark.com/docs/public_api/v3/&quot;&gt;public api&lt;/a&gt;.</source>
+        <translation type="vanished">GrooveOff môže pristupovať k obrovskej Grooveshark databáze cez jej &lt;a href=&quot;http://developers.grooveshark.com/docs/public_api/v3/&quot;&gt;verejné api&lt;/a&gt;.</translation>
+    </message>
+    <message>
+        <location line="-3"/>
         <source>Author:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -52,17 +65,16 @@
         <translation type="vanished">&lt;b&gt;Licencia&lt;/b&gt;: </translation>
     </message>
     <message>
-        <location line="+2"/>
         <source>GrooveOff is not affiliated with Grooveshark™ and has not been reviewed or officially approved by Grooveshark.com. The author is not responsible for any violations this application does to Grooveshark&apos;s TOS. The author is not related to Grooveshark™ in any way! Support the Artists You Like by Buying Their Music.</source>
-        <translation>GrooveOff nie je spojený s Grooveshark™ a nebol preskúmaný a oficiálne schválený Grooveshark.com. Autor nie je zodpovedný za akékoľvek prestúpenia pravidiel, ktorá tento program robí T.O.S. Groovesharku. Autor nie je s Grooveshark™ spojený žiadnym spôsobom! Umelcov, ktorí se vám páčia, podporte zakúpením ich hudby.</translation>
+        <translation type="vanished">GrooveOff nie je spojený s Grooveshark™ a nebol preskúmaný a oficiálne schválený Grooveshark.com. Autor nie je zodpovedný za akékoľvek prestúpenia pravidiel, ktorá tento program robí T.O.S. Groovesharku. Autor nie je s Grooveshark™ spojený žiadnym spôsobom! Umelcov, ktorí se vám páčia, podporte zakúpením ich hudby.</translation>
     </message>
     <message>
-        <location line="+21"/>
+        <location line="+24"/>
         <source>Donation to Grooveoff&apos;s author</source>
         <translation>Prispieť autorovi Grooveoff</translation>
     </message>
     <message>
-        <location line="-22"/>
+        <location line="-23"/>
         <source>Disclaimer:</source>
         <translation>Zrieknutie:</translation>
     </message>

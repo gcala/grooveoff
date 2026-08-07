@@ -83,18 +83,17 @@ void AboutDialog::setupTextElements()
     
     ui->descriptionLabel->setWordWrap( true );
     ui->descriptionLabel->setTextFormat( Qt::RichText );
-    ui->descriptionLabel->setText(tr( "Offline Grooveshark.com music." ) + QLatin1String( "<br><br>" ) +
-                                  tr( "GrooveOff can access the huge Grooveshark database through its "
-                                          "<a href=\"http://developers.grooveshark.com/docs/public_api/v3/\">"
-                                          "public api"
-                                          "</a>." ) + QLatin1String( "<br><br>" ) +
-                                  QLatin1String( "<b>" ) + tr( "Author:" ) + QLatin1String( "</b> Giuseppe Calà &lt;<a href=\"mailto:jiveaxe@gmail.com\">jiveaxe@gmail.com</a>&gt;<br><br>" ) +
-                                  QLatin1String( "<b>" ) + tr( "License:" ) + QLatin1String( "</b> GPLv3+<br><br>" ) +
-                                  QLatin1String( "<b>" ) + tr( "Disclaimer:" ) + QLatin1String( "</b> " ) +
-                                  tr( "GrooveOff is not affiliated with Grooveshark™ and has not been reviewed or "
-                                          "officially approved by Grooveshark.com. The author is not responsible for any "
-                                          "violations this application does to Grooveshark's TOS. The author is not related "
-                                          "to Grooveshark™ in any way! Support the Artists You Like by Buying Their Music." ) );
+    ui->descriptionLabel->setText( tr( "Music streaming from torrents." ) + QLatin1String( "<br><br>" ) +
+                                   tr( "Paste a magnet link or open a .torrent file and it becomes a playlist." )
+                                       + QLatin1String( "<br><br>" ) +
+                                   QLatin1String( "<b>" ) + tr( "Author:" ) + QStringLiteral( "</b> Giuseppe Calà &lt;<a href=\"mailto:gcala@mailbox.org\">gcala@mailbox.org</a>&gt;<br><br>" ) +
+                                   QLatin1String( "<b>" ) + tr( "License:" ) + QLatin1String( "</b> GPLv3+<br><br>" ) +
+                                   QLatin1String( "<b>" ) + tr( "Disclaimer:" ) + QLatin1String( "</b> " ) +
+                                   tr( "GrooveOff provides no content and is not affiliated with any tracker, "
+                                       "indexer or torrent site. The end user is solely responsible for the "
+                                       "sources used and for complying with the law where they are. The author "
+                                       "accepts no liability for any use made of this application. Support the "
+                                       "artists you like by buying their music." ) );
 }
 
 

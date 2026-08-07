@@ -25,16 +25,29 @@
     </message>
     <message>
         <location line="+4"/>
-        <source>Offline Grooveshark.com music.</source>
-        <translation>Μουσική εκτός σύνδεσης από το Grooveshark.com.</translation>
+        <source>Music streaming from torrents.</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+1"/>
-        <source>GrooveOff can access the huge Grooveshark database through its &lt;a href=&quot;http://developers.grooveshark.com/docs/public_api/v3/&quot;&gt;public api&lt;/a&gt;.</source>
-        <translation>Το GrooveOff μπορεί να έχει πρόσβαση στην τεράστια βάση δεδομένων του Grooveshark μέσω του δημοσίου του &lt;a href=&quot;http://developers.grooveshark.com/docs/public_api/v3/&quot;&gt; api&lt;/a&gt;.</translation>
+        <source>Paste a magnet link or open a .torrent file and it becomes a playlist.</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+4"/>
+        <location line="+5"/>
+        <source>GrooveOff provides no content and is not affiliated with any tracker, indexer or torrent site. The end user is solely responsible for the sources used and for complying with the law where they are. The author accepts no liability for any use made of this application. Support the artists you like by buying their music.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Offline Grooveshark.com music.</source>
+        <translation type="vanished">Μουσική εκτός σύνδεσης από το Grooveshark.com.</translation>
+    </message>
+    <message>
+        <source>GrooveOff can access the huge Grooveshark database through its &lt;a href=&quot;http://developers.grooveshark.com/docs/public_api/v3/&quot;&gt;public api&lt;/a&gt;.</source>
+        <translation type="vanished">Το GrooveOff μπορεί να έχει πρόσβαση στην τεράστια βάση δεδομένων του Grooveshark μέσω του δημοσίου του &lt;a href=&quot;http://developers.grooveshark.com/docs/public_api/v3/&quot;&gt; api&lt;/a&gt;.</translation>
+    </message>
+    <message>
+        <location line="-3"/>
         <source>Author:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -52,17 +65,16 @@
         <translation type="vanished">&lt;b&gt;Άδεια χρήσης&lt;/b&gt;: </translation>
     </message>
     <message>
-        <location line="+2"/>
         <source>GrooveOff is not affiliated with Grooveshark™ and has not been reviewed or officially approved by Grooveshark.com. The author is not responsible for any violations this application does to Grooveshark&apos;s TOS. The author is not related to Grooveshark™ in any way! Support the Artists You Like by Buying Their Music.</source>
-        <translation>Το GrooveOff δεν έχει καμία σύνδεση με το Grooveshark™ και δεν έχει αναθεωρηθεί ή εγκριθεί επίσημα από το Grooveshark.com. Ο συγγραφέας δεν είναι υπεύθυνος για οποιαδήποτε παραβίαση κάνει αυτή η εφαρμογή στους όρους παροχής υπηρεσιών του Grooveshark. Ο συγγραφέας δεν έχει καμία σχέση με κανέναν τρόπο με το Grooveshark™ ! Υποστηρίξτε τους αγαπημένους σας καλλιτέχνες αγοράζοντας τη μουσική τους.</translation>
+        <translation type="vanished">Το GrooveOff δεν έχει καμία σύνδεση με το Grooveshark™ και δεν έχει αναθεωρηθεί ή εγκριθεί επίσημα από το Grooveshark.com. Ο συγγραφέας δεν είναι υπεύθυνος για οποιαδήποτε παραβίαση κάνει αυτή η εφαρμογή στους όρους παροχής υπηρεσιών του Grooveshark. Ο συγγραφέας δεν έχει καμία σχέση με κανέναν τρόπο με το Grooveshark™ ! Υποστηρίξτε τους αγαπημένους σας καλλιτέχνες αγοράζοντας τη μουσική τους.</translation>
     </message>
     <message>
-        <location line="+21"/>
+        <location line="+24"/>
         <source>Donation to Grooveoff&apos;s author</source>
         <translation>Κάντε μια δωρεά στον συγγραφέα του Grooveoff</translation>
     </message>
     <message>
-        <location line="-22"/>
+        <location line="-23"/>
         <source>Disclaimer:</source>
         <translation>Αποποίηση ευθύνης:</translation>
     </message>

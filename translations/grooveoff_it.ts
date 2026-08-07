@@ -25,16 +25,49 @@
     </message>
     <message>
         <location line="+4"/>
-        <source>Offline Grooveshark.com music.</source>
-        <translation>Salva la musica di Grooveshark.com.</translation>
+        <source>Music streaming from torrents.</source>
+        <translation>Musica in streaming dai torrent.</translation>
     </message>
     <message>
         <location line="+1"/>
-        <source>GrooveOff can access the huge Grooveshark database through its &lt;a href=&quot;http://developers.grooveshark.com/docs/public_api/v3/&quot;&gt;public api&lt;/a&gt;.</source>
-        <translation>GrooveOff accede all&apos;enorme database di Grooveshark attaverso la sua &lt;a href=&quot;http://developers.grooveshark.com/docs/public_api/v3/&quot;&gt;api pubblica&lt;/a&gt;.</translation>
+        <source>Paste a magnet link or open a .torrent file and it becomes a playlist.</source>
+        <translation>Incolla un magnet o apri un file .torrent e diventa una playlist.</translation>
     </message>
     <message>
-        <location line="+4"/>
+        <location line="+5"/>
+        <source>GrooveOff provides no content and is not affiliated with any tracker, indexer or torrent site. The end user is solely responsible for the sources used and for complying with the law where they are. The author accepts no liability for any use made of this application. Support the artists you like by buying their music.</source>
+        <translation>GrooveOff non fornisce alcun contenuto e non è affiliato ad alcun tracker, indice o sito di torrent. L’utente finale è l’unico responsabile delle fonti utilizzate e del rispetto delle leggi vigenti nel proprio paese. L’autore declina ogni responsabilità per qualsiasi uso venga fatto di questa applicazione. Sostieni gli artisti che ti piacciono comprando la loro musica.</translation>
+    </message>
+    <message>
+        <source>GrooveOff provides no content and is not affiliated with any tracker, indexer or torrent site. What is fetched is chosen entirely by the user, who is solely responsible for the sources used and for complying with the law where they are. The author accepts no liability for any use made of this application. Support the artists you like by buying their music.</source>
+        <translation type="vanished">GrooveOff non fornisce alcun contenuto e non è affiliato ad alcun tracker, indice o sito di torrent. Cosa scaricare lo sceglie interamente l’utente, che è l’unico responsabile delle fonti utilizzate e del rispetto delle leggi vigenti nel proprio paese. L’autore declina ogni responsabilità per qualsiasi uso venga fatto di questa applicazione. Sostieni gli artisti che ti piacciono comprando la loro musica.</translation>
+    </message>
+    <message>
+        <source>GrooveOff searches nothing and indexes nothing, and makes no network requests of its own — no accounts, no service, no telemetry. What is fetched is decided entirely by whoever pastes the link, and so is whether they have the right to. Support the artists you like by buying their music.</source>
+        <translation type="vanished">GrooveOff non cerca e non indicizza niente, e non fa nessuna chiamata di rete per conto proprio: nessun account, nessun servizio, nessuna telemetria. Cosa scaricare lo decide interamente chi incolla il link, e così pure se ne ha il diritto. Sostieni gli artisti che ti piacciono comprando la loro musica.</translation>
+    </message>
+    <message>
+        <source>Paste a magnet link or open a .torrent file and it becomes a playlist. Choose the tracks you want and they play while they arrive, without the whole thing being downloaded and kept: the cache has a ceiling you set, and what goes over it makes room for what comes next.</source>
+        <translation type="vanished">Incolla un magnet o apri un file .torrent e diventa una playlist. Scegli i brani che vuoi e si ascoltano mentre arrivano, senza che l’intero contenuto venga scaricato e conservato: la cache ha un tetto che decidi tu, e ciò che lo supera fa posto a quello che viene dopo.</translation>
+    </message>
+    <message>
+        <source>Worth knowing:</source>
+        <translation type="vanished">Da sapere:</translation>
+    </message>
+    <message>
+        <source>GrooveOff searches nothing and indexes nothing, and makes no network requests of its own — no accounts, no service, no telemetry. What is fetched is decided entirely by whoever pastes the link, and so is whether they have the right to. Sharing a torrent also means your address is visible to everyone else sharing it, which no setting here can change: only a proxy or a vpn can. Support the artists you like by buying their music.</source>
+        <translation type="vanished">GrooveOff non cerca e non indicizza niente, e non fa nessuna chiamata di rete per conto proprio: nessun account, nessun servizio, nessuna telemetria. Cosa scaricare lo decide interamente chi incolla il link, e così pure se ne ha il diritto. Condividere un torrent significa anche che il tuo indirizzo è visibile a chiunque altro lo stia condividendo, e nessuna impostazione qui dentro può cambiarlo: solo un proxy o una vpn. Sostieni gli artisti che ti piacciono comprando la loro musica.</translation>
+    </message>
+    <message>
+        <source>Offline Grooveshark.com music.</source>
+        <translation type="vanished">Salva la musica di Grooveshark.com.</translation>
+    </message>
+    <message>
+        <source>GrooveOff can access the huge Grooveshark database through its &lt;a href=&quot;http://developers.grooveshark.com/docs/public_api/v3/&quot;&gt;public api&lt;/a&gt;.</source>
+        <translation type="vanished">GrooveOff accede all&apos;enorme database di Grooveshark attaverso la sua &lt;a href=&quot;http://developers.grooveshark.com/docs/public_api/v3/&quot;&gt;api pubblica&lt;/a&gt;.</translation>
+    </message>
+    <message>
+        <location line="-3"/>
         <source>Author:</source>
         <translation>Autore:</translation>
     </message>
@@ -52,17 +85,16 @@
         <translation type="vanished">&lt;b&gt;Licenza&lt;/b&gt;: </translation>
     </message>
     <message>
-        <location line="+2"/>
         <source>GrooveOff is not affiliated with Grooveshark™ and has not been reviewed or officially approved by Grooveshark.com. The author is not responsible for any violations this application does to Grooveshark&apos;s TOS. The author is not related to Grooveshark™ in any way! Support the Artists You Like by Buying Their Music.</source>
-        <translation>GrooveOff non è affiliato a Grooveshark™ e non è stato sottoposto a verifica o approvazione ufficiale da parte di Grooveshark.com. L&apos;autore non è responsabile per eventuali violazioni ai termini d&apos;uso di Grooveshark. L&apos;autore non è coinvolto in alcun modo con Grooveshark™! Supporta i tuoi artisti preferiti acquistando la loro musica.</translation>
+        <translation type="vanished">GrooveOff non è affiliato a Grooveshark™ e non è stato sottoposto a verifica o approvazione ufficiale da parte di Grooveshark.com. L&apos;autore non è responsabile per eventuali violazioni ai termini d&apos;uso di Grooveshark. L&apos;autore non è coinvolto in alcun modo con Grooveshark™! Supporta i tuoi artisti preferiti acquistando la loro musica.</translation>
     </message>
     <message>
-        <location line="+21"/>
+        <location line="+24"/>
         <source>Donation to Grooveoff&apos;s author</source>
         <translation>Donazione all&apos;autore di Grooveoff</translation>
     </message>
     <message>
-        <location line="-22"/>
+        <location line="-23"/>
         <source>Disclaimer:</source>
         <translation>Dichiarazione di non responsabilità:</translation>
     </message>

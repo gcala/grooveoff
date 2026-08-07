@@ -25,16 +25,21 @@
     </message>
     <message>
         <location line="+4"/>
-        <source>Offline Grooveshark.com music.</source>
+        <source>Music streaming from torrents.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+1"/>
-        <source>GrooveOff can access the huge Grooveshark database through its &lt;a href=&quot;http://developers.grooveshark.com/docs/public_api/v3/&quot;&gt;public api&lt;/a&gt;.</source>
+        <source>Paste a magnet link or open a .torrent file and it becomes a playlist.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+4"/>
+        <source>Disclaimer:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-2"/>
         <source>Author:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -45,17 +50,12 @@
     </message>
     <message>
         <location line="+2"/>
-        <source>GrooveOff is not affiliated with Grooveshark™ and has not been reviewed or officially approved by Grooveshark.com. The author is not responsible for any violations this application does to Grooveshark&apos;s TOS. The author is not related to Grooveshark™ in any way! Support the Artists You Like by Buying Their Music.</source>
+        <source>GrooveOff provides no content and is not affiliated with any tracker, indexer or torrent site. The end user is solely responsible for the sources used and for complying with the law where they are. The author accepts no liability for any use made of this application. Support the artists you like by buying their music.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+21"/>
+        <location line="+22"/>
         <source>Donation to Grooveoff&apos;s author</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="-22"/>
-        <source>Disclaimer:</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
