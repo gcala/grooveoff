@@ -21,6 +21,7 @@
 #define MAINWINDOW_H
 
 #include "PlaylistItem.h"
+#include "../db/PlaylistStore.h"
 
 // Dbus & remote
 #include "dbus/mpris.h"
@@ -32,6 +33,7 @@
 #include "GrooveOffNamespace.h"
 
 //Qt
+class QAction;
 class QLabel;
 class QPushButton;
 class QLineEdit;
@@ -169,11 +171,17 @@ private Q_SLOTS:
      */
     void updatePlaylistActions();
 
+    /** the lists a whole torrent can be poured into, rebuilt at every row */
+    void fillAddToPlaylistMenu( const PlaylistStore::PlaylistInfo &playlist );
+
     /** tracks dragged onto a playlist of the sidebar */
     void addTracksToPlaylist( qint64 playlistId, const QList<qint64> &trackIds );
 
     /** the same thing from the row's own menu, one track at a time */
     void addTrackToPlaylist( TrackRow *item, qint64 playlistId );
+
+    /** the whole of a torrent's playlist into a list made by hand */
+    void addShownTorrentToPlaylist( QAction *chosen );
 
     /** a drag that landed back in the track list: an order, not a move */
     void reorderTracks( const QList<int> &rows, int targetRow );

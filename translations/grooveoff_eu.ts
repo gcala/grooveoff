@@ -212,12 +212,22 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+4"/>
+        <location line="+8"/>
+        <source>Add all tracks to</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Appends this torrent&apos;s tracks to a list of your own</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+3"/>
         <source>&amp;Playlists</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+9"/>
+        <location line="+10"/>
         <source>&amp;File</source>
         <translation>&amp;Fitxategia</translation>
     </message>
@@ -619,13 +629,13 @@
     </message>
     <message>
         <location line="+2"/>
-        <location line="+505"/>
-        <location line="+1518"/>
+        <location line="+511"/>
+        <location line="+1612"/>
         <source>Idle</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-2014"/>
+        <location line="-2114"/>
         <source>Magnet</source>
         <translation type="unfinished"></translation>
     </message>
@@ -635,7 +645,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+651"/>
+        <location line="+657"/>
         <source>Open a torrent</source>
         <translation type="unfinished"></translation>
     </message>
@@ -795,8 +805,23 @@
         <source>Keep those tracks</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <location line="+115"/>
+        <source>Add all tracks to (no list of your own yet)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Add all tracks to</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+65"/>
+        <source>Already in «%1».</source>
+        <translation type="unfinished"></translation>
+    </message>
     <message numerus="yes">
-        <location line="+128"/>
+        <location line="+12"/>
         <source>%n track(s) added to «%1».</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -828,7 +853,7 @@
         <translation type="vanished">Hasi bilatzen</translation>
     </message>
     <message>
-        <location line="-1805"/>
+        <location line="-1876"/>
         <source>Main menu</source>
         <translation>Menu nagusia</translation>
     </message>
@@ -881,7 +906,7 @@ Select a valid path</source>
 Hautatu baliozko bide-izena</translation>
     </message>
     <message>
-        <location line="+2030"/>
+        <location line="+2130"/>
         <source>Donation to Grooveoff&apos;s author</source>
         <translation>Grooveoff-en egilearentzako dohaintza</translation>
     </message>
@@ -890,8 +915,8 @@ Hautatu baliozko bide-izena</translation>
         <translation type="vanished">Gooveshark-en musika lineaz kanpo</translation>
     </message>
     <message>
-        <location line="-2099"/>
-        <location line="+1418"/>
+        <location line="-2199"/>
+        <location line="+1424"/>
         <source>Attention</source>
         <translation>Kasu</translation>
     </message>
@@ -925,7 +950,7 @@ Hautatu baliozko bide-izena</translation>
         <translation type="vanished">Uzten...</translation>
     </message>
     <message>
-        <location line="+675"/>
+        <location line="+769"/>
         <source>Offline</source>
         <translation>Lineaz kanpo</translation>
     </message>

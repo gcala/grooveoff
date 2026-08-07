@@ -281,6 +281,12 @@ void MainWindow::setupConnections()
     connect( ac->getAction( "actionEmptyPlaylist" ), &QAction::triggered, this, &MainWindow::emptyPlaylist );
     connect( ac->getAction( "actionRemovePlaylist" ), &QAction::triggered, this, &MainWindow::removePlaylist );
 
+    // One connection for a submenu whose entries are made and unmade at every
+    // change of row: which list was picked is in the action's own data, so
+    // nothing here has to survive the rebuild.
+    connect( ac->getMenu( "addToPlaylistMenu" ), &QMenu::triggered, this,
+             &MainWindow::addShownTorrentToPlaylist );
+
     // currentItemChanged rather than itemClicked, so that the keyboard opens a
     // playlist too. Selecting a row from the code blocks the signal, or every
     // rebuild of the sidebar would reopen the list that is already open.
@@ -1935,6 +1941,56 @@ void MainWindow::updatePlaylistActions()
                                                        && playlist.isValid() );
     ac->getAction( "actionEmptyPlaylist" )->setVisible( playlist.kind == PlaylistStore::CustomPlaylist
                                                         && playlist.isValid() );
+
+    fillAddToPlaylistMenu( playlist );
+}
+
+/*!
+  \brief fillAddToPlaylistMenu: which lists a whole torrent can be poured into
+
+  Three torrents of Vivaldi and one list to hear them one after the other: that
+  is the gesture, and doing it a track at a time is the same gesture repeated
+  forty times. What goes in is the torrent's playlist and not the torrent —
+  what was left unticked was left out on purpose, and what was excluded is a
+  refusal that is meant to survive, so taking every file of the torrent would
+  undo both.
+
+  The entries are rebuilt at every change of row rather than kept up to date,
+  because a list made by hand can appear or be renamed at any moment and a menu
+  that is right only until then is worse than one built late.
+*/
+void MainWindow::fillAddToPlaylistMenu( const PlaylistStore::PlaylistInfo &playlist )
+{
+    QMenu *menu = The::actionCollection()->getMenu( "addToPlaylistMenu" );
+    if( !menu )
+        return;
+
+    menu->clear();
+
+    // Only a torrent playlist, and only one with something in it: on an empty
+    // one there is nothing to pour and no wording that would make the entry
+    // mean anything.
+    const bool applies = playlist.isValid() && playlist.kind == PlaylistStore::TorrentPlaylist
+                         && playlist.trackCount > 0;
+
+    menu->menuAction()->setVisible( applies );
+    if( !applies )
+        return;
+
+    for( const PlaylistStore::PlaylistInfo &target : The::playlistStore()->visiblePlaylists() ) {
+        if( target.kind != PlaylistStore::CustomPlaylist )
+            continue;
+
+        QAction *entry = menu->addAction( Utility::playlistName( target ) );
+        entry->setData( target.id );
+    }
+
+    // Greyed out rather than hidden, which is the opposite of what the entries
+    // above do, and for the opposite reason: there is a now — «New playlist…»
+    // is one line up — so the entry says what is missing instead of vanishing.
+    menu->setEnabled( !menu->isEmpty() );
+    menu->setTitle( menu->isEmpty() ? tr( "Add all tracks to (no list of your own yet)" )
+                                    : tr( "Add all tracks to" ) );
 }
 
 void MainWindow::showPlaylistMenu( const QPoint &position )
@@ -1965,6 +2021,7 @@ void MainWindow::showPlaylistMenu( const QPoint &position )
         menu.addSeparator();
         menu.addAction( ac->getAction( "actionRenamePlaylist" ) );
         menu.addAction( ac->getAction( "actionChooseTracks" ) );
+        menu.addMenu( ac->getMenu( "addToPlaylistMenu" ) );
         menu.addAction( ac->getAction( "actionEmptyPlaylist" ) );
         menu.addAction( ac->getAction( "actionRemovePlaylist" ) );
     }
@@ -1981,14 +2038,28 @@ void MainWindow::addTracksToPlaylist( qint64 playlistId, const QList<qint64> &tr
     if( !playlist.isValid() || playlist.kind != PlaylistStore::CustomPlaylist )
         return;
 
+    // A list holds a track at most once and the writer drops the repeats, so
+    // what is dropped has to be dropped here too or the count reported would be
+    // the count asked for rather than the count that landed. It shows with a
+    // whole torrent poured into a list that already has half of it.
     QList<TrackInfoPtr> tracks;
     for( qint64 trackId : trackIds ) {
+        if( The::playlistStore()->contains( playlistId, trackId ) )
+            continue;
+
         const TrackInfoPtr track = The::catalog()->track( trackId );
         if( track )
             tracks << track;
     }
 
-    if( tracks.isEmpty() || !The::playlistStore()->appendTracks( playlistId, tracks ) )
+    const QString name = Utility::playlistName( playlist );
+
+    if( tracks.isEmpty() ) {
+        m_playerWidget->showMessage( tr( "Already in «%1»." ).arg( name ) );
+        return;
+    }
+
+    if( !The::playlistStore()->appendTracks( playlistId, tracks ) )
         return;
 
     loadPlaylists();
@@ -1997,7 +2068,7 @@ void MainWindow::addTracksToPlaylist( qint64 playlistId, const QList<qint64> &tr
         loadCurrentPlaylist();
 
     m_playerWidget->showMessage( tr( "%n track(s) added to «%1».", "", tracks.count() )
-                                 .arg( playlist.name ) );
+                                 .arg( name ) );
 }
 
 void MainWindow::addTrackToPlaylist( TrackRow *item, qint64 playlistId )
@@ -2006,6 +2077,35 @@ void MainWindow::addTrackToPlaylist( TrackRow *item, qint64 playlistId )
         return;
 
     addTracksToPlaylist( playlistId, { item->playlistItem()->track()->id() } );
+}
+
+void MainWindow::addShownTorrentToPlaylist( QAction *chosen )
+{
+    if( !chosen || !The::database()->isOpen() )
+        return;
+
+    const qint64 target = chosen->data().toLongLong();
+    const qint64 source = ui->playlistList->currentPlaylistId();
+    if( target <= 0 || source <= 0 )
+        return;
+
+    // In the order of the torrent's own playlist, which is the order on screen
+    // and the order the tracks were dragged into. Three albums poured in turn
+    // arrive as three albums and not as a shuffle.
+    QList<qint64> trackIds;
+    for( const TrackInfoPtr &track : The::playlistStore()->tracks( source ) ) {
+        if( track && track->id() > 0 )
+            trackIds << track->id();
+    }
+
+    // Queued, and not out of caution about the work: adding rebuilds the
+    // sidebar, and rebuilding refills this very submenu, which begins by
+    // deleting the action whose signal we are standing inside. Doing that while
+    // the menu is still unwinding is how a gesture that worked a hundred times
+    // crashes on the hundred and first.
+    QMetaObject::invokeMethod( this, [this, target, trackIds] {
+        addTracksToPlaylist( target, trackIds );
+    }, Qt::QueuedConnection );
 }
 
 /*!

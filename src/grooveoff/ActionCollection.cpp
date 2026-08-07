@@ -225,11 +225,22 @@ QMenuBar* ActionCollection::createMenuBar( QWidget *parent )
     tracksMenu->setIcon( QIcon( QLatin1String( ":/resources/Playlist.png" ) ) );
     m_menuCollection[ QLatin1String( "tracksMenu" ) ] = tracksMenu;
 
+    // A submenu and not an action, because the question it asks is "into which
+    // one". Its entries are the lists made by hand and they change while the
+    // program is open, so it is built empty here and filled by whoever knows
+    // which row the menu was opened over.
+    QMenu* addToPlaylistMenu = new QMenu( tr( "Add all tracks to" ), menuBar );
+    addToPlaylistMenu->setIcon( QIcon::fromTheme( QLatin1String( "list-add" ),
+                                                  QIcon( QLatin1String( ":/resources/emblem-new.png" ) ) ) );
+    addToPlaylistMenu->menuAction()->setToolTip( tr( "Appends this torrent's tracks to a list of your own" ) );
+    m_menuCollection[ QLatin1String( "addToPlaylistMenu" ) ] = addToPlaylistMenu;
+
     QMenu* playlistsMenu = new QMenu( tr( "&Playlists" ), menuBar );
     playlistsMenu->addAction( m_actionCollection[ QLatin1String( "actionNewPlaylist" ) ] );
     playlistsMenu->addSeparator();
     playlistsMenu->addAction( m_actionCollection[ QLatin1String( "actionRenamePlaylist" ) ] );
     playlistsMenu->addAction( m_actionCollection[ QLatin1String( "actionChooseTracks" ) ] );
+    playlistsMenu->addMenu( m_menuCollection[ QLatin1String( "addToPlaylistMenu" ) ] );
     playlistsMenu->addAction( m_actionCollection[ QLatin1String( "actionEmptyPlaylist" ) ] );
     playlistsMenu->addAction( m_actionCollection[ QLatin1String( "actionRemovePlaylist" ) ] );
     m_menuCollection[ QLatin1String( "playlistsMenu" ) ] = playlistsMenu;

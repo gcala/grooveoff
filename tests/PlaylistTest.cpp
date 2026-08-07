@@ -55,6 +55,7 @@ private Q_SLOTS:
 
     void keepsThePinnedPlaylistFirstAndUndeletable();
     void holdsATrackAtMostOnce();
+    void poursWholeTorrentsIntoOneList();
     void emptiesAPlaylistWithoutRemovingIt();
     void namesThePlaylistsThatWouldSuffer();
     void keepingTheTracksOnlyHidesTheTorrent();
@@ -270,6 +271,57 @@ void PlaylistTest::holdsATrackAtMostOnce()
     QCOMPARE( written.count(), 2 );
     QCOMPARE( written.at( 0 )->id(), track->id() );
     QCOMPARE( written.at( 1 )->id(), m_tracksB.at( 0 )->id() );
+
+    QVERIFY( m_playlists->clearPlaylist( list ) );
+}
+
+/*!
+  \brief poursWholeTorrentsIntoOneList
+
+  Three torrents of Vivaldi into «To listen» to hear them one after the other:
+  the gesture the sidebar offers, asked of the store the way the window asks it
+  — one torrent playlist at a time, whole.
+
+  What is checked is the arithmetic of the second pour and the third, not the
+  first: albums have to arrive one after the other and not interleaved, and a
+  torrent poured into a list that already holds part of it must add the rest
+  without moving what was there. Pouring one twice adds nothing, which is the
+  same rule as [holdsATrackAtMostOnce] seen from the gesture that meets it.
+*/
+void PlaylistTest::poursWholeTorrentsIntoOneList()
+{
+    const qint64 list = m_playlists->pinnedPlaylistId();
+    QVERIFY( m_playlists->clearPlaylist( list ) );
+
+    const QList<TrackInfoPtr> fromA = m_playlists->tracks( m_playlists->torrentPlaylistId( m_hashA ) );
+    const QList<TrackInfoPtr> fromB = m_playlists->tracks( m_playlists->torrentPlaylistId( m_hashB ) );
+    QCOMPARE( fromA.count(), 2 );
+    QCOMPARE( fromB.count(), 2 );
+
+    QVERIFY( m_playlists->appendTracks( list, fromA ) );
+    QVERIFY( m_playlists->appendTracks( list, fromB ) );
+
+    QList<TrackInfoPtr> written = m_playlists->tracks( list );
+    QCOMPARE( written.count(), 4 );
+    QCOMPARE( written.at( 0 )->id(), fromA.at( 0 )->id() );
+    QCOMPARE( written.at( 1 )->id(), fromA.at( 1 )->id() );
+    QCOMPARE( written.at( 2 )->id(), fromB.at( 0 )->id() );
+    QCOMPARE( written.at( 3 )->id(), fromB.at( 1 )->id() );
+
+    // The same torrent again, by somebody who does not remember having done it.
+    QVERIFY( m_playlists->appendTracks( list, fromA ) );
+    QCOMPARE( m_playlists->tracks( list ).count(), 4 );
+
+    // And half of one already there: the rest joins it, the one that was there
+    // keeps its place rather than being moved to the end.
+    QVERIFY( m_playlists->clearPlaylist( list ) );
+    QVERIFY( m_playlists->appendTracks( list, { fromA.at( 1 ) } ) );
+    QVERIFY( m_playlists->appendTracks( list, fromA ) );
+
+    written = m_playlists->tracks( list );
+    QCOMPARE( written.count(), 2 );
+    QCOMPARE( written.at( 0 )->id(), fromA.at( 1 )->id() );
+    QCOMPARE( written.at( 1 )->id(), fromA.at( 0 )->id() );
 
     QVERIFY( m_playlists->clearPlaylist( list ) );
 }

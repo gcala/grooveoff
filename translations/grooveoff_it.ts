@@ -244,7 +244,17 @@
         <translation>&amp;Brani</translation>
     </message>
     <message>
-        <location line="+4"/>
+        <location line="+8"/>
+        <source>Add all tracks to</source>
+        <translation>Aggiungi tutti i brani a</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Appends this torrent&apos;s tracks to a list of your own</source>
+        <translation>Accoda i brani di questo torrent a una lista tua</translation>
+    </message>
+    <message>
+        <location line="+3"/>
         <source>&amp;Playlists</source>
         <translation>&amp;Playlist</translation>
     </message>
@@ -253,7 +263,7 @@
         <translation type="vanished">&amp;Scaletta</translation>
     </message>
     <message>
-        <location line="+9"/>
+        <location line="+10"/>
         <source>&amp;File</source>
         <translation>&amp;File</translation>
     </message>
@@ -667,13 +677,13 @@
     </message>
     <message>
         <location line="+2"/>
-        <location line="+505"/>
-        <location line="+1518"/>
+        <location line="+511"/>
+        <location line="+1612"/>
         <source>Idle</source>
         <translation>Fermo</translation>
     </message>
     <message>
-        <location line="-2014"/>
+        <location line="-2114"/>
         <source>Magnet</source>
         <translation>Magnet</translation>
     </message>
@@ -683,7 +693,7 @@
         <translation>Incolla un magnet e premi invio</translation>
     </message>
     <message>
-        <location line="+651"/>
+        <location line="+657"/>
         <source>Open a torrent</source>
         <translation>Apri un torrent</translation>
     </message>
@@ -900,8 +910,23 @@
         <source>Keep those tracks</source>
         <translation>Conserva quei brani</translation>
     </message>
+    <message>
+        <location line="+115"/>
+        <source>Add all tracks to (no list of your own yet)</source>
+        <translation>Aggiungi tutti i brani a (non hai ancora una lista tua)</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Add all tracks to</source>
+        <translation>Aggiungi tutti i brani a</translation>
+    </message>
+    <message>
+        <location line="+65"/>
+        <source>Already in «%1».</source>
+        <translation>Già in «%1».</translation>
+    </message>
     <message numerus="yes">
-        <location line="+128"/>
+        <location line="+12"/>
         <source>%n track(s) added to «%1».</source>
         <translation>
             <numerusform>%n brano aggiunto a «%1».</numerusform>
@@ -948,7 +973,7 @@
         <translation type="vanished">Inizia ricerca</translation>
     </message>
     <message>
-        <location line="-1805"/>
+        <location line="-1876"/>
         <source>Main menu</source>
         <translation>Menu principale</translation>
     </message>
@@ -1005,13 +1030,13 @@ Select a valid path</source>
 Seleziona un percorso valido</translation>
     </message>
     <message>
-        <location line="+2030"/>
+        <location line="+2130"/>
         <source>Donation to Grooveoff&apos;s author</source>
         <translation>Donazione all&apos;autore di Grooveoff</translation>
     </message>
     <message>
-        <location line="-2099"/>
-        <location line="+1418"/>
+        <location line="-2199"/>
+        <location line="+1424"/>
         <source>Attention</source>
         <translation>Attenzione</translation>
     </message>
@@ -1045,7 +1070,7 @@ Selezionare un percorso valido</translation>
         <translation type="vanished">Annullo...</translation>
     </message>
     <message>
-        <location line="+675"/>
+        <location line="+769"/>
         <source>Offline</source>
         <translation>Non in linea</translation>
     </message>
