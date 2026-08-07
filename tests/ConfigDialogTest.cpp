@@ -22,10 +22,12 @@
 
 #include <QCheckBox>
 #include <QComboBox>
+#include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
 #include <QSettings>
 #include <QSpinBox>
+#include <QStackedWidget>
 #include <QStandardPaths>
 #include <QtTest>
 
@@ -57,6 +59,7 @@ private Q_SLOTS:
     void readsBackWhatWasWritten();
     void restoresTheDefaults();
     void greysTheProxyOutWhenThereIsNone();
+    void leavesTheProxyFieldsTheirHeight();
 
 private:
     template <typename T>
@@ -233,6 +236,57 @@ void ConfigDialogTest::greysTheProxyOutWhenThereIsNone()
     share->setChecked( true );
     QVERIFY( slotBox->isEnabled() );
     QVERIFY( limit->isEnabled() );
+}
+
+/*!
+  \brief leavesTheProxyFieldsTheirHeight: the page fits at the smallest size a
+         window manager will grant it
+
+  This is a test about a height rather than a value, and it is here because the
+  failure has no other channel. A QLabel that wraps answers "one line" when a
+  layout asks it for a minimum, so a page whose hints wrap to three reports a
+  minimum shorter than itself; the window opens at that minimum, and the fields
+  under the longest hint are squeezed into slivers a few pixels tall. The build
+  says nothing, every value is correct, and the only sign is a screenshot.
+
+  So the dialog is opened at exactly the size it claims to need — which is what
+  a window manager grants it, and what the bug turned into unreadable fields —
+  and each field is asked whether it got the height it asked for.
+*/
+void ConfigDialogTest::leavesTheProxyFieldsTheirHeight()
+{
+    ConfigDialog dialog;
+    QStackedWidget *stack = widget<QStackedWidget>( &dialog, QLatin1String( "stackedWidget" ) );
+    QWidget *page = widget<QWidget>( &dialog, QLatin1String( "networkSettingsPage" ) );
+
+    dialog.show();
+    QVERIFY( QTest::qWaitForWindowExposed( &dialog ) );
+    stack->setCurrentWidget( page );
+    dialog.resize( dialog.minimumSizeHint() );
+    QTest::qWait( 100 );
+
+    const QList<QWidget *> fields = {
+        widget<QComboBox>( &dialog, Settings::proxyType ),
+        widget<QLineEdit>( &dialog, Settings::proxyHost ),
+        widget<QSpinBox>( &dialog, Settings::proxyPort )
+    };
+
+    for( QWidget *field : fields ) {
+        QVERIFY2( field->height() >= field->sizeHint().height(),
+                  qPrintable( QStringLiteral( "%1 is %2 pixels tall and asked for %3" )
+                              .arg( field->objectName() )
+                              .arg( field->height() )
+                              .arg( field->sizeHint().height() ) ) );
+    }
+
+    // The cause, rather than where it showed: the hint above them has to be
+    // given room for every line it will draw at the width it ended up with.
+    QLabel *hint = widget<QLabel>( &dialog, QLatin1String( "proxyHint" ) );
+    QVERIFY2( hint->height() >= hint->heightForWidth( hint->width() ),
+              qPrintable( QStringLiteral( "the proxy hint got %1 pixels and needs %2 at %3 wide" )
+                          .arg( hint->height() )
+                          .arg( hint->heightForWidth( hint->width() ) )
+                          .arg( hint->width() ) ) );
 }
 
 QTEST_MAIN( ConfigDialogTest )

@@ -25,6 +25,8 @@
 #include "../torrent/CacheManager.h"
 
 #include <QComboBox>
+#include <QEvent>
+#include <QLabel>
 #include <QLineEdit>
 #include <QLocale>
 #include <QMessageBox>
@@ -49,6 +51,7 @@ ConfigDialog::ConfigDialog( QWidget *parent )
     , configChanged( false )
 {
     ui->setupUi( this );
+    keepHintsTall();
     setupConnections();
     setupGraphicElements();
     setupSettingCategories();
@@ -83,6 +86,46 @@ void ConfigDialog::setupConnections()
     connect( ui->okButton, &QPushButton::clicked, this, &ConfigDialog::okClicked );
     connect( ui->emptyCacheButton, &QPushButton::clicked, this, &ConfigDialog::emptyCacheNow );
     connect( ui->contentsWidget, &QListWidget::currentRowChanged, this, &ConfigDialog::switchPage );
+}
+
+/*!
+  \brief keepHintsTall: a wrapped paragraph asks for the height it will take
+
+  A QLabel with wordWrap answers minimumSizeHint() with the height of one line,
+  whatever it will end up drawing: the height it really needs depends on the
+  width it is given, and a layout works out its minimum before any width exists.
+  So the page reports a minimum shorter than its contents by exactly the extra
+  lines of its hints, the window manager honours that minimum, and the widgets
+  underneath the longest hint are squeezed to make room — which is what the
+  proxy combo, host and port looked like: three fields nine pixels tall, drawn
+  as slivers, while the boxes above them were untouched. Nothing is out of
+  place in the .ui, and no amount of reading it explains the picture.
+
+  So the height is fixed the only moment it can be known, which is when the
+  label is given its width. The guard is not decoration: setting a minimum from
+  inside a resize asks for another layout pass, and without it the two would
+  answer each other for ever.
+*/
+void ConfigDialog::keepHintsTall()
+{
+    const QList<QLabel *> labels = findChildren<QLabel *>();
+    for( QLabel *label : labels ) {
+        if( label->wordWrap() )
+            label->installEventFilter( this );
+    }
+}
+
+bool ConfigDialog::eventFilter( QObject *watched, QEvent *event )
+{
+    if( event->type() == QEvent::Resize ) {
+        if( QLabel *label = qobject_cast<QLabel *>( watched ) ) {
+            const int needed = label->heightForWidth( label->width() );
+            if( needed > 0 && needed != label->minimumHeight() )
+                label->setMinimumHeight( needed );
+        }
+    }
+
+    return QDialog::eventFilter( watched, event );
 }
 
 void ConfigDialog::setupGraphicElements()

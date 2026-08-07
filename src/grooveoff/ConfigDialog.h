@@ -33,6 +33,10 @@ class ConfigDialog : public QDialog
 public:
     explicit ConfigDialog( QWidget *parent = nullptr );
 
+protected:
+    /** watches the hint paragraphs grow, see keepHintsTall() */
+    bool eventFilter( QObject *watched, QEvent *event ) override;
+
 private Q_SLOTS:
     void restoreDefaults();
     void saveSettings();
@@ -54,6 +58,9 @@ private:
 
     /** greys the proxy fields out when there is no proxy to configure */
     void updateEnabledState();
+
+    /** makes a wrapped paragraph ask for the height it will actually take */
+    void keepHintsTall();
 
     /** how much of the disk the cache holds right now, in the label */
     void showCacheUsage();
