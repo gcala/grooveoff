@@ -69,6 +69,10 @@ private Q_SLOTS:
     void refusesAForeignHost();
     void refusesAnUnknownTorrent();
 
+    // Last on purpose: it takes both torrents out of the session and does not
+    // put them back.
+    void servesAWholeFileWithNoTorrentAtAll();
+
 private:
     /**
      * One request, one response, driven by the event loop so the server can
@@ -503,6 +507,84 @@ void StreamServerTest::refusesAnUnknownTorrent()
 
     QVERIFY( headOf( http( requestFor( "GET", url.toEncoded( QUrl::RemoveScheme | QUrl::RemoveAuthority ), host ) ) )
              .startsWith( "HTTP/1.1 404" ) );
+}
+
+/*!
+  \brief servesAWholeFileWithNoTorrentAtAll: the cache answers on its own
+
+  A torrent that has already fetched everything somebody chose has nothing left
+  to do on the network, and adding it to the session in order to play it
+  announces it to a tracker and to the dht for no reason at all. So a file that
+  is whole is served straight from the disk, with the torrent asleep.
+
+  What makes that possible is the resume file: a sparse file is the full size
+  of the file whether it is whole or all holes, so the disk cannot tell the two
+  apart, and the piece map in the resume is the same one libtorrent would
+  answer have_piece() from. This is the test that the two agree — the bytes
+  that come back are compared with the ones that went in, not merely counted.
+
+  And the other half, which is the one that would hurt: a file that is *not*
+  whole must not be served this way. Answering it would mean handing a player
+  the holes as if they were music.
+*/
+void StreamServerTest::servesAWholeFileWithNoTorrentAtAll()
+{
+    QVERIFY( !m_partialHash.isEmpty() );
+
+    const QString resumeDir = m_cacheRoot + QLatin1String( "/resume/" );
+
+    The::torrentSession()->requestResumeData( m_infoHash );
+    The::torrentSession()->requestResumeData( m_partialHash );
+
+    QTRY_VERIFY_WITH_TIMEOUT( QFile::exists( resumeDir + m_infoHash + QLatin1String( ".resume" ) ), 15000 );
+    QTRY_VERIFY_WITH_TIMEOUT( QFile::exists( resumeDir + m_partialHash + QLatin1String( ".resume" ) ), 15000 );
+
+    // Out of the session, and the files stay where they are. This is what a
+    // torrent looks like after a start up that decided not to wake it.
+    The::torrentSession()->remove( m_infoHash, false );
+    The::torrentSession()->remove( m_partialHash, false );
+
+    QVERIFY( !The::torrentSession()->hasMetadata( m_infoHash ) );
+    QVERIFY( !The::torrentSession()->hasMetadata( m_partialHash ) );
+
+    const TorrentSession::CachedFile whole = The::torrentSession()->cachedFile( m_infoHash, 0 );
+    QVERIFY2( whole.complete, "the resume file does not know the file is whole" );
+    QCOMPARE( whole.size, qint64( m_content.size() ) );
+    QVERIFY( whole.path.endsWith( QLatin1String( "/Test Album/01 - prova.mp3" ) ) );
+
+    // The path comes from our cache root and not from the resume, which carries
+    // the absolute path of wherever the torrent was when it was written.
+    QVERIFY( whole.path.startsWith( m_cacheRoot ) );
+
+    const TorrentSession::CachedFile partial = The::torrentSession()->cachedFile( m_partialHash, 0 );
+    QVERIFY2( !partial.complete, "a file with holes in it was called whole" );
+
+    QVERIFY( The::streamServer()->isPlayable( m_infoHash, 0 ) );
+    QVERIFY( !The::streamServer()->isPlayable( m_partialHash, 0 ) );
+
+    const QByteArray host = "127.0.0.1:" + QByteArray::number( The::streamServer()->port() );
+    const QByteArray target = m_url.toEncoded( QUrl::RemoveScheme | QUrl::RemoveAuthority );
+
+    const QByteArray response = http( requestFor( "GET", target, host ) );
+    QVERIFY( headOf( response ).startsWith( "HTTP/1.1 200" ) );
+    QCOMPARE( bodyOf( response ), m_content );
+
+    // Seeking is another request from another offset, and it has to work with
+    // no torrent just as it does with one.
+    const QByteArray ranged = http( requestFor( "GET", target, host, "Range: bytes=100000-100099\r\n" ) );
+    QVERIFY( headOf( ranged ).startsWith( "HTTP/1.1 206" ) );
+    QCOMPARE( bodyOf( ranged ), m_content.mid( 100000, 100 ) );
+
+    const QUrl partialUrl = The::streamServer()->urlFor( m_partialHash, 0 );
+    QVERIFY( headOf( http( requestFor( "GET", partialUrl.toEncoded( QUrl::RemoveScheme | QUrl::RemoveAuthority ), host ) ) )
+             .startsWith( "HTTP/1.1 404" ) );
+
+    // And the map is not believed over the disk. A cache directory deleted by
+    // hand leaves the resume file behind, and taking its word for it would mean
+    // sending a status line and then nothing.
+    QVERIFY( QFile::remove( whole.path ) );
+    QVERIFY2( !The::torrentSession()->cachedFile( m_infoHash, 0 ).complete,
+              "a file that is not there any more was still called whole" );
 }
 
 QTEST_MAIN( StreamServerTest )

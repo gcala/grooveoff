@@ -187,6 +187,21 @@ public:
      */
     qint64 bufferedBytes( const QString &infoHash, int fileIndex ) const;
 
+    /** what is on disk for a file of a torrent nobody woke up */
+    struct CachedFile
+    {
+        QString path;
+        qint64  size     = 0;
+        bool    complete = false;
+    };
+
+    /**
+     * Answers for a torrent the session is not holding, from its resume file.
+     * A torrent that has everything somebody chose has nothing to do on the
+     * network, and this is what makes it possible to play it without adding it.
+     */
+    CachedFile cachedFile( const QString &infoHash, int fileIndex ) const;
+
     void setFilePriority( const QString &infoHash, int fileIndex, FilePriority priority );
 
     /**

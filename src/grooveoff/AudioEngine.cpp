@@ -20,6 +20,8 @@
 #include "AudioEngine.h"
 #include "Playlist.h"
 #include "Settings.h"
+#include "../db/Catalog.h"
+#include "../db/Database.h"
 #include "../torrent/CacheManager.h"
 #include "../torrent/StreamServer.h"
 #include "../torrent/TorrentSession.h"
@@ -263,6 +265,15 @@ void AudioEngine::checkBuffer()
         return;
 
     const TrackInfoPtr &info = m_currentTrack->track();
+
+    // A track playing out of a torrent the session is not holding is a track
+    // that is whole in the cache — it is the only way it could have started at
+    // all. There is nobody to ask how much of it has arrived, and asking anyway
+    // gets a zero, which reads exactly like a stream that has run dry: the
+    // player was paused a second into a file that was complete on the disk.
+    if( !The::torrentSession()->hasMetadata( info->infoHash() ) )
+        return;
+
     const qint64 duration = m_mediaPlayer->duration();
     const qint64 size     = info->fileSize();
 
@@ -351,11 +362,15 @@ void AudioEngine::maybePrefetchNext()
 
     // A sleeping torrent is woken here rather than at the change of track: the
     // handshake and the dht lookup are the slow part, and they happen while
-    // the current track is still playing.
-    if( !The::torrentSession()->hasMetadata( info->infoHash() ) ) {
+    // the current track is still playing. Unless there is nothing to bring up,
+    // in which case waking it would be the whole cost and none of the gain.
+    if( needsItsTorrent( info ) ) {
         The::torrentSession()->reopen( info->infoHash(), info->magnetUri() );
         return;
     }
+
+    if( !The::torrentSession()->hasMetadata( info->infoHash() ) )
+        return;
 
     The::streamServer()->prefetch( info->infoHash(), info->fileIndex() );
 }
@@ -564,8 +579,16 @@ void AudioEngine::startTrack( const PlaylistItemPtr &track )
     The::cacheManager()->setPlayingTorrent( track && track->track() ? track->track()->infoHash()
                                                                    : QString() );
 
-    if( track && track->track()
-        && !The::torrentSession()->hasMetadata( track->track()->infoHash() ) ) {
+    // And the eviction order is told that this torrent was used, here and not
+    // where it used to be told. last_access was written when the metadata
+    // arrived, which is to say only when a torrent was woken up — fine while
+    // every play woke one, and quietly wrong now that a torrent with everything
+    // in the cache is played without being touched. Left there, the torrents
+    // listened to most would have been the first to be thrown away.
+    if( track && track->track() && The::database()->isOpen() )
+        The::catalog()->touch( track->track()->infoHash() );
+
+    if( track && track->track() && needsItsTorrent( track->track() ) ) {
         wakeTorrentFor( track );
         return;
     }
@@ -587,7 +610,7 @@ bool AudioEngine::openStream( const PlaylistItemPtr &track )
 
     const TrackInfoPtr &info = track->track();
 
-    if( !The::torrentSession()->hasMetadata( info->infoHash() ) )
+    if( needsItsTorrent( info ) )
         return false;
 
     // Handing the url over too early is not a wait, it is a failure: ffmpeg
@@ -609,6 +632,32 @@ bool AudioEngine::openStream( const PlaylistItemPtr &track )
 
     player()->setSource( url );
     return true;
+}
+
+/*!
+  \brief needsItsTorrent: whether playing this track means going on the network
+
+  Two ways of answering no, and they are not the same. Either the torrent is
+  already in the session — the usual case once something has been played — or
+  it is asleep and has nothing left to give, because every piece of this file
+  arrived before it went to sleep.
+
+  That second one is the whole point. A torrent whose chosen tracks are all in
+  the cache has no reason to be in the session at all: adding it announces it
+  to a tracker and to the dht, connects to peers, and asks them for nothing —
+  and then, with sharing off, refuses to give them anything either. The bytes
+  are on the disk and the map of them is in the resume file, so nobody has to
+  be told anything for the music to come out.
+*/
+bool AudioEngine::needsItsTorrent( const TrackInfoPtr &info ) const
+{
+    if( !info )
+        return false;
+
+    if( The::torrentSession()->hasMetadata( info->infoHash() ) )
+        return false;
+
+    return !The::torrentSession()->cachedFile( info->infoHash(), info->fileIndex() ).complete;
 }
 
 /*!

@@ -28,6 +28,7 @@
 #include <QDir>
 #include <QElapsedTimer>
 #include <QFile>
+#include <QFileInfo>
 #include <QHash>
 #include <QSaveFile>
 #include <QSet>
@@ -1013,6 +1014,82 @@ qint64 TorrentSession::bufferedBytes( const QString &infoHash, int fileIndex ) c
     }
 
     return offset;
+}
+
+/*!
+  \brief cachedFile: what the resume file says, without adding the torrent
+
+  A torrent that has already fetched everything somebody chose has nothing left
+  to do on the network, and handing it to the session in order to play it
+  announces it to a tracker and to the dht to accomplish precisely nothing —
+  and then, with sharing off, refuses to give anything back.
+
+  But the bytes cannot simply be read off the disk, because the disk does not
+  know which of them are real: a sparse file is the full size of the file
+  whether it is whole or all holes, so nothing about it tells the two apart.
+
+  What does tell them apart is the resume blob, and that is the point of doing
+  it this way. The piece map in it is the very one libtorrent would answer
+  have_piece() from, had the torrent been added — so this is not a second truth
+  about the cache kept alongside the first, it is the same truth read from the
+  same file, off the network. Measured at a tenth of a millisecond an answer.
+
+  The save path is ours and is not the one in the resume, which holds the
+  absolute path the torrent had when it was written: a cache that has been
+  moved or copied would otherwise be looked for where it used to be. That is
+  not hypothetical — it is what the resume files of a copied cache say.
+*/
+TorrentSession::CachedFile TorrentSession::cachedFile( const QString &infoHash, int fileIndex ) const
+{
+    CachedFile file;
+
+    if( fileIndex < 0 || d->torrentsPath.isEmpty() )
+        return file;
+
+    const QByteArray resume = readWholeFile( d->resumeFileFor( infoHash ) );
+    if( resume.isEmpty() )
+        return file;
+
+    lt::error_code error;
+    const lt::add_torrent_params params =
+        lt::read_resume_data( lt::span<const char>( resume.constData(), resume.size() ), error );
+
+    // A resume written before the metadata arrived carries no file layout at
+    // all, so there is nothing there that could be whole.
+    if( error || !params.ti || fileIndex >= params.ti->num_files() )
+        return file;
+
+    const lt::file_storage &layout = params.ti->layout();
+    const lt::file_index_t index { fileIndex };
+
+    file.size = layout.file_size( index );
+    if( file.size <= 0 )
+        return file;
+
+    const std::string savePath = QDir( d->torrentsPath ).absoluteFilePath( infoHash ).toStdString();
+    file.path = QString::fromStdString( layout.file_path( index, savePath ) );
+
+    // The map says what arrived, the disk says whether it is still there. A
+    // cache directory deleted by hand leaves the resume file behind, and
+    // believing it would mean answering a request with a status line and then
+    // nothing at all. Saying "not whole" instead sends the caller down the road
+    // that repairs itself: the torrent is woken, libtorrent rechecks, and what
+    // is missing is fetched again.
+    const QFileInfo onDisk( file.path );
+    if( !onDisk.exists() || onDisk.size() != file.size )
+        return file;
+
+    const lt::peer_request first = layout.map_file( index, 0, 0 );
+    const lt::peer_request last  = layout.map_file( index, file.size - 1, 0 );
+
+    // Every piece the file touches, ends included: the first and the last are
+    // shared with the files either side, and a file whose neighbour's half of
+    // a piece never arrived is not whole.
+    file.complete = params.have_pieces.size() > 0;
+    for( lt::piece_index_t piece = first.piece; piece <= last.piece && file.complete; ++piece )
+        file.complete = int( piece ) < params.have_pieces.size() && params.have_pieces[piece];
+
+    return file;
 }
 
 void TorrentSession::setFilePriority( const QString &infoHash, int fileIndex, FilePriority priority )

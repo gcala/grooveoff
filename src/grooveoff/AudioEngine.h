@@ -220,6 +220,13 @@ private:
     void wakeTorrentFor( const PlaylistItemPtr &track );
 
     /**
+     * Whether this track can only be played by going on the network. A torrent
+     * that has the whole file in the cache does not have to be woken at all,
+     * and waking it would announce it for nothing.
+     */
+    bool needsItsTorrent( const TrackInfoPtr &info ) const;
+
+    /**
      * Once the current track is past its middle, brings up the beginning of
      * the next one with whatever bandwidth is left over. What this mostly
      * hides is not the transfer: it is the tens of seconds it takes to resolve

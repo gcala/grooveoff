@@ -766,8 +766,14 @@ void MainWindow::wakeLastUsedTorrent()
 
     // Nothing is being brought back, so there is nothing worth announcing to a
     // tracker before the user has asked for anything.
+    //
+    // And nothing worth announcing either when the track is whole in the cache:
+    // then pressing play reads it off the disk and the torrent is never needed,
+    // so waking it here would be an announcement made in advance of a use that
+    // is not going to come.
     if( track && !track->infoHash().isEmpty()
-        && settings.value( Settings::restorePlayback, Settings::restorePlaybackDefault ).toBool() ) {
+        && settings.value( Settings::restorePlayback, Settings::restorePlaybackDefault ).toBool()
+        && !The::torrentSession()->cachedFile( track->infoHash(), track->fileIndex() ).complete ) {
         QString error;
         if( !The::torrentSession()->reopen( track->infoHash(), track->magnetUri(), &error ) )
             qDebug() << "GrooveOff ::" << "cannot reopen the last used torrent:" << error;

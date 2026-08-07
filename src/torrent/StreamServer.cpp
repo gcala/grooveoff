@@ -104,6 +104,16 @@ struct PendingRead
     QString       trackKey;
     TorrentTrack *track = nullptr;
 
+    /**
+     * The other way of serving the same file: whole in the cache, with its
+     * torrent asleep and no reason to wake it. There is nothing to wait for
+     * and nothing to ask for, so there is no TorrentTrack either — what would
+     * it raise the priority of.
+     */
+    bool    whole     = false;
+    QString wholePath;
+    qint64  wholeSize = 0;
+
     QFile  file;
     qint64 nextOffset = 0;
     qint64 endOffset  = -1;
@@ -281,16 +291,27 @@ void StreamServer::Private::serve( PendingRead *read )
         return;
     }
 
-    // A torrent that is not in the session cannot be read from. Waking it up is
-    // the caller's business, not the server's: it is the lazy reactivation, and
-    // it belongs where the track was asked for.
+    // A torrent that is not in the session cannot be asked for anything, and
+    // waking it up is the caller's business rather than the server's: it is the
+    // lazy reactivation, and it belongs where the track was asked for.
+    //
+    // Unless there is nothing to ask for. A file that is whole in the cache is
+    // read from the disk and that is the end of it — see cachedFile(), which is
+    // what knows the difference between a file and a file full of holes.
     read->track = trackFor( infoHash, fileIndex, TorrentTrack::Foreground, &read->trackKey );
     if( !read->track ) {
-        fail( read, 404, "Not Found" );
-        return;
+        const TorrentSession::CachedFile cached = The::torrentSession()->cachedFile( infoHash, fileIndex );
+        if( !cached.complete ) {
+            fail( read, 404, "Not Found" );
+            return;
+        }
+
+        read->whole     = true;
+        read->wholePath = cached.path;
+        read->wholeSize = cached.size;
     }
 
-    const qint64 total = read->track->size();
+    const qint64 total = read->track ? read->track->size() : read->wholeSize;
     qint64 first = 0;
     qint64 last  = total - 1;
     bool   partial = false;
@@ -336,7 +357,7 @@ void StreamServer::Private::serve( PendingRead *read )
     read->endOffset  = last;
 
     QByteArray response = partial ? "HTTP/1.1 206 Partial Content\r\n" : "HTTP/1.1 200 OK\r\n";
-    response += "Content-Type: " + contentTypeFor( read->track->localPath() ) + "\r\n";
+    response += "Content-Type: " + contentTypeFor( read->track ? read->track->localPath() : read->wholePath ) + "\r\n";
     response += "Accept-Ranges: bytes\r\n";
     response += "Content-Length: " + QByteArray::number( last - first + 1 ) + "\r\n";
     if( partial ) {
@@ -360,7 +381,7 @@ void StreamServer::Private::serve( PendingRead *read )
 
 void StreamServer::Private::pump( PendingRead *read )
 {
-    if( !read->responded || read->headOnly || !read->track )
+    if( !read->responded || read->headOnly || ( !read->track && !read->whole ) )
         return;
 
     while( read->nextOffset <= read->endOffset ) {
@@ -371,7 +392,9 @@ void StreamServer::Private::pump( PendingRead *read )
             return;
         }
 
-        if( !read->track->isReadableAt( read->nextOffset ) ) {
+        // Nothing of this applies to a whole file: every byte of it is already
+        // there, so there is no piece to want and nobody to wait for.
+        if( read->track && !read->track->isReadableAt( read->nextOffset ) ) {
             read->track->wantAt( read->nextOffset );
 
             if( !read->waitingForPiece ) {
@@ -384,7 +407,7 @@ void StreamServer::Private::pump( PendingRead *read )
         // Only after have_piece said yes: the piece has been written and its
         // hash checked, so what is under it on disk is the real thing.
         if( !read->file.isOpen() ) {
-            read->file.setFileName( read->track->localPath() );
+            read->file.setFileName( read->track ? read->track->localPath() : read->wholePath );
             if( !read->file.open( QIODevice::ReadOnly ) ) {
                 qDebug() << "GrooveOff ::" << "cannot open" << read->file.fileName();
                 close( read );
@@ -392,7 +415,9 @@ void StreamServer::Private::pump( PendingRead *read )
             }
         }
 
-        const qint64 stop = qMin( read->track->pieceEnd( read->nextOffset ), read->endOffset + 1 );
+        const qint64 stop = qMin( read->track ? read->track->pieceEnd( read->nextOffset )
+                                              : read->endOffset + 1,
+                                  read->endOffset + 1 );
         const qint64 wanted = qMin( stop - read->nextOffset, chunkSize );
         if( wanted <= 0 ) {
             close( read );
@@ -726,8 +751,12 @@ bool StreamServer::isPlayable( const QString &infoHash, int fileIndex ) const
 {
     TorrentSession *session = The::torrentSession();
 
-    if( !session->hasMetadata( infoHash ) )
-        return false;
+    if( !session->hasMetadata( infoHash ) ) {
+        // A torrent nobody has woken up, which is normally a reason to wait.
+        // Not when the file is whole in the cache: then there is nothing to
+        // wait for and nothing the network could add.
+        return session->cachedFile( infoHash, fileIndex ).complete;
+    }
 
     const qint64 size = session->fileSize( infoHash, fileIndex );
     if( size <= 0 )
@@ -768,8 +797,15 @@ void StreamServer::prepare( const QString &infoHash, int fileIndex )
     cancelPreparation();
 
     QString key;
-    if( !d->trackFor( infoHash, fileIndex, TorrentTrack::Foreground, &key ) )
+    if( !d->trackFor( infoHash, fileIndex, TorrentTrack::Foreground, &key ) ) {
+        // No track to bring up. Either the torrent is asleep and has nothing to
+        // give, or it is asleep because it has everything already — and in that
+        // case the answer is yes, at once, rather than a silence nobody would
+        // know how to interpret.
+        if( isPlayable( infoHash, fileIndex ) )
+            emit trackPlayable( infoHash, fileIndex );
         return;
+    }
 
     d->preparedKey   = key;
     d->preparedHash  = infoHash;
