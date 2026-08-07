@@ -25,10 +25,13 @@
 #include "../torrent/TorrentSession.h"
 
 #include <QAudio>
+#include <QAudioDevice>
 #include <QAudioOutput>
 #include <QDir>
 #include <QDebug>
+#include <QMediaDevices>
 #include <QSettings>
+#include <QThreadPool>
 
 namespace The {
     static AudioEngine* s_AudioEngine_instance = 0;
@@ -71,6 +74,10 @@ AudioEngine::~AudioEngine()
   Everything that only wants to connect to a signal, ask what state we are in
   or set the volume goes on working with no player at all, or the laziness
   would be undone by the first of them.
+
+  By the time this normally runs the wait has already been had, on another
+  thread: see prepareOutput(). What is left here is the fallback, and the two
+  lines it costs.
 */
 QMediaPlayer *AudioEngine::player()
 {
@@ -92,16 +99,35 @@ QMediaPlayer *AudioEngine::player()
 }
 
 /*!
-  \brief prepareOutput: builds the player at a moment when the wait costs nothing
+  \brief prepareOutput: pays for the sound system on a thread nobody is watching
 
-  Called once the window is on screen. Without it the whole wait would land on
-  the first play instead, which is not an improvement — it is the same pause
-  moved somewhere the user is looking at it. With it, by the time anybody has
-  chosen a track the sound system has usually finished answering.
+  What costs is not building the player, it is the **first touch of the
+  multimedia backend**, whoever makes it: once the backend is up, a player and
+  its output are built in no measurable time at all. Asking for the list of
+  audio outputs is that first touch, and it can be made from any thread.
+
+  Which is the whole point of doing it here. Building the player in the window's
+  own thread half a second after it appeared moved the wait out of the start up
+  and straight into the moment somebody clicks a menu: the window was drawn and
+  did not answer, because the loop that delivers the clicks was inside the
+  round trip to the sound server. A window that ignores the mouse for three
+  seconds is worse than one that takes three seconds to appear — it looks
+  broken rather than slow.
+
+  The thread is very likely gone before anything plays, and that is fine: what
+  it leaves behind is the backend, which belongs to nobody. Playing a file
+  through a player built afterwards was measured end to end, thread already
+  dead, and it plays.
+
+  Nothing waits for it either. A play that arrives while the backend is still
+  coming up blocks exactly as long as it used to, and no longer.
 */
 void AudioEngine::prepareOutput()
 {
-    player();
+    if( m_mediaPlayer )
+        return;
+
+    QThreadPool::globalInstance()->start( [] { ( void )QMediaDevices::audioOutputs(); } );
 }
 
 void AudioEngine::connectPlayer()

@@ -35,7 +35,6 @@
 #include <QDir>
 #include <QLibraryInfo>
 #include <QSettings>
-#include <QTimer>
 #include <QStandardPaths>
 #include <QTranslator>
 
@@ -105,12 +104,12 @@ void App::start()
 
     mainWindow()->show();
 
-    // Only now, and not in the constructor of anything: building the media
-    // player asks the sound server what there is to play on, and that answer
-    // took 2.8 of the 4.1 seconds this application used to need to put a window
-    // on screen. Queued behind the window rather than dropped altogether,
-    // because the wait has to happen once and here nobody is waiting for it.
-    QTimer::singleShot( 500, this, [] { The::audioEngine()->prepareOutput(); } );
+    // Only now, and not in the constructor of anything: asking the sound server
+    // what there is to play on took 2.8 of the 4.1 seconds this application
+    // used to need to put a window on screen. It is started here and answered
+    // on a thread of its own, so that neither the window nor the mouse waits
+    // for it.
+    The::audioEngine()->prepareOutput();
 }
 
 /*!
