@@ -540,12 +540,12 @@
     <message>
         <location line="+2"/>
         <location line="+505"/>
-        <location line="+1525"/>
+        <location line="+1518"/>
         <source>Idle</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-2021"/>
+        <location line="-2014"/>
         <source>Magnet</source>
         <translation type="unfinished"></translation>
     </message>
@@ -678,54 +678,27 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+60"/>
-        <source>Stop looking</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+1"/>
-        <source>Stop looking for «%1»?</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+2"/>
-        <source>Nothing of it has been downloaded, so nothing is lost — but the magnet is, and it would have to be pasted again.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+22"/>
+        <location line="+84"/>
         <source>Remove playlist</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+1"/>
-        <source>Remove the playlist «%1»?</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+2"/>
-        <source>The tracks themselves stay where they are: this only removes the list.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+20"/>
-        <location line="+30"/>
+        <location line="-21"/>
+        <location line="+41"/>
+        <location line="+27"/>
         <source>Remove torrent</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-29"/>
-        <location line="+30"/>
+        <location line="-67"/>
+        <location line="+21"/>
+        <location line="+20"/>
+        <location line="+27"/>
         <source>Remove «%1»?</source>
         <translation type="unfinished"></translation>
     </message>
-    <message>
-        <location line="-28"/>
-        <source>Its tracks and its downloaded data go with it. Adding the magnet again brings it back.</source>
-        <translation type="unfinished"></translation>
-    </message>
     <message numerus="yes">
-        <location line="+29"/>
+        <location line="+1"/>
         <source>%n track(s) of this torrent are used in your own playlists: %1.</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -771,7 +744,7 @@
         <translation type="vanished">Iniciar pesquisa</translation>
     </message>
     <message>
-        <location line="-1812"/>
+        <location line="-1805"/>
         <source>Main menu</source>
         <translation type="unfinished"></translation>
     </message>
@@ -794,7 +767,7 @@ Select a valid path</source>
 Selecione uma pasta válida</translation>
     </message>
     <message>
-        <location line="+2037"/>
+        <location line="+2030"/>
         <source>Donation to Grooveoff&apos;s author</source>
         <translation>Doações ao autor de Grooveoff</translation>
     </message>
@@ -803,7 +776,7 @@ Selecione uma pasta válida</translation>
         <translation type="vanished">Música do Grooveshark.com Offline</translation>
     </message>
     <message>
-        <location line="-2106"/>
+        <location line="-2099"/>
         <location line="+1418"/>
         <source>Attention</source>
         <translation>Atenção</translation>
@@ -830,7 +803,7 @@ Selecione uma pasta válida</translation>
         <translation type="vanished">Um arquivo chamado &quot;%1&quot; já existe. Tem certeza que deseja sobrescreve-lo?</translation>
     </message>
     <message>
-        <location line="+682"/>
+        <location line="+675"/>
         <source>Offline</source>
         <translation>Offline</translation>
     </message>

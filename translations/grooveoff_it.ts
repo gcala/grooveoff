@@ -636,12 +636,12 @@
     <message>
         <location line="+2"/>
         <location line="+505"/>
-        <location line="+1525"/>
+        <location line="+1518"/>
         <source>Idle</source>
         <translation>Fermo</translation>
     </message>
     <message>
-        <location line="-2021"/>
+        <location line="-2014"/>
         <source>Magnet</source>
         <translation>Magnet</translation>
     </message>
@@ -807,54 +807,51 @@
         <translation>Rinomina playlist</translation>
     </message>
     <message>
-        <location line="+60"/>
         <source>Stop looking</source>
-        <translation>Smetti di cercare</translation>
+        <translation type="vanished">Smetti di cercare</translation>
     </message>
     <message>
-        <location line="+1"/>
         <source>Stop looking for «%1»?</source>
-        <translation>Smettere di cercare «%1»?</translation>
+        <translation type="vanished">Smettere di cercare «%1»?</translation>
     </message>
     <message>
-        <location line="+2"/>
         <source>Nothing of it has been downloaded, so nothing is lost — but the magnet is, and it would have to be pasted again.</source>
-        <translation>Non ne è stato scaricato niente, quindi non si perde nulla — tranne il magnet, che andrebbe reincollato.</translation>
+        <translation type="vanished">Non ne è stato scaricato niente, quindi non si perde nulla — tranne il magnet, che andrebbe reincollato.</translation>
     </message>
     <message>
-        <location line="+22"/>
+        <location line="+84"/>
         <source>Remove playlist</source>
         <translation>Rimuovi playlist</translation>
     </message>
     <message>
-        <location line="+1"/>
         <source>Remove the playlist «%1»?</source>
-        <translation>Rimuovere la playlist «%1»?</translation>
+        <translation type="vanished">Rimuovere la playlist «%1»?</translation>
     </message>
     <message>
-        <location line="+2"/>
         <source>The tracks themselves stay where they are: this only removes the list.</source>
-        <translation>I brani restano dove sono: questo toglie soltanto la lista.</translation>
+        <translation type="vanished">I brani restano dove sono: questo toglie soltanto la lista.</translation>
     </message>
     <message>
-        <location line="+20"/>
-        <location line="+30"/>
+        <location line="-21"/>
+        <location line="+41"/>
+        <location line="+27"/>
         <source>Remove torrent</source>
         <translation>Rimuovi torrent</translation>
     </message>
     <message>
-        <location line="-29"/>
-        <location line="+30"/>
+        <location line="-67"/>
+        <location line="+21"/>
+        <location line="+20"/>
+        <location line="+27"/>
         <source>Remove «%1»?</source>
         <translation>Rimuovere «%1»?</translation>
     </message>
     <message>
-        <location line="-28"/>
         <source>Its tracks and its downloaded data go with it. Adding the magnet again brings it back.</source>
-        <translation>Se ne vanno i suoi brani e i suoi dati scaricati. Riaggiungendo il magnet torna.</translation>
+        <translation type="vanished">Se ne vanno i suoi brani e i suoi dati scaricati. Riaggiungendo il magnet torna.</translation>
     </message>
     <message numerus="yes">
-        <location line="+29"/>
+        <location line="+1"/>
         <source>%n track(s) of this torrent are used in your own playlists: %1.</source>
         <translation>
             <numerusform>%n brano di questo torrent è usato nelle tue playlist: %1.</numerusform>
@@ -919,7 +916,7 @@
         <translation type="vanished">Inizia ricerca</translation>
     </message>
     <message>
-        <location line="-1812"/>
+        <location line="-1805"/>
         <source>Main menu</source>
         <translation>Menu principale</translation>
     </message>
@@ -976,12 +973,12 @@ Select a valid path</source>
 Seleziona un percorso valido</translation>
     </message>
     <message>
-        <location line="+2037"/>
+        <location line="+2030"/>
         <source>Donation to Grooveoff&apos;s author</source>
         <translation>Donazione all&apos;autore di Grooveoff</translation>
     </message>
     <message>
-        <location line="-2106"/>
+        <location line="-2099"/>
         <location line="+1418"/>
         <source>Attention</source>
         <translation>Attenzione</translation>
@@ -1016,7 +1013,7 @@ Selezionare un percorso valido</translation>
         <translation type="vanished">Annullo...</translation>
     </message>
     <message>
-        <location line="+682"/>
+        <location line="+675"/>
         <source>Offline</source>
         <translation>Non in linea</translation>
     </message>

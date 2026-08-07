@@ -1786,17 +1786,16 @@ void MainWindow::removePlaylist()
     // A magnet still being looked for comes through the same entry, because
     // from the sidebar it is a row like any other and getting rid of it is the
     // same gesture. What it means underneath is different — there is no
-    // playlist, no track and no byte on disk, only the looking — so it asks its
-    // own question and takes its own way out.
+    // playlist, no track and no byte on disk, only the looking — so it takes
+    // its own way out. It asks the same question, though: what is being removed
+    // is the row somebody is pointing at, and a question that changed its
+    // wording with what happens to sit behind the row would be making a
+    // distinction the person asking has no reason to care about.
     const QString pendingHash = ui->playlistList->currentPendingHash();
     if( !pendingHash.isEmpty() ) {
         const int answer = QMessageBox::question( this,
-                                                  tr( "Stop looking" ),
-                                                  tr( "Stop looking for «%1»?" ).arg( pendingName( pendingHash ) )
-                                                      + QLatin1String( "\n\n" )
-                                                      + tr( "Nothing of it has been downloaded, so nothing is "
-                                                            "lost — but the magnet is, and it would have to be "
-                                                            "pasted again." ),
+                                                  tr( "Remove torrent" ),
+                                                  tr( "Remove «%1»?" ).arg( pendingName( pendingHash ) ),
                                                   QMessageBox::Yes | QMessageBox::No,
                                                   QMessageBox::No );
 
@@ -1817,10 +1816,7 @@ void MainWindow::removePlaylist()
     if( playlist.kind == PlaylistStore::CustomPlaylist ) {
         const int answer = QMessageBox::question( this,
                                                   tr( "Remove playlist" ),
-                                                  tr( "Remove the playlist «%1»?" ).arg( playlist.name )
-                                                      + QLatin1String( "\n\n" )
-                                                      + tr( "The tracks themselves stay where they are: "
-                                                            "this only removes the list." ),
+                                                  tr( "Remove «%1»?" ).arg( playlist.name ),
                                                   QMessageBox::Yes | QMessageBox::No,
                                                   QMessageBox::No );
 
@@ -1840,10 +1836,7 @@ void MainWindow::removePlaylist()
     if( references.isEmpty() ) {
         const int answer = QMessageBox::question( this,
                                                   tr( "Remove torrent" ),
-                                                  tr( "Remove «%1»?" ).arg( playlist.name )
-                                                      + QLatin1String( "\n\n" )
-                                                      + tr( "Its tracks and its downloaded data go with it. "
-                                                            "Adding the magnet again brings it back." ),
+                                                  tr( "Remove «%1»?" ).arg( playlist.name ),
                                                   QMessageBox::Yes | QMessageBox::No,
                                                   QMessageBox::No );
 
