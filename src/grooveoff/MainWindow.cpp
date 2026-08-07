@@ -156,6 +156,10 @@ MainWindow::~MainWindow()
 
     m_spinner->stop();
 
+    // Before the settings, and while the database is still open: App tears the
+    // singletons down after this window, persistence last.
+    rememberPendingMagnets();
+
     // The playback state is not written here: App asks for it before it stops
     // the player, because the position comes from a player that is still
     // running. By the time this destructor runs it would be a zero.
@@ -275,11 +279,6 @@ void MainWindow::setupConnections()
     connect( ac->getAction( "actionRenamePlaylist" ), &QAction::triggered, this, &MainWindow::renamePlaylist );
     connect( ac->getAction( "actionChooseTracks" ), &QAction::triggered, this, &MainWindow::chooseTracksAgain );
     connect( ac->getAction( "actionEmptyPlaylist" ), &QAction::triggered, this, &MainWindow::emptyPlaylist );
-    connect( ac->getAction( "actionStopLooking" ), &QAction::triggered, this, [this] {
-        const QString infoHash = ui->playlistList->currentPendingHash();
-        if( !infoHash.isEmpty() )
-            stopLookingFor( infoHash );
-    } );
     connect( ac->getAction( "actionRemovePlaylist" ), &QAction::triggered, this, &MainWindow::removePlaylist );
 
     // currentItemChanged rather than itemClicked, so that the keyboard opens a
@@ -878,7 +877,8 @@ void MainWindow::addTorrentSource( const QString &source )
     // about and answered, which is the one thing asked() exists to prevent.
     if( !m_awaitingSelection.contains( infoHash ) ) {
         PendingAdd pending;
-        pending.name = Utility::magnetDisplayName( source );
+        pending.name      = Utility::magnetDisplayName( source );
+        pending.magnetUri = The::torrentSession()->magnetUri( infoHash );
         m_awaitingSelection.insert( infoHash, pending );
     }
 
@@ -953,7 +953,8 @@ void MainWindow::resumeMagnetSearches()
     const QList<Catalog::PendingMagnet> magnets = The::catalog()->magnetsWithoutMetadata();
     for( const Catalog::PendingMagnet &magnet : magnets ) {
         PendingAdd pending;
-        pending.name = magnet.name;
+        pending.name      = magnet.name;
+        pending.magnetUri = magnet.magnetUri;
 
         // Looking again from scratch, so the led blinks again — a new attempt
         // is genuinely under way and saying otherwise would be showing the
@@ -1412,6 +1413,8 @@ void MainWindow::askAboutSlowMagnet( const QString &infoHash )
     box->setIcon( QMessageBox::Warning );
     box->setWindowTitle( tr( "No answer" ) );
 
+    box->setModal( false );
+
     // Two sentences and not one, because one of them would be false half the
     // time: a torrent whose tracker knows peers is not one nobody is sharing,
     // it is one that has not sent its track list yet. Saying the wrong one
@@ -1447,7 +1450,16 @@ void MainWindow::askAboutSlowMagnet( const QString &infoHash )
 
     pending.question = box;
 
-    box->open();
+    // show() and not open(), which is the whole difference and is invisible to
+    // anything driving the program from outside. open() shows a dialog
+    // *window-modal* whatever it was set to — it sets the modality itself — and
+    // that blocks every click on the window behind while letting D-Bus through,
+    // so a check made over MPRIS reports an interface that answers where a
+    // person would find it frozen. Worse, it makes the application refuse to
+    // quit: closing the main window is blocked by its own modal child and
+    // closeAllWindows() gives up, so somebody who left the question open could
+    // not shut the program down at all.
+    box->show();
 }
 
 /*!
@@ -1467,9 +1479,33 @@ void MainWindow::keepLookingFor( const QString &infoHash )
     if( !The::database()->isOpen() || !m_awaitingSelection.contains( infoHash ) )
         return;
 
-    The::catalog()->rememberMagnet( infoHash,
-                                    The::torrentSession()->magnetUri( infoHash ),
-                                    m_awaitingSelection.value( infoHash ).name );
+    const PendingAdd pending = m_awaitingSelection.value( infoHash );
+
+    The::catalog()->rememberMagnet( infoHash, pending.magnetUri, pending.name );
+}
+
+/*!
+  \brief rememberPendingMagnets: closing early is not giving up
+
+  Writing down the decision and not the paste is right while the program is
+  open — pasting a magnet and closing the window a moment later left nothing
+  behind, which is what "nothing was decided" should look like. Except that
+  closing the window *is* somebody doing something, and reading it as "throw it
+  away" is the wrong way round: a magnet without sources is exactly the one
+  worth keeping until a source turns up, and whoever pasted it did so on
+  purpose.
+
+  So the only way a magnet is forgotten is somebody saying so, with Remove or
+  with «Stop looking». This covers the two ways out that used to lose one: the
+  first minute, and the question still on screen when the program goes.
+*/
+void MainWindow::rememberPendingMagnets()
+{
+    if( !The::database()->isOpen() )
+        return;
+
+    for( auto it = m_awaitingSelection.constBegin(); it != m_awaitingSelection.constEnd(); ++it )
+        The::catalog()->rememberMagnet( it.key(), it.value().magnetUri, it.value().name );
 }
 
 /*!
@@ -1747,6 +1783,29 @@ void MainWindow::emptyPlaylist()
 
 void MainWindow::removePlaylist()
 {
+    // A magnet still being looked for comes through the same entry, because
+    // from the sidebar it is a row like any other and getting rid of it is the
+    // same gesture. What it means underneath is different — there is no
+    // playlist, no track and no byte on disk, only the looking — so it asks its
+    // own question and takes its own way out.
+    const QString pendingHash = ui->playlistList->currentPendingHash();
+    if( !pendingHash.isEmpty() ) {
+        const int answer = QMessageBox::question( this,
+                                                  tr( "Stop looking" ),
+                                                  tr( "Stop looking for «%1»?" ).arg( pendingName( pendingHash ) )
+                                                      + QLatin1String( "\n\n" )
+                                                      + tr( "Nothing of it has been downloaded, so nothing is "
+                                                            "lost — but the magnet is, and it would have to be "
+                                                            "pasted again." ),
+                                                  QMessageBox::Yes | QMessageBox::No,
+                                                  QMessageBox::No );
+
+        if( answer == QMessageBox::Yes )
+            stopLookingFor( pendingHash );
+
+        return;
+    }
+
     const qint64 playlistId = ui->playlistList->currentPlaylistId();
     if( playlistId <= 0 || !The::database()->isOpen() )
         return;
@@ -1867,8 +1926,15 @@ void MainWindow::updatePlaylistActions()
     // the interface offering something it will not do.
     const bool named = playlist.isValid() && !playlist.pinned;
 
+    // A magnet still being looked for answers none of the questions below — no
+    // name of its own to change, no tracks to empty, no files to choose between
+    // — but it does need the way out, and it is the same one: from the sidebar
+    // it is a row, and removing a row is one command however different the
+    // things behind them are.
+    const bool pending = !ui->playlistList->currentPendingHash().isEmpty();
+
     ac->getAction( "actionRenamePlaylist" )->setVisible( named );
-    ac->getAction( "actionRemovePlaylist" )->setVisible( named );
+    ac->getAction( "actionRemovePlaylist" )->setVisible( named || pending );
 
     // Only a torrent has files to choose between; a list made by hand is filled
     // by dragging into it, and emptying is what that one is offered instead.
@@ -1876,12 +1942,6 @@ void MainWindow::updatePlaylistActions()
                                                        && playlist.isValid() );
     ac->getAction( "actionEmptyPlaylist" )->setVisible( playlist.kind == PlaylistStore::CustomPlaylist
                                                         && playlist.isValid() );
-
-    // A magnet still being looked for. It answers none of the questions above —
-    // it has no name of its own to change, no tracks to empty and no files to
-    // choose between — and it needs the one thing they cannot offer: a way out
-    // for whoever chose to leave it waiting and has had enough.
-    ac->getAction( "actionStopLooking" )->setVisible( !ui->playlistList->currentPendingHash().isEmpty() );
 }
 
 void MainWindow::showPlaylistMenu( const QPoint &position )
@@ -1913,7 +1973,6 @@ void MainWindow::showPlaylistMenu( const QPoint &position )
         menu.addAction( ac->getAction( "actionRenamePlaylist" ) );
         menu.addAction( ac->getAction( "actionChooseTracks" ) );
         menu.addAction( ac->getAction( "actionEmptyPlaylist" ) );
-        menu.addAction( ac->getAction( "actionStopLooking" ) );
         menu.addAction( ac->getAction( "actionRemovePlaylist" ) );
     }
 

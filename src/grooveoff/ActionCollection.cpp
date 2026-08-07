@@ -142,13 +142,6 @@ void ActionCollection::initActions()
                                                 this
                                               );
 
-    QAction *actionStopLooking = new QAction( QIcon::fromTheme( QLatin1String( "process-stop" ),
-                                                                QIcon::fromTheme( QLatin1String( "dialog-cancel" ) )
-                                                              ),
-                                              tr( "&Stop looking" ),
-                                              this
-                                            );
-
     QAction *actionRemovePlaylist = new QAction( QIcon::fromTheme( QLatin1String( "edit-delete" ),
                                                                    QIcon( QLatin1String( ":/resources/edit-delete.png" ) )
                                                                  ),
@@ -193,7 +186,6 @@ void ActionCollection::initActions()
     m_actionCollection[ QLatin1String( "actionRenamePlaylist" ) ] = actionRenamePlaylist;
     m_actionCollection[ QLatin1String( "actionChooseTracks" ) ] = actionChooseTracks;
     m_actionCollection[ QLatin1String( "actionEmptyPlaylist" ) ] = actionEmptyPlaylist;
-    m_actionCollection[ QLatin1String( "actionStopLooking" ) ] = actionStopLooking;
     m_actionCollection[ QLatin1String( "actionRemovePlaylist" ) ] = actionRemovePlaylist;
     m_actionCollection[ QLatin1String( "actionEmptyCache" ) ] = actionEmptyCache;
     m_actionCollection[ QLatin1String( "actionAbout" ) ] = actionAbout;
@@ -212,7 +204,6 @@ void ActionCollection::initActions()
     actionEmptyCache->setToolTip( tr( "Deletes the downloaded data, leaving the playlists alone" ) );
     actionNewPlaylist->setToolTip( tr( "A list of your own, filled by dragging tracks into it" ) );
     actionChooseTracks->setToolTip( tr( "Take more of this torrent, or put back something removed by mistake" ) );
-    actionStopLooking->setToolTip( tr( "Give up on this magnet: nothing of it has been kept" ) );
     
     // set actions shortcuts
     actionClose->setShortcut( QKeySequence( Qt::CTRL | Qt::Key_Q ) );
@@ -240,7 +231,6 @@ QMenuBar* ActionCollection::createMenuBar( QWidget *parent )
     playlistsMenu->addAction( m_actionCollection[ QLatin1String( "actionRenamePlaylist" ) ] );
     playlistsMenu->addAction( m_actionCollection[ QLatin1String( "actionChooseTracks" ) ] );
     playlistsMenu->addAction( m_actionCollection[ QLatin1String( "actionEmptyPlaylist" ) ] );
-    playlistsMenu->addAction( m_actionCollection[ QLatin1String( "actionStopLooking" ) ] );
     playlistsMenu->addAction( m_actionCollection[ QLatin1String( "actionRemovePlaylist" ) ] );
     m_menuCollection[ QLatin1String( "playlistsMenu" ) ] = playlistsMenu;
 

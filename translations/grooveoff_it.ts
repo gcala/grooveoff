@@ -75,22 +75,22 @@
         <translation>&amp;Esci</translation>
     </message>
     <message>
-        <location line="+148"/>
+        <location line="+140"/>
         <source>Close GrooveOff</source>
         <translation>Chiudi GrooveOff</translation>
     </message>
     <message>
-        <location line="-141"/>
+        <location line="-133"/>
         <source>&amp;Donate</source>
         <translation>&amp;Dona</translation>
     </message>
     <message>
-        <location line="+142"/>
+        <location line="+134"/>
         <source>Donate with PayPal</source>
         <translation>Dona con PayPal</translation>
     </message>
     <message>
-        <location line="-119"/>
+        <location line="-111"/>
         <source>&amp;Compact Layout</source>
         <translation>Disposizione &amp;compatta</translation>
     </message>
@@ -155,9 +155,8 @@
         <translation>S&amp;vuota la playlist</translation>
     </message>
     <message>
-        <location line="+7"/>
         <source>&amp;Stop looking</source>
-        <translation>&amp;Smetti di cercare</translation>
+        <translation type="vanished">&amp;Smetti di cercare</translation>
     </message>
     <message>
         <location line="+7"/>
@@ -180,7 +179,7 @@
         <translation>Informazioni su &amp;Qt</translation>
     </message>
     <message>
-        <location line="+34"/>
+        <location line="+33"/>
         <source>Add a .torrent file as a playlist</source>
         <translation>Aggiunge un file .torrent come playlist</translation>
     </message>
@@ -204,9 +203,8 @@
         <translation>Prendi altri brani di questo torrent, o rimetti quello tolto per sbaglio</translation>
     </message>
     <message>
-        <location line="+1"/>
         <source>Give up on this magnet: nothing of it has been kept</source>
-        <translation>Rinuncia a questo magnet: non ne è stato conservato niente</translation>
+        <translation type="vanished">Rinuncia a questo magnet: non ne è stato conservato niente</translation>
     </message>
     <message>
         <location line="+18"/>
@@ -223,7 +221,7 @@
         <translation type="vanished">&amp;Scaletta</translation>
     </message>
     <message>
-        <location line="+10"/>
+        <location line="+9"/>
         <source>&amp;File</source>
         <translation>&amp;File</translation>
     </message>
@@ -626,7 +624,7 @@
         <translation>Le playlist non verranno ricordate.</translation>
     </message>
     <message>
-        <location line="+55"/>
+        <location line="+59"/>
         <source>GrooveOff</source>
         <translation>GrooveOff</translation>
     </message>
@@ -637,13 +635,13 @@
     </message>
     <message>
         <location line="+2"/>
-        <location line="+510"/>
-        <location line="+1465"/>
+        <location line="+505"/>
+        <location line="+1525"/>
         <source>Idle</source>
         <translation>Fermo</translation>
     </message>
     <message>
-        <location line="-1966"/>
+        <location line="-2021"/>
         <source>Magnet</source>
         <translation>Magnet</translation>
     </message>
@@ -653,7 +651,7 @@
         <translation>Incolla un magnet e premi invio</translation>
     </message>
     <message>
-        <location line="+656"/>
+        <location line="+651"/>
         <source>Open a torrent</source>
         <translation>Apri un torrent</translation>
     </message>
@@ -663,7 +661,7 @@
         <translation>Torrent (*.torrent)</translation>
     </message>
     <message>
-        <location line="+38"/>
+        <location line="+39"/>
         <location line="+18"/>
         <source>Reading the track list…</source>
         <translation>Lettura dell’elenco dei brani…</translation>
@@ -687,7 +685,7 @@
         </translation>
     </message>
     <message>
-        <location line="+391"/>
+        <location line="+392"/>
         <source>The cache is already empty.</source>
         <translation>La cache è già vuota.</translation>
     </message>
@@ -712,7 +710,7 @@
         <translation>Liberati %1.</translation>
     </message>
     <message>
-        <location line="+102"/>
+        <location line="+104"/>
         <source>It can be left in the sidebar and looked for again at every start: if a source turns up, the track list will arrive on its own.</source>
         <translation>Può restare nella barra laterale e viene cercato di nuovo a ogni avvio: se compare una fonte, l’elenco dei brani arriverà da solo.</translation>
     </message>
@@ -722,7 +720,7 @@
         <translation>Continua a cercare</translation>
     </message>
     <message>
-        <location line="+80"/>
+        <location line="+113"/>
         <source>The cache could not be written to:</source>
         <translation>Non è stato possibile scrivere nella cache:</translation>
     </message>
@@ -739,7 +737,7 @@
         </translation>
     </message>
     <message>
-        <location line="-598"/>
+        <location line="-634"/>
         <source>Looking for the track list of «%1»…</source>
         <translation>Cerco l’elenco dei brani di «%1»…</translation>
     </message>
@@ -749,7 +747,7 @@
         <translation>Nuovo torrent</translation>
     </message>
     <message>
-        <location line="+172"/>
+        <location line="+173"/>
         <source>Nothing chosen from «%1»: paste the magnet again to pick tracks.</source>
         <translation>Non hai scelto niente da «%1»: incolla di nuovo il magnet per scegliere dei brani.</translation>
     </message>
@@ -759,7 +757,7 @@
         <translation>Nessuna risposta</translation>
     </message>
     <message>
-        <location line="+7"/>
+        <location line="+9"/>
         <source>«%1» has not sent its track list.</source>
         <translation>«%1» non ha mandato il suo elenco dei brani.</translation>
     </message>
@@ -782,7 +780,7 @@
         <translation type="vanished">Lascia in attesa</translation>
     </message>
     <message>
-        <location line="+207"/>
+        <location line="+240"/>
         <source>Still looking for the tracks of «%1»…</source>
         <translation>Sto ancora cercando i brani di «%1»…</translation>
     </message>
@@ -809,7 +807,22 @@
         <translation>Rinomina playlist</translation>
     </message>
     <message>
-        <location line="+62"/>
+        <location line="+60"/>
+        <source>Stop looking</source>
+        <translation>Smetti di cercare</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Stop looking for «%1»?</source>
+        <translation>Smettere di cercare «%1»?</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Nothing of it has been downloaded, so nothing is lost — but the magnet is, and it would have to be pasted again.</source>
+        <translation>Non ne è stato scaricato niente, quindi non si perde nulla — tranne il magnet, che andrebbe reincollato.</translation>
+    </message>
+    <message>
+        <location line="+22"/>
         <source>Remove playlist</source>
         <translation>Rimuovi playlist</translation>
     </message>
@@ -906,7 +919,7 @@
         <translation type="vanished">Inizia ricerca</translation>
     </message>
     <message>
-        <location line="-1757"/>
+        <location line="-1812"/>
         <source>Main menu</source>
         <translation>Menu principale</translation>
     </message>
@@ -963,13 +976,13 @@ Select a valid path</source>
 Seleziona un percorso valido</translation>
     </message>
     <message>
-        <location line="+1982"/>
+        <location line="+2037"/>
         <source>Donation to Grooveoff&apos;s author</source>
         <translation>Donazione all&apos;autore di Grooveoff</translation>
     </message>
     <message>
-        <location line="-2047"/>
-        <location line="+1382"/>
+        <location line="-2106"/>
+        <location line="+1418"/>
         <source>Attention</source>
         <translation>Attenzione</translation>
     </message>
@@ -1003,7 +1016,7 @@ Selezionare un percorso valido</translation>
         <translation type="vanished">Annullo...</translation>
     </message>
     <message>
-        <location line="+659"/>
+        <location line="+682"/>
         <source>Offline</source>
         <translation>Non in linea</translation>
     </message>
@@ -1061,7 +1074,7 @@ Selezionare un percorso valido</translation>
     </message>
     <message numerus="yes">
         <location filename="../src/grooveoff/widgets/PlaylistList.cpp" line="+92"/>
-        <location line="+199"/>
+        <location line="+205"/>
         <source>%n track(s)</source>
         <translation>
             <numerusform>%n brano</numerusform>
@@ -1069,7 +1082,12 @@ Selezionare un percorso valido</translation>
         </translation>
     </message>
     <message>
-        <location line="+3"/>
+        <location line="-87"/>
+        <source>No answer yet — still looking</source>
+        <translation>Ancora nessuna risposta — continuo a cercare</translation>
+    </message>
+    <message>
+        <location line="+90"/>
         <source>Asleep: it wakes at the first play</source>
         <translation>Addormentato: si sveglia alla prima riproduzione</translation>
     </message>
@@ -1088,12 +1106,11 @@ Selezionare un percorso valido</translation>
         <translation>Cerco l’elenco dei brani…</translation>
     </message>
     <message>
-        <location line="+1"/>
         <source>The track list has not arrived</source>
-        <translation>L’elenco dei brani non è arrivato</translation>
+        <translation type="vanished">L’elenco dei brani non è arrivato</translation>
     </message>
     <message numerus="yes">
-        <location line="+4"/>
+        <location line="+5"/>
         <location line="+89"/>
         <source>%n seed(s)</source>
         <translation>

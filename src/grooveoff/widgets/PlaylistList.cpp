@@ -199,9 +199,15 @@ void PlaylistList::updatePendingRow( QListWidgetItem *row )
     else if( !row->data( PlaylistRoles::Health ).isValid() )
         row->setData( PlaylistRoles::Health, static_cast<int>( GrooveOff::UnknownSource ) );
 
+    // The second one used to read "The track list has not arrived", and that is
+    // a report of a failure where what is happening is a search that has not
+    // finished. Nothing stops at the timeout — the torrent stays in the session
+    // and goes on announcing, and metadata turning up an hour later still open
+    // the selector — so a row that reads as dead is the interface saying the
+    // opposite of what the program is doing.
     QStringList lines;
     lines << ( searching ? tr( "Looking for the track list…" )
-                         : tr( "The track list has not arrived" ) );
+                         : tr( "No answer yet — still looking" ) );
 
     if( counts.first > 0 ) {
         lines << tr( "%n peer(s)", "", counts.first ) + QLatin1String( ", " )

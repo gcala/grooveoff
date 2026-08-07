@@ -304,6 +304,13 @@ private:
         /** what the magnet calls itself, which is all there is to go on until the metadata land */
         QString name;
 
+        /**
+         * Kept here rather than asked of the session at the end, because the
+         * end is where it is needed and the session is being taken down around
+         * the same time.
+         */
+        QString magnetUri;
+
         /** whether the led is still blinking: the sixty seconds turn it off */
         bool searching = true;
 
@@ -356,6 +363,15 @@ private:
 
     /** writes the magnet down so the looking survives the program being closed */
     void keepLookingFor( const QString &infoHash );
+
+    /**
+     * And writes down every magnet still being looked for when the program is
+     * closed. Closing early — inside the first minute, or with the question
+     * still on screen — is taken as wanting to keep the torrent until either a
+     * source turns up or it is removed by hand, so the only way a magnet is
+     * forgotten is somebody saying so.
+     */
+    void rememberPendingMagnets();
 
     /** gives up on a magnet: out of the session, off the sidebar, nothing left behind */
     void stopLookingFor( const QString &infoHash );

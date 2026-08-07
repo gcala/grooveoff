@@ -75,22 +75,22 @@
         <translation>&amp;Ukončit</translation>
     </message>
     <message>
-        <location line="+148"/>
+        <location line="+140"/>
         <source>Close GrooveOff</source>
         <translation>Zavřít GrooveOff</translation>
     </message>
     <message>
-        <location line="-141"/>
+        <location line="-133"/>
         <source>&amp;Donate</source>
         <translation>&amp;Darovat</translation>
     </message>
     <message>
-        <location line="+142"/>
+        <location line="+134"/>
         <source>Donate with PayPal</source>
         <translation>Darovat pomocí PayPal</translation>
     </message>
     <message>
-        <location line="-119"/>
+        <location line="-111"/>
         <source>&amp;Compact Layout</source>
         <translation>&amp;Celistvé rozvržení</translation>
     </message>
@@ -156,11 +156,6 @@
     </message>
     <message>
         <location line="+7"/>
-        <source>&amp;Stop looking</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+7"/>
         <source>Re&amp;move playlist...</source>
         <translation type="unfinished"></translation>
     </message>
@@ -180,7 +175,7 @@
         <translation>O &amp;Qt</translation>
     </message>
     <message>
-        <location line="+34"/>
+        <location line="+33"/>
         <source>Add a .torrent file as a playlist</source>
         <translation type="unfinished"></translation>
     </message>
@@ -200,11 +195,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+1"/>
-        <source>Give up on this magnet: nothing of it has been kept</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location line="+18"/>
         <source>&amp;Tracks</source>
         <translation type="unfinished"></translation>
@@ -215,7 +205,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+10"/>
+        <location line="+9"/>
         <source>&amp;File</source>
         <translation>&amp;Soubor</translation>
     </message>
@@ -606,7 +596,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+55"/>
+        <location line="+59"/>
         <source>GrooveOff</source>
         <translation>GrooveOff</translation>
     </message>
@@ -617,13 +607,13 @@
     </message>
     <message>
         <location line="+2"/>
-        <location line="+510"/>
-        <location line="+1465"/>
+        <location line="+505"/>
+        <location line="+1525"/>
         <source>Idle</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1966"/>
+        <location line="-2021"/>
         <source>Magnet</source>
         <translation type="unfinished"></translation>
     </message>
@@ -633,7 +623,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+656"/>
+        <location line="+651"/>
         <source>Open a torrent</source>
         <translation type="unfinished"></translation>
     </message>
@@ -643,7 +633,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+38"/>
+        <location line="+39"/>
         <location line="+18"/>
         <source>Reading the track list…</source>
         <translation type="unfinished"></translation>
@@ -659,7 +649,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+172"/>
+        <location line="+173"/>
         <source>Nothing chosen from «%1»: paste the magnet again to pick tracks.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -694,7 +684,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+7"/>
+        <location line="+9"/>
         <source>«%1» has not sent its track list.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -719,7 +709,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+81"/>
+        <location line="+114"/>
         <source>The cache could not be written to:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -756,7 +746,22 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+62"/>
+        <location line="+60"/>
+        <source>Stop looking</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Stop looking for «%1»?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Nothing of it has been downloaded, so nothing is lost — but the magnet is, and it would have to be pasted again.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+22"/>
         <source>Remove playlist</source>
         <translation type="unfinished"></translation>
     </message>
@@ -840,7 +845,7 @@
         <translation type="vanished">Spustit hledání</translation>
     </message>
     <message>
-        <location line="-1757"/>
+        <location line="-1812"/>
         <source>Main menu</source>
         <translation>Hlavní nabídka</translation>
     </message>
@@ -893,7 +898,7 @@ Select a valid path</source>
 Vyberte platnou cestu</translation>
     </message>
     <message>
-        <location line="+1982"/>
+        <location line="+2037"/>
         <source>Donation to Grooveoff&apos;s author</source>
         <translation>Dát dar autorovi GrooveOff</translation>
     </message>
@@ -902,8 +907,8 @@ Vyberte platnou cestu</translation>
         <translation type="vanished">Hudba z Grooveshark.com v režimu bez připojení k internetu</translation>
     </message>
     <message>
-        <location line="-2047"/>
-        <location line="+1382"/>
+        <location line="-2106"/>
+        <location line="+1418"/>
         <source>Attention</source>
         <translation>Pozor</translation>
     </message>
@@ -938,7 +943,7 @@ Vyberte platnou cestu</translation>
         <translation type="vanished">Ruší se...</translation>
     </message>
     <message>
-        <location line="+659"/>
+        <location line="+682"/>
         <source>Offline</source>
         <translation>Nepřipojený</translation>
     </message>
@@ -992,7 +997,7 @@ Vyberte platnou cestu</translation>
     <name>PlaylistList</name>
     <message numerus="yes">
         <location filename="../src/grooveoff/widgets/PlaylistList.cpp" line="+92"/>
-        <location line="+199"/>
+        <location line="+205"/>
         <source>%n track(s)</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -1001,7 +1006,12 @@ Vyberte platnou cestu</translation>
         </translation>
     </message>
     <message>
-        <location line="+3"/>
+        <location line="-87"/>
+        <source>No answer yet — still looking</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+90"/>
         <source>Asleep: it wakes at the first play</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1020,13 +1030,8 @@ Vyberte platnou cestu</translation>
         <source>Looking for the track list…</source>
         <translation type="unfinished"></translation>
     </message>
-    <message>
-        <location line="+1"/>
-        <source>The track list has not arrived</source>
-        <translation type="unfinished"></translation>
-    </message>
     <message numerus="yes">
-        <location line="+4"/>
+        <location line="+5"/>
         <location line="+89"/>
         <source>%n seed(s)</source>
         <translation type="unfinished">
