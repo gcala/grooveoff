@@ -277,7 +277,10 @@ void MainWindow::setupConnections()
     // playlist too. Selecting a row from the code blocks the signal, or every
     // rebuild of the sidebar would reopen the list that is already open.
     connect( ui->playlistList, &QListWidget::currentItemChanged, this,
-             [this]( QListWidgetItem *current, QListWidgetItem * ) { openPlaylist( current ); } );
+             [this]( QListWidgetItem *current, QListWidgetItem * ) {
+        openPlaylist( current );
+        updatePlaylistActions();
+    } );
 
     connect( ui->playlistList, &QWidget::customContextMenuRequested, this, &MainWindow::showPlaylistMenu );
     connect( ui->playlistList, &PlaylistList::tracksDropped, this, &MainWindow::addTracksToPlaylist );
@@ -1354,6 +1357,12 @@ void MainWindow::loadPlaylists()
         // pressed. It looks exactly like a playlist that refuses to open.
         ui->playlistList->selectPlaylist( first->data( PlaylistRoles::Id ).toLongLong() );
     }
+
+    // The rebuild may have left the sidebar pointing at a different kind of
+    // playlist, or at nothing — a removal does exactly that — and the menu has
+    // to follow. Asked here and not only on the change of selection, because
+    // selecting the row that was already current emits nothing.
+    updatePlaylistActions();
 }
 
 void MainWindow::openPlaylist( QListWidgetItem *row )
@@ -1580,6 +1589,30 @@ void MainWindow::removeTorrentEverywhere( const QString &infoHash )
     The::catalog()->removeTorrent( infoHash );
 }
 
+void MainWindow::updatePlaylistActions()
+{
+    ActionCollection *ac = The::actionCollection();
+
+    const qint64 playlistId = The::database()->isOpen() ? ui->playlistList->currentPlaylistId() : 0;
+    const PlaylistStore::PlaylistInfo playlist = playlistId > 0 ? The::playlistStore()->playlist( playlistId )
+                                                                : PlaylistStore::PlaylistInfo();
+
+    // The one that is always there has no name of its own to change and no
+    // removal to offer. Leaving the entries in and refusing afterwards would be
+    // the interface offering something it will not do.
+    const bool named = playlist.isValid() && !playlist.pinned;
+
+    ac->getAction( "actionRenamePlaylist" )->setVisible( named );
+    ac->getAction( "actionRemovePlaylist" )->setVisible( named );
+
+    // Only a torrent has files to choose between; a list made by hand is filled
+    // by dragging into it, and emptying is what that one is offered instead.
+    ac->getAction( "actionChooseTracks" )->setVisible( playlist.kind == PlaylistStore::TorrentPlaylist
+                                                       && playlist.isValid() );
+    ac->getAction( "actionEmptyPlaylist" )->setVisible( playlist.kind == PlaylistStore::CustomPlaylist
+                                                        && playlist.isValid() );
+}
+
 void MainWindow::showPlaylistMenu( const QPoint &position )
 {
     const qint64 playlistId = ui->playlistList->playlistAt( position );
@@ -1590,32 +1623,23 @@ void MainWindow::showPlaylistMenu( const QPoint &position )
     if( playlistId > 0 )
         ui->playlistList->selectPlaylist( playlistId );
 
+    // And selecting it is not only about what the entries act on: which of them
+    // apply is decided from the current row, so this has to come after. Asked
+    // here as well as on the change of selection, because a right click on the
+    // row that is already current changes nothing and emits nothing.
+    updatePlaylistActions();
+
     ActionCollection *ac = The::actionCollection();
 
     QMenu menu( this );
     menu.addAction( ac->getAction( "actionNewPlaylist" ) );
 
     if( playlistId > 0 ) {
-        const PlaylistStore::PlaylistInfo playlist = The::playlistStore()->playlist( playlistId );
-
         menu.addSeparator();
-
-        // The one that is always there has no name of its own to change and no
-        // removal to offer. Leaving the entries in and refusing afterwards
-        // would be the interface offering something it will not do.
-        if( !playlist.pinned )
-            menu.addAction( ac->getAction( "actionRenamePlaylist" ) );
-
-        // Only a torrent has files to choose between; a list made by hand is
-        // filled by dragging into it.
-        if( playlist.kind == PlaylistStore::TorrentPlaylist )
-            menu.addAction( ac->getAction( "actionChooseTracks" ) );
-
-        if( playlist.kind == PlaylistStore::CustomPlaylist )
-            menu.addAction( ac->getAction( "actionEmptyPlaylist" ) );
-
-        if( !playlist.pinned )
-            menu.addAction( ac->getAction( "actionRemovePlaylist" ) );
+        menu.addAction( ac->getAction( "actionRenamePlaylist" ) );
+        menu.addAction( ac->getAction( "actionChooseTracks" ) );
+        menu.addAction( ac->getAction( "actionEmptyPlaylist" ) );
+        menu.addAction( ac->getAction( "actionRemovePlaylist" ) );
     }
 
     menu.exec( ui->playlistList->mapToGlobal( position ) );

@@ -153,6 +153,20 @@ private Q_SLOTS:
 
     void showPlaylistMenu( const QPoint &position );
 
+    /**
+     * Hides from the playlist menu what the playlist the sidebar is pointing at
+     * cannot do. Hidden and not greyed out: a disabled entry says "not now",
+     * and there is no now in which «Choose tracks» will apply to a list somebody
+     * filled by hand — the files it offers to choose between belong to a
+     * torrent, and that list has no torrent.
+     *
+     * There is one rule and both menus read the answer off the actions
+     * themselves, since adding a hidden action to a menu shows nothing. The
+     * menu bar used to offer all four whatever was selected, so on a custom
+     * playlist «Choose tracks» was there and did nothing at all when clicked.
+     */
+    void updatePlaylistActions();
+
     /** tracks dragged onto a playlist of the sidebar */
     void addTracksToPlaylist( qint64 playlistId, const QList<qint64> &trackIds );
 
