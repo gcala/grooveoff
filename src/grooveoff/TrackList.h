@@ -82,9 +82,21 @@ protected:
     QMimeData* mimeData( const QList<QListWidgetItem *> &items ) const override;
     QStringList mimeTypes() const override;
 
+    /**
+     * Carries a picture of the rows and does not remove them afterwards.
+     * Both are things the base class gets wrong here, and for the same reason:
+     * it knows the items, and everything about these rows is in a widget put
+     * on top of them.
+     */
+    void startDrag( Qt::DropActions supportedActions ) override;
+
     void dragEnterEvent( QDragEnterEvent *event ) override;
     void dragMoveEvent( QDragMoveEvent *event ) override;
     void dropEvent( QDropEvent *event ) override;
+
+private:
+    /** the rows themselves, drawn into the picture the cursor carries */
+    QPixmap dragPixmap( const QList<QListWidgetItem *> &items ) const;
 
 private Q_SLOTS:
     void actionTriggered();

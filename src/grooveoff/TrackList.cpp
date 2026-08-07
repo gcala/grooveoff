@@ -29,10 +29,13 @@
 #include <QDir>
 
 #include <algorithm>
+#include <QCursor>
+#include <QDrag>
 #include <QMenu>
 #include <QDragEnterEvent>
 #include <QDropEvent>
 #include <QMimeData>
+#include <QPainter>
 
 #define ROW( x )  ( (TrackRow *)itemWidget( item( x ) ) )
 
@@ -151,6 +154,81 @@ QMimeData* TrackList::mimeData( const QList<QListWidgetItem *> &items ) const
     data->setData( GrooveOffMime::tracks, GrooveOffMime::encodeTracks( ids ) );
 
     return data;
+}
+
+/*!
+  \brief dragPixmap: what the cursor carries, drawn from the rows themselves
+
+  The view renders the *items* to make that picture, and the items of this list
+  are empty: what a row looks like is a widget put on top of it with
+  setItemWidget, and the view knows nothing about it. So the drag came out as a
+  blank rectangle the size of the row — the right shape, with nothing in it.
+
+  Grabbing the widgets is the whole answer. They are laid out where the view
+  says they are, so several selected rows keep their spacing and come out as
+  one block rather than a pile.
+*/
+QPixmap TrackList::dragPixmap( const QList<QListWidgetItem *> &items ) const
+{
+    QRect area;
+    for( const QListWidgetItem *item : items )
+        area = area.united( visualItemRect( item ) );
+
+    if( area.isEmpty() )
+        return QPixmap();
+
+    const qreal ratio = devicePixelRatioF();
+    QPixmap pixmap( area.size() * ratio );
+    pixmap.setDevicePixelRatio( ratio );
+
+    // The rows are drawn on the colour they are drawn on in the list. Left
+    // transparent, the text of a row would be dragged over the desktop with
+    // nothing behind it, and on a dark background it would disappear.
+    pixmap.fill( viewport()->palette().color( viewport()->backgroundRole() ) );
+
+    QPainter painter( &pixmap );
+    for( QListWidgetItem *item : items ) {
+        if( QWidget *row = itemWidget( item ) )
+            painter.drawPixmap( visualItemRect( item ).topLeft() - area.topLeft(), row->grab() );
+    }
+    painter.end();
+
+    return pixmap;
+}
+
+/*!
+  \brief startDrag: the same as the base class, minus the one thing it does at the end
+
+  QAbstractItemView removes the dragged rows itself when the drop is accepted
+  as a move, and both drops here are accepted as moves. Neither wants it: a
+  reorder is reported and the list is rebuilt from the order that was written,
+  and a track dropped on a playlist of the sidebar is copied into it — it stays
+  where it was, which is what dragging one there means.
+*/
+void TrackList::startDrag( Qt::DropActions supportedActions )
+{
+    const QList<QListWidgetItem *> items = selectedItems();
+    if( items.isEmpty() )
+        return;
+
+    QMimeData *data = mimeData( items );
+    if( !data )
+        return;
+
+    QRect area;
+    for( const QListWidgetItem *item : items )
+        area = area.united( visualItemRect( item ) );
+
+    QDrag *drag = new QDrag( this );
+    drag->setMimeData( data );
+    drag->setPixmap( dragPixmap( items ) );
+
+    // Where the picture sits under the cursor. Without it the block jumps so
+    // that its corner is under the pointer, and what was grabbed by its middle
+    // is suddenly held by an edge.
+    drag->setHotSpot( viewport()->mapFromGlobal( QCursor::pos() ) - area.topLeft() );
+
+    drag->exec( supportedActions, defaultDropAction() );
 }
 
 void TrackList::dragEnterEvent( QDragEnterEvent *event )
