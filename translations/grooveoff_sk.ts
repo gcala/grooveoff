@@ -999,14 +999,9 @@ Vyberte platnú cestu</translation>
         <source>No answer yet — still looking</source>
         <translation type="unfinished"></translation>
     </message>
-    <message>
-        <location line="+90"/>
-        <source>Asleep: it wakes at the first play</source>
-        <translation type="unfinished"></translation>
-    </message>
     <message numerus="yes">
-        <location line="-87"/>
-        <location line="+89"/>
+        <location line="+3"/>
+        <location line="+93"/>
         <source>%n peer(s)</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -1015,13 +1010,13 @@ Vyberte platnú cestu</translation>
         </translation>
     </message>
     <message>
-        <location line="-93"/>
+        <location line="-97"/>
         <source>Looking for the track list…</source>
         <translation type="unfinished"></translation>
     </message>
     <message numerus="yes">
         <location line="+5"/>
-        <location line="+89"/>
+        <location line="+93"/>
         <source>%n seed(s)</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -1030,8 +1025,8 @@ Vyberte platnú cestu</translation>
         </translation>
     </message>
     <message numerus="yes">
-        <location line="-84"/>
-        <location line="+91"/>
+        <location line="-88"/>
+        <location line="+95"/>
         <source>%n peer(s) from the tracker</source>
         <translation type="unfinished">
             <numerusform></numerusform>

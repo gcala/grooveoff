@@ -1116,13 +1116,16 @@ Selezionare un percorso valido</translation>
         <translation>Ancora nessuna risposta — continuo a cercare</translation>
     </message>
     <message>
-        <location line="+90"/>
+        <source>Not connected: it has the tracks you chose</source>
+        <translation type="vanished">Non connesso: ha i brani che hai scelto</translation>
+    </message>
+    <message>
         <source>Asleep: it wakes at the first play</source>
-        <translation>Addormentato: si sveglia alla prima riproduzione</translation>
+        <translation type="vanished">Addormentato: si sveglia alla prima riproduzione</translation>
     </message>
     <message numerus="yes">
-        <location line="-87"/>
-        <location line="+89"/>
+        <location line="+3"/>
+        <location line="+93"/>
         <source>%n peer(s)</source>
         <translation>
             <numerusform>%n peer</numerusform>
@@ -1130,7 +1133,7 @@ Selezionare un percorso valido</translation>
         </translation>
     </message>
     <message>
-        <location line="-93"/>
+        <location line="-97"/>
         <source>Looking for the track list…</source>
         <translation>Cerco l’elenco dei brani…</translation>
     </message>
@@ -1140,7 +1143,7 @@ Selezionare un percorso valido</translation>
     </message>
     <message numerus="yes">
         <location line="+5"/>
-        <location line="+89"/>
+        <location line="+93"/>
         <source>%n seed(s)</source>
         <translation>
             <numerusform>%n seed</numerusform>
@@ -1148,8 +1151,8 @@ Selezionare un percorso valido</translation>
         </translation>
     </message>
     <message numerus="yes">
-        <location line="-84"/>
-        <location line="+91"/>
+        <location line="-88"/>
+        <location line="+95"/>
         <source>%n peer(s) from the tracker</source>
         <translation>
             <numerusform>%n peer dal tracker</numerusform>

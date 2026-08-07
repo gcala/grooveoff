@@ -296,9 +296,13 @@ void PlaylistList::updateHealth( const QString &infoHash )
         QStringList lines;
         lines << tr( "%n track(s)", "", row->data( PlaylistRoles::TrackCount ).toInt() );
 
-        if( !active ) {
-            lines << tr( "Asleep: it wakes at the first play" );
-        } else {
+        // A torrent off the network says nothing about why. It used to promise
+        // it would wake at the first play, which stopped being true once the
+        // fetching ahead arrived — one still asleep has what was chosen from
+        // it, and playing that reads off the disk and wakes nothing. Whether
+        // it sleeps because it is done or because nothing has asked yet is our
+        // bookkeeping, and the led already says it is not on the network.
+        if( active ) {
             lines << tr( "%n peer(s)", "", counts.first ) + QLatin1String( ", " )
                      + tr( "%n seed(s)", "", counts.second );
 
