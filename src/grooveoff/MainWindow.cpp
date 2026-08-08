@@ -2580,7 +2580,7 @@ void MainWindow::onlineStateChanged( bool isOnline )
 
 void MainWindow::donate()
 {
-    QDesktopServices::openUrl( QUrl( QLatin1String( "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=WJNETV7GLTKDG&item_name=" ) + tr( "Donation to Grooveoff's author" ) ) );
+    QDesktopServices::openUrl( QUrl( Utility::donateUrl ) );
 }
 
 // intercept palette changes to modify the palette for svg images

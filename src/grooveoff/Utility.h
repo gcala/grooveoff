@@ -57,6 +57,13 @@ public:
 
     static const int buttonSize;
     static const int coverSize;
+
+    /**
+     * Where «Donate» goes. Here because two places open it — the menu entry and
+     * the button in the about box — and a url spelled twice eventually stops
+     * agreeing with itself.
+     */
+    static const QString donateUrl;
     static const int marginSize;
 
     /** where torrents keep their sparse files, one directory per info hash */

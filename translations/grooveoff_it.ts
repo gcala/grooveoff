@@ -14,7 +14,7 @@
         <translation>Chiudi</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/AboutDialog.cpp" line="+80"/>
+        <location filename="../src/grooveoff/AboutDialog.cpp" line="+79"/>
         <source>GrooveOff</source>
         <translation>GrooveOff</translation>
     </message>
@@ -89,12 +89,11 @@
         <translation type="vanished">GrooveOff non è affiliato a Grooveshark™ e non è stato sottoposto a verifica o approvazione ufficiale da parte di Grooveshark.com. L&apos;autore non è responsabile per eventuali violazioni ai termini d&apos;uso di Grooveshark. L&apos;autore non è coinvolto in alcun modo con Grooveshark™! Supporta i tuoi artisti preferiti acquistando la loro musica.</translation>
     </message>
     <message>
-        <location line="+24"/>
         <source>Donation to Grooveoff&apos;s author</source>
-        <translation>Donazione all&apos;autore di Grooveoff</translation>
+        <translation type="vanished">Donazione all&apos;autore di Grooveoff</translation>
     </message>
     <message>
-        <location line="-23"/>
+        <location line="+1"/>
         <source>Disclaimer:</source>
         <translation>Dichiarazione di non responsabilità:</translation>
     </message>
@@ -1058,12 +1057,11 @@ Select a valid path</source>
 Seleziona un percorso valido</translation>
     </message>
     <message>
-        <location line="+2389"/>
         <source>Donation to Grooveoff&apos;s author</source>
-        <translation>Donazione all&apos;autore di Grooveoff</translation>
+        <translation type="vanished">Donazione all&apos;autore di Grooveoff</translation>
     </message>
     <message>
-        <location line="-2458"/>
+        <location line="-69"/>
         <location line="+1632"/>
         <source>Attention</source>
         <translation>Attenzione</translation>

@@ -14,7 +14,7 @@
         <translation>Fermer</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/AboutDialog.cpp" line="+80"/>
+        <location filename="../src/grooveoff/AboutDialog.cpp" line="+79"/>
         <source>GrooveOff</source>
         <translation>GrooveOff</translation>
     </message>
@@ -69,12 +69,11 @@
         <translation type="vanished">GrooveOff n&apos;est pas affilié à Grooveshark™ et n&apos;a pas été examiné ou officiellement approuvé par Grooveshark.com. L&apos;auteur n&apos;est responsable d&apos;aucune violations aux Termes de Service de Grooveshark que permettrait cette application. L&apos;auteur n&apos;a aucun lien avec Grooveshark™! Supportez les artistes que vous aimez en achetant leur musique.</translation>
     </message>
     <message>
-        <location line="+24"/>
         <source>Donation to Grooveoff&apos;s author</source>
-        <translation>Don à l&apos;auteur de Grooveoff</translation>
+        <translation type="vanished">Don à l&apos;auteur de Grooveoff</translation>
     </message>
     <message>
-        <location line="-23"/>
+        <location line="+1"/>
         <source>Disclaimer:</source>
         <translation>Disclaimer :</translation>
     </message>
@@ -828,16 +827,15 @@ Select a valid path</source>
 Sélectionnez un chemin valide</translation>
     </message>
     <message>
-        <location line="+2389"/>
         <source>Donation to Grooveoff&apos;s author</source>
-        <translation>Don à l&apos;auteur de Grooveoff</translation>
+        <translation type="vanished">Don à l&apos;auteur de Grooveoff</translation>
     </message>
     <message>
         <source>Offline Grooveshark.com music</source>
         <translation type="vanished">La musique de Grooveshark.com hors connexion</translation>
     </message>
     <message>
-        <location line="-2458"/>
+        <location line="-69"/>
         <location line="+1632"/>
         <source>Attention</source>
         <translation>Attention</translation>

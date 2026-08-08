@@ -14,7 +14,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/AboutDialog.cpp" line="+80"/>
+        <location filename="../src/grooveoff/AboutDialog.cpp" line="+79"/>
         <source>GrooveOff</source>
         <translation type="unfinished"></translation>
     </message>
@@ -51,11 +51,6 @@
     <message>
         <location line="+2"/>
         <source>GrooveOff provides no content and is not affiliated with any tracker, indexer or torrent site. The end user is solely responsible for the sources used and for complying with the law where they are. The author accepts no liability for any use made of this application. Support the artists you like by buying their music.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+22"/>
-        <source>Donation to Grooveoff&apos;s author</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -714,12 +709,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+498"/>
-        <source>Donation to Grooveoff&apos;s author</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="-2458"/>
+        <location line="-1960"/>
         <location line="+1632"/>
         <source>Attention</source>
         <translation type="unfinished"></translation>

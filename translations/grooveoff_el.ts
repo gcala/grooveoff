@@ -14,7 +14,7 @@
         <translation>Κλείσιμο</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/AboutDialog.cpp" line="+80"/>
+        <location filename="../src/grooveoff/AboutDialog.cpp" line="+79"/>
         <source>GrooveOff</source>
         <translation>GrooveOff</translation>
     </message>
@@ -69,12 +69,11 @@
         <translation type="vanished">Το GrooveOff δεν έχει καμία σύνδεση με το Grooveshark™ και δεν έχει αναθεωρηθεί ή εγκριθεί επίσημα από το Grooveshark.com. Ο συγγραφέας δεν είναι υπεύθυνος για οποιαδήποτε παραβίαση κάνει αυτή η εφαρμογή στους όρους παροχής υπηρεσιών του Grooveshark. Ο συγγραφέας δεν έχει καμία σχέση με κανέναν τρόπο με το Grooveshark™ ! Υποστηρίξτε τους αγαπημένους σας καλλιτέχνες αγοράζοντας τη μουσική τους.</translation>
     </message>
     <message>
-        <location line="+24"/>
         <source>Donation to Grooveoff&apos;s author</source>
-        <translation>Κάντε μια δωρεά στον συγγραφέα του Grooveoff</translation>
+        <translation type="vanished">Κάντε μια δωρεά στον συγγραφέα του Grooveoff</translation>
     </message>
     <message>
-        <location line="-23"/>
+        <location line="+1"/>
         <source>Disclaimer:</source>
         <translation>Αποποίηση ευθύνης:</translation>
     </message>
@@ -930,16 +929,15 @@ Select a valid path</source>
 Επιλέξτε μια έγκυρη διαδρομή</translation>
     </message>
     <message>
-        <location line="+2389"/>
         <source>Donation to Grooveoff&apos;s author</source>
-        <translation>Κάντε μια δωρεά στον συγγραφέα του Grooveoff</translation>
+        <translation type="vanished">Κάντε μια δωρεά στον συγγραφέα του Grooveoff</translation>
     </message>
     <message>
         <source>Offline Grooveshark.com music</source>
         <translation type="vanished">Μουσική εκτός σύνδεσης από το Grooveshark.com</translation>
     </message>
     <message>
-        <location line="-2458"/>
+        <location line="-69"/>
         <location line="+1632"/>
         <source>Attention</source>
         <translation>Προσοχή</translation>

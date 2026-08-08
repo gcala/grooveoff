@@ -19,14 +19,13 @@
 
 #include "AboutDialog.h"
 #include "ui_AboutDialog.h"
+#include "Utility.h"
 
 // version include
 #include <../config-version.h>
 
 #include <QDesktopServices>
 #include <QUrl>
-
-const QString &paypalUrl = "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=WJNETV7GLTKDG&item_name=";
 
 /*!
   \class AboudDialog
@@ -111,5 +110,5 @@ void AboutDialog::openGplPage()
 */
 void AboutDialog::openDonatePage()
 {
-    QDesktopServices::openUrl( QUrl( paypalUrl + tr( "Donation to Grooveoff's author" ) ) );
+    QDesktopServices::openUrl( QUrl( Utility::donateUrl ) );
 }

@@ -97,6 +97,8 @@ QString Utility::magnetDisplayName( const QString &magnetUri )
 }
 
 const int Utility::buttonSize = 24;
+
+const QString Utility::donateUrl = QStringLiteral( "https://paypal.me/GCala" );
 const int Utility::marginSize = 5;
 QString Utility::torrentsCachePath = QString();
 QString Utility::resumeCachePath = QString();

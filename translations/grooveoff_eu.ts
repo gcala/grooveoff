@@ -14,7 +14,7 @@
         <translation>Itxi</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/AboutDialog.cpp" line="+80"/>
+        <location filename="../src/grooveoff/AboutDialog.cpp" line="+79"/>
         <source>GrooveOff</source>
         <translation>GrooveOff</translation>
     </message>
@@ -69,12 +69,11 @@
         <translation type="vanished">GrooveOff-ek ez dago Grooveshark™-ekin afiliatua eta Groveshark.com-ek ez du ofizialki berrikusi edo onartu. Egileak ez ditu bere gain hartzen aplikazio honek Grooveshark-en erabilera baldintzen gainean egin ditzakeen urraketak. Egileak ez dauka inolako zerikusirik Grooveshark-ekin. Lagundu ezazu zure gustuko artistak haien musika erosten.</translation>
     </message>
     <message>
-        <location line="+24"/>
         <source>Donation to Grooveoff&apos;s author</source>
-        <translation>Dohaintza egin Grooveoff-en egileari</translation>
+        <translation type="vanished">Dohaintza egin Grooveoff-en egileari</translation>
     </message>
     <message>
-        <location line="-23"/>
+        <location line="+1"/>
         <source>Disclaimer:</source>
         <translation>Ezespena:</translation>
     </message>
@@ -930,16 +929,15 @@ Select a valid path</source>
 Hautatu baliozko bide-izena</translation>
     </message>
     <message>
-        <location line="+2389"/>
         <source>Donation to Grooveoff&apos;s author</source>
-        <translation>Grooveoff-en egilearentzako dohaintza</translation>
+        <translation type="vanished">Grooveoff-en egilearentzako dohaintza</translation>
     </message>
     <message>
         <source>Offline Grooveshark.com music</source>
         <translation type="vanished">Gooveshark-en musika lineaz kanpo</translation>
     </message>
     <message>
-        <location line="-2458"/>
+        <location line="-69"/>
         <location line="+1632"/>
         <source>Attention</source>
         <translation>Kasu</translation>

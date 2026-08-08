@@ -14,7 +14,7 @@
         <translation>Zatvoriť</translation>
     </message>
     <message>
-        <location filename="../src/grooveoff/AboutDialog.cpp" line="+80"/>
+        <location filename="../src/grooveoff/AboutDialog.cpp" line="+79"/>
         <source>GrooveOff</source>
         <translation>GrooveOff</translation>
     </message>
@@ -69,12 +69,11 @@
         <translation type="vanished">GrooveOff nie je spojený s Grooveshark™ a nebol preskúmaný a oficiálne schválený Grooveshark.com. Autor nie je zodpovedný za akékoľvek prestúpenia pravidiel, ktorá tento program robí T.O.S. Groovesharku. Autor nie je s Grooveshark™ spojený žiadnym spôsobom! Umelcov, ktorí se vám páčia, podporte zakúpením ich hudby.</translation>
     </message>
     <message>
-        <location line="+24"/>
         <source>Donation to Grooveoff&apos;s author</source>
-        <translation>Prispieť autorovi Grooveoff</translation>
+        <translation type="vanished">Prispieť autorovi Grooveoff</translation>
     </message>
     <message>
-        <location line="-23"/>
+        <location line="+1"/>
         <source>Disclaimer:</source>
         <translation>Zrieknutie:</translation>
     </message>
@@ -945,16 +944,15 @@ Select a valid path</source>
 Vyberte platný priečinok</translation>
     </message>
     <message>
-        <location line="+2389"/>
         <source>Donation to Grooveoff&apos;s author</source>
-        <translation>Prispieť autorovi GrooveOff</translation>
+        <translation type="vanished">Prispieť autorovi GrooveOff</translation>
     </message>
     <message>
         <source>Offline Grooveshark.com music</source>
         <translation type="vanished">Offline hudba z Grooveshark.com</translation>
     </message>
     <message>
-        <location line="-2458"/>
+        <location line="-69"/>
         <location line="+1632"/>
         <source>Attention</source>
         <translation>Výstraha</translation>
