@@ -180,46 +180,6 @@
     </widget>
    </item>
    <item>
-    <widget class="QWidget" name="timerWidget" native="true">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>30</width>
-       <height>30</height>
-      </size>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>30</width>
-       <height>30</height>
-      </size>
-     </property>
-     <layout class="QGridLayout" name="timerLayout">
-      <property name="leftMargin">
-       <number>0</number>
-      </property>
-      <property name="rightMargin">
-       <number>0</number>
-      </property>
-      <item row="0" column="0">
-       <widget class="TimerButton" name="timerButton">
-        <property name="text">
-         <string/>
-        </property>
-        <property name="flat">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item>
     <widget class="QWidget" name="playWidget" native="true">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
@@ -285,7 +245,6 @@
   <zorder>infoIconWidget</zorder>
   <zorder>infoMessageWidget</zorder>
   <zorder>openFolderWidget</zorder>
-  <zorder>timerWidget</zorder>
   <zorder>playWidget</zorder>
   <zorder>animationWidget</zorder>
   <zorder>unqueueWidget</zorder>
@@ -294,11 +253,6 @@
   <zorder>queueWidget</zorder>
  </widget>
  <customwidgets>
-  <customwidget>
-   <class>TimerButton</class>
-   <extends>QPushButton</extends>
-   <header location="global">widgets/TimerButton.h</header>
-  </customwidget>
   <customwidget>
    <class>ElidedLabel</class>
    <extends>QLabel</extends>

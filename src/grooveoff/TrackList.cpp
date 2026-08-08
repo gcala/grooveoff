@@ -94,9 +94,12 @@ void TrackList::reloadPlaylist()
   There used to be a second way out, removeAll(), which announced every row to
   the engine as one being taken away. It went with the Downloads menu that was
   its only caller: emptying the view is not emptying the playlist, and a track
-  removed from the one and not the other came back at the next rebuild. What
-  takes tracks away for good is removeRow(), one row at a time, from the
-  gesture that means it.
+  removed from the one and not the other came back at the next rebuild.
+
+  And there used to be a third, removeRow(), for the gesture that takes a track
+  away for good. That one went too: a removal now writes to lists nobody is
+  looking at, so what is on screen is rebuilt from what was written rather than
+  edited to match — the road every other change to a playlist already took.
 */
 void TrackList::releaseRows()
 {
@@ -115,19 +118,6 @@ QList< PlaylistItemPtr > TrackList::playlistItems() const
     }
 
     return tracks;
-}
-
-void TrackList::removeRow( TrackRow *row )
-{
-    The::audioEngine()->removingTrack( row->playlistItem() );
-    
-    for( int i = 0; i < count(); i++ ) {
-        if( ROW( i ) == row ) {
-            QListWidgetItem *it = takeItem( i );
-            removeItemWidget( it );
-            delete it;
-        }
-    }
 }
 
 QStringList TrackList::mimeTypes() const

@@ -120,12 +120,6 @@ private Q_SLOTS:
     /** reopens the selector on the playlist the sidebar is pointing at */
     void chooseTracksAgain();
 
-    /** the sticky refusal, as opposed to taking a row out of the playlist */
-    void excludeTrack( TrackRow *item );
-
-    /** writes the rows, in the order they are in, into the open playlist */
-    void savePlaylistOrder();
-
     /** reads the tags of a track whose head has just arrived */
     void readTagsOf( const QString &infoHash, int fileIndex );
 
@@ -182,6 +176,14 @@ private Q_SLOTS:
 
     /** the whole of a torrent's playlist into a list made by hand */
     void addShownTorrentToPlaylist( QAction *chosen );
+
+    /**
+     * A row asked to be taken out of the playlist. What that means depends on
+     * the kind of list open, which is why the row asks instead of acting: out
+     * of a list made by hand it is only that, out of a torrent's playlist it is
+     * the removal of a track from everywhere, bytes included.
+     */
+    void removeTracksRequested( TrackRow *row );
 
     /** a drag that landed back in the track list: an order, not a move */
     void reorderTracks( const QList<int> &rows, int targetRow );
@@ -305,6 +307,37 @@ private:
 
     /** whether the open playlist is one the user built by hand */
     bool openPlaylistIsCustom() const;
+
+    /**
+     * The rows one gesture acts on: the whole selection when the row it was
+     * made on is part of it, that row alone otherwise. Ten rows highlighted and
+     * one of them removed is a gesture that looks broken.
+     */
+    QList<TrackRow *> rowsForGesture( TrackRow *row ) const;
+
+    /**
+     * The one question asked before any track is thrown away, naming the lists
+     * made by hand that would lose something. True when there is nothing to ask
+     * about, which is the common case and the one that must not cost a click.
+     */
+    bool confirmDiscard( const QList<TrackInfoPtr> &tracks );
+
+    /**
+     * Takes these tracks out of every list and throws their bytes away. The one
+     * place that does it, because the bin, the row's menu and the selector all
+     * mean the same thing by it and a second implementation is a second chance
+     * to leave bytes on the disk with nothing pointing at them.
+     *
+     * Asks nothing and reloads nothing: the question belongs to the gesture,
+     * and the sidebar is rebuilt once by the caller however many tracks went.
+     */
+    void discardTracks( const QList<TrackInfoPtr> &tracks );
+
+    /** takes these items out of the play queue, the one playing last of all */
+    void detachFromPlayer( const QList<PlaylistItemPtr> &items );
+
+    /** offers to remove a torrent whose playlist has just been emptied */
+    void offerToRemoveEmptied( const QString &infoHash, const QString &name );
 
     /** what is known about a magnet while its track list is still being looked for */
     struct PendingAdd

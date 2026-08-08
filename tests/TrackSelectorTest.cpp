@@ -20,6 +20,7 @@
 #include "TrackSelector.h"
 
 #include <QCheckBox>
+#include <QDialogButtonBox>
 #include <QLineEdit>
 #include <QPushButton>
 #include <QTreeWidget>
@@ -41,20 +42,20 @@ class TrackSelectorTest : public QObject
 
 private Q_SLOTS:
     void ticksTheAudioOfANewTorrent();
-    void leavesAnExcludedFileAlone();
-    void letsAnExcludedFileBackIn();
+    void selectAllReallySelectsAll();
     void keepsWhatWasChosenBefore();
+    void refusesToConfirmAnEmptySelection();
     void hidesWhatIsNotAudioUntilAsked();
     void selectAllOnlyTouchesWhatIsShown();
 
 private:
     /** a file of a torrent, as the catalogue would hand it over */
-    static TrackInfoPtr track( int index, const QString &path, bool audio, bool excluded = false );
+    static TrackInfoPtr track( int index, const QString &path, bool audio );
 
     QTreeWidget* listOf( TrackSelector *selector ) const;
 };
 
-TrackInfoPtr TrackSelectorTest::track( int index, const QString &path, bool audio, bool excluded )
+TrackInfoPtr TrackSelectorTest::track( int index, const QString &path, bool audio )
 {
     TrackInfoPtr info( new TrackInfo );
     info->setId( index + 1 );
@@ -63,7 +64,6 @@ TrackInfoPtr TrackSelectorTest::track( int index, const QString &path, bool audi
     info->setFilePath( path );
     info->setFileSize( 1000 * ( index + 1 ) );
     info->setIsAudio( audio );
-    info->setExcluded( excluded );
 
     return info;
 }
@@ -89,43 +89,29 @@ void TrackSelectorTest::ticksTheAudioOfANewTorrent()
     QCOMPARE( selected.at( 1 )->filePath(), QLatin1String( "album/02.flac" ) );
 }
 
-void TrackSelectorTest::leavesAnExcludedFileAlone()
+/*!
+  \brief selectAllReallySelectsAll
+
+  There used to be a sticky refusal that select all stepped over, so that three
+  tracks thrown out stayed out however explicitly they were asked for. It is
+  gone: a file left out of the playlist is unticked and nothing more, and the
+  most explicit gesture in the dialog does what it says.
+*/
+void TrackSelectorTest::selectAllReallySelectsAll()
 {
     const QList<TrackInfoPtr> tracks = {
         track( 0, QLatin1String( "album/01.mp3" ), true ),
-        track( 1, QLatin1String( "album/02.mp3" ), true, /*excluded*/ true )
+        track( 1, QLatin1String( "album/02.mp3" ), true ),
+        track( 2, QLatin1String( "album/03.mp3" ), true )
     };
 
-    TrackSelector selector( QLatin1String( "album" ), tracks );
-
-    // Shown, so that it can be taken back, but never ticked on its own: that
-    // is what makes a refusal a refusal.
-    QCOMPARE( listOf( &selector )->topLevelItemCount(), 2 );
-    QVERIFY( !listOf( &selector )->topLevelItem( 1 )->isHidden() );
-
-    const QList<TrackInfoPtr> selected = selector.selectedTracks();
-    QCOMPARE( selected.count(), 1 );
-    QCOMPARE( selected.first()->filePath(), QLatin1String( "album/01.mp3" ) );
-
-    // And select all must not bring it back either.
-    selector.findChild<QPushButton *>( QLatin1String( "selectAllButton" ) )->click();
-    QCOMPARE( selector.selectedTracks().count(), 2 );
-    QCOMPARE( selector.readmittedTracks().count(), 1 );
-}
-
-void TrackSelectorTest::letsAnExcludedFileBackIn()
-{
-    const QList<TrackInfoPtr> tracks = {
-        track( 0, QLatin1String( "album/01.mp3" ), true, /*excluded*/ true )
-    };
-
-    TrackSelector selector( QLatin1String( "album" ), tracks );
-    QVERIFY( selector.selectedTracks().isEmpty() );
-
-    listOf( &selector )->topLevelItem( 0 )->setCheckState( 0, Qt::Checked );
-
+    // Reopened on a playlist holding only the first: the other two were taken
+    // out at some point, which the dialog has no memory of and no opinion on.
+    TrackSelector selector( QLatin1String( "album" ), tracks, { 1 } );
     QCOMPARE( selector.selectedTracks().count(), 1 );
-    QCOMPARE( selector.readmittedTracks().count(), 1 );
+
+    selector.findChild<QPushButton *>( QLatin1String( "selectAllButton" ) )->click();
+    QCOMPARE( selector.selectedTracks().count(), 3 );
 }
 
 void TrackSelectorTest::keepsWhatWasChosenBefore()
@@ -146,8 +132,34 @@ void TrackSelectorTest::keepsWhatWasChosenBefore()
     QCOMPARE( selected.at( 0 )->filePath(), QLatin1String( "album/01.mp3" ) );
     QCOMPARE( selected.at( 1 )->filePath(), QLatin1String( "album/03.mp3" ) );
 
-    // Taken out of the playlist is not refused: nothing was excluded here.
-    QVERIFY( selector.readmittedTracks().isEmpty() );
+}
+
+/*!
+  \brief refusesToConfirmAnEmptySelection
+
+  A small guard carrying a large consequence. Unticking is now the same act as
+  the bin, bytes included, so a selector confirmed with nothing ticked would
+  throw away a whole torrent's music in one click. The dialog cannot be
+  confirmed empty, and that is what stands between the two.
+*/
+void TrackSelectorTest::refusesToConfirmAnEmptySelection()
+{
+    const QList<TrackInfoPtr> tracks = {
+        track( 0, QLatin1String( "album/01.mp3" ), true ),
+        track( 1, QLatin1String( "album/02.mp3" ), true )
+    };
+
+    TrackSelector selector( QLatin1String( "album" ), tracks );
+
+    QDialogButtonBox *buttons = selector.findChild<QDialogButtonBox *>();
+    QVERIFY( buttons );
+    QVERIFY( buttons->button( QDialogButtonBox::Ok )->isEnabled() );
+
+    selector.findChild<QPushButton *>( QLatin1String( "selectNoneButton" ) )->click();
+
+    QVERIFY( selector.selectedTracks().isEmpty() );
+    QVERIFY2( !buttons->button( QDialogButtonBox::Ok )->isEnabled(),
+              "an empty selection could be confirmed, which now deletes every byte" );
 }
 
 void TrackSelectorTest::hidesWhatIsNotAudioUntilAsked()

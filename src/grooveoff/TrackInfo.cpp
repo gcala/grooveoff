@@ -62,7 +62,6 @@ TrackInfo::TrackInfo( QObject *parent )
     , m_fileIndex( -1 )
     , m_fileSize( 0 )
     , m_isAudio( false )
-    , m_excluded( false )
     , m_trackNum( 0 )
     , m_year( 0 )
     , m_duration( 0 )
@@ -143,15 +142,6 @@ void TrackInfo::setIsAudio( bool isAudio )
     m_isAudio = isAudio;
 }
 
-bool TrackInfo::excluded() const
-{
-    return m_excluded;
-}
-
-void TrackInfo::setExcluded( bool excluded )
-{
-    m_excluded = excluded;
-}
 
 QString TrackInfo::title() const
 {

@@ -18,7 +18,6 @@
 
 
 #include "TrackRow.h"
-#include "widgets/TimerButton.h"
 #include "Utility.h"
 #include "ui_TrackRow.h"
 #include "AudioEngine.h"
@@ -72,11 +71,6 @@ TrackRow::TrackRow( const PlaylistItemPtr &playlistItemPtr, QWidget *parent )
 
 TrackRow::~TrackRow()
 {
-    if( ui->timerButton->isCountdownStarted() ) {
-        ui->timerButton->stopCountdown();
-        removeSong();
-    }
-
     delete ui;
 }
 
@@ -131,7 +125,6 @@ void TrackRow::setupUi()
 
     ui->infoIcon->setType( IconButton::Clock );
 
-    ui->timerButton->setFixedSize( QSize( Utility::buttonSize,Utility::buttonSize ) );
     ui->barsWidget->setFixedSize( QSize( Utility::buttonSize,Utility::buttonSize ) );
     ui->deleteButton->setFixedSize( QSize( Utility::buttonSize,Utility::buttonSize ) );
     ui->infoIcon->setFixedSize( QSize( Utility::buttonSize,Utility::buttonSize ) );
@@ -140,7 +133,6 @@ void TrackRow::setupUi()
     // seems that gtk DEs use different default values than Qt...
     ui->animationLayout->setContentsMargins( 0,4,0,4 );
     ui->mainLayout->setContentsMargins( 4,4,4,4 );
-    ui->timerLayout->setContentsMargins( 0,4,0,4 );
     ui->infoIconLayout->setContentsMargins( 0,4,0,4 );
     ui->infoMessageLayout->setContentsMargins( 0,4,0,4 );
     ui->progressLayout->setContentsMargins( 0,4,0,4 );
@@ -149,7 +141,6 @@ void TrackRow::setupUi()
     ui->songWidgetLayout->setContentsMargins( 1,1,0,2 );
     ui->songWidgetLayout->setHorizontalSpacing( 5 );
 
-    ui->timerWidget->setVisible( false );
     ui->deleteWidget->setVisible( false );
     ui->infoMessageWidget->setVisible( false );
 }
@@ -164,9 +155,13 @@ void TrackRow::setupConnections()
     connect( m_playlistItem.data(), &PlaylistItem::stateChanged, this, &TrackRow::setPlayerState );
 
     connect( ui->playButton, &SvgButton::buttonClicked, this, &TrackRow::playSong );
-    connect( ui->timerButton, &TimerButton::clicked, this, &TrackRow::timerButtonClicked );
-    connect( ui->timerButton, &TimerButton::countdownFinished, this, &TrackRow::removeSong );
-    connect( ui->deleteButton, &SvgButton::buttonClicked, this, &TrackRow::deleteItem );
+    // Straight through, with no delay of its own. The bin used to start a four
+    // second countdown that the menu entry beside it did not, so the same
+    // operation asked twice behaved differently depending on where it was asked
+    // — and a row destroyed mid-countdown committed the removal on its way out,
+    // which is how switching playlist could throw something away.
+    connect( ui->deleteButton, &SvgButton::buttonClicked, this,
+             [this] { emit removeRequested( this ); } );
 }
 
 void TrackRow::setTrackState( GrooveOff::TrackState state )
@@ -353,43 +348,9 @@ void TrackRow::playSong() const
     The::audioEngine()->playItem( m_playlistItem );
 }
 
-/*!
-  \brief startRemoving: prepare to remove a song
-  \return void
-*/
-void TrackRow::timerButtonClicked()
-{
-    ui->timerButton->stopCountdown();
-    ui->timerWidget->setVisible( false );
-    ui->deleteWidget->setVisible( true );
-}
-
-void TrackRow::deleteItem()
-{
-    ui->timerWidget->setVisible( true );
-    ui->timerButton->setToolTip( tr( "Abort removal" ) );
-    ui->timerButton->startCountdown();
-    ui->deleteWidget->setVisible( false );
-}
-
 bool TrackRow::operator==( TrackRow& right ) const
 {
     return *m_playlistItem == *right.playlistItem();
-}
-
-/*!
-  \brief removeSong: take the track out of the playlist
-  \return void
-*/
-void TrackRow::removeSong()
-{
-    // Nothing is deleted from disk here: the cache decides on its own when to
-    // let go of the bytes, and the track stays in the catalogue.
-    The::audioEngine()->removingTrack( m_playlistItem );
-    The::playlist()->removeItem( m_playlistItem );
-
-    emit removeMe( this );
-    emit reloadPlaylist();
 }
 
 /*!
@@ -444,28 +405,14 @@ void TrackRow::contextMenuEvent( QContextMenuEvent *event )
     QAction *removeAction = menu.addAction( QIcon::fromTheme( QLatin1String( "list-remove" ) ),
                                             tr( "Remove from the playlist" ) );
 
-    QAction *excludeAction = nullptr;
-    if( !m_inCustomPlaylist ) {
-        excludeAction = menu.addAction( QIcon::fromTheme( QLatin1String( "edit-delete" ) ),
-                                        tr( "Exclude this track" ) );
-        excludeAction->setToolTip( tr( "Keeps it out of this torrent's playlist until you say otherwise" ) );
-    }
-
     const QAction *chosen = menu.exec( event->globalPos() );
 
     if( chosen == playAction )
         playSong();
     else if( chosen == removeAction )
-        removeSong();
-    else if( excludeAction && chosen == excludeAction )
-        emit excludeRequested( this );
+        emit removeRequested( this );
     else if( chosen && playlistOf.contains( chosen ) )
         emit addToPlaylistRequested( this, playlistOf.value( chosen ) );
-}
-
-void TrackRow::setInCustomPlaylist( bool custom )
-{
-    m_inCustomPlaylist = custom;
 }
 
 /*!
@@ -474,7 +421,7 @@ void TrackRow::setInCustomPlaylist( bool custom )
 */
 void TrackRow::enterEvent( QEnterEvent* event )
 {
-    ui->deleteWidget->setVisible( !ui->timerButton->isCountdownStarted() );
+    ui->deleteWidget->setVisible( true );
 
     if( m_trackState != GrooveOff::ReadyState && m_trackState != GrooveOff::DormantState )
         ui->infoMessageWidget->setVisible( true );

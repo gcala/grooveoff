@@ -305,8 +305,7 @@ bool Database::migrateToVersion1()
             "    added_at    INTEGER NOT NULL,"
             "    last_access INTEGER NOT NULL,"
             "    bytes_done  INTEGER NOT NULL DEFAULT 0,"
-            "    has_resume  INTEGER NOT NULL DEFAULT 0,"
-            "    hidden      INTEGER NOT NULL DEFAULT 0"
+            "    has_resume  INTEGER NOT NULL DEFAULT 0"
             ")" ),
         QStringLiteral(
             "CREATE TABLE track ("
@@ -316,7 +315,6 @@ bool Database::migrateToVersion1()
             "    file_path   TEXT    NOT NULL,"
             "    file_size   INTEGER NOT NULL,"
             "    is_audio    INTEGER NOT NULL DEFAULT 0,"
-            "    excluded    INTEGER NOT NULL DEFAULT 0,"
             "    title       TEXT,"
             "    artist      TEXT,"
             "    album       TEXT,"
@@ -366,7 +364,7 @@ bool Database::migrateToVersion1()
             " VALUES ( 'To listen', 1, NULL, 1, strftime( '%s', 'now' ), strftime( '%s', 'now' ) )" ),
         QStringLiteral( "CREATE UNIQUE INDEX idx_playlist_torrent ON playlist( info_hash ) WHERE info_hash IS NOT NULL" ),
         QStringLiteral( "CREATE INDEX idx_playlist_track ON playlist_track( track_id )" ),
-        QStringLiteral( "CREATE INDEX idx_track_hash     ON track( info_hash, excluded )" ),
+        QStringLiteral( "CREATE INDEX idx_track_hash     ON track( info_hash, is_audio )" ),
         QStringLiteral( "CREATE INDEX idx_torrent_lru    ON torrent( last_access )" )
     };
 

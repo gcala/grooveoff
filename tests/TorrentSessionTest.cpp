@@ -27,8 +27,11 @@
 #include <QTemporaryDir>
 #include <QtTest>
 
+#include <libtorrent/add_torrent_params.hpp>
 #include <libtorrent/create_torrent.hpp>
 #include <libtorrent/error_code.hpp>
+#include <libtorrent/load_torrent.hpp>
+#include <libtorrent/torrent_info.hpp>
 
 #include <vector>
 
@@ -58,16 +61,28 @@ private Q_SLOTS:
     void downloadsNothingBeforeATrackIsAsked();
     void savesResumeDataOnShutdown();
     void reopensWithoutTheTorrentFile();
+    void dropsOneFileAndKeepsTheOther();
+    void libtorrentAgreesTheBytesAreGone();
 
 private:
     /** builds a two file torrent out of a directory made for the occasion */
     QString buildTorrentFile();
+
+    /** the same, with its content already where the session will look for it */
+    void buildFullTorrent();
 
     QTemporaryDir m_root;
     QString       m_cacheRoot;
     QString       m_seedRoot;
     QString       m_torrentFile;
     QString       m_infoHash;
+
+    /** the second torrent, the one that actually holds its bytes */
+    QString       m_fullHash;
+    QString       m_keptFile;
+    QByteArray    m_keptContent;
+    int           m_goneIndex = -1;
+    int           m_keptIndex = -1;
 };
 
 void TorrentSessionTest::initTestCase()
@@ -249,6 +264,147 @@ void TorrentSessionTest::reopensWithoutTheTorrentFile()
     const QList<TrackInfoPtr> tracks = arguments.at( 2 ).value<QList<TrackInfoPtr>>();
     QCOMPARE( tracks.count(), 2 );
     QCOMPARE( tracks.at( 0 )->filePath(), QLatin1String( "Test Album/01 - prova.mp3" ) );
+}
+
+void TorrentSessionTest::buildFullTorrent()
+{
+    // Two audio files this time, and both whole on the disk before the torrent
+    // is ever added: libtorrent checks them at the add and finds every piece,
+    // so the whole thing works with no peer anywhere. Dropping one of them is
+    // then a question about bytes that really exist.
+    const QString album = m_seedRoot + QLatin1String( "/Full Album" );
+    QVERIFY( QDir().mkpath( album ) );
+
+    const QByteArray first( 40000, 'x' );
+    m_keptContent = QByteArray( 40000, 'y' );
+
+    QFile one( album + QLatin1String( "/01 - one.mp3" ) );
+    QVERIFY( one.open( QIODevice::WriteOnly ) );
+    one.write( first );
+    one.close();
+
+    QFile two( album + QLatin1String( "/02 - two.mp3" ) );
+    QVERIFY( two.open( QIODevice::WriteOnly ) );
+    two.write( m_keptContent );
+    two.close();
+
+    std::vector<lt::create_file_entry> files = lt::list_files( album.toStdString() );
+    lt::create_torrent torrent( std::move( files ), 16 * 1024 );
+
+    lt::error_code error;
+    lt::set_piece_hashes( torrent, m_seedRoot.toStdString(), error );
+    QVERIFY( !error );
+
+    const std::vector<char> buffer = torrent.generate_buf();
+
+    const QString fileName = m_root.filePath( QLatin1String( "full.torrent" ) );
+    QFile file( fileName );
+    QVERIFY( file.open( QIODevice::WriteOnly ) );
+    file.write( buffer.data(), qint64( buffer.size() ) );
+    file.close();
+
+    const lt::add_torrent_params parsed = lt::load_torrent_file( fileName.toStdString() );
+    const lt::sha1_hash hash = parsed.ti->info_hashes().get_best();
+    m_fullHash = QString::fromLatin1( QByteArray( hash.data(), int( hash.size() ) ).toHex() );
+
+    const QString target = m_cacheRoot + QLatin1String( "/torrents/" ) + m_fullHash
+                           + QLatin1String( "/Full Album" );
+    QVERIFY( QDir().mkpath( target ) );
+    QVERIFY( QFile::copy( album + QLatin1String( "/01 - one.mp3" ),
+                          target + QLatin1String( "/01 - one.mp3" ) ) );
+    QVERIFY( QFile::copy( album + QLatin1String( "/02 - two.mp3" ),
+                          target + QLatin1String( "/02 - two.mp3" ) ) );
+
+    m_keptFile = target + QLatin1String( "/02 - two.mp3" );
+
+    QSignalSpy metadata( The::torrentSession(), &TorrentSession::metadataReady );
+    QString addError;
+    QCOMPARE( The::torrentSession()->addTorrentFile( fileName, &addError ), m_fullHash );
+    QVERIFY2( metadata.wait( 5000 ), qPrintable( addError ) );
+
+    // The indexes are looked up and not assumed: libtorrent lays a hybrid
+    // torrent out with pad files between the real ones, so the second track is
+    // not file 1. Guessing gave a test that failed against correct code.
+    const QList<TrackInfoPtr> tracks = metadata.first().at( 2 ).value<QList<TrackInfoPtr>>();
+    for( const TrackInfoPtr &track : tracks ) {
+        if( track->filePath().endsWith( QLatin1String( "01 - one.mp3" ) ) )
+            m_goneIndex = track->fileIndex();
+        else if( track->filePath().endsWith( QLatin1String( "02 - two.mp3" ) ) )
+            m_keptIndex = track->fileIndex();
+    }
+
+    QVERIFY( m_goneIndex >= 0 );
+    QVERIFY( m_keptIndex >= 0 );
+
+    // The check takes a moment, and until it is done there is nothing to drop.
+    // Asked of the live handle and not of cachedFile(), which reads the resume
+    // blob: a torrent that got its bytes from a check rather than from a
+    // download has not written one yet, which is precisely the case dropFiles()
+    // has to cope with.
+    QTRY_VERIFY_WITH_TIMEOUT( The::torrentSession()->havePiece( m_fullHash, 0 ), 15000 );
+    QTRY_VERIFY_WITH_TIMEOUT( The::torrentSession()->havePiece( m_fullHash, 4 ), 15000 );
+}
+
+/*!
+  \brief dropsOneFileAndKeepsTheOther
+
+  The per-file removal, asked of the layer that has to do it. libtorrent has no
+  such operation — a torrent is the unit of everything destructive it offers —
+  so what is being checked is that the assembly built out of what it does offer
+  arrives at the right place: one file gone from the disk, the other intact byte
+  for byte, and the piece map agreeing with both.
+
+  The second half is the one that matters and the one an obvious implementation
+  gets wrong: a file left claimed in the map is a file that will be believed
+  present next time and played as silence.
+*/
+void TorrentSessionTest::dropsOneFileAndKeepsTheOther()
+{
+    buildFullTorrent();
+
+    const QString goneFile = The::torrentSession()->filePath( m_fullHash, m_goneIndex );
+    QVERIFY( QFile::exists( goneFile ) );
+
+    const qint64 remaining = The::torrentSession()->dropFiles( m_fullHash, { m_goneIndex } );
+
+    // Something is left, and it is less than everything: the exact figure
+    // depends on whether the layout pads its files apart, and asserting it
+    // would be asserting libtorrent's business rather than ours.
+    QVERIFY( remaining > 0 );
+    QVERIFY( remaining < 80000 );
+
+    QTRY_VERIFY_WITH_TIMEOUT( !QFile::exists( goneFile ), 5000 );
+
+    // The neighbour is untouched, and compared rather than counted: a sparse
+    // file is the full size whether it is whole or all holes.
+    QFile kept( m_keptFile );
+    QVERIFY( kept.open( QIODevice::ReadOnly ) );
+    QCOMPARE( kept.readAll(), m_keptContent );
+
+    QVERIFY( !The::torrentSession()->cachedFile( m_fullHash, m_goneIndex ).complete );
+    QVERIFY2( The::torrentSession()->cachedFile( m_fullHash, m_keptIndex ).complete,
+              "a piece shared with the file that stays was cleared" );
+}
+
+/*!
+  \brief libtorrentAgreesTheBytesAreGone
+
+  The test that stops anybody simplifying the drop back to "skip the file and
+  unlink it". That version passes everything above: the file is gone, the
+  neighbour is fine, and cachedFile() — which stats the disk — says the right
+  thing. What it gets wrong is libtorrent's own map, and the symptom arrives
+  weeks later as a track that will not play out of a swarm that is working.
+*/
+void TorrentSessionTest::libtorrentAgreesTheBytesAreGone()
+{
+    // The drop put the torrent back in the session; the first piece of the file
+    // that went belongs to nothing else, whatever the layout.
+    QTRY_VERIFY_WITH_TIMEOUT( The::torrentSession()->isActive( m_fullHash ), 5000 );
+    QTRY_VERIFY_WITH_TIMEOUT( !The::torrentSession()->havePiece( m_fullHash, 0 ), 15000 );
+
+    // And it did not throw the rest away to say so: the kept file's own pieces
+    // are still there, which is what tells a corrected map from a full recheck.
+    QVERIFY( The::torrentSession()->cachedFile( m_fullHash, m_keptIndex ).complete );
 }
 
 QTEST_MAIN( TorrentSessionTest )

@@ -46,7 +46,6 @@ class TrackInfo : public QObject
     Q_PROPERTY( QString filePath  READ filePath  WRITE setFilePath )
     Q_PROPERTY( qint64  fileSize  READ fileSize  WRITE setFileSize )
     Q_PROPERTY( bool    isAudio   READ isAudio   WRITE setIsAudio )
-    Q_PROPERTY( bool    excluded  READ excluded  WRITE setExcluded )
     Q_PROPERTY( QString title     READ title     WRITE setTitle )
     Q_PROPERTY( QString artist    READ artist    WRITE setArtist )
     Q_PROPERTY( QString album     READ album     WRITE setAlbum )
@@ -84,8 +83,6 @@ public:
     void setIsAudio( bool isAudio );
 
     /** true when the user explicitly refused this file; sticky across playlists */
-    bool excluded() const;
-    void setExcluded( bool excluded );
 
     QString title() const;
     void setTitle( const QString &title );
@@ -128,7 +125,6 @@ private:
     QString m_filePath;
     qint64  m_fileSize;
     bool    m_isAudio;
-    bool    m_excluded;
     QString m_title;
     QString m_artist;
     QString m_album;

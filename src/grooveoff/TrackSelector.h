@@ -39,10 +39,16 @@ class QTreeWidgetItem;
   * too many. It appears even for a torrent holding a single track, because a
   * behaviour that is always the same is worth the extra click.
   *
-  * A file the user has excluded before comes back greyed and unticked, and
-  * ticking it again lifts the exclusion. Leaving a file unticked is not the
-  * same thing: that only keeps it out of the playlist, and it can be put back
-  * whenever. Exclusion is the deliberate act, and it is sticky.
+  * A file has two states and no third: in the playlist or not. There used to be
+  * a sticky refusal beside them, kept so that «Select all» would step over the
+  * files somebody had thrown out; it is gone, and select all means all. A list
+  * of refusals the program applies quietly makes people remember something they
+  * cannot see anywhere, in order to contradict them on the most explicit
+  * gesture there is.
+  *
+  * Unticking is therefore the same act as the bin on a row, and costs the same:
+  * the track leaves every list and its bytes go with it, after one question if
+  * any of them are in a list made by hand.
   *
   * Non audio files are hidden behind a switch rather than dropped, because an
   * extension nobody thought of would otherwise become a track that simply is
@@ -68,8 +74,6 @@ public:
     /** the files to put in the playlist, in the order they have in the torrent */
     QList<TrackInfoPtr> selectedTracks() const;
 
-    /** the files whose exclusion the user has just lifted by ticking them */
-    QList<TrackInfoPtr> readmittedTracks() const;
 
 private Q_SLOTS:
     void applyFilter( const QString &text );

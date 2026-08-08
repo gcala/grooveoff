@@ -151,6 +151,16 @@ public:
     QString resumeFileFor( const QString &infoHash ) const;
 
     /**
+     * Takes the torrent out of the session and forgets what we were tracking
+     * about it, without touching a byte on the disk. Shared by the removal and
+     * by the dropping of single files so that the bookkeeping cannot drift
+     * apart between them; what happens to the files afterwards is the caller's.
+     *
+     * @return whether the session was holding it.
+     */
+    bool detach( const QString &infoHash, bool deleteFiles );
+
+    /**
      * Where the files of a torrent being deleted live, by every hash it could
      * come back under. Emptied by torrent_deleted_alert, which is the only
      * moment at which the directory is certainly nobody's any more.
@@ -865,30 +875,38 @@ bool TorrentSession::hasResume( const QString &infoHash ) const
     return QFile::exists( d->resumeFileFor( infoHash ) );
 }
 
-void TorrentSession::remove( const QString &infoHash, bool deleteFiles )
+bool TorrentSession::Private::detach( const QString &infoHash, bool deleteFiles )
 {
-    const QString directory = QDir( d->torrentsPath ).absoluteFilePath( infoHash );
-
-    const lt::torrent_handle handle = d->session ? d->handles.take( infoHash ) : lt::torrent_handle();
+    const lt::torrent_handle handle = session ? handles.take( infoHash ) : lt::torrent_handle();
     const bool held = handle.is_valid();
 
     if( held ) {
         if( deleteFiles ) {
+            const QString directory = QDir( torrentsPath ).absoluteFilePath( infoHash );
             const lt::info_hash_t hashes = handle.info_hashes();
 
             if( hashes.has_v1() )
-                d->pendingDeletes.insert( hexString( hashes.v1 ), directory );
+                pendingDeletes.insert( hexString( hashes.v1 ), directory );
             if( hashes.has_v2() )
-                d->pendingDeletes.insert( hexString( hashes.get( lt::protocol_version::V2 ) ), directory );
+                pendingDeletes.insert( hexString( hashes.get( lt::protocol_version::V2 ) ), directory );
         }
 
-        d->session->remove_torrent( handle, deleteFiles ? lt::session::delete_files : lt::remove_flags_t() );
+        session->remove_torrent( handle, deleteFiles ? lt::session::delete_files : lt::remove_flags_t() );
     }
 
-    d->pendingAdds.remove( infoHash );
-    d->published.remove( infoHash );
-    d->awaitingMetadata.remove( infoHash );
-    d->uploaded.remove( infoHash );
+    pendingAdds.remove( infoHash );
+    published.remove( infoHash );
+    awaitingMetadata.remove( infoHash );
+    uploaded.remove( infoHash );
+
+    return held;
+}
+
+void TorrentSession::remove( const QString &infoHash, bool deleteFiles )
+{
+    const QString directory = QDir( d->torrentsPath ).absoluteFilePath( infoHash );
+
+    const bool held = d->detach( infoHash, deleteFiles );
 
     if( !deleteFiles )
         return;
@@ -908,6 +926,138 @@ void TorrentSession::remove( const QString &infoHash, bool deleteFiles )
     // A resume file whose data are gone is worse than no resume file at all:
     // libtorrent would recheck files that do not exist any more.
     QFile::remove( d->resumeFileFor( infoHash ) );
+}
+
+qint64 TorrentSession::dropFiles( const QString &infoHash, const QList<int> &fileIndexes )
+{
+    if( infoHash.isEmpty() || fileIndexes.isEmpty() || d->torrentsPath.isEmpty() )
+        return -1;
+
+    // Before anything else, so libtorrent stops asking for them and nothing is
+    // left queued for its disk thread against a file about to go. Almost all of
+    // the race in which a block already in flight recreates the file is closed
+    // right here.
+    for( int fileIndex : fileIndexes )
+        setFilePriority( infoHash, fileIndex, SkipFile );
+
+    const QString resumeFile = d->resumeFileFor( infoHash );
+
+    // A torrent whose bytes came from a check of its files rather than from a
+    // download may not have written a resume blob yet, and without one there is
+    // no map to correct: the drop would delete nothing and say nothing. Asking
+    // for it and waiting is the bounded pump the shutdown already uses, and
+    // this is the only other place in this class that waits on purpose — it is
+    // a gesture somebody made, not a signal arriving.
+    const auto pending = d->handles.constFind( infoHash );
+    if( d->session && pending != d->handles.constEnd() && !QFile::exists( resumeFile ) ) {
+        d->saveResumeData( pending.value() );
+
+        QElapsedTimer clock;
+        clock.start();
+        while( !QFile::exists( resumeFile ) && clock.elapsed() < resumeTimeoutMs ) {
+            d->session->wait_for_alert( std::chrono::milliseconds( 50 ) );
+            drainAlerts();
+        }
+    }
+
+    const bool held = d->detach( infoHash, false );
+
+    const QByteArray stored = readWholeFile( resumeFile );
+    if( stored.isEmpty() )
+        return -1;
+
+    lt::error_code error;
+    lt::add_torrent_params params =
+        lt::read_resume_data( lt::span<const char>( stored.constData(), stored.size() ), error );
+
+    if( error || !params.ti ) {
+        qDebug() << "GrooveOff ::" << "cannot drop files of" << infoHash
+                 << "without a usable resume:" << QString::fromStdString( error.message() );
+        return -1;
+    }
+
+    const lt::file_storage &layout = params.ti->layout();
+    const int fileCount = params.ti->num_files();
+    const std::string savePath = QDir( d->torrentsPath ).absoluteFilePath( infoHash ).toStdString();
+
+    QSet<int> dropped;
+    for( int fileIndex : fileIndexes ) {
+        if( fileIndex >= 0 && fileIndex < fileCount )
+            dropped.insert( fileIndex );
+    }
+
+    if( dropped.isEmpty() )
+        return -1;
+
+    // Which pieces belong wholly to what is going. A piece touched by anything
+    // that stays — a pad file included, which costs at most one piece and risks
+    // nothing — is left claimed: its other half is still honest on the disk.
+    QSet<int> goneWith;
+    QSet<int> keptWith;
+
+    for( int fileIndex = 0; fileIndex < fileCount; ++fileIndex ) {
+        const lt::file_index_t index { fileIndex };
+        const qint64 size = layout.file_size( index );
+        if( size <= 0 )
+            continue;
+
+        const int first = int( layout.map_file( index, 0, 0 ).piece );
+        const int last  = int( layout.map_file( index, size - 1, 0 ).piece );
+
+        QSet<int> &target = dropped.contains( fileIndex ) ? goneWith : keptWith;
+        for( int piece = first; piece <= last; ++piece )
+            target.insert( piece );
+    }
+
+    for( int piece : std::as_const( goneWith ) ) {
+        if( keptWith.contains( piece ) )
+            continue;
+
+        const lt::piece_index_t index { piece };
+
+        if( piece < params.have_pieces.size() )
+            params.have_pieces.clear_bit( index );
+        if( piece < params.verified_pieces.size() )
+            params.verified_pieces.clear_bit( index );
+
+        params.unfinished_pieces.erase( index );
+    }
+
+    // And the files themselves have to be expected missing, or the next open
+    // validates the resume against a file that is not there and rechecks the
+    // whole torrent to find out what we already know.
+    // dont_download and not default_priority for the ones the blob says nothing
+    // about: everything in this program starts at dont_download and the queue
+    // raises what was chosen at its next pass, so filling with anything else
+    // would have a torrent come back fetching files nobody asked for — which is
+    // the one thing the whole design is built to prevent.
+    if( int( params.file_priorities.size() ) < fileCount )
+        params.file_priorities.resize( fileCount, lt::dont_download );
+
+    for( int fileIndex : std::as_const( dropped ) ) {
+        params.file_priorities[fileIndex] = lt::dont_download;
+        QFile::remove( QString::fromStdString( layout.file_path( lt::file_index_t { fileIndex },
+                                                                savePath ) ) );
+    }
+
+    if( !writeWholeFile( resumeFile, lt::write_resume_data_buf( params ) ) )
+        qWarning() << "GrooveOff ::" << "could not write back the resume of" << infoHash;
+
+    // What libtorrent itself will report at its next status update, and not the
+    // space that came back on the disk: bytes_done has never been a disk
+    // measurement, and writing the real figure would look right for one second
+    // and then jump when the status arrives.
+    qint64 remaining = 0;
+    for( int piece = 0; piece < params.have_pieces.size(); ++piece ) {
+        const lt::piece_index_t index { piece };
+        if( params.have_pieces[index] )
+            remaining += params.ti->piece_size( index );
+    }
+
+    if( held )
+        reopen( infoHash, d->magnets.value( infoHash ) );
+
+    return remaining;
 }
 
 void TorrentSession::requestResumeData( const QString &infoHash )

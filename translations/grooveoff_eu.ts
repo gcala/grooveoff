@@ -630,12 +630,12 @@
     <message>
         <location line="+2"/>
         <location line="+511"/>
-        <location line="+1612"/>
+        <location line="+1819"/>
         <source>Idle</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-2114"/>
+        <location line="-2321"/>
         <source>Magnet</source>
         <translation type="unfinished"></translation>
     </message>
@@ -676,7 +676,30 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+204"/>
+        <location line="+124"/>
+        <source>Remove tracks</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <location line="+1"/>
+        <source>%n track(s) of this selection are in your own playlists: %1.</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Removing them takes them out of those too.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+74"/>
+        <source>Nothing is left of «%1». Remove it?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+190"/>
         <source>The cache is already empty.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -726,7 +749,13 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1"/>
+        <location line="+440"/>
+        <source>Remove only what nothing else uses</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-830"/>
+        <location line="+389"/>
         <source>Remove</source>
         <translation type="unfinished"></translation>
     </message>
@@ -773,7 +802,8 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-21"/>
+        <location line="-706"/>
+        <location line="+685"/>
         <location line="+41"/>
         <location line="+27"/>
         <source>Remove torrent</source>
@@ -801,12 +831,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+1"/>
-        <source>Keep those tracks</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+115"/>
+        <location line="+140"/>
         <source>Add all tracks to (no list of your own yet)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -853,7 +878,7 @@
         <translation type="vanished">Hasi bilatzen</translation>
     </message>
     <message>
-        <location line="-1876"/>
+        <location line="-2087"/>
         <source>Main menu</source>
         <translation>Menu nagusia</translation>
     </message>
@@ -906,7 +931,7 @@ Select a valid path</source>
 Hautatu baliozko bide-izena</translation>
     </message>
     <message>
-        <location line="+2130"/>
+        <location line="+2337"/>
         <source>Donation to Grooveoff&apos;s author</source>
         <translation>Grooveoff-en egilearentzako dohaintza</translation>
     </message>
@@ -915,8 +940,8 @@ Hautatu baliozko bide-izena</translation>
         <translation type="vanished">Gooveshark-en musika lineaz kanpo</translation>
     </message>
     <message>
-        <location line="-2199"/>
-        <location line="+1424"/>
+        <location line="-2406"/>
+        <location line="+1611"/>
         <source>Attention</source>
         <translation>Kasu</translation>
     </message>
@@ -950,7 +975,7 @@ Hautatu baliozko bide-izena</translation>
         <translation type="vanished">Uzten...</translation>
     </message>
     <message>
-        <location line="+769"/>
+        <location line="+789"/>
         <source>Offline</source>
         <translation>Lineaz kanpo</translation>
     </message>
@@ -1065,7 +1090,7 @@ Hautatu baliozko bide-izena</translation>
 <context>
     <name>TorrentSession</name>
     <message>
-        <location filename="../src/torrent/TorrentSession.cpp" line="+722"/>
+        <location filename="../src/torrent/TorrentSession.cpp" line="+732"/>
         <location line="+35"/>
         <location line="+41"/>
         <source>The torrent session is not running.</source>
@@ -1092,7 +1117,7 @@ Hautatu baliozko bide-izena</translation>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+387"/>
+        <location line="+527"/>
         <source>Could not get the track list of this torrent.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1100,18 +1125,18 @@ Hautatu baliozko bide-izena</translation>
 <context>
     <name>TrackRow</name>
     <message>
-        <location filename="../src/grooveoff/TrackRow.cpp" line="+127"/>
-        <location line="+280"/>
+        <location filename="../src/grooveoff/TrackRow.cpp" line="+121"/>
+        <location line="+247"/>
         <source>Play</source>
         <translation>Erreproduzitu</translation>
     </message>
     <message>
-        <location line="-277"/>
+        <location line="-244"/>
         <source>Remove track from the playlist</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+58"/>
+        <location line="+59"/>
         <source>%1 of %2 buffered</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1148,12 +1173,7 @@ Hautatu baliozko bide-izena</translation>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+29"/>
-        <source>Abort removal</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+45"/>
+        <location line="+40"/>
         <source>Add to playlist</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1170,16 +1190,6 @@ Hautatu baliozko bide-izena</translation>
     <message>
         <location line="+5"/>
         <source>Remove from the playlist</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+5"/>
-        <source>Exclude this track</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+1"/>
-        <source>Keeps it out of this torrent&apos;s playlist until you say otherwise</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1261,13 +1271,8 @@ Hautatu baliozko bide-izena</translation>
         <source>No file of this torrent has a known audio extension.</source>
         <translation type="unfinished"></translation>
     </message>
-    <message>
-        <location line="+45"/>
-        <source>Excluded. Tick it to let it back in.</source>
-        <translation type="unfinished"></translation>
-    </message>
     <message numerus="yes">
-        <location line="+68"/>
+        <location line="+106"/>
         <source>%n track(s)</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -1278,7 +1283,7 @@ Hautatu baliozko bide-izena</translation>
 <context>
     <name>Utility</name>
     <message>
-        <location filename="../src/grooveoff/Utility.cpp" line="+73"/>
+        <location filename="../src/grooveoff/Utility.cpp" line="+78"/>
         <source>To listen</source>
         <translation type="unfinished"></translation>
     </message>

@@ -71,14 +71,6 @@ public:
     /** takes up the tags and the cover once they became readable */
     void refreshLabels();
 
-    /**
-     * Which kind of playlist this row is being shown in. It decides one thing
-     * only: excluding a file is a refusal aimed at its torrent, so the entry is
-     * not offered while looking at a list the user built by hand, where the
-     * track is there because it was put there on purpose.
-     */
-    void setInCustomPlaylist( bool custom );
-
     bool operator==( TrackRow & ) const;
 
 public Q_SLOTS:
@@ -89,10 +81,15 @@ Q_SIGNALS:
     void stateChangedSignal();
     void play( QString );
     void reloadPlaylist();
-    void removeMe( TrackRow * );
 
-    /** the user refused this file for good, which is not the same as removing it */
-    void excludeRequested( TrackRow * );
+    /**
+     * Take this track out of the playlist. The row asks and does not act: what
+     * removing means depends on which kind of list is open and on where else
+     * the track sits, and neither is a row's business — it is the window that
+     * knows both, and that has to be able to ask one question for a whole
+     * selection instead of one per row.
+     */
+    void removeRequested( TrackRow * );
 
     /** copy this track into a custom playlist, leaving it where it is */
     void addToPlaylistRequested( TrackRow *, qint64 playlistId );
@@ -104,17 +101,13 @@ protected:
 
 private Q_SLOTS:
     void playSong() const;
-    void timerButtonClicked();
-    void removeSong();
     void loadCover();
-    void deleteItem();
 
 private:
     Ui::TrackRow      *ui;
     PlaylistItemPtr        m_playlistItem;
     GrooveOff::TrackState  m_trackState;
     GrooveOff::PlayerState m_playerState;
-    bool                   m_inCustomPlaylist = false;
 
     /**
      * Whether the whole file is in the cache, hence whether the bar has

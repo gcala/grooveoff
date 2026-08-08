@@ -57,7 +57,6 @@ public Q_SLOTS:
     void releaseRows();
 
     /** takes one track away for good, and tells the engine so */
-    void removeRow( TrackRow *row );
 
 Q_SIGNALS:
     /**

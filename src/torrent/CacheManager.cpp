@@ -163,3 +163,20 @@ bool CacheManager::evict( const QString &infoHash )
 
     return true;
 }
+
+bool CacheManager::discardFiles( const QString &infoHash, const QList<int> &fileIndexes )
+{
+    if( infoHash.isEmpty() || fileIndexes.isEmpty() )
+        return false;
+
+    const qint64 remaining = The::torrentSession()->dropFiles( infoHash, fileIndexes );
+
+    // A torrent with no usable resume has nothing of ours on the disk to
+    // account for: the bytes and the blob are written and deleted together.
+    // Guessing a figure here would be worse than leaving the old one, which at
+    // least the next status update corrects.
+    if( remaining < 0 )
+        return false;
+
+    return The::catalog()->setBytesDone( infoHash, remaining );
+}

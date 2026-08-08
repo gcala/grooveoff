@@ -56,10 +56,13 @@ private Q_SLOTS:
     void keepsThePinnedPlaylistFirstAndUndeletable();
     void holdsATrackAtMostOnce();
     void poursWholeTorrentsIntoOneList();
+    void namesTheListsThatHoldTheseTracks();
+    void keepsTheTracksSomethingElseUses();
+    void takingATrackOutTakesItOutOfEveryList();
+    void removingATrackFromACustomListLeavesItEverywhereElse();
     void emptiesAPlaylistWithoutRemovingIt();
     void namesThePlaylistsThatWouldSuffer();
-    void keepingTheTracksOnlyHidesTheTorrent();
-    void theHiddenTorrentGoesWithItsLastTrack();
+    void keepingOnlyWhatIsUsedElsewhere();
     void removingEverythingTakesTheTracksWithIt();
     void forgetsTheOpenPlaylistWhenItIsRemoved();
 
@@ -326,6 +329,131 @@ void PlaylistTest::poursWholeTorrentsIntoOneList()
     QVERIFY( m_playlists->clearPlaylist( list ) );
 }
 
+/*!
+  \brief namesTheListsThatHoldTheseTracks
+
+  The question the removal of a track asks before it destroys anything, and it
+  has to name the lists because that is the whole content of the warning. The
+  one that is always there answers like any other and reports itself as pinned,
+  since its stored name is English and the interface says it in its own
+  language: without the flag the question prints «To listen» to somebody who has
+  only ever seen «Da ascoltare».
+*/
+void PlaylistTest::namesTheListsThatHoldTheseTracks()
+{
+    const qint64 pinned = m_playlists->pinnedPlaylistId();
+    QVERIFY( m_playlists->clearPlaylist( pinned ) );
+    QVERIFY( m_playlists->appendTracks( pinned, { m_tracksA.at( 0 ) } ) );
+
+    const QList<Catalog::PlaylistReference> holding =
+        m_catalog->customPlaylistsHolding( { m_tracksA.at( 0 )->id() } );
+
+    QCOMPARE( holding.count(), 2 );
+
+    int pinnedSeen = 0;
+    for( const Catalog::PlaylistReference &reference : holding ) {
+        QCOMPARE( reference.trackCount, 1 );
+        if( reference.pinned ) {
+            ++pinnedSeen;
+            QCOMPARE( reference.playlistId, pinned );
+        }
+    }
+    QCOMPARE( pinnedSeen, 1 );
+
+    // A track only its own torrent holds is nobody else's business, and neither
+    // is nothing at all: both have to come back empty rather than answer with
+    // every list there is.
+    QVERIFY( m_catalog->customPlaylistsHolding( { m_tracksB.at( 1 )->id() } ).isEmpty() );
+    QVERIFY( m_catalog->customPlaylistsHolding( {} ).isEmpty() );
+
+    QVERIFY( m_playlists->clearPlaylist( pinned ) );
+}
+
+void PlaylistTest::keepsTheTracksSomethingElseUses()
+{
+    // What «remove only what nothing else uses» spares, and what the torrent's
+    // own playlist is left holding.
+    const QList<qint64> kept = m_catalog->tracksInCustomPlaylists( m_hashA );
+    QCOMPARE( kept.count(), 2 );
+    QVERIFY( kept.contains( m_tracksA.at( 0 )->id() ) );
+    QVERIFY( kept.contains( m_tracksA.at( 1 )->id() ) );
+
+    // Torrent B has one track in the list made by hand and one in nothing.
+    const QList<qint64> keptB = m_catalog->tracksInCustomPlaylists( m_hashB );
+    QCOMPARE( keptB.count(), 1 );
+    QCOMPARE( keptB.first(), m_tracksB.at( 0 )->id() );
+
+    QVERIFY( m_catalog->tracksInCustomPlaylists( QStringLiteral( "nothing" ) ).isEmpty() );
+}
+
+/*!
+  \brief takingATrackOutTakesItOutOfEveryList
+
+  The removal that means «never chosen». A torrent's playlist is the list of
+  what was chosen from it, so a track leaving it has to leave the lists made by
+  hand too — otherwise one of them would go on pointing at music whose bytes are
+  about to be thrown away.
+
+  What is checked besides the disappearance is the renumbering: the positions
+  have to come back contiguous from zero in every list touched, because a drag
+  reads them as indexes and one hole makes a track move by two.
+*/
+void PlaylistTest::takingATrackOutTakesItOutOfEveryList()
+{
+    const qint64 pinned   = m_playlists->pinnedPlaylistId();
+    const qint64 torrentA = m_playlists->torrentPlaylistId( m_hashA );
+    const qint64 removed  = m_tracksA.at( 0 )->id();
+
+    QVERIFY( m_playlists->clearPlaylist( pinned ) );
+    QVERIFY( m_playlists->appendTracks( pinned, { m_tracksB.at( 0 ), m_tracksA.at( 0 ),
+                                                  m_tracksB.at( 1 ) } ) );
+
+    QVERIFY( m_playlists->removeTracksEverywhere( { removed } ) );
+
+    // Out of all three, and the torrent's own playlist is not an exception.
+    QVERIFY( !m_playlists->contains( pinned, removed ) );
+    QVERIFY( !m_playlists->contains( m_customId, removed ) );
+    QVERIFY( !m_playlists->contains( torrentA, removed ) );
+
+    // The neighbours keep their order, and close up over the hole.
+    const QList<TrackInfoPtr> left = m_playlists->tracks( pinned );
+    QCOMPARE( left.count(), 2 );
+    QCOMPARE( left.at( 0 )->id(), m_tracksB.at( 0 )->id() );
+    QCOMPARE( left.at( 1 )->id(), m_tracksB.at( 1 )->id() );
+
+    // The row in track survives: the file is known and not chosen, which is
+    // where every file starts and the only state left besides being in a list.
+    QVERIFY( m_catalog->track( removed ) );
+
+    // Asked again for something already gone: nothing to do and no failure.
+    QVERIFY( m_playlists->removeTracksEverywhere( { removed } ) );
+    QVERIFY( m_playlists->removeTracksEverywhere( {} ) );
+
+    QVERIFY( m_playlists->clearPlaylist( pinned ) );
+    QVERIFY( m_playlists->setTracks( torrentA, m_tracksA ) );
+    QVERIFY( m_playlists->setTracks( m_customId, { m_tracksA.at( 0 ), m_tracksA.at( 1 ),
+                                                   m_tracksB.at( 0 ) } ) );
+}
+
+void PlaylistTest::removingATrackFromACustomListLeavesItEverywhereElse()
+{
+    const qint64 torrentB = m_playlists->torrentPlaylistId( m_hashB );
+    const qint64 taken    = m_tracksB.at( 0 )->id();
+
+    QVERIFY( m_playlists->removeTracks( m_customId, { taken } ) );
+
+    // The simple case, and the reason it is simple: a list made by hand is a
+    // list and nothing else, so dropping something from it says nothing about
+    // the track and nothing about the torrent.
+    QVERIFY( !m_playlists->contains( m_customId, taken ) );
+    QVERIFY( m_playlists->contains( torrentB, taken ) );
+    QVERIFY( m_catalog->track( taken ) );
+    QCOMPARE( m_playlists->tracks( m_customId ).count(), 2 );
+
+    QVERIFY( m_playlists->setTracks( m_customId, { m_tracksA.at( 0 ), m_tracksA.at( 1 ),
+                                                   m_tracksB.at( 0 ) } ) );
+}
+
 void PlaylistTest::emptiesAPlaylistWithoutRemovingIt()
 {
     const qint64 pinned = m_playlists->pinnedPlaylistId();
@@ -358,48 +486,56 @@ void PlaylistTest::namesThePlaylistsThatWouldSuffer()
     QVERIFY( m_catalog->customPlaylistReferences( QStringLiteral( "no-such-torrent" ) ).isEmpty() );
 }
 
-void PlaylistTest::keepingTheTracksOnlyHidesTheTorrent()
-{
-    QVERIFY( m_catalog->hideTorrent( m_hashA ) );
+/*!
+  \brief keepingOnlyWhatIsUsedElsewhere
 
-    // Out of the sidebar: the other torrent, the list made by hand, and the one
-    // that is always there.
+  The middle way out of «Remove playlist…» on a torrent somebody has borrowed
+  from. It used to hide the torrent, which meant the row left the sidebar and
+  the reason it was still alive lived in a column nobody could see. Now the row
+  stays holding what survived: what is left and why is on the screen.
+
+  The arithmetic is what the window does, asked of the store — the tracks a list
+  made by hand still holds are kept, the rest go from every list, and the ones
+  kept stay in the order they were in rather than coming back in file order.
+*/
+void PlaylistTest::keepingOnlyWhatIsUsedElsewhere()
+{
+    const qint64 torrentA = m_playlists->torrentPlaylistId( m_hashA );
+
+    // The list made by hand holds the second track of A and nothing else of it.
+    QVERIFY( m_playlists->setTracks( m_customId, { m_tracksA.at( 1 ), m_tracksB.at( 0 ) } ) );
+
+    const QList<qint64> kept = m_catalog->tracksInCustomPlaylists( m_hashA );
+    QCOMPARE( kept.count(), 1 );
+    QCOMPARE( kept.first(), m_tracksA.at( 1 )->id() );
+
+    QList<TrackInfoPtr> remaining;
+    QList<qint64>       going;
+    for( const TrackInfoPtr &track : m_playlists->tracks( torrentA ) ) {
+        if( kept.contains( track->id() ) )
+            remaining << track;
+        else
+            going << track->id();
+    }
+
+    QVERIFY( m_playlists->setTracks( torrentA, remaining ) );
+    QVERIFY( m_playlists->removeTracksEverywhere( going ) );
+
+    // The row is still there, with what survived in it.
     const QList<PlaylistStore::PlaylistInfo> visible = m_playlists->visiblePlaylists();
-    QCOMPARE( visible.count(), 3 );
+    QCOMPARE( visible.count(), 4 );
 
-    for( const PlaylistStore::PlaylistInfo &playlist : visible )
-        QVERIFY( playlist.infoHash != m_hashA );
+    QCOMPARE( m_playlists->tracks( torrentA ).count(), 1 );
+    QCOMPARE( m_playlists->tracks( torrentA ).first()->id(), m_tracksA.at( 1 )->id() );
 
-    // And nowhere else. The tracks are still in the list they were put in, and
-    // still playable — which is the whole promise of this way out.
-    QCOMPARE( m_playlists->tracks( m_customId ).count(), 3 );
+    // Still known, still playable, and still in the list it was put in.
     QVERIFY( m_catalog->isKnown( m_hashA ) );
-    QVERIFY( m_catalog->isHidden( m_hashA ) );
     QVERIFY( m_catalog->track( m_hashA, 0 ) );
-    QVERIFY( !m_catalog->magnetUri( m_hashA ).isEmpty() );
-}
+    QVERIFY( m_playlists->contains( m_customId, m_tracksA.at( 1 )->id() ) );
 
-void PlaylistTest::theHiddenTorrentGoesWithItsLastTrack()
-{
-    // Taking the tracks out one at a time, which is the trigger the store has
-    // to notice: a hidden torrent nobody refers to any more is rubbish that no
-    // interface would ever show again.
-    QCOMPARE( m_playlists->tracks( m_customId ).at( 0 )->infoHash(), m_hashA );
-    QVERIFY( m_playlists->removeTrackAt( m_customId, 0 ) );
-
-    // One of the two is still there, so the torrent stays.
-    QVERIFY( m_catalog->isKnown( m_hashA ) );
-    QCOMPARE( m_playlists->tracks( m_customId ).count(), 2 );
-
-    QVERIFY( m_playlists->removeTrackAt( m_customId, 0 ) );
-
-    // That was the last one.
-    QVERIFY( !m_catalog->isKnown( m_hashA ) );
-    QVERIFY( m_catalog->orphanedHiddenTorrents().isEmpty() );
-
-    // And what belonged to the other torrent did not go with it.
-    QCOMPARE( m_playlists->tracks( m_customId ).count(), 1 );
-    QCOMPARE( m_playlists->tracks( m_customId ).first()->infoHash(), m_hashB );
+    QVERIFY( m_playlists->setTracks( torrentA, m_tracksA ) );
+    QVERIFY( m_playlists->setTracks( m_customId, { m_tracksA.at( 0 ), m_tracksA.at( 1 ),
+                                                   m_tracksB.at( 0 ) } ) );
 }
 
 void PlaylistTest::removingEverythingTakesTheTracksWithIt()
@@ -411,13 +547,20 @@ void PlaylistTest::removingEverythingTakesTheTracksWithIt()
     QVERIFY( m_catalog->removeTorrent( m_hashB ) );
 
     QVERIFY( !m_catalog->isKnown( m_hashB ) );
-    QVERIFY( m_playlists->tracks( m_customId ).isEmpty() );
 
-    // The list itself is not a casualty: it is empty, not gone.
+    // What belonged to that torrent went, and what belonged to the other one
+    // stayed: a cascade that reached further would be deleting music somebody
+    // put in a list by hand.
+    const QList<TrackInfoPtr> left = m_playlists->tracks( m_customId );
+    QCOMPARE( left.count(), 2 );
+    for( const TrackInfoPtr &track : left )
+        QCOMPARE( track->infoHash(), m_hashA );
+
+    // The list itself is not a casualty either.
     QVERIFY( m_playlists->playlist( m_customId ).isValid() );
 
-    // The list made by hand and the pinned one: every torrent is gone.
-    QCOMPARE( m_playlists->visiblePlaylists().count(), 2 );
+    // Torrent A, the list made by hand and the pinned one.
+    QCOMPARE( m_playlists->visiblePlaylists().count(), 3 );
 }
 
 /*!
@@ -458,10 +601,10 @@ void PlaylistTest::forgetsTheOpenPlaylistWhenItIsRemoved()
 
     QCOMPARE( m_playlists->currentPlaylistId(), qint64( 0 ) );
     QCOMPARE( m_playlists->currentTrackId(), qint64( 0 ) );
-    // Everything the story made is gone; what is left is the one nothing here
-    // created and nothing here can remove.
+    // What is left is torrent A, which nothing in this story removed, and the
+    // one nothing here created and nothing here can remove.
     const QList<PlaylistStore::PlaylistInfo> left = m_playlists->visiblePlaylists();
-    QCOMPARE( left.count(), 1 );
+    QCOMPARE( left.count(), 2 );
     QVERIFY( left.first().pinned );
 
     // And now the same thing from the other side, which is how it actually

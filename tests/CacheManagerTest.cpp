@@ -72,6 +72,7 @@ private Q_SLOTS:
     void neverEvictsWhatIsPlaying();
     void suspendsThePrefetchNearTheCeiling();
     void emptiesTheCache();
+    void discardingOneFileKeepsTheCatalogue();
 
 private:
     /** a torrent really added to the session, files and all */
@@ -298,7 +299,6 @@ void CacheManagerTest::evictingIsNotRemoving()
     // the catalogue, and — the one that matters — it is still in the playlist
     // the user built by hand.
     QVERIFY( catalog->isKnown( m_awake ) );
-    QVERIFY( !catalog->isHidden( m_awake ) );
 
     const QList<TrackInfoPtr> tracks = catalog->tracks( m_awake );
     QCOMPARE( tracks.count(), 1 );
@@ -370,6 +370,132 @@ void CacheManagerTest::emptiesTheCache()
     // Not one row fewer than before, in either table.
     QCOMPARE( The::catalog()->knownTorrents().count(), 3 );
     QCOMPARE( The::playlistStore()->tracks( m_customId ).count(), 1 );
+}
+
+/*!
+  \brief discardingOneFileKeepsTheCatalogue
+
+  Throwing away the bytes of one track, which is what removing it from a
+  playlist now does. Two things are asked, and the second is the one with teeth.
+
+  That the catalogue is untouched — the torrent still known, the file still a
+  row, the list made by hand still holding it — is the rule this whole class is
+  built around, and it is the same rule as evict().
+
+  That the byte count **stays down** is the other one, and it is what tells this
+  implementation apart from the obvious wrong one. bytes_done is written from
+  libtorrent's own figure once a second: an implementation that unlinks the file
+  behind libtorrent's back leaves it believing it still has those pieces, the
+  next status update puts the old number straight back, and the cache spends
+  the following months evicting other people's music to make room that already
+  exists. Two seconds of watching is enough to catch it.
+*/
+void CacheManagerTest::discardingOneFileKeepsTheCatalogue()
+{
+    // A torrent of its own, because everything above has been evicted by now.
+    const QString staging = m_root.filePath( QLatin1String( "discard" ) );
+    const QString album   = staging + QLatin1String( "/Discard Album" );
+    QVERIFY( QDir().mkpath( album ) );
+
+    QFile one( album + QLatin1String( "/01 - one.mp3" ) );
+    QVERIFY( one.open( QIODevice::WriteOnly ) );
+    one.write( QByteArray( 64 * 1024, 'a' ) );
+    one.close();
+
+    QFile two( album + QLatin1String( "/02 - two.mp3" ) );
+    QVERIFY( two.open( QIODevice::WriteOnly ) );
+    two.write( QByteArray( 64 * 1024, 'b' ) );
+    two.close();
+
+    std::vector<lt::create_file_entry> files = lt::list_files( album.toStdString() );
+    lt::create_torrent torrent( std::move( files ), 16 * 1024 );
+
+    lt::error_code error;
+    lt::set_piece_hashes( torrent, staging.toStdString(), error );
+    QVERIFY( !error );
+
+    const std::vector<char> buffer = torrent.generate_buf();
+    const QString torrentFile = m_root.filePath( QLatin1String( "discard.torrent" ) );
+    QFile file( torrentFile );
+    QVERIFY( file.open( QIODevice::WriteOnly ) );
+    file.write( buffer.data(), qint64( buffer.size() ) );
+    file.close();
+
+    const lt::add_torrent_params parsed = lt::load_torrent_file( torrentFile.toStdString() );
+    const lt::sha1_hash hash = parsed.ti->info_hashes().get_best();
+    const QString infoHash = QString::fromLatin1( QByteArray( hash.data(), int( hash.size() ) ).toHex() );
+
+    const QString target = m_cacheRoot + QLatin1String( "/torrents/" ) + infoHash
+                           + QLatin1String( "/Discard Album" );
+    QVERIFY( QDir().mkpath( target ) );
+    QVERIFY( QFile::copy( album + QLatin1String( "/01 - one.mp3" ),
+                          target + QLatin1String( "/01 - one.mp3" ) ) );
+    QVERIFY( QFile::copy( album + QLatin1String( "/02 - two.mp3" ),
+                          target + QLatin1String( "/02 - two.mp3" ) ) );
+
+    QSignalSpy metadata( The::torrentSession(), &TorrentSession::metadataReady );
+    QString addError;
+    QCOMPARE( The::torrentSession()->addTorrentFile( torrentFile, &addError ), infoHash );
+    QVERIFY2( metadata.wait( 5000 ), qPrintable( addError ) );
+
+    // The indexes are looked up: a hybrid layout puts pad files between the
+    // real ones, so the second track is not file 1.
+    int goneIndex = -1;
+    int keptIndex = -1;
+    const QList<TrackInfoPtr> published = metadata.first().at( 2 ).value<QList<TrackInfoPtr>>();
+    for( const TrackInfoPtr &track : published ) {
+        if( track->filePath().endsWith( QLatin1String( "01 - one.mp3" ) ) )
+            goneIndex = track->fileIndex();
+        else if( track->filePath().endsWith( QLatin1String( "02 - two.mp3" ) ) )
+            keptIndex = track->fileIndex();
+    }
+    QVERIFY( goneIndex >= 0 );
+    QVERIFY( keptIndex >= 0 );
+
+    QTRY_VERIFY_WITH_TIMEOUT( The::torrentSession()->havePiece( infoHash, 0 ), 15000 );
+
+    // The wiring MainWindow does, reproduced here because it is the mechanism
+    // under test: libtorrent reports its own figure once a second and it lands
+    // in the column. Without this the count could only ever be what the test
+    // wrote, and the assertion that matters would prove nothing.
+    const QMetaObject::Connection wiring =
+        connect( The::torrentSession(), &TorrentSession::statsUpdated,
+                 []( const QString &hash, int, int, qint64, qint64 bytes ) {
+                     The::catalog()->setBytesDone( hash, bytes );
+                 } );
+
+    QVERIFY( The::catalog()->addTorrent( infoHash, The::torrentSession()->magnetUri( infoHash ),
+                                         QStringLiteral( "Discard Album" ) ) );
+
+    const QList<TrackInfoPtr> tracks = {
+        makeTrack( infoHash, goneIndex, QStringLiteral( "Discard Album/01 - one.mp3" ) ),
+        makeTrack( infoHash, keptIndex, QStringLiteral( "Discard Album/02 - two.mp3" ) )
+    };
+    QVERIFY( The::catalog()->addTracks( tracks ) );
+    QVERIFY( The::playlistStore()->appendTracks( m_customId, tracks ) );
+
+    // Whatever libtorrent has settled on, before anything is thrown away.
+    QTRY_VERIFY_WITH_TIMEOUT( The::catalog()->bytesDone( infoHash ) > 0, 15000 );
+    const qint64 before = The::catalog()->bytesDone( infoHash );
+
+    QVERIFY( The::cacheManager()->discardFiles( infoHash, { goneIndex } ) );
+
+    const qint64 after = The::catalog()->bytesDone( infoHash );
+    QVERIFY2( after < before, "the byte count did not come down" );
+
+    // The catalogue is untouched: the row, the file and the list made by hand.
+    QVERIFY( The::catalog()->isKnown( infoHash ) );
+    QCOMPARE( The::catalog()->tracks( infoHash ).count(), 2 );
+    QCOMPARE( The::playlistStore()->tracks( m_customId ).count(), 3 );
+
+    // And with the torrent back in the session, the figure stays down.
+    QTest::qWait( 2500 );
+    const qint64 settled = The::catalog()->bytesDone( infoHash );
+
+    disconnect( wiring );
+
+    QVERIFY2( settled <= after,
+              "libtorrent put the old byte count back: the piece map was not corrected" );
 }
 
 QTEST_MAIN( CacheManagerTest )

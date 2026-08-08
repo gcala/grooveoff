@@ -47,16 +47,16 @@ private Q_SLOTS:
     void initTestCase();
     void addsTorrentsAndTheirPlaylists();
     void storesEveryFileOfATorrent();
-    void exclusionIsStickyAndDoesNotEmptyPlaylists();
     void customPlaylistSpansTorrents();
-    void hidingKeepsTracksReachable();
-    void reAddingRestoresTheSelection();
-    void garbageCollectionRemovesTheLastUnreferenced();
+    void namesTheListsThatWouldSuffer();
+    void reAddingKeepsTheFileList();
     void cacheEvictionKeepsTheCatalogue();
     void remembersWhatWasPlaying();
     void customPlaylistRemoval();
     void survivesALostPlaybackRow();
     void aMagnetLeftWaitingIsKnownWithoutBeingAPlaylist();
+    void aDeclinedTorrentKeepsItsFilesAndNoPlaylist();
+    void readsATrackBackTheWayItWasWritten();
 
 private:
     Catalog*       m_catalog  = nullptr;
@@ -122,7 +122,6 @@ void DatabaseTest::addsTorrentsAndTheirPlaylists()
                                     QStringLiteral( "Album B" ) ) );
 
     QVERIFY( m_catalog->isKnown( m_hashA ) );
-    QVERIFY( !m_catalog->isHidden( m_hashA ) );
     QVERIFY( m_playlists->torrentPlaylistId( m_hashA ) > 0 );
 
     // Adding a known torrent again must not disturb anything.
@@ -157,24 +156,14 @@ void DatabaseTest::storesEveryFileOfATorrent()
     QCOMPARE( m_catalog->tracks( m_hashA, false ).count(), 3 );
 }
 
-void DatabaseTest::exclusionIsStickyAndDoesNotEmptyPlaylists()
+void DatabaseTest::customPlaylistSpansTorrents()
 {
+    // The torrent's own playlist first: every list made by hand is a subset of
+    // it, so it has to hold what the others will point at.
     const qint64 playlistA = m_playlists->torrentPlaylistId( m_hashA );
     QVERIFY( m_playlists->setTracks( playlistA, m_catalog->tracks( m_hashA ) ) );
     QCOMPARE( m_playlists->tracks( playlistA ).count(), 2 );
 
-    QVERIFY( m_catalog->setExcluded( m_tracksA.at( 1 )->id(), true ) );
-
-    // Excluded means "stop offering it", not "erase it".
-    QCOMPARE( m_catalog->tracks( m_hashA ).count(), 1 );
-    QCOMPARE( m_catalog->tracks( m_hashA, true, true ).count(), 2 );
-
-    // And a deliberate choice already made in a playlist is not undone by it.
-    QCOMPARE( m_playlists->tracks( playlistA ).count(), 2 );
-}
-
-void DatabaseTest::customPlaylistSpansTorrents()
-{
     m_customId = m_playlists->createCustomPlaylist( QStringLiteral( "Preferite" ) );
     QVERIFY( m_customId > 0 );
 
@@ -190,47 +179,34 @@ void DatabaseTest::customPlaylistSpansTorrents()
     QCOMPARE( m_playlists->tracks( m_customId ).at( 2 )->infoHash(), m_hashA );
 }
 
-void DatabaseTest::hidingKeepsTracksReachable()
+void DatabaseTest::namesTheListsThatWouldSuffer()
 {
     const QList<Catalog::PlaylistReference> &references = m_catalog->customPlaylistReferences( m_hashA );
     QCOMPARE( references.count(), 1 );
     QCOMPARE( references.first().trackCount, 1 );
     QCOMPARE( references.first().name, QStringLiteral( "Preferite" ) );
-
-    QVERIFY( m_catalog->hideTorrent( m_hashA ) );
-    QVERIFY( m_catalog->isHidden( m_hashA ) );
-
-    // Out of sight: torrent B, the custom playlist and the pinned one remain.
-    QCOMPARE( m_playlists->visiblePlaylists().count(), 3 );
-
-    // Still alive, because a custom playlist points at one of its tracks.
-    QVERIFY( m_catalog->collectGarbage( m_hashA ) );
-    QVERIFY( m_catalog->isKnown( m_hashA ) );
-    QCOMPARE( m_playlists->tracks( m_customId ).count(), 3 );
+    QVERIFY( !references.first().pinned );
 }
 
-void DatabaseTest::reAddingRestoresTheSelection()
+/*!
+  \brief reAddingKeepsTheFileList
+
+  Pasting the same magnet twice must not cost a second trip to the swarm. There
+  is nothing to restore beyond that any more — no hidden flag to lift and no
+  refusals to remember — so what is checked is simply that the files are still
+  there and the playlist comes back if it went.
+*/
+void DatabaseTest::reAddingKeepsTheFileList()
 {
+    QVERIFY( m_playlists->removeTorrentPlaylist( m_hashA ) );
+    QCOMPARE( m_playlists->torrentPlaylistId( m_hashA ), qint64( 0 ) );
+
     QVERIFY( m_catalog->addTorrent( m_hashA, QLatin1String( "magnet:?xt=urn:btih:" ) + m_hashA,
                                     QStringLiteral( "Album A" ) ) );
-    QVERIFY( !m_catalog->isHidden( m_hashA ) );
 
-    // Files and exclusions survived being hidden.
-    QCOMPARE( m_catalog->tracks( m_hashA, true, true ).count(), 2 );
-    QCOMPARE( m_catalog->tracks( m_hashA ).count(), 1 );
-}
-
-void DatabaseTest::garbageCollectionRemovesTheLastUnreferenced()
-{
-    QVERIFY( m_catalog->hideTorrent( m_hashA ) );
-
-    QList<TrackInfoPtr> onlyB;
-    onlyB << m_tracksB.at( 0 ) << m_tracksB.at( 1 );
-    QVERIFY( m_playlists->setTracks( m_customId, onlyB ) );
-
-    // The last reference is gone, so the hidden torrent goes with it.
-    QVERIFY( !m_catalog->isKnown( m_hashA ) );
-    QVERIFY( m_catalog->orphanedHiddenTorrents().isEmpty() );
+    QVERIFY( m_playlists->torrentPlaylistId( m_hashA ) > 0 );
+    QCOMPARE( m_catalog->tracks( m_hashA ).count(), 2 );
+    QCOMPARE( m_catalog->tracks( m_hashA, false ).count(), 3 );
 }
 
 void DatabaseTest::cacheEvictionKeepsTheCatalogue()
@@ -246,9 +222,10 @@ void DatabaseTest::cacheEvictionKeepsTheCatalogue()
     QVERIFY( m_catalog->clearData( m_hashB ) );
 
     // The cache holds bytes, the catalogue holds knowledge: evicting must not
-    // take away tracks a custom playlist still points at.
+    // take away tracks a custom playlist still points at. Three of them, one
+    // from torrent A and two from B, exactly as they were put there.
     QVERIFY( m_catalog->isKnown( m_hashB ) );
-    QCOMPARE( m_playlists->tracks( m_customId ).count(), 2 );
+    QCOMPARE( m_playlists->tracks( m_customId ).count(), 3 );
     QCOMPARE( m_catalog->totalBytesDone(), qint64( 0 ) );
 }
 
@@ -265,9 +242,11 @@ void DatabaseTest::customPlaylistRemoval()
 {
     QVERIFY( m_playlists->removeCustomPlaylist( m_customId ) );
 
-    // Torrent B and the pinned playlist: the list made by hand is gone and the
-    // one that cannot be removed is not.
-    QCOMPARE( m_playlists->visiblePlaylists().count(), 2 );
+    // Both torrents and the pinned playlist: the list made by hand is gone and
+    // the one that cannot be removed is not. Nothing followed the tracks out of
+    // it — a torrent is unreferenced exactly when its own playlist is empty,
+    // and removing somebody's list says nothing about that.
+    QCOMPARE( m_playlists->visiblePlaylists().count(), 3 );
 
     // A torrent playlist belongs to its torrent and is removed with it.
     QVERIFY( !m_playlists->removeCustomPlaylist( m_playlists->torrentPlaylistId( m_hashB ) ) );
@@ -356,6 +335,107 @@ void DatabaseTest::aMagnetLeftWaitingIsKnownWithoutBeingAPlaylist()
     QVERIFY( !m_catalog->isKnown( gone ) );
     QVERIFY( m_catalog->magnetsWithoutMetadata().isEmpty() );
     QCOMPARE( m_playlists->visiblePlaylists().count(), before + 1 );
+}
+
+/*!
+  \brief aDeclinedTorrentKeepsItsFilesAndNoPlaylist
+
+  Closing the selector on a torrent just added means "I do not want this after
+  all", and what is left of it is the file list — worth keeping, because the
+  same magnet pasted again then opens the selector instead of asking the swarm
+  for a minute.
+
+  The trap this pins is the one that has no symptom of its own: a torrent with
+  files and no playlist looks exactly like a magnet still being looked for, and
+  magnetsWithoutMetadata() used to say so. The next start would have looked for
+  it, got metadata it already had, and addTorrent() would have put the declined
+  torrent back in the sidebar with nobody able to say why.
+*/
+void DatabaseTest::aDeclinedTorrentKeepsItsFilesAndNoPlaylist()
+{
+    const QString hash = QStringLiteral( "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee" );
+    const QString magnet = QLatin1String( "magnet:?xt=urn:btih:" ) + hash;
+
+    QVERIFY( m_catalog->addTorrent( hash, magnet, QStringLiteral( "Declined" ) ) );
+
+    QList<TrackInfoPtr> files;
+    files << makeTrack( hash, 0, QStringLiteral( "Declined/01 - one.mp3" ) )
+          << makeTrack( hash, 1, QStringLiteral( "Declined/02 - two.mp3" ) );
+    QVERIFY( m_catalog->addTracks( files ) );
+
+    const int before = m_playlists->visiblePlaylists().count();
+    QVERIFY( m_playlists->torrentPlaylistId( hash ) > 0 );
+
+    QVERIFY( m_playlists->removeTorrentPlaylist( hash ) );
+
+    // Nothing shows, because the sidebar lists playlists and there is no longer
+    // one — no flag needed to hide it.
+    QCOMPARE( m_playlists->visiblePlaylists().count(), before - 1 );
+    QCOMPARE( m_playlists->torrentPlaylistId( hash ), qint64( 0 ) );
+
+    // But the torrent and its file list are still there, which is the point.
+    QVERIFY( m_catalog->isKnown( hash ) );
+    QCOMPARE( m_catalog->tracks( hash ).count(), 2 );
+
+    // And it is not mistaken for a magnet still being looked for.
+    QVERIFY( m_catalog->magnetsWithoutMetadata().isEmpty() );
+
+    // Pasting the same magnet again gives it its playlist back, without a swarm.
+    QVERIFY( m_catalog->addTorrent( hash, magnet, QStringLiteral( "Declined" ) ) );
+    QVERIFY( m_playlists->torrentPlaylistId( hash ) > 0 );
+    QCOMPARE( m_playlists->visiblePlaylists().count(), before );
+    QCOMPARE( m_catalog->tracks( hash ).count(), 2 );
+}
+
+/*!
+  \brief readsATrackBackTheWayItWasWritten
+
+  A guard against one mistake and nothing else: the columns of track are listed
+  in one constant and read back by index, in two different files. Add a column
+  or take one away without shifting both readers and everything still compiles,
+  still runs, and hands every track somebody else's title, artist and album.
+
+  Both roads are checked because they are two separate lists that have to agree
+  — the catalogue's own and the one the playlists read through.
+*/
+void DatabaseTest::readsATrackBackTheWayItWasWritten()
+{
+    const QString hash = QStringLiteral( "ffffffffffffffffffffffffffffffffffffffff" );
+    QVERIFY( m_catalog->addTorrent( hash, QLatin1String( "magnet:?xt=urn:btih:" ) + hash,
+                                    QStringLiteral( "Tagged" ) ) );
+
+    const TrackInfoPtr written = makeTrack( hash, 3, QStringLiteral( "Tagged/03 - song.flac" ) );
+    QVERIFY( m_catalog->addTracks( { written } ) );
+
+    written->setTitle( QStringLiteral( "Casta Diva" ) );
+    written->setArtist( QStringLiteral( "Maria Callas" ) );
+    written->setAlbum( QStringLiteral( "Norma" ) );
+    written->setTrackNum( 7 );
+    written->setYear( 1954 );
+    written->setDuration( 372000 );
+    QVERIFY( m_catalog->updateTags( written ) );
+
+    const qint64 playlistId = m_playlists->torrentPlaylistId( hash );
+    QVERIFY( m_playlists->setTracks( playlistId, { written } ) );
+
+    const QList<TrackInfoPtr> viaPlaylist = m_playlists->tracks( playlistId );
+    QCOMPARE( viaPlaylist.count(), 1 );
+
+    for( const TrackInfoPtr &read : { m_catalog->track( written->id() ), viaPlaylist.first() } ) {
+        QVERIFY( read );
+        QCOMPARE( read->id(), written->id() );
+        QCOMPARE( read->infoHash(), hash );
+        QCOMPARE( read->fileIndex(), 3 );
+        QCOMPARE( read->filePath(), QStringLiteral( "Tagged/03 - song.flac" ) );
+        QCOMPARE( read->fileSize(), written->fileSize() );
+        QVERIFY( read->isAudio() );
+        QCOMPARE( read->title(), QStringLiteral( "Casta Diva" ) );
+        QCOMPARE( read->artist(), QStringLiteral( "Maria Callas" ) );
+        QCOMPARE( read->album(), QStringLiteral( "Norma" ) );
+        QCOMPARE( read->trackNum(), 7u );
+        QCOMPARE( read->year(), 1954u );
+        QCOMPARE( read->duration(), qint64( 372000 ) );
+    }
 }
 
 QTEST_MAIN( DatabaseTest )

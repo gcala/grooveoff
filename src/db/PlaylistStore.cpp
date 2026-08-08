@@ -23,8 +23,11 @@
 
 #include <QDateTime>
 #include <QDebug>
+#include <QSet>
 #include <QSqlError>
 #include <QSqlQuery>
+
+#include <utility>
 
 namespace The {
     static PlaylistStore* s_PlaylistStore_instance = nullptr;
@@ -139,10 +142,6 @@ bool PlaylistStore::removeCustomPlaylist( qint64 playlistId )
 
     Database *database = The::database();
 
-    // Which torrents this playlist was keeping alive has to be read before the
-    // rows go away.
-    const QStringList &affected = referencedTorrents( playlistId );
-
     if( !database->transaction() )
         return false;
 
@@ -156,20 +155,16 @@ bool PlaylistStore::removeCustomPlaylist( qint64 playlistId )
         return false;
     }
 
-    if( !collectGarbageFor( affected ) ) {
-        database->rollback();
-        return false;
-    }
-
     return database->commit();
 }
 
 /*!
   \brief clearPlaylist: empties a list without removing it
 
-  The same care as a removal, and for the same reason: the tracks going out may
-  be the last thing keeping a hidden torrent alive, and a torrent nobody
-  references and nobody can see is cache that is never coming back.
+  Nothing follows from it beyond the rows going: a track that leaves a list made
+  by hand is still in its torrent's playlist, which is where it was copied from.
+  It used to carry a garbage collection, back when a torrent could be referenced
+  by lists that were not its own.
 */
 bool PlaylistStore::clearPlaylist( qint64 playlistId )
 {
@@ -181,8 +176,6 @@ bool PlaylistStore::clearPlaylist( qint64 playlistId )
 
     Database *database = The::database();
 
-    const QStringList &affected = referencedTorrents( playlistId );
-
     if( !database->transaction() )
         return false;
 
@@ -192,11 +185,6 @@ bool PlaylistStore::clearPlaylist( qint64 playlistId )
 
     if( !query.exec() ) {
         reportFailure( query );
-        database->rollback();
-        return false;
-    }
-
-    if( !collectGarbageFor( affected ) ) {
         database->rollback();
         return false;
     }
@@ -224,8 +212,6 @@ QList<PlaylistStore::PlaylistInfo> PlaylistStore::visiblePlaylists() const
             "       ( SELECT COUNT(*) FROM playlist_track pt WHERE pt.playlist_id = p.id ),"
             "       p.pinned"
             "  FROM playlist p"
-            "  LEFT JOIN torrent t ON t.info_hash = p.info_hash"
-            " WHERE p.kind = 1 OR t.hidden = 0"
             " ORDER BY p.pinned DESC, p.kind, p.name COLLATE NOCASE" ) ) ) {
         reportFailure( query );
         return playlists;
@@ -291,7 +277,7 @@ QList<TrackInfoPtr> PlaylistStore::tracks( qint64 playlistId ) const
     QSqlQuery query( The::database()->connection() );
     query.prepare( QStringLiteral(
         "SELECT t.id, t.info_hash, t.file_index, t.file_path, t.file_size,"
-        "       t.is_audio, t.excluded, t.title, t.artist, t.album,"
+        "       t.is_audio, t.title, t.artist, t.album,"
         "       t.track_num, t.year, t.duration, tor.magnet"
         "  FROM playlist_track pt"
         "  JOIN track   t   ON t.id = pt.track_id"
@@ -312,14 +298,13 @@ QList<TrackInfoPtr> PlaylistStore::tracks( qint64 playlistId ) const
         track->setFilePath( query.value( 3 ).toString() );
         track->setFileSize( query.value( 4 ).toLongLong() );
         track->setIsAudio( query.value( 5 ).toBool() );
-        track->setExcluded( query.value( 6 ).toBool() );
-        track->setTitle( query.value( 7 ).toString() );
-        track->setArtist( query.value( 8 ).toString() );
-        track->setAlbum( query.value( 9 ).toString() );
-        track->setTrackNum( query.value( 10 ).toUInt() );
-        track->setYear( query.value( 11 ).toUInt() );
-        track->setDuration( query.value( 12 ).toLongLong() );
-        track->setMagnetUri( query.value( 13 ).toString() );
+        track->setTitle( query.value( 6 ).toString() );
+        track->setArtist( query.value( 7 ).toString() );
+        track->setAlbum( query.value( 8 ).toString() );
+        track->setTrackNum( query.value( 9 ).toUInt() );
+        track->setYear( query.value( 10 ).toUInt() );
+        track->setDuration( query.value( 11 ).toLongLong() );
+        track->setMagnetUri( query.value( 12 ).toString() );
         tracks << track;
     }
 
@@ -425,14 +410,10 @@ bool PlaylistStore::setTracks( qint64 playlistId, const QList<TrackInfoPtr> &tra
 
     Database *database = The::database();
 
-    // What the playlist used to hold may have been the last thing keeping a
-    // hidden torrent alive.
-    const QStringList &affected = referencedTorrents( playlistId );
-
     if( !database->transaction() )
         return false;
 
-    if( !writeTrackIds( playlistId, ids ) || !collectGarbageFor( affected ) ) {
+    if( !writeTrackIds( playlistId, ids ) ) {
         database->rollback();
         return false;
     }
@@ -470,12 +451,120 @@ bool PlaylistStore::removeTrackAt( qint64 playlistId, int position )
     if( !database->transaction() )
         return false;
 
-    if( !writeTrackIds( playlistId, ids ) || !collectGarbageFor( affected ) ) {
+    if( !writeTrackIds( playlistId, ids ) ) {
         database->rollback();
         return false;
     }
 
     return database->commit();
+}
+
+/*!
+  \brief removeTracksEverywhere: the removal that means "never chosen"
+
+  Every list that held one of these tracks is rewritten, not only the one on
+  screen: the torrent's playlist is the list of what was chosen from it, so a
+  track taken out of it has to leave the lists made by hand as well, or a list
+  would go on pointing at music whose bytes are about to be thrown away.
+
+  The rewriting is per list rather than one DELETE, because the positions have
+  to come back contiguous from zero — the arithmetic of a drag reads them as
+  indexes, and a hole makes a track move by two.
+*/
+bool PlaylistStore::removeTracksEverywhere( const QList<qint64> &trackIds )
+{
+    if( trackIds.isEmpty() )
+        return true;
+
+    QSet<qint64> removed;
+    for( qint64 trackId : trackIds ) {
+        if( trackId > 0 )
+            removed.insert( trackId );
+    }
+
+    if( removed.isEmpty() )
+        return true;
+
+    // Which lists are touched has to be read before anything is written, and
+    // the ids are checked to be numbers on the way in, so the list built into
+    // the statement is ours rather than anybody's.
+    QStringList placeholders;
+    for( qint64 trackId : std::as_const( removed ) )
+        placeholders << QString::number( trackId );
+
+    Database *database = The::database();
+
+    QList<qint64> playlists;
+    QSqlQuery affected( database->connection() );
+    if( !affected.exec( QStringLiteral( "SELECT DISTINCT playlist_id FROM playlist_track"
+                                        " WHERE track_id IN ( %1 )" )
+                            .arg( placeholders.join( QLatin1Char( ',' ) ) ) ) ) {
+        return reportFailure( affected );
+    }
+
+    while( affected.next() )
+        playlists << affected.value( 0 ).toLongLong();
+
+    if( playlists.isEmpty() )
+        return true;
+
+    if( !database->transaction() )
+        return false;
+
+    for( qint64 playlistId : std::as_const( playlists ) ) {
+        QList<qint64> kept;
+        for( qint64 trackId : this->trackIds( playlistId ) ) {
+            if( !removed.contains( trackId ) )
+                kept << trackId;
+        }
+
+        if( !writeTrackIds( playlistId, kept ) ) {
+            database->rollback();
+            return false;
+        }
+    }
+
+    return database->commit();
+}
+
+bool PlaylistStore::removeTracks( qint64 playlistId, const QList<qint64> &trackIds )
+{
+    if( trackIds.isEmpty() )
+        return true;
+
+    QSet<qint64> removed( trackIds.constBegin(), trackIds.constEnd() );
+
+    QList<qint64> kept;
+    for( qint64 trackId : this->trackIds( playlistId ) ) {
+        if( !removed.contains( trackId ) )
+            kept << trackId;
+    }
+
+    Database *database = The::database();
+
+    if( !database->transaction() )
+        return false;
+
+    if( !writeTrackIds( playlistId, kept ) ) {
+        database->rollback();
+        return false;
+    }
+
+    return database->commit();
+}
+
+bool PlaylistStore::removeTorrentPlaylist( const QString &infoHash )
+{
+    if( infoHash.isEmpty() )
+        return false;
+
+    QSqlQuery query( The::database()->connection() );
+    query.prepare( QStringLiteral( "DELETE FROM playlist WHERE info_hash = :hash" ) );
+    query.bindValue( QStringLiteral( ":hash" ), infoHash );
+
+    // playlist_track follows through ON DELETE CASCADE; torrent and track are
+    // on the other side of the reference and are deliberately left alone.
+    return query.exec() ? true : reportFailure( query );
 }
 
 bool PlaylistStore::moveTrack( qint64 playlistId, int from, int to )
@@ -591,39 +680,6 @@ bool PlaylistStore::isCustom( qint64 playlistId ) const
         return false;
 
     return query.value( 0 ).toInt() == int( CustomPlaylist );
-}
-
-QStringList PlaylistStore::referencedTorrents( qint64 playlistId ) const
-{
-    QStringList hashes;
-
-    QSqlQuery query( The::database()->connection() );
-    query.prepare( QStringLiteral( "SELECT DISTINCT t.info_hash FROM playlist_track pt"
-                                   " JOIN track t ON t.id = pt.track_id"
-                                   " WHERE pt.playlist_id = :id" ) );
-    query.bindValue( QStringLiteral( ":id" ), playlistId );
-
-    if( !query.exec() ) {
-        reportFailure( query );
-        return hashes;
-    }
-
-    while( query.next() )
-        hashes << query.value( 0 ).toString();
-
-    return hashes;
-}
-
-bool PlaylistStore::collectGarbageFor( const QStringList &infoHashes )
-{
-    Catalog *catalog = The::catalog();
-
-    for( const QString &infoHash : infoHashes ) {
-        if( !catalog->collectGarbage( infoHash ) )
-            return false;
-    }
-
-    return true;
 }
 
 bool PlaylistStore::touch( qint64 playlistId )

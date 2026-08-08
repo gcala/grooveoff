@@ -52,6 +52,9 @@ public:
      */
     static QString playlistName( const PlaylistStore::PlaylistInfo &playlist );
 
+    /** the same for whoever holds the two fields without the whole row */
+    static QString playlistName( const QString &storedName, bool pinned );
+
     static const int buttonSize;
     static const int coverSize;
     static const int marginSize;

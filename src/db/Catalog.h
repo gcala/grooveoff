@@ -47,12 +47,17 @@ public:
 
     ~Catalog();
 
-    /** a custom playlist holding tracks of a given torrent */
+    /** a custom playlist holding tracks of a given torrent, or of given tracks */
     struct PlaylistReference
     {
         qint64  playlistId = 0;
         QString name;
         int     trackCount = 0;
+
+        // The one that is always there has no name of its own to report: the
+        // interface says it in the language it is running in. Without this the
+        // question naming the lists at stake prints the stored English.
+        bool    pinned = false;
     };
 
     /** a torrent holding data in the cache */
@@ -65,10 +70,11 @@ public:
     // --- torrents -----------------------------------------------------------
 
     /**
-     * Records a torrent and creates its own playlist. Adding a torrent that is
-     * already known leaves its rows alone and only brings it back into sight if
-     * it was hidden, so that re-adding a magnet restores the previous selection
-     * and exclusions instead of starting over.
+     * Records a torrent and creates its own playlist. Adding one that is
+     * already known leaves its rows alone, so pasting the same magnet again
+     * finds the file list already there instead of asking the swarm for it —
+     * and gives back the playlist if it has none, which is how a magnet left
+     * waiting and a torrent whose selector was closed both come back.
      */
     bool addTorrent( const QString &infoHash, const QString &magnetUri, const QString &name );
 
@@ -95,7 +101,6 @@ public:
     QList<PendingMagnet> magnetsWithoutMetadata() const;
 
     bool isKnown( const QString &infoHash ) const;
-    bool isHidden( const QString &infoHash ) const;
     QString magnetUri( const QString &infoHash ) const;
     QString name( const QString &infoHash ) const;
 
@@ -116,29 +121,22 @@ public:
     bool setHasResume( const QString &infoHash, bool hasResume );
     bool hasResume( const QString &infoHash ) const;
 
-    /** brings a hidden torrent back into sight, with its selection intact */
-    bool unhideTorrent( const QString &infoHash );
-
-    /** every torrent that should be reopened at start up, hidden ones included */
+    /** every torrent that could be reopened at start up */
     QStringList knownTorrents() const;
 
     // --- tracks -------------------------------------------------------------
 
     /**
      * Stores every file of a torrent, audio or not, and fills the id of each
-     * TrackInfo. Files already known are left untouched, so their exclusions
-     * survive a second look at the same torrent.
+     * TrackInfo. Files already known are left untouched, so a second look at
+     * the same torrent does not renumber anything a playlist points at.
      */
     bool addTracks( const QList<TrackInfoPtr> &tracks );
 
-    QList<TrackInfoPtr> tracks( const QString &infoHash,
-                                bool audioOnly = true,
-                                bool includeExcluded = false ) const;
+    QList<TrackInfoPtr> tracks( const QString &infoHash, bool audioOnly = true ) const;
 
     TrackInfoPtr track( qint64 trackId ) const;
     TrackInfoPtr track( const QString &infoHash, int fileIndex ) const;
-
-    bool setExcluded( qint64 trackId, bool excluded );
 
     /** writes back the tags read from the file once its first pieces arrived */
     bool updateTags( const TrackInfoPtr &track );
@@ -152,22 +150,28 @@ public:
      */
     QList<PlaylistReference> customPlaylistReferences( const QString &infoHash ) const;
 
+    /**
+     * Which lists made by hand hold any of these tracks, and how many of them
+     * each one holds. The question every removal of a track asks before it
+     * destroys anything, and it is about tracks where the one above is about a
+     * whole torrent — that one still answers for «Remove playlist…».
+     *
+     * The list that is always there answers like any other, because it is one:
+     * a track dropped into it was put there by hand and is exactly as much at
+     * stake as one in a list somebody named.
+     */
+    QList<PlaylistReference> customPlaylistsHolding( const QList<qint64> &trackIds ) const;
+
+    /**
+     * The tracks of this torrent that a list made by hand still holds. What
+     * «remove only what nothing else uses» keeps, and what the torrent's own
+     * playlist is left holding afterwards.
+     */
+    QList<qint64> tracksInCustomPlaylists( const QString &infoHash ) const;
+
     /** removes torrent, tracks and playlists; the caller deletes files and resume */
     bool removeTorrent( const QString &infoHash );
 
-    /** keeps the rows but takes the torrent out of sight */
-    bool hideTorrent( const QString &infoHash );
-
-    /**
-     * Removes a hidden torrent once nothing refers to it any more. Meant to be
-     * called inside the same transaction as the removal that triggered it,
-     * otherwise a crash in between leaves an invisible torrent holding cache
-     * for ever.
-     */
-    bool collectGarbage( const QString &infoHash );
-
-    /** every hidden torrent no custom playlist refers to; a hygiene check */
-    QStringList orphanedHiddenTorrents() const;
 
     // --- cache --------------------------------------------------------------
 

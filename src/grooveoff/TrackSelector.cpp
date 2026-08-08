@@ -103,20 +103,13 @@ void TrackSelector::fill()
         item->setToolTip( 0, track->filePath() );
         item->setData( 0, trackRole, QVariant::fromValue( track ) );
 
-        // Everything ticked for a torrent nobody has chosen from yet; what was
-        // chosen last time for one that has been seen before. An excluded file
-        // is never ticked on its own: it takes the user to say so again.
-        const bool wanted = track->excluded() ? false
-                                              : ( isNewTorrent ? track->isAudio()
-                                                               : m_chosen.contains( track->id() ) );
+        // Everything ticked for a torrent nobody has chosen from yet; what is
+        // in the playlist for one that has been seen before. A file left out
+        // last time is simply unticked — there is no refusal kept anywhere, so
+        // «Select all» really does select all.
+        const bool wanted = isNewTorrent ? track->isAudio() : m_chosen.contains( track->id() );
 
         item->setCheckState( 0, wanted ? Qt::Checked : Qt::Unchecked );
-
-        if( track->excluded() ) {
-            item->setForeground( 0, palette().brush( QPalette::Disabled, QPalette::Text ) );
-            item->setForeground( 1, palette().brush( QPalette::Disabled, QPalette::Text ) );
-            item->setToolTip( 0, tr( "Excluded. Tick it to let it back in." ) );
-        }
 
         item->setHidden( !isVisible( item ) );
     }
@@ -207,19 +200,3 @@ QList<TrackInfoPtr> TrackSelector::selectedTracks() const
     return selected;
 }
 
-QList<TrackInfoPtr> TrackSelector::readmittedTracks() const
-{
-    QList<TrackInfoPtr> readmitted;
-
-    for( int i = 0; i < ui->fileList->topLevelItemCount(); ++i ) {
-        const QTreeWidgetItem *item = ui->fileList->topLevelItem( i );
-        if( item->checkState( 0 ) != Qt::Checked )
-            continue;
-
-        const TrackInfoPtr track = item->data( 0, trackRole ).value<TrackInfoPtr>();
-        if( track && track->excluded() )
-            readmitted << track;
-    }
-
-    return readmitted;
-}

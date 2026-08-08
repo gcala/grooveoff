@@ -151,6 +151,44 @@ public:
      */
     void remove( const QString &infoHash, bool deleteFiles );
 
+    /**
+     * Throws away the cached bytes of some files of a torrent and leaves the
+     * rest of it where it is. Removing a track asks for this, and libtorrent
+     * has no answer to it: a torrent is the unit of everything destructive it
+     * offers, and there is no way to tell it to forget a piece it believes it
+     * has.
+     *
+     * So the torrent is taken out of the session with its files untouched, the
+     * chosen ones are unlinked, and the piece map in the resume blob is
+     * corrected before it goes back in — the same map cachedFile() reads and
+     * the one libtorrent starts from at the next reopen, so this is not a
+     * second truth about the cache but the same one, edited.
+     *
+     * The obvious version of this is wrong in a way that has no symptom for
+     * weeks. Skipping the file and unlinking it leaves libtorrent believing it
+     * still has those pieces: ticked again later, the file is fetched from
+     * nowhere and played as silence, with the swarm working perfectly and
+     * nothing in the log. Correcting the map is what makes the missing file
+     * expected instead, which is also what saves a full recheck at the next
+     * open.
+     *
+     * A piece shared with a file that stays is left alone. Half of it is still
+     * honest on the disk, nothing here ever hands a piece to a peer, and
+     * dropping it would cost a fetch to say something nobody is asking — so
+     * the cache does not come all the way back to zero, by one piece at each
+     * end of what went.
+     *
+     * A torrent the session was holding goes back into it, because it was on
+     * the network a moment ago and nothing in this program puts a torrent to
+     * sleep. One that was asleep stays asleep: there is nothing to announce.
+     *
+     * @return the bytes this torrent still holds, which is the figure the next
+     *         status update will carry, or -1 when nothing is known well enough
+     *         to say — the caller then leaves the accounting where it was
+     *         rather than inventing a number.
+     */
+    qint64 dropFiles( const QString &infoHash, const QList<int> &fileIndexes );
+
     /** asks for the resume data of one torrent; the write happens on the alert */
     void requestResumeData( const QString &infoHash );
 

@@ -43,7 +43,7 @@ namespace {
 
 /** the columns of track, in the order trackFromQuery() expects them */
 const char c_trackColumns[] = "id, info_hash, file_index, file_path, file_size,"
-                              " is_audio, excluded, title, artist, album,"
+                              " is_audio, title, artist, album,"
                               " track_num, year, duration";
 
 qint64 now()
@@ -56,6 +56,18 @@ bool reportFailure( const QSqlQuery &query )
     qWarning() << "GrooveOff ::" << "catalog query failed:" << query.lastError().text()
                << "in" << query.lastQuery();
     return false;
+}
+
+/** id, name, count, pinned — the shape both reference queries select */
+Catalog::PlaylistReference referenceFromQuery( const QSqlQuery &query )
+{
+    Catalog::PlaylistReference reference;
+    reference.playlistId = query.value( 0 ).toLongLong();
+    reference.name       = query.value( 1 ).toString();
+    reference.trackCount = query.value( 2 ).toInt();
+    reference.pinned     = query.value( 3 ).toInt() != 0;
+
+    return reference;
 }
 
 } // namespace
@@ -78,13 +90,12 @@ TrackInfoPtr Catalog::trackFromQuery( const QSqlQuery &query )
     track->setFilePath( query.value( 3 ).toString() );
     track->setFileSize( query.value( 4 ).toLongLong() );
     track->setIsAudio( query.value( 5 ).toBool() );
-    track->setExcluded( query.value( 6 ).toBool() );
-    track->setTitle( query.value( 7 ).toString() );
-    track->setArtist( query.value( 8 ).toString() );
-    track->setAlbum( query.value( 9 ).toString() );
-    track->setTrackNum( query.value( 10 ).toUInt() );
-    track->setYear( query.value( 11 ).toUInt() );
-    track->setDuration( query.value( 12 ).toLongLong() );
+    track->setTitle( query.value( 6 ).toString() );
+    track->setArtist( query.value( 7 ).toString() );
+    track->setAlbum( query.value( 8 ).toString() );
+    track->setTrackNum( query.value( 9 ).toUInt() );
+    track->setYear( query.value( 10 ).toUInt() );
+    track->setDuration( query.value( 11 ).toLongLong() );
 
     return track;
 }
@@ -99,8 +110,8 @@ bool Catalog::addTorrent( const QString &infoHash, const QString &magnetUri, con
         return false;
 
     if( isKnown( infoHash ) ) {
-        // Already in the catalogue. Bringing it back into sight is usually all
-        // that is needed: its tracks, exclusions and playlist are still there.
+        // Already in the catalogue, and usually there is nothing to do: its
+        // files and its playlist are still there.
         //
         // Usually, and not always. A magnet left waiting by rememberMagnet()
         // has a row here and no playlist, because there was nothing to make one
@@ -112,7 +123,7 @@ bool Catalog::addTorrent( const QString &infoHash, const QString &magnetUri, con
             return false;
         }
 
-        return isHidden( infoHash ) ? unhideTorrent( infoHash ) : true;
+        return true;
     }
 
     if( !database->transaction() )
@@ -169,12 +180,19 @@ QList<Catalog::PendingMagnet> Catalog::magnetsWithoutMetadata() const
 
     QSqlQuery query( The::database()->connection() );
 
-    // No playlist is the mark of it. Every torrent whose metadata arrived got
-    // one, and addTorrent() makes sure of that even for the ones that came in
-    // through here, so the absence cannot mean anything else.
+    // No playlist and no files. The playlist alone used to be the mark of it,
+    // and it stopped being one when a declined torrent started keeping its file
+    // list without a playlist: that one would have been looked for again at
+    // every start, would have got metadata it already had, and addTorrent()
+    // would have put it back in the sidebar by itself. The rows in track are
+    // written only when the metadata arrive, so their absence is exactly the
+    // question being asked.
     if( !query.exec( QStringLiteral( "SELECT t.info_hash, t.magnet, t.name FROM torrent t"
                                      " LEFT JOIN playlist p ON p.info_hash = t.info_hash"
-                                     " WHERE p.id IS NULL ORDER BY t.added_at" ) ) ) {
+                                     " WHERE p.id IS NULL"
+                                     "   AND NOT EXISTS ( SELECT 1 FROM track tr"
+                                     "                     WHERE tr.info_hash = t.info_hash )"
+                                     " ORDER BY t.added_at" ) ) ) {
         reportFailure( query );
         return magnets;
     }
@@ -197,18 +215,6 @@ bool Catalog::isKnown( const QString &infoHash ) const
     query.bindValue( QStringLiteral( ":hash" ), infoHash );
 
     return query.exec() && query.next();
-}
-
-bool Catalog::isHidden( const QString &infoHash ) const
-{
-    QSqlQuery query( The::database()->connection() );
-    query.prepare( QStringLiteral( "SELECT hidden FROM torrent WHERE info_hash = :hash" ) );
-    query.bindValue( QStringLiteral( ":hash" ), infoHash );
-
-    if( !query.exec() || !query.next() )
-        return false;
-
-    return query.value( 0 ).toBool();
 }
 
 QString Catalog::magnetUri( const QString &infoHash ) const
@@ -299,15 +305,6 @@ bool Catalog::hasResume( const QString &infoHash ) const
     return query.value( 0 ).toBool();
 }
 
-bool Catalog::unhideTorrent( const QString &infoHash )
-{
-    QSqlQuery query( The::database()->connection() );
-    query.prepare( QStringLiteral( "UPDATE torrent SET hidden = 0 WHERE info_hash = :hash" ) );
-    query.bindValue( QStringLiteral( ":hash" ), infoHash );
-
-    return query.exec() ? true : reportFailure( query );
-}
-
 QStringList Catalog::knownTorrents() const
 {
     QStringList hashes;
@@ -371,29 +368,26 @@ bool Catalog::addTracks( const QList<TrackInfoPtr> &tracks )
     const QString &infoHash = tracks.first()->infoHash();
 
     QSqlQuery ids( database->connection() );
-    ids.prepare( QStringLiteral( "SELECT file_index, id, excluded FROM track WHERE info_hash = :hash" ) );
+    ids.prepare( QStringLiteral( "SELECT file_index, id FROM track WHERE info_hash = :hash" ) );
     ids.bindValue( QStringLiteral( ":hash" ), infoHash );
 
     if( !ids.exec() )
         return reportFailure( ids );
 
-    QHash<int, QPair<qint64, bool> > stored;
+    QHash<int, qint64> stored;
     while( ids.next() )
-        stored.insert( ids.value( 0 ).toInt(),
-                       qMakePair( ids.value( 1 ).toLongLong(), ids.value( 2 ).toBool() ) );
+        stored.insert( ids.value( 0 ).toInt(), ids.value( 1 ).toLongLong() );
 
     for( const TrackInfoPtr &track : tracks ) {
         const auto it = stored.constFind( track->fileIndex() );
-        if( it != stored.constEnd() ) {
-            track->setId( it->first );
-            track->setExcluded( it->second );
-        }
+        if( it != stored.constEnd() )
+            track->setId( it.value() );
     }
 
     return true;
 }
 
-QList<TrackInfoPtr> Catalog::tracks( const QString &infoHash, bool audioOnly, bool includeExcluded ) const
+QList<TrackInfoPtr> Catalog::tracks( const QString &infoHash, bool audioOnly ) const
 {
     QList<TrackInfoPtr> tracks;
 
@@ -402,8 +396,6 @@ QList<TrackInfoPtr> Catalog::tracks( const QString &infoHash, bool audioOnly, bo
 
     if( audioOnly )
         statement += QLatin1String( " AND is_audio = 1" );
-    if( !includeExcluded )
-        statement += QLatin1String( " AND excluded = 0" );
 
     statement += QLatin1String( " ORDER BY file_index" );
 
@@ -460,16 +452,6 @@ TrackInfoPtr Catalog::track( const QString &infoHash, int fileIndex ) const
     return track;
 }
 
-bool Catalog::setExcluded( qint64 trackId, bool excluded )
-{
-    QSqlQuery query( The::database()->connection() );
-    query.prepare( QStringLiteral( "UPDATE track SET excluded = :excluded WHERE id = :id" ) );
-    query.bindValue( QStringLiteral( ":excluded" ), excluded ? 1 : 0 );
-    query.bindValue( QStringLiteral( ":id" ), trackId );
-
-    return query.exec() ? true : reportFailure( query );
-}
-
 bool Catalog::updateTags( const TrackInfoPtr &track )
 {
     if( !track || track->id() <= 0 )
@@ -497,11 +479,11 @@ QList<Catalog::PlaylistReference> Catalog::customPlaylistReferences( const QStri
     QList<PlaylistReference> references;
 
     QSqlQuery query( The::database()->connection() );
-    query.prepare( QStringLiteral( "SELECT p.id, p.name, COUNT(*) FROM playlist_track pt"
+    query.prepare( QStringLiteral( "SELECT p.id, p.name, COUNT(*), p.pinned FROM playlist_track pt"
                                    " JOIN track    t ON t.id = pt.track_id"
                                    " JOIN playlist p ON p.id = pt.playlist_id"
                                    " WHERE t.info_hash = :hash AND p.kind = 1"
-                                   " GROUP BY p.id, p.name ORDER BY p.name" ) );
+                                   " GROUP BY p.id, p.name, p.pinned ORDER BY p.name" ) );
     query.bindValue( QStringLiteral( ":hash" ), infoHash );
 
     if( !query.exec() ) {
@@ -509,15 +491,68 @@ QList<Catalog::PlaylistReference> Catalog::customPlaylistReferences( const QStri
         return references;
     }
 
-    while( query.next() ) {
-        PlaylistReference reference;
-        reference.playlistId = query.value( 0 ).toLongLong();
-        reference.name       = query.value( 1 ).toString();
-        reference.trackCount = query.value( 2 ).toInt();
-        references << reference;
-    }
+    while( query.next() )
+        references << referenceFromQuery( query );
 
     return references;
+}
+
+QList<Catalog::PlaylistReference> Catalog::customPlaylistsHolding( const QList<qint64> &trackIds ) const
+{
+    QList<PlaylistReference> references;
+
+    if( trackIds.isEmpty() )
+        return references;
+
+    // Built rather than bound, because a bind cannot stand for a list. The ids
+    // come from rows this program put there and are checked to be numbers on
+    // the way in, so there is nothing here anybody could write into.
+    QStringList placeholders;
+    for( qint64 trackId : trackIds ) {
+        if( trackId > 0 )
+            placeholders << QString::number( trackId );
+    }
+
+    if( placeholders.isEmpty() )
+        return references;
+
+    QSqlQuery query( The::database()->connection() );
+
+    if( !query.exec( QStringLiteral( "SELECT p.id, p.name, COUNT(*), p.pinned FROM playlist_track pt"
+                                     " JOIN playlist p ON p.id = pt.playlist_id"
+                                     " WHERE p.kind = 1 AND pt.track_id IN ( %1 )"
+                                     " GROUP BY p.id, p.name, p.pinned ORDER BY p.name" )
+                         .arg( placeholders.join( QLatin1Char( ',' ) ) ) ) ) {
+        reportFailure( query );
+        return references;
+    }
+
+    while( query.next() )
+        references << referenceFromQuery( query );
+
+    return references;
+}
+
+QList<qint64> Catalog::tracksInCustomPlaylists( const QString &infoHash ) const
+{
+    QList<qint64> ids;
+
+    QSqlQuery query( The::database()->connection() );
+    query.prepare( QStringLiteral( "SELECT DISTINCT t.id FROM playlist_track pt"
+                                   " JOIN track    t ON t.id = pt.track_id"
+                                   " JOIN playlist p ON p.id = pt.playlist_id"
+                                   " WHERE t.info_hash = :hash AND p.kind = 1" ) );
+    query.bindValue( QStringLiteral( ":hash" ), infoHash );
+
+    if( !query.exec() ) {
+        reportFailure( query );
+        return ids;
+    }
+
+    while( query.next() )
+        ids << query.value( 0 ).toLongLong();
+
+    return ids;
 }
 
 bool Catalog::removeTorrent( const QString &infoHash )
@@ -528,47 +563,6 @@ bool Catalog::removeTorrent( const QString &infoHash )
 
     // track, playlist and playlist_track follow through ON DELETE CASCADE.
     return query.exec() ? true : reportFailure( query );
-}
-
-bool Catalog::hideTorrent( const QString &infoHash )
-{
-    QSqlQuery query( The::database()->connection() );
-    query.prepare( QStringLiteral( "UPDATE torrent SET hidden = 1 WHERE info_hash = :hash" ) );
-    query.bindValue( QStringLiteral( ":hash" ), infoHash );
-
-    return query.exec() ? true : reportFailure( query );
-}
-
-bool Catalog::collectGarbage( const QString &infoHash )
-{
-    if( infoHash.isEmpty() || !isHidden( infoHash ) )
-        return true;
-
-    if( !customPlaylistReferences( infoHash ).isEmpty() )
-        return true;
-
-    return removeTorrent( infoHash );
-}
-
-QStringList Catalog::orphanedHiddenTorrents() const
-{
-    QStringList hashes;
-
-    QSqlQuery query( The::database()->connection() );
-    if( !query.exec( QStringLiteral( "SELECT t.info_hash FROM torrent t"
-                                     " WHERE t.hidden = 1 AND NOT EXISTS ("
-                                     "   SELECT 1 FROM playlist_track pt"
-                                     "     JOIN track    tr ON tr.id = pt.track_id"
-                                     "     JOIN playlist p  ON p.id  = pt.playlist_id"
-                                     "    WHERE tr.info_hash = t.info_hash AND p.kind = 1 )" ) ) ) {
-        reportFailure( query );
-        return hashes;
-    }
-
-    while( query.next() )
-        hashes << query.value( 0 ).toString();
-
-    return hashes;
 }
 
 // --- cache ------------------------------------------------------------------

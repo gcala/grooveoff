@@ -70,7 +70,12 @@ QList<TrackInfoPtr> Utility::mergedSelection( const QList<TrackInfoPtr> &current
 
 QString Utility::playlistName( const PlaylistStore::PlaylistInfo &playlist )
 {
-    return playlist.pinned ? tr( "To listen" ) : playlist.name;
+    return playlistName( playlist.name, playlist.pinned );
+}
+
+QString Utility::playlistName( const QString &storedName, bool pinned )
+{
+    return pinned ? tr( "To listen" ) : storedName;
 }
 
 QString Utility::magnetDisplayName( const QString &magnetUri )

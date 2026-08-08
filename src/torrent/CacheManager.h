@@ -95,6 +95,23 @@ public Q_SLOTS:
     /** one torrent: its files and its resume blob go, its rows stay */
     bool evict( const QString &infoHash );
 
+    /**
+     * Some files of one torrent: their bytes go, every row of the catalogue
+     * stays. The per-file counterpart of an eviction, and it lives here for the
+     * same reason that one does — the bytes and the number saying how many
+     * there are have to go together, and a caller made to remember the second
+     * half would one day forget it.
+     *
+     * Never a DELETE, exactly like evict(): what was asked for is a track out
+     * of a playlist, and the row saying the file exists is what lets the
+     * selector offer it again.
+     *
+     * No evicted() either. That signal means a whole torrent's bytes went and
+     * its rows should go back to Dormant; here the tracks that are left are as
+     * playable as they were a moment ago.
+     */
+    bool discardFiles( const QString &infoHash, const QList<int> &fileIndexes );
+
 Q_SIGNALS:
     /**
      * The bytes of this torrent are gone. Rows showing its tracks go back to

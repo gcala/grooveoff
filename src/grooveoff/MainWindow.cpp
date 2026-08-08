@@ -1068,9 +1068,9 @@ void MainWindow::chooseTracksOf( const QString &infoHash, bool justAdded )
     if( playlistId <= 0 )
         return;
 
-    // Everything, excluded and non audio included: hiding them here is what
-    // makes a missing track impossible to explain.
-    const QList<TrackInfoPtr> all = catalog->tracks( infoHash, false, true );
+    // Every file, non audio included: hiding them here is what makes a missing
+    // track impossible to explain.
+    const QList<TrackInfoPtr> all = catalog->tracks( infoHash, false );
 
     QList<qint64> chosen;
     for( const TrackInfoPtr &track : playlists->tracks( playlistId ) )
@@ -1097,7 +1097,7 @@ void MainWindow::chooseTracksOf( const QString &infoHash, bool justAdded )
         // emptying it was somebody's decision too.
         if( justAdded && playlists->tracks( playlistId ).isEmpty() ) {
             The::torrentSession()->remove( infoHash, false );
-            catalog->hideTorrent( infoHash );
+            playlists->removeTorrentPlaylist( infoHash );
 
             loadPlaylists();
             loadCurrentPlaylist();
@@ -1111,9 +1111,29 @@ void MainWindow::chooseTracksOf( const QString &infoHash, bool justAdded )
         return;
     }
 
-    // Ticking a file that had been refused is how a refusal is taken back.
-    for( const TrackInfoPtr &track : selector.readmittedTracks() )
-        catalog->setExcluded( track->id(), false );
+    // Unticking is the same act as the bin, so it costs the same: what comes
+    // out of the playlist comes out of every list and its bytes go with it.
+    // The alternative — leaving the bytes because the file was unticked rather
+    // than binned — would make the same outcome depend on which of two doors
+    // somebody walked through.
+    const QList<TrackInfoPtr> previous = playlists->tracks( playlistId );
+    const QList<TrackInfoPtr> selected = selector.selectedTracks();
+
+    QSet<qint64> keptIds;
+    for( const TrackInfoPtr &track : selected )
+        keptIds.insert( track->id() );
+
+    QList<TrackInfoPtr> removed;
+    for( const TrackInfoPtr &track : previous ) {
+        if( !keptIds.contains( track->id() ) )
+            removed << track;
+    }
+
+    // One question for the lot of them, and Cancel abandons the whole
+    // confirmation: it was one gesture, so half of it is not an outcome
+    // anybody asked for.
+    if( !removed.isEmpty() && !confirmDiscard( removed ) )
+        return;
 
     // What was already in the playlist keeps the order it was put in, and what
     // has just been ticked is dropped in where its place in the album says.
@@ -1121,11 +1141,23 @@ void MainWindow::chooseTracksOf( const QString &infoHash, bool justAdded )
     // rearrange a playlist somebody had dragged into shape, and would send a
     // track taken out by mistake to the end of the list rather than back where
     // it came from — which is one of the two things this dialog is for.
-    const QList<TrackInfoPtr> ordered =
-        Utility::mergedSelection( playlists->tracks( playlistId ), selector.selectedTracks() );
+    const QList<TrackInfoPtr> ordered = Utility::mergedSelection( previous, selected );
 
     playlists->setTracks( playlistId, ordered );
     playlists->setPlaybackState( playlistId, 0, 0 );
+
+    // The rest of what unticking means. setTracks() has already taken them out
+    // of this playlist, so what is left is the other lists and the bytes.
+    if( !removed.isEmpty() ) {
+        QList<PlaylistItemPtr> playing;
+        for( const TrackInfoPtr &track : removed ) {
+            if( TrackRow *row = rowFor( track ) )
+                playing << row->playlistItem();
+        }
+
+        detachFromPlayer( playing );
+        discardTracks( removed );
+    }
 
     loadPlaylists();
     loadCurrentPlaylist();
@@ -1138,45 +1170,200 @@ void MainWindow::chooseTracksOf( const QString &infoHash, bool justAdded )
 }
 
 /*!
-  \brief excludeTrack: the refusal that sticks
+  \brief rowsForGesture: what one removal acts on
 
-  Taking a row out of the playlist and refusing a file are two different
-  things, and conflating them is the mistake that has the user pressing select
-  all and watching the same three tracks come back for ever.
+  There used to be two entries here, «Remove from the playlist» and «Exclude
+  this track», with different consequences the next time round. They are one
+  now: what a removal means is decided by the kind of list open, not by which
+  of two words was clicked, and nothing is remembered about a refusal — a track
+  taken out is a track not chosen, which is where every file starts.
 */
-void MainWindow::excludeTrack( TrackRow *item )
+QList<TrackRow *> MainWindow::rowsForGesture( TrackRow *row ) const
 {
-    if( !item || !item->playlistItem()->track() )
-        return;
+    QList<TrackRow *> rows;
+    if( !row )
+        return rows;
 
-    const TrackInfoPtr track = item->playlistItem()->track();
+    // The menu is raised by the row under the cursor and knows nothing about
+    // what is highlighted, so the selection only counts when that row is in it.
+    // A right click somewhere else means that row and not the ten elsewhere.
+    const QList<QListWidgetItem *> selected = ui->trackList->selectedItems();
 
-    The::catalog()->setExcluded( track->id(), true );
+    bool inSelection = false;
+    QList<TrackRow *> fromSelection;
+    for( QListWidgetItem *item : selected ) {
+        TrackRow *each = qobject_cast<TrackRow *>( ui->trackList->itemWidget( item ) );
+        if( !each )
+            continue;
 
-    The::audioEngine()->removingTrack( item->playlistItem() );
-    The::playlist()->removeItem( item->playlistItem() );
-    ui->trackList->removeRow( item );
+        fromSelection << each;
+        if( each == row )
+            inSelection = true;
+    }
 
-    savePlaylistOrder();
+    if( inSelection && fromSelection.count() > 1 )
+        return fromSelection;
+
+    rows << row;
+    return rows;
 }
 
-void MainWindow::savePlaylistOrder()
+bool MainWindow::confirmDiscard( const QList<TrackInfoPtr> &tracks )
 {
-    if( !The::database()->isOpen() )
+    QList<qint64> ids;
+    for( const TrackInfoPtr &track : tracks ) {
+        if( track && track->id() > 0 )
+            ids << track->id();
+    }
+
+    const QList<Catalog::PlaylistReference> holding = The::catalog()->customPlaylistsHolding( ids );
+    if( holding.isEmpty() )
+        return true;
+
+    QStringList names;
+    for( const Catalog::PlaylistReference &reference : holding )
+        names << Utility::playlistName( reference.name, reference.pinned );
+
+    QMessageBox box( this );
+    box.setIcon( QMessageBox::Warning );
+    box.setWindowTitle( tr( "Remove tracks" ) );
+    box.setText( tr( "%n track(s) of this selection are in your own playlists: %1.", "", ids.count() )
+                 .arg( names.join( QLatin1String( ", " ) ) ) );
+    box.setInformativeText( tr( "Removing them takes them out of those too." ) );
+
+    QPushButton *remove = box.addButton( tr( "Remove" ), QMessageBox::DestructiveRole );
+    box.addButton( QMessageBox::Cancel );
+    box.setDefaultButton( QMessageBox::Cancel );
+
+    box.exec();
+
+    return box.clickedButton() == remove;
+}
+
+void MainWindow::detachFromPlayer( const QList<PlaylistItemPtr> &items )
+{
+    const PlaylistItemPtr current = The::audioEngine()->currentTrack();
+    PlaylistItemPtr playing;
+
+    // The one being listened to goes last, and the order is the whole point:
+    // removingTrack() stops the player and advances, and it advances through
+    // the queue as it stands at that moment. Taking the others out first is
+    // what stops it landing on a track that is going in the same gesture.
+    for( const PlaylistItemPtr &item : items ) {
+        if( !item )
+            continue;
+
+        if( item == current ) {
+            playing = item;
+            continue;
+        }
+
+        The::audioEngine()->removingTrack( item );
+        The::playlist()->removeItem( item );
+    }
+
+    if( playing ) {
+        The::audioEngine()->removingTrack( playing );
+        The::playlist()->removeItem( playing );
+    }
+}
+
+void MainWindow::discardTracks( const QList<TrackInfoPtr> &tracks )
+{
+    QList<qint64> ids;
+    QHash<QString, QList<int>> byTorrent;
+
+    for( const TrackInfoPtr &track : tracks ) {
+        if( !track || track->id() <= 0 )
+            continue;
+
+        ids << track->id();
+        byTorrent[track->infoHash()] << track->fileIndex();
+    }
+
+    if( ids.isEmpty() )
+        return;
+
+    // The rows first, the bytes after. A failure in between leaves bytes no
+    // playlist points at, and those are still reachable — the torrent row is
+    // untouched, so an eviction or «Empty the cache» still finds them. The
+    // other order would leave a playlist pointing at music that has gone.
+    The::playlistStore()->removeTracksEverywhere( ids );
+
+    // What was playing may have been one of these, and app_state must not come
+    // back at start up to a track that is in no list and has no bytes.
+    if( ids.contains( The::playlistStore()->currentTrackId() ) )
+        The::playlistStore()->setPlaybackState( m_playingPlaylistId, 0, 0 );
+
+    for( auto torrent = byTorrent.constBegin(); torrent != byTorrent.constEnd(); ++torrent )
+        The::cacheManager()->discardFiles( torrent.key(), torrent.value() );
+}
+
+void MainWindow::offerToRemoveEmptied( const QString &infoHash, const QString &name )
+{
+    const int answer = QMessageBox::question( this,
+                                              tr( "Remove torrent" ),
+                                              tr( "Nothing is left of «%1». Remove it?" ).arg( name ),
+                                              QMessageBox::Yes | QMessageBox::No,
+                                              QMessageBox::No );
+
+    if( answer != QMessageBox::Yes )
+        return;
+
+    removeTorrentEverywhere( infoHash );
+
+    loadPlaylists();
+    loadCurrentPlaylist();
+}
+
+void MainWindow::removeTracksRequested( TrackRow *row )
+{
+    if( !row || !The::database()->isOpen() )
         return;
 
     const qint64 playlistId = shownPlaylistId();
-    if( playlistId <= 0 )
+    const PlaylistStore::PlaylistInfo playlist = The::playlistStore()->playlist( playlistId );
+    if( !playlist.isValid() )
         return;
 
-    QList<TrackInfoPtr> tracks;
-    for( int i = 0; i < ui->trackList->count(); ++i ) {
-        TrackRow *item = qobject_cast<TrackRow *>( ui->trackList->itemWidget( ui->trackList->item( i ) ) );
-        if( item && item->playlistItem()->track() )
-            tracks << item->playlistItem()->track();
+    QList<PlaylistItemPtr> items;
+    QList<TrackInfoPtr>    tracks;
+    QList<qint64>          ids;
+
+    for( TrackRow *each : rowsForGesture( row ) ) {
+        const PlaylistItemPtr item = each->playlistItem();
+        if( !item || !item->track() )
+            continue;
+
+        items  << item;
+        tracks << item->track();
+        ids    << item->track()->id();
     }
 
-    The::playlistStore()->setTracks( playlistId, tracks );
+    if( tracks.isEmpty() )
+        return;
+
+    const bool fromTorrent = playlist.kind == PlaylistStore::TorrentPlaylist;
+
+    // Asked before anything is touched, so that Cancel really means nothing
+    // happened rather than nothing more happened.
+    if( fromTorrent && !confirmDiscard( tracks ) )
+        return;
+
+    detachFromPlayer( items );
+
+    if( fromTorrent )
+        discardTracks( tracks );
+    else
+        The::playlistStore()->removeTracks( playlistId, ids );
+
+    loadPlaylists();
+    loadCurrentPlaylist();
+
+    // And a torrent playlist left with nothing in it is a question worth
+    // asking: what is on the disk of that torrent is now nothing anybody chose.
+    if( fromTorrent && The::playlistStore()->playlist( playlistId ).trackCount == 0 )
+        offerToRemoveEmptied( playlist.infoHash, playlist.name );
 }
 
 void MainWindow::onTorrentStats( const QString &infoHash, int peers, int seeds, qint64 rate, qint64 bytesDone )
@@ -1863,7 +2050,7 @@ void MainWindow::removePlaylist()
     QStringList names;
     for( const Catalog::PlaylistReference &reference : references ) {
         trackCount += reference.trackCount;
-        names << reference.name;
+        names << Utility::playlistName( reference.name, reference.pinned );
     }
 
     QMessageBox box( this );
@@ -1874,20 +2061,44 @@ void MainWindow::removePlaylist()
                                 "", trackCount ).arg( names.join( QLatin1String( ", " ) ) ) );
 
     QPushButton *removeAll = box.addButton( tr( "Remove everything" ), QMessageBox::DestructiveRole );
-    QPushButton *keepTracks = box.addButton( tr( "Keep those tracks" ), QMessageBox::AcceptRole );
+    QPushButton *keepUsed  = box.addButton( tr( "Remove only what nothing else uses" ),
+                                            QMessageBox::AcceptRole );
     box.addButton( QMessageBox::Cancel );
-    box.setDefaultButton( keepTracks );
+    box.setDefaultButton( keepUsed );
 
     box.exec();
 
     if( box.clickedButton() == removeAll ) {
         removeTorrentEverywhere( infoHash );
-    } else if( box.clickedButton() == keepTracks ) {
-        // Hidden, not removed: the torrent leaves the sidebar, its tracks stay
-        // where they were put and go on playing, and its data follow the
-        // ordinary rules of the cache. Adding the same magnet again brings it
-        // back with the selection and the exclusions it had.
-        The::catalog()->hideTorrent( infoHash );
+    } else if( box.clickedButton() == keepUsed ) {
+        // Nothing is hidden any more: the row stays in the sidebar holding what
+        // survived, so what is left and why is on the screen rather than in a
+        // column. The entry does not always remove the playlist, and the
+        // wording of the button is what says so.
+        const QList<qint64> kept = The::catalog()->tracksInCustomPlaylists( infoHash );
+
+        QList<TrackInfoPtr> remaining;
+        QList<TrackInfoPtr> going;
+
+        // Filtered out of the list as it stands, not rebuilt from the kept ids:
+        // a playlist dragged into shape would otherwise come back in file order.
+        for( const TrackInfoPtr &track : The::playlistStore()->tracks( playlistId ) ) {
+            if( kept.contains( track->id() ) )
+                remaining << track;
+            else
+                going << track;
+        }
+
+        QList<PlaylistItemPtr> playing;
+        for( const TrackInfoPtr &track : std::as_const( going ) ) {
+            if( TrackRow *row = rowFor( track ) )
+                playing << row->playlistItem();
+        }
+
+        detachFromPlayer( playing );
+
+        The::playlistStore()->setTracks( playlistId, remaining );
+        discardTracks( going );
     } else {
         return;
     }
@@ -2191,18 +2402,14 @@ void MainWindow::addPlaylistItem( const PlaylistItemPtr &playlistItem )
     connect( item,             &TrackRow::reloadPlaylist,
              ui->trackList, &TrackList::reloadPlaylist );
 
-    connect( item,             &TrackRow::removeMe,
-             ui->trackList, &TrackList::removeRow );
-
-    // After the list has taken the row out, not before: what is written is
-    // what is on screen.
-    connect( item, &TrackRow::removeMe, this, &MainWindow::savePlaylistOrder );
-
-    connect( item, &TrackRow::excludeRequested, this, &MainWindow::excludeTrack );
+    // The row asks and the window acts, then the list is rebuilt from what was
+    // written — the same road every other change to a playlist takes. Taking
+    // the row out here and writing the rows that are left, which is what used
+    // to happen, cannot serve a gesture that removes a track from lists nobody
+    // is looking at.
+    connect( item, &TrackRow::removeRequested, this, &MainWindow::removeTracksRequested );
 
     connect( item, &TrackRow::addToPlaylistRequested, this, &MainWindow::addTrackToPlaylist );
-
-    item->setInCustomPlaylist( openPlaylistIsCustom() );
 
     QListWidgetItem *wi = new QListWidgetItem;
 

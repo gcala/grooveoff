@@ -82,24 +82,16 @@ public:
 
     bool rename( qint64 playlistId, const QString &name );
 
-    /**
-     * Drops a custom playlist. Hidden torrents whose last reference went with
-     * it are removed too, in the same transaction.
-     */
+    /** drops a custom playlist; the tracks stay in the catalogue and in its torrent */
     bool removeCustomPlaylist( qint64 playlistId );
 
-    /**
-     * Takes every track out of a playlist made by hand and leaves the playlist
-     * where it is. The garbage collection runs with it and in the same
-     * transaction, for the same reason removal does: a hidden torrent kept
-     * alive only by the tracks just taken out has nothing holding it any more.
-     */
+    /** takes every track out of a playlist made by hand and leaves the playlist */
     bool clearPlaylist( qint64 playlistId );
 
     /** the playlist that is always there, created by the migration */
     qint64 pinnedPlaylistId() const;
 
-    /** every playlist worth showing: custom ones plus the torrents not hidden */
+    /** every playlist there is; nothing is hidden any more */
     QList<PlaylistInfo> visiblePlaylists() const;
 
     PlaylistInfo playlist( qint64 playlistId ) const;
@@ -120,6 +112,37 @@ public:
     bool removeTrackAt( qint64 playlistId, int position );
     bool moveTrack( qint64 playlistId, int from, int to );
 
+    /**
+     * Takes these tracks out of every list of both kinds. What removing a track
+     * from a torrent's playlist means: that playlist is the list of what was
+     * chosen, so a track nobody chose has no business sitting in a list made
+     * out of it either.
+     *
+     * The rows in track stay, and that is the whole of the state afterwards —
+     * the file is known and not chosen, which is where every file starts. There
+     * is no third state and nothing is remembered about the refusal.
+     *
+     * One transaction, and every list touched is renumbered from zero, which
+     * the arithmetic of a drag depends on.
+     */
+    bool removeTracksEverywhere( const QList<qint64> &trackIds );
+
+    /** takes these tracks out of this list only, and leaves them everywhere else */
+    bool removeTracks( qint64 playlistId, const QList<qint64> &trackIds );
+
+    /**
+     * Drops the playlist a torrent came with, keeping the torrent and its file
+     * list. What a selector closed with nothing chosen means: there is nothing
+     * to show, and the file list is worth keeping so that the same magnet
+     * pasted again opens the selector instead of asking the swarm all over.
+     *
+     * The torrent is then known, has tracks and has no playlist — which is why
+     * Catalog::magnetsWithoutMetadata() asks for no tracks as well as no
+     * playlist, or the next start up would go looking for it as if the metadata
+     * had never arrived and put the declined torrent back in the sidebar.
+     */
+    bool removeTorrentPlaylist( const QString &infoHash );
+
     // --- what was playing ---------------------------------------------------
 
     qint64 currentPlaylistId() const;
@@ -136,8 +159,6 @@ private:
     bool exists( const QString &table, qint64 id ) const;
 
     bool isCustom( qint64 playlistId ) const;
-    QStringList referencedTorrents( qint64 playlistId ) const;
-    bool collectGarbageFor( const QStringList &infoHashes );
     /** the contents of a playlist, in order, with any repeat dropped */
     bool writeTrackIds( qint64 playlistId, const QList<qint64> &requested );
     QList<qint64> trackIds( qint64 playlistId ) const;

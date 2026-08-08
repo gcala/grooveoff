@@ -21,7 +21,6 @@ set(grooveoff_SRCS main.cpp
                    widgets/SvgButton.cpp
                    widgets/PlayAnimationWidget.cpp
                    widgets/ElidedLabel.cpp
-                   widgets/TimerButton.cpp
                    widgets/TimerLabel.cpp
                    widgets/VolumeDial.cpp
                    widgets/IconButton.cpp
