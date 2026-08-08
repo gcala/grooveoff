@@ -1434,17 +1434,36 @@ void MainWindow::readArrivedTags( const QString &infoHash )
             continue;
 
         const QString key = track->infoHash() + QLatin1Char( '/' ) + QString::number( track->fileIndex() );
-        if( m_tagsRead.contains( key ) )
-            continue;
 
         if( !TrackTags::hasHead( item->playlistItem()->localPath() ) )
             continue;
 
-        // Once the head is there the answer will not change, so the row is
-        // marked whatever came back: a file with no tags at all is a file with
-        // no tags at all, and asking it again every second says nothing new.
-        m_tagsRead.insert( key );
-        readTagsOf( track->infoHash(), track->fileIndex() );
+        if( !m_tagsRead.contains( key ) ) {
+            // The words are in the first kilobytes, so once the head is there
+            // the answer will not change: the row is marked whatever came back,
+            // and a file with no tags is a file with no tags.
+            m_tagsRead.insert( key );
+            readTagsOf( track->infoHash(), track->fileIndex() );
+        }
+
+        // The picture is the one answer that goes on changing. A cover is tens
+        // of kilobytes where the tags are two, so read as early as them it
+        // comes back cut in half — and a half decoded jpeg is not null, so the
+        // row used to remember it and never ask again. It stayed broken until
+        // something unrelated rebuilt the list, which is exactly what somebody
+        // switching playlist and coming back was doing by hand.
+        if( m_coversRead.contains( key ) || item->hasCover() )
+            continue;
+
+        item->refreshCover();
+
+        // Settled when there is one, or when the whole file has arrived and
+        // there is none — which is also what stops this asking for ever.
+        if( item->hasCover()
+            || The::torrentSession()->bufferedBytes( track->infoHash(), track->fileIndex() )
+               >= track->fileSize() ) {
+            m_coversRead.insert( key );
+        }
     }
 }
 

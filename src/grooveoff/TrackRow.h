@@ -71,6 +71,12 @@ public:
     /** takes up the tags and the cover once they became readable */
     void refreshLabels();
 
+    /** whether the row is showing the picture out of the file, not the fallback */
+    bool hasCover() const;
+
+    /** asks the file for its cover again, for a head that was still arriving */
+    void refreshCover();
+
     bool operator==( TrackRow & ) const;
 
 public Q_SLOTS:

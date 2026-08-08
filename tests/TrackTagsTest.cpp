@@ -46,6 +46,7 @@ class TrackTagsTest : public QObject
 private Q_SLOTS:
     void findsNoCoverInAFileThatHasNotArrived();
     void findsNoCoverInAFileThatIsNotThere();
+    void refusesAPictureThatStopsHalfWay();
 };
 
 void TrackTagsTest::findsNoCoverInAFileThatHasNotArrived()
@@ -83,6 +84,44 @@ void TrackTagsTest::findsNoCoverInAFileThatIsNotThere()
 
     QVERIFY( TrackTags::cover( directory.filePath( QStringLiteral( "absent.mp3" ) ) ).isNull() );
     QVERIFY( TrackTags::cover( QString() ).isNull() );
+}
+
+/*!
+  \brief refusesAPictureThatStopsHalfWay
+
+  The other half of the same story, and the one that took a field report to
+  find. The tags of a file sit in its first two kilobytes and a cover is tens of
+  them, so a picture read as soon as the head arrives comes back cut off. Qt
+  decodes that into an image with a grey bottom, which is not null — so the row
+  remembered it and never asked again, and the cover stayed broken until
+  something unrelated rebuilt the list.
+
+  A rule about bytes, asked without a file.
+*/
+void TrackTagsTest::refusesAPictureThatStopsHalfWay()
+{
+    QByteArray jpeg;
+    jpeg.append( char( 0xFF ) ).append( char( 0xD8 ) );      // start of image
+    jpeg.append( 2000, 'x' );                                 // whatever is inside
+    jpeg.append( char( 0xFF ) ).append( char( 0xD9 ) );      // end of image
+
+    QVERIFY( TrackTags::pictureIsWhole( jpeg ) );
+    QVERIFY2( !TrackTags::pictureIsWhole( jpeg.left( jpeg.size() - 2 ) ),
+              "a jpeg without its end marker was taken for a whole picture" );
+    QVERIFY( !TrackTags::pictureIsWhole( jpeg.left( 400 ) ) );
+
+    QByteArray png = QByteArrayLiteral( "\x89PNG\r\n\x1a\n" );
+    const int header = png.size();
+    png.append( 300, 'y' );
+
+    QVERIFY( !TrackTags::pictureIsWhole( png ) );
+    QVERIFY( TrackTags::pictureIsWhole( png + QByteArrayLiteral( "IEND" ) ) );
+    QVERIFY( !TrackTags::pictureIsWhole( png.left( header ) ) );
+
+    // Nothing at all is nothing, and a format nobody thought of is taken at
+    // face value: refusing it would be a cover that never appears.
+    QVERIFY( !TrackTags::pictureIsWhole( QByteArray() ) );
+    QVERIFY( TrackTags::pictureIsWhole( QByteArrayLiteral( "some other picture format" ) ) );
 }
 
 QTEST_MAIN( TrackTagsTest )

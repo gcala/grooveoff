@@ -119,6 +119,25 @@ bool TrackTags::read( const TrackInfoPtr &track )
     return true;
 }
 
+bool TrackTags::pictureIsWhole( const QByteArray &data )
+{
+    if( data.size() < 4 )
+        return false;
+
+    const auto byte = [&data]( int at ) { return static_cast<unsigned char>( data.at( at ) ); };
+
+    if( byte( 0 ) == 0xFF && byte( 1 ) == 0xD8 ) {
+        return byte( data.size() - 2 ) == 0xFF && byte( data.size() - 1 ) == 0xD9;
+    }
+
+    if( data.size() >= 8 && byte( 0 ) == 0x89 && byte( 1 ) == 0x50
+        && byte( 2 ) == 0x4E && byte( 3 ) == 0x47 ) {
+        return data.contains( QByteArrayLiteral( "IEND" ) );
+    }
+
+    return true;
+}
+
 QImage TrackTags::cover( const QString &localPath )
 {
     if( localPath.isEmpty() || !QFile::exists( localPath ) || !headOf( localPath ) )
@@ -136,8 +155,10 @@ QImage TrackTags::cover( const QString &localPath )
         return QImage();
 
     const TagLib::ByteVector data = pictures.front().value( "data" ).value<TagLib::ByteVector>();
-    if( data.isEmpty() )
+    if( data.isEmpty()
+        || !pictureIsWhole( QByteArray::fromRawData( data.data(), int( data.size() ) ) ) ) {
         return QImage();
+    }
 
     QImage cover;
     cover.loadFromData( reinterpret_cast<const uchar *>( data.data() ), int( data.size() ) );

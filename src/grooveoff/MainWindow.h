@@ -430,6 +430,15 @@ private:
      */
     QSet<QString> m_tagsRead;
 
+    /**
+     * Tracks whose cover question is settled: one was found, or the file is
+     * whole and there is none. Kept apart from the tags because the two answers
+     * arrive at different moments — the tags sit in the first kilobytes and a
+     * picture is tens of them, so a cover read as early as the tags comes back
+     * cut in half.
+     */
+    QSet<QString> m_coversRead;
+
     /** what the torrent being listened to had last time, to see it progressing */
     QString m_lastStatsHash;
     qint64  m_lastBytesDone = -1;

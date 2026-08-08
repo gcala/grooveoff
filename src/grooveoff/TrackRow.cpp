@@ -470,6 +470,16 @@ void TrackRow::refreshLabels()
     loadCover();
 }
 
+bool TrackRow::hasCover() const
+{
+    return !m_coverPath.isEmpty();
+}
+
+void TrackRow::refreshCover()
+{
+    loadCover();
+}
+
 void TrackRow::loadCover()
 {
     const QString path = m_playlistItem->localPath();

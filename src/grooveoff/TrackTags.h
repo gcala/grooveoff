@@ -52,6 +52,23 @@ namespace TrackTags {
     QImage cover( const QString &localPath );
 
     /**
+     * Whether the bytes of a picture are all there. A file still arriving
+     * carries a tag that stops in the middle of its cover, and TagLib hands
+     * back what there is — half a jpeg, which QImage decodes happily into a
+     * picture with a grey bottom half. Not being null, it was remembered and
+     * never asked about again.
+     *
+     * Both formats worth the question say where they end, so asking costs two
+     * bytes: jpeg finishes on ffd9, png on the IEND chunk. Anything else is
+     * taken at face value rather than refused, or a format nobody thought of
+     * would be a cover that never appears at all.
+     *
+     * Here rather than hidden in the reader because it is a rule about bytes,
+     * and a rule about bytes can be asked without a file.
+     */
+    bool pictureIsWhole( const QByteArray &data );
+
+    /**
      * Whether the head of this file has arrived, hence whether asking it
      * anything can produce an answer. Public because it is also the cheapest
      * way of asking "is this one ready to be read yet" of a row that is
