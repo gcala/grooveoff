@@ -90,6 +90,16 @@ public:
      */
     void savePlaybackState();
 
+    /**
+     * The tracks one gesture on this row acts on: the whole selection when the
+     * row is part of it, that row alone otherwise.
+     *
+     * Public because the row's own menu has to ask the same question the window
+     * will answer with — a menu offering the lists that are missing one track
+     * beside an action that adds five is two rules for one gesture.
+     */
+    QList<TrackInfoPtr> tracksForGesture( TrackRow *row ) const;
+
 protected:
     void changeEvent( QEvent *event ) override;
     void resizeEvent( QResizeEvent *event ) override;

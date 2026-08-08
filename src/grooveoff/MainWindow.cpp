@@ -2322,12 +2322,25 @@ void MainWindow::addTracksToPlaylist( qint64 playlistId, const QList<qint64> &tr
                                  .arg( name ) );
 }
 
+QList<TrackInfoPtr> MainWindow::tracksForGesture( TrackRow *row ) const
+{
+    QList<TrackInfoPtr> tracks;
+
+    for( TrackRow *each : rowsForGesture( row ) ) {
+        if( each->playlistItem() && each->playlistItem()->track() )
+            tracks << each->playlistItem()->track();
+    }
+
+    return tracks;
+}
+
 void MainWindow::addTrackToPlaylist( TrackRow *item, qint64 playlistId )
 {
-    if( !item || !item->playlistItem()->track() )
-        return;
+    QList<qint64> ids;
+    for( const TrackInfoPtr &track : tracksForGesture( item ) )
+        ids << track->id();
 
-    addTracksToPlaylist( playlistId, { item->playlistItem()->track()->id() } );
+    addTracksToPlaylist( playlistId, ids );
 }
 
 void MainWindow::addShownTorrentToPlaylist( QAction *chosen )

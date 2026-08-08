@@ -345,16 +345,20 @@ void TrackRow::contextMenuEvent( QContextMenuEvent *event )
     QAction *playAction = menu.addAction( QIcon::fromTheme( QLatin1String( "media-playback-start" ) ),
                                           tr( "Play" ) );
 
-    // The lists made by hand that do not have this track already. A playlist
-    // holds a track at most once, so offering one that has it would be
-    // offering a gesture with no outcome — and the one being looked at, when
-    // it is a list made by hand, always has it.
+    // The lists made by hand that are missing at least one of the tracks this
+    // gesture covers. A playlist holds a track at most once, so offering one
+    // that has them all would be offering a gesture with no outcome — and the
+    // one being looked at, when it is a list made by hand, always has them.
+    //
+    // The tracks come from the window because the gesture is the selection when
+    // this row is in it: asking only about the row would offer the lists that
+    // are missing this one beside an action that adds five.
     QHash<const QAction *, qint64> playlistOf;
     QMenu *addMenu = menu.addMenu( QIcon::fromTheme( QLatin1String( "list-add" ) ),
                                    tr( "Add to playlist" ) );
 
     PlaylistStore *playlists = The::playlistStore();
-    const qint64 trackId = m_playlistItem->track() ? m_playlistItem->track()->id() : 0;
+    const QList<TrackInfoPtr> covered = The::mainWindow()->tracksForGesture( this );
 
     int customCount = 0;
     const QList<PlaylistStore::PlaylistInfo> all = playlists->visiblePlaylists();
@@ -364,7 +368,15 @@ void TrackRow::contextMenuEvent( QContextMenuEvent *event )
 
         ++customCount;
 
-        if( playlists->contains( playlist.id, trackId ) )
+        bool missingOne = false;
+        for( const TrackInfoPtr &track : covered ) {
+            if( track && !playlists->contains( playlist.id, track->id() ) ) {
+                missingOne = true;
+                break;
+            }
+        }
+
+        if( !missingOne )
             continue;
 
         playlistOf.insert( addMenu->addAction( Utility::playlistName( playlist ) ), playlist.id );
