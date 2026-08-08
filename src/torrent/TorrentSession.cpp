@@ -73,6 +73,9 @@ namespace {
 /** how long the shutdown waits for the resume data before giving up */
 const int resumeTimeoutMs = 10000;
 
+/** how long a drop waits for libtorrent to let go of the torrent */
+const int removalTimeoutMs = 5000;
+
 /** how often the peers and the byte counts are refreshed */
 const int updateIntervalMs = 1000;
 
@@ -159,6 +162,17 @@ public:
      * @return whether the session was holding it.
      */
     bool detach( const QString &infoHash, bool deleteFiles );
+
+    /**
+     * Waits until libtorrent has actually let go of a torrent detach() asked it
+     * to drop. remove_torrent() only asks: the work happens on the session's
+     * own thread, and adding the same torrent again before it is done gets back
+     * the very torrent that was being removed.
+     */
+    void waitForRemoval( const QString &infoHash );
+
+    /** torrents asked to leave and not gone yet, under every hash they answer to */
+    QSet<QString> pendingRemovals;
 
     /**
      * Where the files of a torrent being deleted live, by every hash it could
@@ -494,6 +508,15 @@ void TorrentSession::Private::handleAlert( const lt::alert *alert )
         // A .torrent, or a magnet reopened from its resume file, arrives with
         // the metadata already in hand and no metadata_received_alert follows.
         publishMetadata( infoHash, added->handle );
+        return;
+    }
+
+    if( const auto *removed = lt::alert_cast<lt::torrent_removed_alert>( alert ) ) {
+        if( removed->info_hashes.has_v1() )
+            pendingRemovals.remove( hexString( removed->info_hashes.v1 ) );
+        if( removed->info_hashes.has_v2() )
+            pendingRemovals.remove( hexString( removed->info_hashes.get( lt::protocol_version::V2 ) ) );
+
         return;
     }
 
@@ -881,13 +904,19 @@ bool TorrentSession::Private::detach( const QString &infoHash, bool deleteFiles 
     const bool held = handle.is_valid();
 
     if( held ) {
-        if( deleteFiles ) {
-            const QString directory = QDir( torrentsPath ).absoluteFilePath( infoHash );
-            const lt::info_hash_t hashes = handle.info_hashes();
+        const lt::info_hash_t hashes = handle.info_hashes();
+        const QString directory = QDir( torrentsPath ).absoluteFilePath( infoHash );
 
-            if( hashes.has_v1() )
+        // Under both names it could come back as, the way pendingDeletes does:
+        // a hybrid torrent carries two hashes and the alert may name either.
+        if( hashes.has_v1() ) {
+            pendingRemovals.insert( hexString( hashes.v1 ) );
+            if( deleteFiles )
                 pendingDeletes.insert( hexString( hashes.v1 ), directory );
-            if( hashes.has_v2() )
+        }
+        if( hashes.has_v2() ) {
+            pendingRemovals.insert( hexString( hashes.get( lt::protocol_version::V2 ) ) );
+            if( deleteFiles )
                 pendingDeletes.insert( hexString( hashes.get( lt::protocol_version::V2 ) ), directory );
         }
 
@@ -900,6 +929,23 @@ bool TorrentSession::Private::detach( const QString &infoHash, bool deleteFiles 
     uploaded.remove( infoHash );
 
     return held;
+}
+
+void TorrentSession::Private::waitForRemoval( const QString &infoHash )
+{
+    if( !session )
+        return;
+
+    QElapsedTimer clock;
+    clock.start();
+
+    while( pendingRemovals.contains( infoHash ) && clock.elapsed() < removalTimeoutMs ) {
+        session->wait_for_alert( std::chrono::milliseconds( 20 ) );
+        q->drainAlerts();
+    }
+
+    if( pendingRemovals.contains( infoHash ) )
+        qWarning() << "GrooveOff ::" << infoHash << "did not leave the session in time";
 }
 
 void TorrentSession::remove( const QString &infoHash, bool deleteFiles )
@@ -962,6 +1008,16 @@ qint64 TorrentSession::dropFiles( const QString &infoHash, const QList<int> &fil
 
     const bool held = d->detach( infoHash, false );
 
+    // remove_torrent() only asks. The torrent leaves on libtorrent's own thread,
+    // and until it has gone, adding it again hands back the very torrent being
+    // corrected — with its piece map whole. What follows then looks like it
+    // worked: the file is unlinked and the resume we write is overwritten by
+    // the old map a moment later, so libtorrent goes on believing it has those
+    // pieces, nothing is ever fetched again however often the file is ticked,
+    // and the track plays as silence. This wait is the whole difference.
+    if( held )
+        d->waitForRemoval( infoHash );
+
     const QByteArray stored = readWholeFile( resumeFile );
     if( stored.isEmpty() )
         return -1;
@@ -989,13 +1045,21 @@ qint64 TorrentSession::dropFiles( const QString &infoHash, const QList<int> &fil
     if( dropped.isEmpty() )
         return -1;
 
-    // Which pieces belong wholly to what is going. A piece touched by anything
-    // that stays — a pad file included, which costs at most one piece and risks
-    // nothing — is left claimed: its other half is still honest on the disk.
+    // Every piece the dropped files touch, the ones they share with a neighbour
+    // included. Keeping a shared piece looks careful and is the opposite: a
+    // piece straddling two files is stored across both of them, so unlinking
+    // one takes away its half — and a piece left claimed is a piece nobody will
+    // ever ask for again. The head of the file, which is where the tags and the
+    // cover live, is exactly what sits in that first shared piece: the track
+    // came back as tens of kilobytes of holes followed by music, with no cover
+    // and no header, and no amount of re-ticking it ever repaired that.
+    //
+    // Clearing it costs the neighbour up to one piece at each end, fetched
+    // again the next time anything wants it. That is a cost; the other way was
+    // a lie.
     QSet<int> goneWith;
-    QSet<int> keptWith;
 
-    for( int fileIndex = 0; fileIndex < fileCount; ++fileIndex ) {
+    for( int fileIndex : std::as_const( dropped ) ) {
         const lt::file_index_t index { fileIndex };
         const qint64 size = layout.file_size( index );
         if( size <= 0 )
@@ -1004,15 +1068,11 @@ qint64 TorrentSession::dropFiles( const QString &infoHash, const QList<int> &fil
         const int first = int( layout.map_file( index, 0, 0 ).piece );
         const int last  = int( layout.map_file( index, size - 1, 0 ).piece );
 
-        QSet<int> &target = dropped.contains( fileIndex ) ? goneWith : keptWith;
         for( int piece = first; piece <= last; ++piece )
-            target.insert( piece );
+            goneWith.insert( piece );
     }
 
     for( int piece : std::as_const( goneWith ) ) {
-        if( keptWith.contains( piece ) )
-            continue;
-
         const lt::piece_index_t index { piece };
 
         if( piece < params.have_pieces.size() )

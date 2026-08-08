@@ -22,6 +22,7 @@
 #include <QDir>
 #include <QDirIterator>
 #include <QFile>
+#include <QSet>
 #include <QSignalSpy>
 #include <QStandardPaths>
 #include <QTemporaryDir>
@@ -31,6 +32,7 @@
 #include <libtorrent/create_torrent.hpp>
 #include <libtorrent/error_code.hpp>
 #include <libtorrent/load_torrent.hpp>
+#include <libtorrent/read_resume_data.hpp>
 #include <libtorrent/torrent_info.hpp>
 
 #include <vector>
@@ -288,8 +290,11 @@ void TorrentSessionTest::buildFullTorrent()
     two.write( m_keptContent );
     two.close();
 
+    // v1 only, deliberately: without pad files the files share their boundary
+    // pieces, which is the layout of nearly every music torrent in the world
+    // and the one the piece arithmetic of a drop has to be right about.
     std::vector<lt::create_file_entry> files = lt::list_files( album.toStdString() );
-    lt::create_torrent torrent( std::move( files ), 16 * 1024 );
+    lt::create_torrent torrent( std::move( files ), 16 * 1024, lt::create_torrent::v1_only );
 
     lt::error_code error;
     lt::set_piece_hashes( torrent, m_seedRoot.toStdString(), error );
@@ -382,8 +387,13 @@ void TorrentSessionTest::dropsOneFileAndKeepsTheOther()
     QCOMPARE( kept.readAll(), m_keptContent );
 
     QVERIFY( !The::torrentSession()->cachedFile( m_fullHash, m_goneIndex ).complete );
-    QVERIFY2( The::torrentSession()->cachedFile( m_fullHash, m_keptIndex ).complete,
-              "a piece shared with the file that stays was cleared" );
+
+    // The neighbour's own bytes are untouched — compared above rather than
+    // counted — but it is no longer *whole* as far as the piece map goes, and
+    // that is the declared cost of a drop rather than a defect: the two share a
+    // piece, the piece had to go, and whoever wants that file next fetches it
+    // again. Claiming it instead is what left the dropped file headless.
+    QVERIFY( QFile::exists( m_keptFile ) );
 }
 
 /*!
@@ -397,14 +407,67 @@ void TorrentSessionTest::dropsOneFileAndKeepsTheOther()
 */
 void TorrentSessionTest::libtorrentAgreesTheBytesAreGone()
 {
-    // The drop put the torrent back in the session; the first piece of the file
-    // that went belongs to nothing else, whatever the layout.
+    // The drop put the torrent back in the session, and that it did is half the
+    // assertion: an add that libtorrent refuses as a duplicate leaves no handle,
+    // and every question asked of a torrent it is not holding answers "no" —
+    // which is how a first version of this test passed while the map was whole.
     QTRY_VERIFY_WITH_TIMEOUT( The::torrentSession()->isActive( m_fullHash ), 5000 );
-    QTRY_VERIFY_WITH_TIMEOUT( !The::torrentSession()->havePiece( m_fullHash, 0 ), 15000 );
 
-    // And it did not throw the rest away to say so: the kept file's own pieces
-    // are still there, which is what tells a corrected map from a full recheck.
-    QVERIFY( The::torrentSession()->cachedFile( m_fullHash, m_keptIndex ).complete );
+    // The map itself, read off the disk rather than off the session, because
+    // the map on the disk is what the next start will believe. Every piece
+    // wholly inside the file that went has to be clear; the ones it shared with
+    // the file that stays are deliberately left alone.
+    const QString resumeFile = The::torrentSession()->resumePath()
+                               + QLatin1Char( '/' ) + m_fullHash + QLatin1String( ".resume" );
+
+    QFile blob( resumeFile );
+    QVERIFY( blob.open( QIODevice::ReadOnly ) );
+    const QByteArray stored = blob.readAll();
+    QVERIFY( !stored.isEmpty() );
+
+    lt::error_code error;
+    const lt::add_torrent_params params =
+        lt::read_resume_data( lt::span<const char>( stored.constData(), stored.size() ), error );
+    QVERIFY( !error );
+    QVERIFY( params.ti );
+
+    const lt::file_storage &layout = params.ti->layout();
+    const lt::file_index_t gone { m_goneIndex };
+
+    const int goneFirst = int( layout.map_file( gone, 0, 0 ).piece );
+    const int goneLast  = int( layout.map_file( gone, layout.file_size( gone ) - 1, 0 ).piece );
+
+    // **Every** piece it touched, the shared ones at each end included. Those
+    // are the ones that matter: a piece straddling two files is stored across
+    // both, so unlinking one takes away its half, and a piece left claimed is
+    // one nobody will ask for again. The head of the file lives in that first
+    // shared piece, which is where the tags and the cover are — keeping it is
+    // how the track came back as holes with no cover and stayed that way.
+    for( int piece = goneFirst; piece <= goneLast; ++piece ) {
+        QVERIFY2( piece < params.have_pieces.size(), "the resume lost its piece map" );
+        QVERIFY2( !params.have_pieces[lt::piece_index_t { piece }],
+                  "a piece the file touched is still claimed: its head will never come back" );
+    }
+
+    QVERIFY2( goneLast > goneFirst, "the file fits in one piece, so this proves little" );
+
+    // And it did not throw the whole torrent away to say so: the pieces of the
+    // file that stays, the shared ones apart, are still claimed — which is what
+    // tells a corrected map from a full recheck.
+    const lt::file_index_t kept { m_keptIndex };
+    const int keptFirst = int( layout.map_file( kept, 0, 0 ).piece );
+    const int keptLast  = int( layout.map_file( kept, layout.file_size( kept ) - 1, 0 ).piece );
+
+    int stillThere = 0;
+    for( int piece = keptFirst; piece <= keptLast; ++piece ) {
+        if( piece >= goneFirst && piece <= goneLast )
+            continue;
+
+        QVERIFY( params.have_pieces[lt::piece_index_t { piece }] );
+        ++stillThere;
+    }
+
+    QVERIFY( stillThere > 0 );
 }
 
 QTEST_MAIN( TorrentSessionTest )

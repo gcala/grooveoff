@@ -172,11 +172,13 @@ public:
      * expected instead, which is also what saves a full recheck at the next
      * open.
      *
-     * A piece shared with a file that stays is left alone. Half of it is still
-     * honest on the disk, nothing here ever hands a piece to a peer, and
-     * dropping it would cost a fetch to say something nobody is asking — so
-     * the cache does not come all the way back to zero, by one piece at each
-     * end of what went.
+     * Every piece the file touched is cleared, the shared ones at each end
+     * included. Keeping those looks careful and is the opposite: a piece
+     * straddling two files is stored across both, so unlinking one takes away
+     * its half, and a piece left claimed is one nobody asks for again — the
+     * head of the file, tags and cover and all, lives in exactly that first
+     * shared piece. It costs the neighbour up to one piece at each end, fetched
+     * again when anything next wants it.
      *
      * A torrent the session was holding goes back into it, because it was on
      * the network a moment ago and nothing in this program puts a torrent to
