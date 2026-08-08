@@ -164,13 +164,6 @@ void ActionCollection::initActions()
                                       );
     
 
-    QAction *actionQtAbout = new QAction( QIcon::fromTheme( QLatin1String( "qtlogo" ),
-                                                            QIcon( QLatin1String( ":/resources/qtlogo.png" ) )
-                                                          ),
-                                          tr( "About &Qt" ), 
-                                          this
-                                        );
-    
     // append all actions to the collector
     m_actionCollection[ QLatin1String( "actionClose" ) ] = actionClose;
     m_actionCollection[ QLatin1String( "actionDonate" ) ] = actionDonate;
@@ -189,11 +182,9 @@ void ActionCollection::initActions()
     m_actionCollection[ QLatin1String( "actionRemovePlaylist" ) ] = actionRemovePlaylist;
     m_actionCollection[ QLatin1String( "actionEmptyCache" ) ] = actionEmptyCache;
     m_actionCollection[ QLatin1String( "actionAbout" ) ] = actionAbout;
-    m_actionCollection[ QLatin1String( "actionQtAbout" ) ] = actionQtAbout;
     
     // set action roles
     m_actionCollection[ QLatin1String( "actionClose" ) ]->setMenuRole( QAction::QuitRole );
-    m_actionCollection[ QLatin1String( "actionQtAbout" ) ]->setMenuRole( QAction::AboutQtRole );
     
     // set actions tool tip
     actionClose->setToolTip( tr( "Close GrooveOff" ) );
@@ -281,7 +272,6 @@ QMenuBar* ActionCollection::createMenuBar( QWidget *parent )
 
     QMenu* helpMenu = new QMenu( tr( "&Help" ), menuBar );
     helpMenu->addAction( m_actionCollection[ QLatin1String( "actionAbout" ) ] );
-    helpMenu->addAction( m_actionCollection[ QLatin1String( "actionQtAbout" ) ] );
     m_menuCollection[ QLatin1String( "helpMenu" ) ] = helpMenu;
 
     menuBar->addMenu( fileMenu );

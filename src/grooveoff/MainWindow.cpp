@@ -272,7 +272,6 @@ void MainWindow::setupConnections()
     connect( ac->getAction( "actionWide" ), &QAction::triggered, this, &MainWindow::setWideLayout );
     connect( ac->getAction( "miniPlayer" ), &QAction::triggered, this, &MainWindow::setMiniPlayerLayout );
     connect( ac->getAction( "actionAbout" ), &QAction::triggered, this, &MainWindow::about );
-    connect( ac->getAction( "actionQtAbout" ), &QAction::triggered, qApp, &QApplication::aboutQt );
     connect( ac->getAction( "actionOpenTorrent" ), &QAction::triggered, this, &MainWindow::openTorrentFile );
     connect( ac->getAction( "actionEmptyCache" ), &QAction::triggered, this, &MainWindow::emptyCache );
     connect( ac->getAction( "actionNewPlaylist" ), &QAction::triggered, this, &MainWindow::newPlaylist );

@@ -87,22 +87,22 @@
         <translation type="unfinished">&amp;Sair</translation>
     </message>
     <message>
-        <location line="+140"/>
+        <location line="+131"/>
         <source>Close GrooveOff</source>
         <translation type="unfinished">Fechar GrooveOff</translation>
     </message>
     <message>
-        <location line="-133"/>
+        <location line="-124"/>
         <source>&amp;Donate</source>
         <translation type="unfinished">&amp;Doar</translation>
     </message>
     <message>
-        <location line="+134"/>
+        <location line="+125"/>
         <source>Donate with PayPal</source>
         <translation type="unfinished">Doar com PayPal</translation>
     </message>
     <message>
-        <location line="-111"/>
+        <location line="-102"/>
         <source>&amp;Compact Layout</source>
         <translation type="unfinished"></translation>
     </message>
@@ -162,12 +162,11 @@
         <translation type="unfinished">&amp;Sobre GroveOff</translation>
     </message>
     <message>
-        <location line="+8"/>
         <source>About &amp;Qt</source>
-        <translation type="unfinished">Sobre &amp;Qt</translation>
+        <translation type="obsolete">Sobre &amp;Qt</translation>
     </message>
     <message>
-        <location line="+33"/>
+        <location line="+32"/>
         <source>Add a .torrent file as a playlist</source>
         <translation type="unfinished"></translation>
     </message>
@@ -231,7 +230,7 @@
         <translation type="unfinished">&amp;Ajuda</translation>
     </message>
     <message>
-        <location line="+19"/>
+        <location line="+24"/>
         <source>Main Menu</source>
         <translation type="unfinished"></translation>
     </message>
@@ -561,13 +560,13 @@
     </message>
     <message>
         <location line="+2"/>
-        <location line="+511"/>
-        <location line="+1819"/>
+        <location line="+513"/>
+        <location line="+1869"/>
         <source>Idle</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-2321"/>
+        <location line="-2373"/>
         <source>Magnet</source>
         <translation type="unfinished"></translation>
     </message>
@@ -577,7 +576,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+657"/>
+        <location line="+659"/>
         <source>Open a torrent</source>
         <translation type="unfinished"></translation>
     </message>
@@ -631,7 +630,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+190"/>
+        <location line="+209"/>
         <source>The cache is already empty.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -686,8 +685,8 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-830"/>
-        <location line="+389"/>
+        <location line="-849"/>
+        <location line="+408"/>
         <source>Remove</source>
         <translation type="unfinished"></translation>
     </message>
@@ -734,8 +733,8 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-706"/>
-        <location line="+685"/>
+        <location line="-725"/>
+        <location line="+704"/>
         <location line="+41"/>
         <location line="+27"/>
         <source>Remove torrent</source>
@@ -763,7 +762,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+140"/>
+        <location line="+158"/>
         <source>Add all tracks to (no list of your own yet)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -806,7 +805,7 @@
         <translation type="vanished">Iniciar pesquisa</translation>
     </message>
     <message>
-        <location line="-2087"/>
+        <location line="-2126"/>
         <source>Main menu</source>
         <translation type="unfinished"></translation>
     </message>
@@ -829,7 +828,7 @@ Select a valid path</source>
 Selecione uma pasta válida</translation>
     </message>
     <message>
-        <location line="+2337"/>
+        <location line="+2389"/>
         <source>Donation to Grooveoff&apos;s author</source>
         <translation>Doações ao autor de Grooveoff</translation>
     </message>
@@ -838,8 +837,8 @@ Selecione uma pasta válida</translation>
         <translation type="vanished">Música do Grooveshark.com Offline</translation>
     </message>
     <message>
-        <location line="-2406"/>
-        <location line="+1611"/>
+        <location line="-2458"/>
+        <location line="+1632"/>
         <source>Attention</source>
         <translation>Atenção</translation>
     </message>
@@ -865,7 +864,7 @@ Selecione uma pasta válida</translation>
         <translation type="vanished">Um arquivo chamado &quot;%1&quot; já existe. Tem certeza que deseja sobrescreve-lo?</translation>
     </message>
     <message>
-        <location line="+789"/>
+        <location line="+820"/>
         <source>Offline</source>
         <translation>Offline</translation>
     </message>
@@ -969,7 +968,7 @@ Selecione uma pasta válida</translation>
 <context>
     <name>TorrentSession</name>
     <message>
-        <location filename="../src/torrent/TorrentSession.cpp" line="+732"/>
+        <location filename="../src/torrent/TorrentSession.cpp" line="+755"/>
         <location line="+35"/>
         <location line="+41"/>
         <source>The torrent session is not running.</source>
@@ -996,7 +995,7 @@ Selecione uma pasta válida</translation>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+527"/>
+        <location line="+564"/>
         <source>Could not get the track list of this torrent.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1005,12 +1004,12 @@ Selecione uma pasta válida</translation>
     <name>TrackRow</name>
     <message>
         <location filename="../src/grooveoff/TrackRow.cpp" line="+121"/>
-        <location line="+247"/>
+        <location line="+225"/>
         <source>Play</source>
         <translation>Play</translation>
     </message>
     <message>
-        <location line="-244"/>
+        <location line="-222"/>
         <source>Remove track from the playlist</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1021,12 +1020,12 @@ Selecione uma pasta válida</translation>
     </message>
     <message>
         <location line="+19"/>
-        <location line="+124"/>
+        <location line="+102"/>
         <source>Waiting for peers</source>
         <translation type="unfinished"></translation>
     </message>
     <message numerus="yes">
-        <location line="-123"/>
+        <location line="-101"/>
         <source>%n peer(s)</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -1042,22 +1041,22 @@ Selecione uma pasta válida</translation>
         </translation>
     </message>
     <message>
-        <location line="+63"/>
+        <location line="+65"/>
         <source>Not buffered</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+68"/>
+        <location line="+44"/>
         <source>Track not available</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+40"/>
+        <location line="+44"/>
         <source>Add to playlist</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+24"/>
+        <location line="+32"/>
         <source>Add to playlist (none yet)</source>
         <translation type="unfinished"></translation>
     </message>
