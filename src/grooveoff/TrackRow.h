@@ -105,6 +105,15 @@ protected:
     void enterEvent( QEnterEvent *event ) override;
     void contextMenuEvent( QContextMenuEvent *event ) override;
 
+private:
+    /**
+     * The play button, or the bars, or neither. The same question in every
+     * state, because what the torrent is doing says nothing about whether this
+     * track is coming out of the speakers: one whose torrent is asleep plays
+     * perfectly off the disk, which is the whole point of the cache.
+     */
+    void showPlaybackOrButton();
+
 private Q_SLOTS:
     void playSong() const;
     void loadCover();

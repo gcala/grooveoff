@@ -243,25 +243,27 @@ void TrackRow::stateChanged()
 
 void TrackRow::setDormantState()
 {
-    ui->animationWidget->setVisible( false );
-    ui->barsWidget->stopAnimation();
     ui->progressWidget->setVisible( false );
 
-    // Playable in the sense that pressing play wakes the torrent up.
-    ui->playWidget->setVisible( true );
+    // Playable in the sense that pressing play wakes the torrent up — and
+    // playable without waking it at all when the file is whole in the cache,
+    // which is why the animation is asked for here like anywhere else. Hiding
+    // it because the torrent was not in the session left a row sitting still
+    // while the music came out of it, and a rebuilt row asked the torrent the
+    // same question and stayed still too: only pausing and starting again put
+    // the bars back.
     ui->playButton->setButtonEnabled( true );
+    showPlaybackOrButton();
 
     ui->infoIconWidget->setVisible( false );
 }
 
 void TrackRow::setIdleState()
 {
-    ui->animationWidget->setVisible( false );
-    ui->barsWidget->stopAnimation();
     ui->progressWidget->setVisible( false );
 
-    ui->playWidget->setVisible( true );
     ui->playButton->setButtonEnabled( true );
+    showPlaybackOrButton();
 
     ui->infoIconWidget->setVisible( true );
     ui->infoIcon->setType( IconButton::Clock );
@@ -276,19 +278,7 @@ void TrackRow::setBufferingState()
     ui->infoIcon->setType( IconButton::Clock );
     ui->progressWidget->setVisible( true );
 
-    if( m_playerState == GrooveOff::PlayerState::Stopped ) {
-        ui->playWidget->setVisible( true );
-        ui->animationWidget->setVisible( false );
-        ui->barsWidget->stopAnimation();
-    } else if( m_playerState == GrooveOff::PlayerState::Playing ) {
-        ui->playWidget->setVisible( false );
-        ui->animationWidget->setVisible( true );
-        ui->barsWidget->startAnimation();
-    } else {
-        ui->playWidget->setVisible( false );
-        ui->animationWidget->setVisible( true );
-        ui->barsWidget->stopAnimation();
-    }
+    showPlaybackOrButton();
 }
 
 void TrackRow::setReadyState()
@@ -298,19 +288,7 @@ void TrackRow::setReadyState()
 
     ui->playButton->setButtonEnabled( true );
 
-    if( m_playerState == GrooveOff::PlayerState::Stopped ) {
-        ui->playWidget->setVisible( true );
-        ui->animationWidget->setVisible( false );
-        ui->barsWidget->stopAnimation();
-    } else if( m_playerState == GrooveOff::PlayerState::Playing ) {
-        ui->playWidget->setVisible( false );
-        ui->animationWidget->setVisible( true );
-        ui->barsWidget->startAnimation();
-    } else {
-        ui->playWidget->setVisible( false );
-        ui->animationWidget->setVisible( true );
-        ui->barsWidget->stopAnimation();
-    }
+    showPlaybackOrButton();
 }
 
 void TrackRow::setStalledState()
@@ -468,6 +446,19 @@ void TrackRow::refreshLabels()
     ui->artist_albumLabel->setToolTip( m_playlistItem->displaySubtitle() );
 
     loadCover();
+}
+
+void TrackRow::showPlaybackOrButton()
+{
+    const bool stopped = m_playerState == GrooveOff::PlayerState::Stopped;
+
+    ui->playWidget->setVisible( stopped );
+    ui->animationWidget->setVisible( !stopped );
+
+    if( m_playerState == GrooveOff::PlayerState::Playing )
+        ui->barsWidget->startAnimation();
+    else
+        ui->barsWidget->stopAnimation();
 }
 
 bool TrackRow::hasCover() const
