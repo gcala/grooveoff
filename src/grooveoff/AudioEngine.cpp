@@ -860,6 +860,15 @@ void AudioEngine::removingTrack( const PlaylistItemPtr &track )
         m_currentTrack = PlaylistItemPtr();
         next();
     }
+
+    // Nothing followed it, so the player is holding no track — and it must not
+    // go on holding a url either. Stopping leaves the source where it was, and
+    // play() plays whatever source there is: on a track whose torrent has just
+    // been removed that is half a second of sound and then a 404, which reads
+    // as a broken player rather than as an empty one. With no source, play()
+    // falls through to asking what play even means now.
+    if( !m_currentTrack && m_mediaPlayer )
+        m_mediaPlayer->setSource( QUrl() );
 }
 
 void AudioEngine::seek( qint64 ms )

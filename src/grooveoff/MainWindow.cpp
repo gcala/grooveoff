@@ -2111,11 +2111,29 @@ void MainWindow::removeTorrentEverywhere( const QString &infoHash )
 {
     // Removing from the catalogue, which is not evicting from the cache: this
     // one takes the rows with it, on purpose, because it is what was asked for.
+    //
+    // Everything of this torrent the player is holding goes, and stopping is
+    // not enough: a stopped player still holds its track, so the bar went on
+    // showing the name, the album and the cover of music that had just been
+    // deleted, and play answered with a url the server now refuses. It is the
+    // whole queue and not only the track being listened to, or the one that
+    // follows would be another track of the torrent being removed.
+    QList<PlaylistItemPtr> going;
+    for( int i = 0; i < The::playlist()->count(); ++i ) {
+        const PlaylistItemPtr item = The::playlist()->item( i );
+        if( item && item->track() && item->track()->infoHash() == infoHash )
+            going << item;
+    }
+
     const PlaylistItemPtr current = The::audioEngine()->currentTrack();
     if( current && current->track() && current->track()->infoHash() == infoHash ) {
-        The::audioEngine()->stop();
+        if( !going.contains( current ) )
+            going << current;
+
         The::cacheManager()->setPlayingTorrent( QString() );
     }
+
+    detachFromPlayer( going );
 
     The::downloadQueue()->forget( infoHash );
 
