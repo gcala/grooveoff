@@ -295,13 +295,18 @@ QMenuBar* ActionCollection::createMenuBar( QWidget *parent )
 
 /*!
  \brief A small menu used with mini player layout
+
+ The playlists are not in it, and that is the whole idea of this layout: there
+ is no sidebar and no track list on screen, so entries that rename, empty or
+ remove a playlist would be acting on something nobody can see. What stays is
+ what one can do while listening — the tracks of the list that is playing, the
+ layouts, the settings, and the way out.
  */
 QMenu* ActionCollection::createCompactMenu( QWidget *parent )
 {
     QMenu* compactMenu = new QMenu( tr( "Main Menu" ), parent );
 
     compactMenu->addMenu( m_menuCollection[ QLatin1String( "tracksMenu" ) ] );
-    compactMenu->addMenu( m_menuCollection[ QLatin1String( "playlistsMenu" ) ] );
     compactMenu->addSeparator();
     compactMenu->addAction( m_actionCollection[ QLatin1String( "actionCompact" ) ] );
     compactMenu->addAction( m_actionCollection[ QLatin1String( "actionWide" ) ] );
