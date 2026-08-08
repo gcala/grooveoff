@@ -309,17 +309,20 @@ void MainWindow::setupConnections()
     // another playlist while it buffers would otherwise have moved on by the
     // time anybody asked where the track came from.
     connect( The::audioEngine(), &AudioEngine::trackRequested, this,
-             [this]( const PlaylistItemPtr &track ) {
-        if( !track || !track->track() || !rowFor( track->track() ) || shownPlaylistId() <= 0 )
+             [this]( const PlaylistItemPtr &track, bool chosen ) {
+        // The queue advancing, or the track left over from last time being
+        // resumed: neither is somebody choosing, so the mark stays where it is
+        // rather than walking onto whatever playlist happens to be on screen.
+        //
+        // This used to ask whether the track was already in the queue, which is
+        // the same answer most of the time and the wrong one exactly when it
+        // matters: a track clicked in a list made by hand while that very track
+        // was playing from its torrent's playlist is in the queue, and removing
+        // it afterwards carried on with the next track of the other playlist.
+        if( !chosen )
             return;
 
-        // A track already in the queue is the queue advancing, not somebody
-        // choosing: next() takes what it plays from there. Without this the
-        // mark walks over to whatever playlist happens to be on screen the
-        // moment a track changes — and it walks over most easily when that
-        // playlist holds the same track, which is exactly when it is most
-        // confusing to watch.
-        if( The::playlist()->row( track ) >= 0 )
+        if( !track || !track->track() || !rowFor( track->track() ) || shownPlaylistId() <= 0 )
             return;
 
         m_playingPlaylistId = shownPlaylistId();

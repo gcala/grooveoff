@@ -119,7 +119,19 @@ Q_SIGNALS:
      * to know *which* track was chosen — and above all which playlist it was
      * chosen from — has to hear it now, while the answer is still on screen.
      */
-    void trackRequested( const PlaylistItemPtr &track );
+    /**
+     * A track is about to be started. @p chosen says whether a person picked
+     * this one — a row clicked, a playlist started, an MPRIS request — as
+     * opposed to the queue advancing on its own or the track left over from
+     * last time being resumed.
+     *
+     * The difference decides which playlist the music is said to be coming
+     * from, and asking it any other way gets it wrong: "is this track already
+     * in the queue" reads as "the queue is advancing" and is also true of the
+     * track somebody just clicked in another playlist, which is exactly when
+     * two playlists holding one track is the point.
+     */
+    void trackRequested( const PlaylistItemPtr &track, bool chosen );
 
     /**
      * Play was pressed with nothing chosen and nothing left over from last
@@ -252,7 +264,7 @@ private:
     void applyResumePosition();
 
     /** the whole of playItem() past the question of whether to do it at all */
-    void startTrack( const PlaylistItemPtr &track );
+    void startTrack( const PlaylistItemPtr &track, bool chosen );
 
     GrooveOff::PlayerState m_state;
 

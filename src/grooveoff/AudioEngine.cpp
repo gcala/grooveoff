@@ -534,13 +534,19 @@ void AudioEngine::playItem( const PlaylistItemPtr &track)
         m_resumePosition = 0;
     }
 
-    // this was added to handle triggers from playlist menu
-    if(m_currentTrack == track) {
+    // Somebody picked this row, so the playlist holding it becomes the one the
+    // music comes from — and that has to be said even when the track was
+    // already the current one, which is the case whenever the same track sits
+    // in two playlists and the one being looked at is not the one playing.
+    // Left unsaid, removing that track carried on with the next track of the
+    // other playlist.
+    if( m_currentTrack == track ) {
+        emit trackRequested( track, true );
         m_currentTrack->isPlaying() ? pause() : play();
         return;
     }
 
-    startTrack( track );
+    startTrack( track, true );
 }
 
 /*!
@@ -553,9 +559,9 @@ void AudioEngine::playItem( const PlaylistItemPtr &track)
   straight back: two functions politely calling each other until the stack ran
   out. This is the way out of that circle, and play() uses it directly.
 */
-void AudioEngine::startTrack( const PlaylistItemPtr &track )
+void AudioEngine::startTrack( const PlaylistItemPtr &track, bool chosen )
 {
-    emit trackRequested( track );
+    emit trackRequested( track, chosen );
 
     if( m_currentTrack && m_currentTrack != track )
         m_currentTrack->setState( GrooveOff::PlayerState::Stopped );
@@ -728,7 +734,9 @@ void AudioEngine::play()
         // about to be handed it and would drop the position with it.
         if( m_resumeTrack ) {
             const PlaylistItemPtr resume = m_resumeTrack;
-            startTrack( resume );
+            // Not a choice: the track left over from last time belongs to the
+            // playlist it was playing in, whatever is on screen now.
+            startTrack( resume, false );
             m_resumeTrack.clear();
             return;
         }
@@ -834,10 +842,19 @@ bool AudioEngine::canGoPrevious()
 
 void AudioEngine::next()
 {
-    if( canGoNext() ) {
-        PlaylistItemPtr track = The::playlist()->item( The::playlist()->row( m_oldTrack ) + 1 );
-        playItem(track);
-    }
+    if( !canGoNext() )
+        return;
+
+    const PlaylistItemPtr track = The::playlist()->item( The::playlist()->row( m_oldTrack ) + 1 );
+
+    // The queue advancing, not somebody choosing: startTrack() directly rather
+    // than through playItem(), so that the playlist the music comes from is
+    // left where it is. What playItem() would have done besides is drop the
+    // resume point, which advancing has to do as well.
+    m_resumeTrack.clear();
+    m_resumePosition = 0;
+
+    startTrack( track, false );
 }
 
 void AudioEngine::previous()
