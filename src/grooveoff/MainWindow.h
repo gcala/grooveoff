@@ -300,7 +300,12 @@ private:
     /** hands the torrent of the track that was playing back to the session */
     void wakeLastUsedTorrent();
 
-    /** and the ones that still have chosen tracks to fetch, if fetching ahead is on */
+    /**
+     * And the ones that still have chosen tracks to fetch — if fetching ahead
+     * is on and the cache has room for it, both asked inside rather than by
+     * whoever calls. Connected to DownloadQueue::fetchingResumed as well, which
+     * is what brings the sleepers back when either answer turns to yes.
+     */
     void wakeUnfinishedTorrents();
 
     /** brings the rows of one torrent out of the dormant state */

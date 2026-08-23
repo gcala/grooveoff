@@ -56,6 +56,7 @@ private Q_SLOTS:
     void aFileOutsideTheSelectionIsLeftAlone();
     void switchedOffOnlyWhatIsPlayingIsFetched();
     void aFullCacheStopsTheQueueAndEvictsNothing();
+    void asksForTheSleepersWhenFetchingCanResume();
 
 private:
     static const QString s_hash;
@@ -239,6 +240,60 @@ void DownloadQueueTest::aFullCacheStopsTheQueueAndEvictsNothing()
     settings.sync();
 
     QCOMPARE( queue->priorityFor( s_hash, 6 ), TorrentSession::NormalFile );
+}
+
+/*!
+  \brief asksForTheSleepersWhenFetchingCanResume: the half that is easy to forget
+
+  The queue stops on its own — the cache fills up, or somebody switches the
+  fetching off — and that half works by itself, since a priority is simply not
+  handed out. Starting again does not: the torrents that would do the fetching
+  are asleep by then, and a priority handed to a torrent the session is not
+  holding goes nowhere at all. Nothing else in the program is watching for the
+  moment it becomes worth waking them, because neither of the two things that
+  change it is a gesture anybody made.
+
+  So the queue says so, and this asks that it says so exactly when the answer
+  turns from no to yes: not on the way down, and not twice for one change.
+*/
+void DownloadQueueTest::asksForTheSleepersWhenFetchingCanResume()
+{
+    DownloadQueue *queue = The::downloadQueue();
+    QSignalSpy spy( queue, &DownloadQueue::fetchingResumed );
+
+    QSettings settings;
+
+    // Off: nothing would be fetched, so there is nothing to wake up for.
+    settings.setValue( Settings::downloadAhead, false );
+    settings.sync();
+    queue->reloadSettings();
+    QCOMPARE( spy.count(), 0 );
+
+    settings.setValue( Settings::downloadAhead, true );
+    settings.sync();
+    queue->reloadSettings();
+    QCOMPARE( spy.count(), 1 );
+
+    // And again with the same answer, which is not a change. Said twice, a
+    // start up would announce every unfinished torrent for a second time.
+    queue->reloadSettings();
+    QCOMPARE( spy.count(), 1 );
+
+    // The other road in, and the direction that must stay quiet: the cache
+    // filling up takes the fetching away rather than giving it back.
+    settings.setValue( Settings::cacheSize, 100 );   // megabytes, against 200 held
+    settings.sync();
+    QVERIFY( !The::cacheManager()->hasRoomForPrefetch() );
+
+    QVERIFY( QMetaObject::invokeMethod( queue, "checkCacheRoom" ) );
+    QCOMPARE( spy.count(), 1 );
+
+    settings.setValue( Settings::cacheSize, Settings::cacheSizeDefault );
+    settings.sync();
+    QVERIFY( The::cacheManager()->hasRoomForPrefetch() );
+
+    QVERIFY( QMetaObject::invokeMethod( queue, "checkCacheRoom" ) );
+    QCOMPARE( spy.count(), 2 );
 }
 
 QTEST_MAIN( DownloadQueueTest )

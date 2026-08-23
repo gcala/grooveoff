@@ -112,6 +112,23 @@ public:
     /** hands every priority to the session again */
     void refresh();
 
+Q_SIGNALS:
+    /**
+     * The queue has gone back to handing out real priorities after a spell of
+     * handing out SkipFile: the cache has room again, or the fetching was
+     * switched on.
+     *
+     * Whoever can wake a torrent has to hear about it, and that is the whole
+     * reason this signal exists. A priority handed to a torrent the session is
+     * not holding goes nowhere and nothing repeats it, so a torrent left asleep
+     * while the queue was stopped would go on sleeping through the moment it
+     * was allowed to fetch again — and nothing anywhere would say so. This
+     * class cannot wake anything itself: it knows info hashes and file indexes
+     * and has never heard of a playlist, let alone of the magnet a torrent is
+     * reopened from.
+     */
+    void fetchingResumed();
+
 private Q_SLOTS:
     /**
      * The cache filling up is not an event anybody sends: it happens while

@@ -69,6 +69,12 @@ DownloadQueue::DownloadQueue()
     connect( The::torrentSession(), &TorrentSession::metadataReady, this,
              [this]( const QString &, const QString &, const QList<TrackInfoPtr> & ) { refresh(); } );
 
+    // Asked once here rather than assumed, because what this remembers is used
+    // to spot the moment the answer changes: starting out believing there is
+    // room when there is none means the first change — the one that matters,
+    // from no room to room — looks like no change at all.
+    m_hadRoom = The::cacheManager()->hasRoomForPrefetch();
+
     connect( m_roomTimer, &QTimer::timeout, this, &DownloadQueue::checkCacheRoom );
     m_roomTimer->start( roomIntervalMs );
 }
@@ -127,7 +133,16 @@ bool DownloadQueue::isEnabled() const
 void DownloadQueue::reloadSettings()
 {
     QSettings settings;
+
+    const bool wasEnabled = m_enabled;
     m_enabled = settings.value( Settings::downloadAhead, Settings::downloadAheadDefault ).toBool();
+
+    // Switching it on is one of the two moments at which a sleeping torrent
+    // gains something to do. Nothing else notices it: refresh() hands the new
+    // priorities to the torrents the session is holding, and the ones it is not
+    // holding are precisely the ones that would have to be woken to act on them.
+    if( m_enabled && !wasEnabled )
+        emit fetchingResumed();
 }
 
 int DownloadQueue::positionOf( const QString &infoHash, int fileIndex ) const
@@ -205,4 +220,10 @@ void DownloadQueue::checkCacheRoom()
 
     m_hadRoom = hasRoom;
     refresh();
+
+    // The other one. Room comes back on its own — an eviction, a track thrown
+    // out of a playlist, a ceiling raised in the settings — so there is no
+    // gesture to hang this on and nobody else is watching for it.
+    if( hasRoom )
+        emit fetchingResumed();
 }

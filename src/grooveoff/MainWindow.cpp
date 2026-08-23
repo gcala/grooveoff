@@ -355,6 +355,13 @@ void MainWindow::setupConnections()
     // play, which is what a cache is for.
     connect( The::cacheManager(), &CacheManager::evicted, this, &MainWindow::refreshRowsOf );
 
+    // And when the queue is allowed to fetch again — room in the cache, or the
+    // setting switched on — the torrents it would fetch from have to be in the
+    // session to hear about it. Nothing else would put them there: the sidebar
+    // is not rebuilt by a cache dropping under its ceiling.
+    connect( The::downloadQueue(), &DownloadQueue::fetchingResumed, this,
+             &MainWindow::wakeUnfinishedTorrents );
+
     // The head of a file is where its tags are, so this is the first moment at
     // which asking the file what it is called gets an answer.
     connect( The::streamServer(), &StreamServer::trackPlayable, this, &MainWindow::readTagsOf );
@@ -798,21 +805,42 @@ void MainWindow::wakeLastUsedTorrent()
             qDebug() << "GrooveOff ::" << "cannot reopen the last used torrent:" << error;
     }
 
-    if( !The::downloadQueue()->isEnabled() )
-        return;
-
-    // Fetching ahead cannot happen in a torrent the session is not holding, so
-    // reactivation stops being lazy for the torrents that still have music to
-    // fetch. Not for the others: one whose chosen tracks are already in the
-    // cache has nothing to do on the network, and waking it would announce it
-    // to a tracker to accomplish precisely nothing. So the announcements stay
-    // proportionate to the work left, and once everything has been fetched a
-    // start up goes back to being as quiet as it was before.
+    // And the ones with music still to fetch, which asks for itself whether
+    // there is anything to be gained by waking them. The question used to be
+    // asked here instead, and being asked here was the same as not being asked
+    // at all: loadPlaylists() runs three lines before this in the constructor
+    // and calls the same function, so with the fetching switched off every
+    // unfinished torrent had already announced itself by the time the check was
+    // reached.
     wakeUnfinishedTorrents();
 }
 
 void MainWindow::wakeUnfinishedTorrents()
 {
+    // Waking a torrent is an announcement — to a tracker, to the dht, to
+    // whatever peers answer — and the only thing it buys here is the fetching
+    // ahead. So the two questions that decide whether a byte would be asked for
+    // are asked first, and they are asked here rather than at the three call
+    // sites: a guard living in one of them is a guard the other two walk past.
+    //
+    // Switched off, this is the setting doing what it promises. Near the
+    // ceiling, DownloadQueue hands out SkipFile to everything nobody is
+    // listening to, so a torrent woken now would announce itself and then ask
+    // for nothing at all.
+    if( !The::downloadQueue()->isEnabled() || !The::cacheManager()->hasRoomForPrefetch() )
+        return;
+
+    // The way back in is DownloadQueue::fetchingResumed, connected in
+    // setupConnections(): both of those answers change on their own, with no
+    // gesture behind them, and a torrent asleep when they changed would
+    // otherwise stay asleep until something happened to rebuild the sidebar.
+    //
+    // The opposite edge is deliberately not handled. A torrent already awake
+    // when the room runs out goes on announcing while fetching nothing, and
+    // putting it back to sleep means taking it out of the session — with the
+    // torrent being listened to, the one being brought up and the one the
+    // stream server is reading from all to be spared. That is a real risk to
+    // the music in exchange for an announcement that has already been made.
     const QList<PlaylistStore::PlaylistInfo> playlists = The::playlistStore()->visiblePlaylists();
 
     for( const PlaylistStore::PlaylistInfo &playlist : playlists ) {
