@@ -616,6 +616,20 @@ void MainWindow::restoreWhatWasPlaying()
 
         if( item && item->track() && item->track()->id() == trackId ) {
             The::audioEngine()->setResumePoint( item, playlists->currentPositionMs() );
+
+            // And the fetching starts from where the listening stopped rather
+            // than from the top of the list. The cursor is otherwise moved only
+            // by a track actually starting, which after a restart is a moment
+            // that may never come: a collection left at its hundred and fiftieth
+            // track would have been refilled from the first, and the cursor
+            // would have jumped to the right place at the one moment it is no
+            // longer needed — the play that asks for that track directly.
+            //
+            // It takes top priority within its torrent, which is the same trade
+            // wakeLastUsedTorrent() makes one line further down: this is the
+            // track somebody is going to press play on.
+            The::downloadQueue()->setPlaying( item->track()->infoHash(),
+                                              item->track()->fileIndex() );
             return;
         }
     }
@@ -858,12 +872,21 @@ void MainWindow::wakeUnfinishedTorrents()
         for( const TrackInfoPtr &track : tracks )
             wanted += track->fileSize();
 
-        // Rough on purpose, and rough in the safe direction: bytes_done counts
-        // every piece the torrent holds, including the ones shared with files
-        // nobody chose, so a torrent that has enough bytes to cover the chosen
-        // tracks is probably done with them. Being wrong here costs one torrent
-        // waking up for nothing; being wrong the other way would leave a
-        // playlist that never finishes fetching.
+        // Rough on purpose: bytes_done counts every piece the torrent holds,
+        // including the ones shared with files nobody chose, so a torrent with
+        // enough bytes to cover the chosen tracks is probably done with them.
+        //
+        // Which way it is rough depends on the selection, and that is worth
+        // knowing before trusting it. With everything chosen it cannot overstate
+        // anything — the count cannot pass the sum of the files — so equality
+        // means complete. With a partial selection it can: twenty tracks of two
+        // hundred, nineteen of them fetched plus the pieces they share with
+        // their neighbours, and the count reaches the total with a track still
+        // missing. That torrent is not woken and its last track waits to be
+        // asked for. The exact answer exists — cachedFile() reads the piece map
+        // — but it costs one read per track at every rebuild of the sidebar,
+        // which is the cheap operation multiplied by the number of tracks that
+        // has frozen this window twice already.
         if( The::catalog()->bytesDone( playlist.infoHash ) >= wanted )
             continue;
 

@@ -503,11 +503,22 @@ void TorrentSession::Private::handleAlert( const lt::alert *alert )
 
         handles.insert( infoHash, added->handle );
         awaitingMetadata.insert( infoHash, QDateTime::currentMSecsSinceEpoch() );
-        emit q->torrentAdded( infoHash );
 
         // A .torrent, or a magnet reopened from its resume file, arrives with
         // the metadata already in hand and no metadata_received_alert follows.
         publishMetadata( infoHash, added->handle );
+
+        // And only now is the torrent announced, which is the whole of an
+        // invariant worth stating: nobody outside this class hears about a
+        // torrent before its files are at dont_download. The other way round it
+        // worked by luck. DownloadQueue answers torrentAdded by handing out the
+        // priorities of the tracks somebody chose, and publishMetadata wiped
+        // them a line later — the fetching after a restart came back only
+        // because metadataReady is emitted at the end of that function and the
+        // queue listens to that too. Anybody moving either emission, or trusting
+        // one signal alone, would have left a restart fetching nothing at all,
+        // in silence and with nothing in the log.
+        emit q->torrentAdded( infoHash );
         return;
     }
 

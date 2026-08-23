@@ -63,6 +63,7 @@ private Q_SLOTS:
     void downloadsNothingBeforeATrackIsAsked();
     void savesResumeDataOnShutdown();
     void reopensWithoutTheTorrentFile();
+    void keepsThePrioritiesItWasGivenAtTheAdd();
     void dropsOneFileAndKeepsTheOther();
     void libtorrentAgreesTheBytesAreGone();
 
@@ -266,6 +267,58 @@ void TorrentSessionTest::reopensWithoutTheTorrentFile()
     const QList<TrackInfoPtr> tracks = arguments.at( 2 ).value<QList<TrackInfoPtr>>();
     QCOMPARE( tracks.count(), 2 );
     QCOMPARE( tracks.at( 0 )->filePath(), QLatin1String( "Test Album/01 - prova.mp3" ) );
+}
+
+/*!
+  \brief keepsThePrioritiesItWasGivenAtTheAdd: the whole of the restart
+
+  This is the chain that makes a half fetched album go on fetching itself after
+  a restart, and it hangs on an order that is easy to get wrong and impossible
+  to notice. DownloadQueue answers torrentAdded by handing out the priorities of
+  the tracks somebody chose; publishing the file list sets every file of the
+  torrent to dont_download, because adding a torrent must cost the metadata and
+  nothing else. Announce the torrent before that and the answer is thrown away a
+  line later — the fetching came back only because metadataReady happens to be
+  emitted afterwards and the queue happens to listen to that too.
+
+  So the invariant is asserted from outside, the way the queue sees it: nobody
+  hears about a torrent before its files are at dont_download, and a priority
+  set on hearing about it is a priority that stays.
+*/
+void TorrentSessionTest::keepsThePrioritiesItWasGivenAtTheAdd()
+{
+    TorrentSession *session = The::torrentSession();
+
+    // A restart, the same one the previous function does: this torrent is in
+    // the session and has to come back out of it to be added again.
+    session->shutdown();
+    QVERIFY( session->start( m_cacheRoot, TorrentSession::Offline ) );
+
+    // Exactly what DownloadQueue does, and from the same signal.
+    const QMetaObject::Connection handler =
+        QObject::connect( session, &TorrentSession::torrentAdded, session,
+                          [session]( const QString &infoHash ) {
+        session->setFilePriority( infoHash, 0, TorrentSession::NormalFile );
+    } );
+
+    QSignalSpy metadata( session, &TorrentSession::metadataReady );
+
+    QString error;
+    QVERIFY2( session->reopen( m_infoHash, QString(), &error ), qPrintable( error ) );
+    QVERIFY( metadata.wait( 5000 ) );
+
+    QObject::disconnect( handler );
+
+    // Waited for rather than read back: a priority is handed to libtorrent's own
+    // thread, so the line after the call still sees the old value. Which is also
+    // why this cannot be checked by reading once — and why, announced too early,
+    // the wipe would win here and time this out.
+    QTRY_COMPARE_WITH_TIMEOUT( session->filePriority( m_infoHash, 0 ),
+                               TorrentSession::NormalFile, 5000 );
+
+    // And the file nobody asked for is still where the add left it, or the
+    // check above would pass on a torrent fetching the whole thing.
+    QCOMPARE( session->filePriority( m_infoHash, 1 ), TorrentSession::SkipFile );
 }
 
 void TorrentSessionTest::buildFullTorrent()

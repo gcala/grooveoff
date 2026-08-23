@@ -60,9 +60,16 @@ DownloadQueue::DownloadQueue()
     // is a queue that is right by accident. This is the class keeping its own
     // promise.
     //
-    // Both signals and not one: a torrent reopened from its resume file
-    // arrives with its file list in hand and never sends the second, while a
-    // magnet sends the first with nothing behind it yet.
+    // Both signals and not one, and the reason is not the obvious one. A
+    // torrent reopened from its resume file does arrive with its file list in
+    // hand, so libtorrent posts it no metadata_received_alert — but the session
+    // publishes the list all the same, out of the add, so metadataReady comes
+    // either way. What differs is only when: for a magnet, torrentAdded arrives
+    // with nothing behind it and metadataReady up to a minute later; for a
+    // reopened torrent the two arrive together. Either alone would do. Two are
+    // kept because the session sets every file to dont_download as it publishes,
+    // and a queue told once, at the wrong side of that, would ask for nothing
+    // and say nothing about it.
     connect( The::torrentSession(), &TorrentSession::torrentAdded, this,
              [this]( const QString & ) { refresh(); } );
 
